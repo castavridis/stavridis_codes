@@ -7,7 +7,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <script async defer src="https://www.recurse-scout.com/loader.js?t=9c50b48e101a6b0889830f42c474a03d"></script>
+      </body>
     </html>
   )
 }
