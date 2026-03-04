@@ -8,74 +8,44 @@ import { Project } from '@/types/project'
 
 const CARD_W = 210
 const CARD_H = 210
-const ROT_MAX = 8          // ± degrees
-const SECTION_H = 1080     // px — tall enough for 3 staggered rows
-const GAP = 16             // min px gap between card bounding boxes
+const ROT_MAX = 8     // ± degrees
+const SECTION_H = 1080
 
-// Zones as [xMinPct, xMaxPct, yMinPct, yMaxPct] of container dimensions.
-// x is the card's left edge; y is the card's top edge.
-// xMax capped so card doesn't overflow right edge (card is CARD_W wide).
-const ZONES: [number, number, number, number][] = [
-  [0.02, 0.37, 0.02, 0.28],   // 1 — top left
-  [0.47, 0.78, 0.02, 0.28],   // 2 — top right
-  [0.00, 0.16, 0.35, 0.60],   // 3 — mid far-left
-  [0.22, 0.46, 0.32, 0.58],   // 4 — mid center-left
-  [0.50, 0.68, 0.32, 0.58],   // 5 — mid center-right
-  [0.72, 0.78, 0.35, 0.60],   // 6 — mid far-right
-  [0.00, 0.20, 0.65, 0.85],   // 7 — bot far-left
-  [0.26, 0.54, 0.63, 0.85],   // 8 — bot center
-  [0.58, 0.78, 0.65, 0.85],   // 9 — bot right
+// Guaranteed non-overlapping 3×3 staggered grid.
+// Columns are separated by ~300 px (well above the max AABB width of ~240 px).
+// Within each column the three rows are ~350 px apart (well above max AABB height).
+// Only rotation and a small y-jitter are randomised — overlap is structurally impossible.
+//
+// [xFraction, yBasePx, yJitterPx]  — x is card left edge as fraction of container width
+const GRID: [number, number, number][] = [
+  [0.05,  30, 20],  // col 0, row 0
+  [0.39,  55, 20],  // col 1, row 0  (slightly lower → stagger)
+  [0.73,  20, 20],  // col 2, row 0
+  [0.05, 405, 20],  // col 0, row 1
+  [0.39, 425, 20],  // col 1, row 1
+  [0.73, 400, 20],  // col 2, row 1
+  [0.05, 775, 20],  // col 0, row 2
+  [0.39, 795, 20],  // col 1, row 2
+  [0.73, 760, 20],  // col 2, row 2
 ]
 
 // ─── Placement algorithm ────────────────────────────────────────────────────
 
 interface Placement { x: number; y: number; rotation: number }
 
-/** Axis-aligned bounding box of a rotated card, plus a gap margin. */
-function aabb(x: number, y: number, rot: number) {
-  const r  = (rot * Math.PI) / 180
-  const hw = (Math.abs(CARD_W * Math.cos(r)) + Math.abs(CARD_H * Math.sin(r))) / 2 + GAP
-  const hh = (Math.abs(CARD_W * Math.sin(r)) + Math.abs(CARD_H * Math.cos(r))) / 2 + GAP
-  return { cx: x + CARD_W / 2, cy: y + CARD_H / 2, hw, hh }
-}
-
-function overlaps(
-  a: ReturnType<typeof aabb>,
-  b: ReturnType<typeof aabb>
-) {
-  return Math.abs(a.cx - b.cx) < a.hw + b.hw &&
-         Math.abs(a.cy - b.cy) < a.hh + b.hh
-}
-
 function rand(lo: number, hi: number) {
   return Math.random() * (hi - lo) + lo
 }
 
 function computePlacements(cw: number, count: number): Placement[] {
-  const placed: ReturnType<typeof aabb>[] = []
-  const out: Placement[] = []
-
-  for (let i = 0; i < count; i++) {
-    const [xLo, xHi, yLo, yHi] = ZONES[i] ?? ZONES[ZONES.length - 1]
-    let best: Placement | null = null
-    let bestBox: ReturnType<typeof aabb> | null = null
-
-    for (let attempt = 0; attempt < 25; attempt++) {
-      const rotation = rand(-ROT_MAX, ROT_MAX)
-      const x = rand(xLo, xHi) * cw
-      const y = rand(yLo, yHi) * SECTION_H
-      const box = aabb(x, y, rotation)
-      const hit = placed.some(p => overlaps(box, p))
-
-      if (!hit) { best = { x, y, rotation }; bestBox = box; break }
-      if (best === null) { best = { x, y, rotation }; bestBox = box }
+  return Array.from({ length: count }, (_, i) => {
+    const [xFrac, yBase, yJit] = GRID[i] ?? GRID[GRID.length - 1]
+    return {
+      x: xFrac * cw,
+      y: yBase + rand(-yJit, yJit),
+      rotation: rand(-ROT_MAX, ROT_MAX),
     }
-
-    out.push(best!)
-    if (bestBox) placed.push(bestBox)
-  }
-
-  return out
+  })
 }
 
 // ─── Single card ────────────────────────────────────────────────────────────

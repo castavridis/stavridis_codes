@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'rc_rain_check/app/globals.css';
 
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(14px); }
