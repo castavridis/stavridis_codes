@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { useFloatingDots } from './useFloatingDots'
 import { SKILLS, DOT_RADIUS, GROUP_RADIUS } from './data'
 import { sono } from '../../(fonts)/sono'
+import DecorativeCard from './DecorativeCard'
 
 const GROUP_COLOR = {
   design:      '#e85c5c',
@@ -107,6 +108,9 @@ export default function HeroSection() {
         </div>
       ))}
 
+      {/* Decorative floating card — spirals in after headline */}
+      <DecorativeCard />
+
       {/* Nav */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-6">
         <span className="text-sm text-white/80 tracking-wide">
@@ -127,6 +131,7 @@ export default function HeroSection() {
         <h1
           ref={headlineRef}
           className="text-2xl md:text-4xl text-white text-center font-semibold leading-tight max-w-3xl px-6"
+          style={{ animation: 'fade-up 0.4s ease both' }}
         >
           I turn complex ideas into<br />
           approachable products with personality.

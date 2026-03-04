@@ -1,265 +1,218 @@
 'use client'
 
-import { useRef, useEffect, useState, type CSSProperties } from 'react'
+import { useRef, useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Project } from '@/types/project'
 
-interface Project {
-  id: string
-  name: string
-  type: 'image' | 'outline' | 'stat' | 'dark' | 'white'
-  bg?: string
-  rotation: number
-  yOffset: number
-  delay: number
-  width: number
-  height: number
-}
+// ─── Layout constants ───────────────────────────────────────────────────────
 
-const PROJECTS: Project[] = [
-  // Row 1
-  {
-    id: 'caresignal-ai',
-    name: 'CareSignal.ai',
-    type: 'image',
-    bg: '#1a35a0',
-    rotation: -6,
-    yOffset: 20,
-    delay: 0,
-    width: 240,
-    height: 240,
-  },
-  {
-    id: 'sol-lewitt',
-    name: 'Sol LeWitt',
-    type: 'outline',
-    rotation: 5,
-    yOffset: -15,
-    delay: 100,
-    width: 200,
-    height: 200,
-  },
-  // Row 2
-  {
-    id: 'design-system',
-    name: 'CareSignal\nDesign System',
-    type: 'outline',
-    rotation: -4,
-    yOffset: 30,
-    delay: 0,
-    width: 180,
-    height: 180,
-  },
-  {
-    id: 'conversion',
-    name: 'conversion',
-    type: 'stat',
-    bg: '#c42b24',
-    rotation: -3,
-    yOffset: 0,
-    delay: 80,
-    width: 190,
-    height: 210,
-  },
-  {
-    id: 'vv',
-    name: 'vv',
-    type: 'dark',
-    bg: '#0a0a0a',
-    rotation: 4,
-    yOffset: -20,
-    delay: 160,
-    width: 175,
-    height: 190,
-  },
-  {
-    id: 'iso',
-    name: 'ISO Compliance\nReport',
-    type: 'outline',
-    rotation: 7,
-    yOffset: 50,
-    delay: 220,
-    width: 160,
-    height: 170,
-  },
-  // Row 3
-  {
-    id: 'health',
-    name: 'Health Issue',
-    type: 'white',
-    rotation: 5,
-    yOffset: 10,
-    delay: 0,
-    width: 210,
-    height: 210,
-  },
-  {
-    id: 'sandy',
-    name: 'Sandy',
-    type: 'outline',
-    rotation: -2,
-    yOffset: -15,
-    delay: 80,
-    width: 210,
-    height: 240,
-  },
-  {
-    id: 'radian',
-    name: 'Radian',
-    type: 'outline',
-    rotation: 3,
-    yOffset: 30,
-    delay: 160,
-    width: 200,
-    height: 200,
-  },
+const CARD_W = 210
+const CARD_H = 210
+const ROT_MAX = 8          // ± degrees
+const SECTION_H = 1080     // px — tall enough for 3 staggered rows
+const GAP = 16             // min px gap between card bounding boxes
+
+// Zones as [xMinPct, xMaxPct, yMinPct, yMaxPct] of container dimensions.
+// x is the card's left edge; y is the card's top edge.
+// xMax capped so card doesn't overflow right edge (card is CARD_W wide).
+const ZONES: [number, number, number, number][] = [
+  [0.02, 0.37, 0.02, 0.28],   // 1 — top left
+  [0.47, 0.78, 0.02, 0.28],   // 2 — top right
+  [0.00, 0.16, 0.35, 0.60],   // 3 — mid far-left
+  [0.22, 0.46, 0.32, 0.58],   // 4 — mid center-left
+  [0.50, 0.68, 0.32, 0.58],   // 5 — mid center-right
+  [0.72, 0.78, 0.35, 0.60],   // 6 — mid far-right
+  [0.00, 0.20, 0.65, 0.85],   // 7 — bot far-left
+  [0.26, 0.54, 0.63, 0.85],   // 8 — bot center
+  [0.58, 0.78, 0.65, 0.85],   // 9 — bot right
 ]
 
-const ROWS = [
-  PROJECTS.slice(0, 2),
-  PROJECTS.slice(2, 6),
-  PROJECTS.slice(6),
-]
+// ─── Placement algorithm ────────────────────────────────────────────────────
 
-function CardContent({ p }: { p: Project }) {
-  const base: CSSProperties = {
-    width: p.width,
-    height: p.height,
-    borderRadius: 18,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    flexShrink: 0,
-  }
+interface Placement { x: number; y: number; rotation: number }
 
-  if (p.type === 'outline') {
-    return (
-      <div style={{ ...base, border: '1.5px solid rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: '#fff', fontSize: 13, fontWeight: 300, textAlign: 'center', whiteSpace: 'pre-line', letterSpacing: '0.01em' }}>
-          {p.name}
-        </span>
-      </div>
-    )
-  }
-
-  if (p.type === 'image') {
-    return (
-      <div style={{ ...base, background: p.bg, padding: 16, justifyContent: 'flex-end' }}>
-        {/* placeholder for screenshot — replace with <img> */}
-        <div style={{
-          flex: 1,
-          marginBottom: 12,
-          borderRadius: 6,
-          background: 'radial-gradient(circle at 28% 55%, rgba(255,255,255,0.18) 0%, transparent 55%), radial-gradient(circle at 72% 28%, rgba(255,255,255,0.12) 0%, transparent 45%)',
-        }} />
-        <span style={{ color: '#fff', fontSize: 13, fontWeight: 300 }}>{p.name}</span>
-      </div>
-    )
-  }
-
-  if (p.type === 'stat') {
-    return (
-      <div style={{ ...base, background: p.bg, padding: 20, justifyContent: 'space-between' }}>
-        <div>
-          <p style={{ color: '#fff', lineHeight: 1, margin: 0 }}>
-            <span style={{ fontSize: 52, fontWeight: 700 }}>330</span>
-            <span style={{ fontSize: 14 }}>% increase in</span>
-          </p>
-          <p style={{ color: '#fff', fontSize: 16, fontWeight: 500, marginTop: 4 }}>conversion Rates</p>
-        </div>
-        <p style={{ color: '#fff', fontSize: 14, margin: 0 }}>
-          in <span style={{ fontSize: 40, fontWeight: 700, lineHeight: 1 }}>3</span> months
-        </p>
-      </div>
-    )
-  }
-
-  if (p.type === 'dark') {
-    return (
-      <div style={{ ...base, background: p.bg, alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-        <div style={{
-          width: 88,
-          height: 88,
-          borderRadius: 14,
-          background: 'linear-gradient(135deg, #a78bfa 0%, #ec4899 45%, #fbbf24 100%)',
-        }} />
-        <span style={{ color: '#fff', fontSize: 13, fontWeight: 300 }}>{p.name}</span>
-      </div>
-    )
-  }
-
-  if (p.type === 'white') {
-    return (
-      <div style={{ ...base, background: '#fff', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ position: 'relative', width: 152, height: 152 }}>
-          <svg viewBox="0 0 152 152" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-            <defs>
-              <path id="health-circle" d="M76,76 m-53,0 a53,53 0 1,1 106,0 a53,53 0 1,1 -106,0" fill="none" />
-            </defs>
-            <text fill="#999" style={{ fontSize: 9.5, letterSpacing: 1.5 } as CSSProperties}>
-              <textPath href="#health-circle">
-                DUE TO · DUE TO · DUE TO · DUE TO · DUE TO · DUE TO ·
-              </textPath>
-            </text>
-          </svg>
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontWeight: 700, fontSize: 14, color: '#222', textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.4 }}>
-              Health<br />Issue
-            </span>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return null
+/** Axis-aligned bounding box of a rotated card, plus a gap margin. */
+function aabb(x: number, y: number, rot: number) {
+  const r  = (rot * Math.PI) / 180
+  const hw = (Math.abs(CARD_W * Math.cos(r)) + Math.abs(CARD_H * Math.sin(r))) / 2 + GAP
+  const hh = (Math.abs(CARD_W * Math.sin(r)) + Math.abs(CARD_H * Math.cos(r))) / 2 + GAP
+  return { cx: x + CARD_W / 2, cy: y + CARD_H / 2, hw, hh }
 }
 
-function ProjectCard({ project }: { project: Project }) {
-  const wrapRef = useRef<HTMLDivElement>(null)
+function overlaps(
+  a: ReturnType<typeof aabb>,
+  b: ReturnType<typeof aabb>
+) {
+  return Math.abs(a.cx - b.cx) < a.hw + b.hw &&
+         Math.abs(a.cy - b.cy) < a.hh + b.hh
+}
+
+function rand(lo: number, hi: number) {
+  return Math.random() * (hi - lo) + lo
+}
+
+function computePlacements(cw: number, count: number): Placement[] {
+  const placed: ReturnType<typeof aabb>[] = []
+  const out: Placement[] = []
+
+  for (let i = 0; i < count; i++) {
+    const [xLo, xHi, yLo, yHi] = ZONES[i] ?? ZONES[ZONES.length - 1]
+    let best: Placement | null = null
+    let bestBox: ReturnType<typeof aabb> | null = null
+
+    for (let attempt = 0; attempt < 25; attempt++) {
+      const rotation = rand(-ROT_MAX, ROT_MAX)
+      const x = rand(xLo, xHi) * cw
+      const y = rand(yLo, yHi) * SECTION_H
+      const box = aabb(x, y, rotation)
+      const hit = placed.some(p => overlaps(box, p))
+
+      if (!hit) { best = { x, y, rotation }; bestBox = box; break }
+      if (best === null) { best = { x, y, rotation }; bestBox = box }
+    }
+
+    out.push(best!)
+    if (bestBox) placed.push(bestBox)
+  }
+
+  return out
+}
+
+// ─── Single card ────────────────────────────────────────────────────────────
+
+function ProjectCard({
+  project,
+  placement,
+}: {
+  project: Project
+  placement: Placement
+}) {
+  const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const el = wrapRef.current
+    const el = ref.current
     if (!el) return
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          obs.disconnect()
-        }
-      },
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect() } },
       { threshold: 0.05 }
     )
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
 
+  const hasImage = Boolean(project.cover_image_url)
+
   return (
     <div
-      ref={wrapRef}
-      style={{ transform: `rotate(${project.rotation}deg) translateY(${project.yOffset}px)`, flexShrink: 0 }}
-    >
-      <div style={{
+      ref={ref}
+      style={{
+        position: 'absolute',
+        left: placement.x,
+        top: placement.y,
+        width: CARD_W,
+        height: CARD_H,
+        transform: `rotate(${placement.rotation}deg)`,
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(28px)',
-        transition: `opacity 0.75s ease ${project.delay}ms, transform 0.75s ease ${project.delay}ms`,
-      }}>
-        <CardContent p={project} />
-      </div>
+        transition: 'opacity 0.7s ease',
+        willChange: 'opacity',
+      }}
+    >
+      <Link
+        href={`/work/${project.slug}`}
+        className="group block w-full h-full"
+        style={{ textDecoration: 'none' }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            borderRadius: 18,
+            overflow: 'hidden',
+            border: '1.5px solid rgba(255,255,255,0.25)',
+            background: hasImage ? 'transparent' : 'transparent',
+            cursor: 'pointer',
+          }}
+        >
+          {/* Cover image */}
+          {hasImage && (
+            <img
+              src={project.cover_image_url!}
+              alt={project.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          )}
+
+          {/* Name — centered for outline cards, bottom-left for image cards */}
+          <div
+            style={{
+              position: 'absolute',
+              ...(hasImage
+                ? { bottom: 12, left: 14 }
+                : { inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }),
+            }}
+          >
+            <span
+              style={{
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: 13,
+                fontWeight: 300,
+                textAlign: 'center',
+                whiteSpace: 'pre-line',
+                letterSpacing: '0.01em',
+              }}
+            >
+              {project.name}
+            </span>
+          </div>
+
+          {/* Hover scrim */}
+          <div
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0,0,0,0.38)',
+              borderRadius: 'inherit',
+            }}
+          />
+        </div>
+      </Link>
     </div>
   )
 }
 
-export default function ProjectsSection() {
+// ─── Section ────────────────────────────────────────────────────────────────
+
+export default function ProjectsSection({ projects }: { projects: Project[] }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [placements, setPlacements] = useState<Placement[] | null>(null)
+
+  useEffect(() => {
+    const cw = containerRef.current?.clientWidth ?? 960
+    setPlacements(computePlacements(cw, projects.length))
+  }, [projects.length])
+
   return (
-    <section style={{ background: '#6b1212' }} className="w-full pt-4 pb-32">
-      <div className="max-w-5xl mx-auto px-12 flex flex-col gap-20">
-        {ROWS.map((row, ri) => (
-          <div key={ri} className="flex justify-between items-start">
-            {row.map(p => (
-              <ProjectCard key={p.id} project={p} />
-            ))}
-          </div>
-        ))}
+    <section
+      style={{
+        background: '#6b1212',
+        position: 'relative',
+        height: SECTION_H + 120, // extra bottom breathing room
+        width: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        ref={containerRef}
+        className="max-w-5xl mx-auto px-8"
+        style={{ position: 'relative', height: '100%' }}
+      >
+        {placements &&
+          projects.map((p, i) => (
+            <ProjectCard key={p.id} project={p} placement={placements[i]} />
+          ))}
       </div>
     </section>
   )

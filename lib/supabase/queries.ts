@@ -1,8 +1,11 @@
-import { supabase } from './client'
+import { getSupabase } from './client'
 import { Project } from '@/types/project'
 
 export async function getAllProjects(): Promise<Project[]> {
-  const { data, error } = await supabase
+  const client = getSupabase()
+  if (!client) return []
+
+  const { data, error } = await client
     .from('projects')
     .select('*')
     .order('sort_order', { ascending: true })
@@ -15,7 +18,10 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const { data, error } = await supabase
+  const client = getSupabase()
+  if (!client) return null
+
+  const { data, error } = await client
     .from('projects')
     .select('*')
     .eq('slug', slug)
