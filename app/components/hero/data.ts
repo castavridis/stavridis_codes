@@ -31,7 +31,7 @@ export const SKILLS: SkillEntry[] = [
 ]
 
 export const PROXIMITY_THRESHOLD = 180  // px
-export const DOT_SPEED_RANGE: [number, number] = [0.04, 0.12]
+export const DOT_SPEED_RANGE: [number, number] = [0.006, 0.018]
 export const DOT_RADIUS = 4             // px — skill dots
 export const GROUP_RADIUS = 7           // px — group leader dots
 export const HEADLINE_MARGIN = 50       // px — dots repel from headline edge

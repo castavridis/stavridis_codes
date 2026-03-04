@@ -42,7 +42,8 @@ export function useFloatingDots(
   containerRef: RefObject<HTMLElement | null>,
   headlineRef: RefObject<HTMLElement | null>,
   circleRefs: RefObject<(SVGCircleElement | null)[]>,
-  groupLabelRefs: RefObject<(HTMLDivElement | null)[]>
+  groupLabelRefs: RefObject<(HTMLDivElement | null)[]>,
+  dotButtonRefs: RefObject<(HTMLButtonElement | null)[]>
 ) {
   const dotsRef = useRef<Dot[]>([])
   const rafRef = useRef<number>(0)
@@ -174,6 +175,13 @@ export function useFloatingDots(
           circle.setAttribute('cy', String(d.y))
         }
 
+        // Update HTML click-target button position
+        const btn = dotButtonRefs.current[i]
+        if (btn) {
+          btn.style.left = d.x + 'px'
+          btn.style.top  = d.y + 'px'
+        }
+
         // Update group label DOM position (60fps, no React re-render)
         if (d.isGroup) {
           const refIdx = groupLeaderMap.get(d.id)
@@ -228,7 +236,7 @@ export function useFloatingDots(
       clearInterval(boundsInterval)
       ro.disconnect()
     }
-  }, [containerRef, headlineRef, circleRefs, groupLabelRefs])
+  }, [containerRef, headlineRef, circleRefs, groupLabelRefs, dotButtonRefs])
 
   return { connections }
 }

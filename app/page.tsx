@@ -10,7 +10,7 @@ export default async function Page() {
 
   return (
     <main className={sono.className}>
-      <HeroSection />
+      <HeroSection projects={projects} />
       <ProjectsSection projects={projects} />
     </main>
   )

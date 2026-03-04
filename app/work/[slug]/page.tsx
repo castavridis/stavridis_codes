@@ -1,12 +1,18 @@
 import { getAllProjects, getProjectBySlug } from '@/lib/supabase/queries'
 import { notFound } from 'next/navigation'
 import { sono } from '(fonts)/sono'
+import { SLUG as RAIN_CHECK_SLUG } from '../rain-check/page'
 
 export const dynamic = 'force-static'
 
+// Slugs with custom page overrides — exclude from generic template
+const CUSTOM_SLUGS = new Set([RAIN_CHECK_SLUG])
+
 export async function generateStaticParams() {
   const projects = await getAllProjects()
-  return projects.map(p => ({ slug: p.slug }))
+  return projects
+    .filter(p => !CUSTOM_SLUGS.has(p.slug))
+    .map(p => ({ slug: p.slug }))
 }
 
 export default async function ProjectPage({
