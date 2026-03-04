@@ -1,7 +1,12 @@
+import HeroSection from './components/hero/HeroSection'
+import ProjectsSection from './components/projects/ProjectsSection'
+import { sono } from '(fonts)/sono'
+
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1 className="text-4xl font-bold">c.stavridis.codes</h1>
+    <main className={sono.className}>
+      <HeroSection />
+      <ProjectsSection />
     </main>
   )
 }
