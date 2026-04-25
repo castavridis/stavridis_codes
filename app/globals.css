@@ -6,27 +6,27 @@
 
 @theme {
   --color-paper-blue: #CAE7ED;
-  --color-paper-blue-mid: rgb(149,207,219);
-  --color-paper-blue-dark: rgb(84,178,197);
+  --color-paper-blue-mid: rgb(149, 207, 219);
+  --color-paper-blue-dark: rgb(84, 178, 197);
 
   --color-paper-green: #A7D9B8;
-  --color-paper-green-mid: rgb(45,164,86);
+  --color-paper-green-mid: rgb(45, 164, 86);
 
-  --color-paper-pink: rgb(245,201,211);
-  --color-paper-pink-mid: rgb(235,147,167);
+  --color-paper-pink: rgb(245, 201, 211);
+  --color-paper-pink-mid: rgb(235, 147, 167);
 
   --color-paper-purple: #AEADD7;
-  --color-paper-purple-mid: rgb(147,146,202);
-  --color-paper-purple-dark: rgb(94,92,175);
+  --color-paper-purple-mid: rgb(147, 146, 202);
+  --color-paper-purple-dark: rgb(94, 92, 175);
 
   --color-paper-yellow: #FCF5BE;
-  --color-paper-yellow-mid: rgb(245,223,45);
-  --color-paper-yellow-dark: rgb(240,205,0);
+  --color-paper-yellow-mid: rgb(245, 223, 45);
+  --color-paper-yellow-dark: rgb(240, 205, 0);
 
   --color-paper-white: #FFFEF8;
   --color-paper-gray: #BFBFBF;
   --color-paper-black: #404040;
-  --color-paper-dark-black: rgb(35,35,35);
+  --color-paper-dark-black: rgb(35, 35, 35);
 
   --color-accent-blue: #0D6193;
   --color-accent-green: #4B7358;
@@ -38,8 +38,15 @@
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes spiral-in {
@@ -47,6 +54,7 @@
     opacity: 0;
     transform: rotate(-368deg) scale(0.35) translate(110px, -180px);
   }
+
   to {
     opacity: 1;
     transform: rotate(-8deg) scale(1) translate(0, 0);

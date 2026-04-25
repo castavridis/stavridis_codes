@@ -10,8 +10,15 @@ export default async function Page() {
 
   return (
     <main className={sono.className}>
-      <HeroSection projects={projects} />
-      <ProjectsSection projects={projects} />
+      <div className="h-[100vh] w-full flex items-center justify-center">
+        <div>
+          Hello there! I'm C Stavridis.<br />
+          I am a Design Engineer based in Saint Louis, MO.<br />
+          I'm available for remote opportunities.<br />
+          But my portfolio is not ready at the moment. (Check back soon!)<br />
+          Checkout my <a href="https://github.com/castavridis/">GitHub</a> or <a href="https://www.linkedin.com/in/castavridis/">LinkedIn</a> for more information, for now.
+        </div>
+      </div>
     </main>
   )
 }
