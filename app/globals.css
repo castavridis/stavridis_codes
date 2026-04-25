@@ -5,6 +5,9 @@
 @source inline("border-b-paper-{blue-mid,pink} drop-shadow-fieldset");
 
 @theme {
+  --color-cream: #fffefc;
+  --color-blackberry: #28001e;
+
   --color-paper-blue: #CAE7ED;
   --color-paper-blue-mid: rgb(149, 207, 219);
   --color-paper-blue-dark: rgb(84, 178, 197);

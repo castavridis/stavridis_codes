@@ -12,11 +12,12 @@ export default async function Page() {
     <main className={sono.className}>
       <div className="h-[100vh] w-full flex items-center justify-center">
         <div>
-          Hello there! I'm C Stavridis.<br />
+          Hello there! I'm C Stavridis.<br /><br />
           I am a Design Engineer based in Saint Louis, MO.<br />
-          I'm available for remote opportunities.<br />
-          But my portfolio is not ready at the moment. (Check back soon!)<br />
-          Checkout my <a href="https://github.com/castavridis/">GitHub</a> or <a href="https://www.linkedin.com/in/castavridis/">LinkedIn</a> for more information, for now.
+          And I'm available for remote opportunities.<br />
+          But my portfolio is not ready at the moment. ('''' •᷄ ᴗ •᷅ )<br />
+          For now, checkout my <a style={{ textDecorationLine: "underline", textDecorationStyle: "wavy", }} href="https://github.com/castavridis/">GitHub</a> or <a style={{ textDecorationLine: "underline", textDecorationStyle: "wavy", }} href="https://www.linkedin.com/in/castavridis/">LinkedIn</a> for more information.<br /><br/>
+          Check back soon!
         </div>
       </div>
     </main>
