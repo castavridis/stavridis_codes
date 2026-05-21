@@ -3,6 +3,7 @@
 import '../globals.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animated, useSpring } from '@react-spring/web';
+import { useLocation } from 'wouter';
 import type { PigmentOption, WashesInstance } from '../../lib/washes/washes.js';
 import { Washes } from '../../lib/washes/washes.js';
 
@@ -57,6 +58,15 @@ type HeroProject = {
   rotation: number;
   offsetX: number;
   offsetY: number;
+};
+
+// Project ids that have a real detail page wired up. Clicking these will
+// trigger the splash and then navigate after the watercolor reads.
+// Siblings to be added by the other PRs:
+//   'proj-sol-lewitt' → /projects/sol-lewitt
+//   'proj-careSignal-ds' → /projects/caresignal-design-system
+const PROJECT_ROUTES: Record<string, string> = {
+  'proj-careSignal-ai': '/projects/caresignal-ai',
 };
 
 const HERO_PROJECTS: HeroProject[] = [
@@ -179,6 +189,7 @@ export default function LandingPage({ onCardClick }: LandingPageProps = {}): Rea
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
+  const [, setLocation] = useLocation();
 
   const [activePigment, setActivePigment] = useState<PigmentKey>('rose');
   const [locationIdx, setLocationIdx] = useState(0);
@@ -341,8 +352,17 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
         }
       }
       onCardClick?.(cardId);
+
+      // Navigate to the project page ~600ms after the splash starts so
+      // the watercolor animation reads before the route changes. Only
+      // projects with a wired-up route navigate; the rest fire splash
+      // only until their PRs land.
+      const route = PROJECT_ROUTES[cardId];
+      if (route) {
+        window.setTimeout(() => setLocation(route), 600);
+      }
     },
-    [onCardClick]
+    [onCardClick, setLocation]
   );
 
   const activeColor = PIGMENTS[activePigment].color;
