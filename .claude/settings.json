@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(/workspace/node_modules/.bin/tsc:*)",
+      "Bash(/workspace/node_modules/.bin/prettier:*)",
+      "Bash(/workspace/node_modules/.bin/vite:*)",
+      "Bash(git:*)",
+      "Bash(gh:*)"
+    ]
+  }
+}
