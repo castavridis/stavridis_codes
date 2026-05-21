@@ -670,7 +670,7 @@ function HeroProjectCard({
       style={{
         transform: `translate(${project.offsetX}px, ${project.offsetY}px) rotate(${project.rotation}deg)`,
       }}
-      className="group absolute top-0 left-1/2 -ml-[136px] flex w-[272px] cursor-pointer flex-col items-center gap-[16px] rounded-[12px] bg-[#fbf6ea] px-[24px] pt-[24px] pb-[28px] text-left drop-shadow-[0_0_3.5px_#fbf6ea] drop-shadow-[0_4px_24px_rgba(40,0,30,0.18)] transition-transform hover:scale-[1.02] hover:drop-shadow-[0_8px_32px_rgba(40,0,30,0.25)]"
+      className="group absolute top-0 left-1/2 -ml-[136px] flex w-[272px] cursor-pointer flex-col items-center gap-[16px] overflow-hidden rounded-[12px] bg-[#fbf6ea] px-[24px] pt-[24px] pb-[28px] text-left transition-transform hover:scale-[1.02]"
     >
       <div
         ref={hostRef}
@@ -807,13 +807,21 @@ function RevealCard({
   const maskHostRef = useRef<HTMLDivElement | null>(null);
   const descRef = useRef<HTMLParagraphElement | null>(null);
   const [hovered, setHovered] = useState(false);
-  // 28px is a reasonable single-line description + gap; useLayoutEffect
-  // updates the real value once layout settles (handles 2-line copy).
-  const [descHeight, setDescHeight] = useState(28);
+
+  // Hide distance for the inactive state. The text block sits inside a
+  // container with 4px gap + 12px padding-bottom, so the description ends
+  // 12px above the article's bottom edge. To bury the description fully
+  // below the fold we need to translate by its height + the gap + the pb.
+  // 36px is a fine default for a single-line description; the layout
+  // effect updates it once we can read offsetHeight for real (handles
+  // 2-line descriptions like Sandy's).
+  const GAP_PX = 4;
+  const PB_PX = 12;
+  const [hideDistance, setHideDistance] = useState(20 + GAP_PX + PB_PX);
 
   useLayoutEffect(() => {
     if (descRef.current) {
-      setDescHeight(descRef.current.offsetHeight + 4);
+      setHideDistance(descRef.current.offsetHeight + GAP_PX + PB_PX);
     }
   }, [description]);
 
@@ -914,7 +922,7 @@ function RevealCard({
     delay: hovered ? 80 : 0,
   });
   const textStyle = useSpring({
-    transform: hovered ? 'translateY(0px)' : `translateY(${descHeight}px)`,
+    transform: hovered ? 'translateY(0px)' : `translateY(${hideDistance}px)`,
     config: { tension: 220, friction: 22 },
   });
 
@@ -926,15 +934,23 @@ function RevealCard({
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={{ width, height }}
-      className="relative overflow-hidden rounded-[12px] bg-[#fbf6ea] shadow-[0_0_7px_0_rgba(251,246,234,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="relative isolate overflow-hidden rounded-[12px] bg-[#fbf6ea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
-      {/* "Original project image" — vivid pigments, always visible underneath. */}
-      <div ref={imageHostRef} className="absolute inset-0" aria-hidden="true" />
+      {/* "Original project image" — vivid pigments, always visible underneath.
+          Each layer carries its own `overflow-hidden rounded-[12px]` so the
+          canvas's rectangular bitmap is clipped against the card's curve in
+          browsers that don't always honor the parent's clip on
+          mix-blend-mode children (notably Safari). */}
+      <div
+        ref={imageHostRef}
+        className="absolute inset-0 overflow-hidden rounded-[12px]"
+        aria-hidden="true"
+      />
 
       {/* Mask layer #1: Washes Multiplied — the second wash painted in the
           accent pigment, multiplied over the image. */}
       <animated.div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]"
         style={{ opacity: maskStyle.opacity, mixBlendMode: 'multiply' }}
       >
         <div ref={maskHostRef} className="absolute inset-0 opacity-80" />
@@ -942,7 +958,7 @@ function RevealCard({
 
       {/* Mask layer #2: Noise — fractal-noise SVG dataurl over the lot. */}
       <animated.div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]"
         style={{
           opacity: noiseStyle.opacity,
           backgroundImage:
@@ -954,7 +970,7 @@ function RevealCard({
 
       {/* Mask layer #3: Desaturation — cream wash with mix-blend-color. */}
       <animated.div
-        className="pointer-events-none absolute inset-0 bg-[#fbf6ea]"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px] bg-[#fbf6ea]"
         style={{ opacity: desatStyle.opacity, mixBlendMode: 'color' }}
       />
 
