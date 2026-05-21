@@ -2,6 +2,7 @@
 
 import '../globals.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'wouter';
 import { animated, useSpring } from '@react-spring/web';
 import type { PigmentOption, WashesInstance } from '../../lib/washes/washes.js';
 import { Washes } from '../../lib/washes/washes.js';
@@ -176,7 +177,15 @@ export default function LandingPage({ onCardClick }: LandingPageProps = {}): Rea
 // Hero
 // ---------------------------------------------------------------------------
 
+// Map hero card IDs to their detail-page routes. Cards without a route
+// here keep their splash-only behavior (their own units will land the
+// route + page when those PRs merge).
+const CARD_ROUTES: Record<string, string> = {
+  'proj-careSignal-ds': '/projects/caresignal-design-system',
+};
+
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
+  const [, setLocation] = useLocation();
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -341,8 +350,16 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
         }
       }
       onCardClick?.(cardId);
+
+      // After the splash, navigate to the card's detail page if it has one.
+      // The 600ms delay lets the watercolor animation play out before the
+      // route swap, so the transition feels intentional rather than abrupt.
+      const route = CARD_ROUTES[cardId];
+      if (route) {
+        window.setTimeout(() => setLocation(route), 600);
+      }
     },
-    [onCardClick]
+    [onCardClick, setLocation]
   );
 
   const activeColor = PIGMENTS[activePigment].color;

@@ -14,6 +14,8 @@ const BlogPostNotFound = lazy(() =>
   import('./features/blog/blog-post.js').then((module) => ({ default: module.BlogPostNotFound }))
 );
 
+const ProjectCareSignalDs = lazy(() => import('./features/projects/caresignal-design-system.js'));
+
 export function App() {
   return (
     <main className="mx-auto min-h-screen max-w-3xl px-4 py-16 sm:py-20">
@@ -21,6 +23,7 @@ export function App() {
         <Switch>
           <Route path={routes.home.path} component={BlogIndex} />
           <Route path={routes.blogPost.path}>{(params) => <BlogPost slug={params.slug} />}</Route>
+          <Route path={routes.projectCareSignalDs.path} component={ProjectCareSignalDs} />
           <Route component={BlogPostNotFound} />
         </Switch>
       </Suspense>
