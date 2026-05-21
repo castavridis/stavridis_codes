@@ -7,4 +7,8 @@ export const routes = {
     path: '/blog/:slug',
     href: ({ slug }: { slug: string }) => `/blog/${encodeURIComponent(slug)}`,
   },
+  projectSolLewitt: {
+    path: '/projects/sol-lewitt',
+    href: () => '/projects/sol-lewitt',
+  },
 } as const;

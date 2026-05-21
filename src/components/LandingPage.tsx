@@ -3,8 +3,10 @@
 import '../globals.css';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { animated, useSpring } from '@react-spring/web';
+import { useLocation } from 'wouter';
 import type { PigmentOption, WashesInstance } from '../../lib/washes/washes.js';
 import { Washes } from '../../lib/washes/washes.js';
+import { routes } from '../routes.js';
 
 // ---------------------------------------------------------------------------
 // Pigments — the three primaries the lib ships with. These drive both the
@@ -179,6 +181,7 @@ export default function LandingPage({ onCardClick }: LandingPageProps = {}): Rea
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
+  const [, setLocation] = useLocation();
 
   const [activePigment, setActivePigment] = useState<PigmentKey>('rose');
   const [locationIdx, setLocationIdx] = useState(0);
@@ -340,9 +343,14 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
           });
         }
       }
+      // Route to the project page after the splash animation kicks off.
+      // Other agents own the other two project cards' navigation.
+      if (cardId === 'proj-sol-lewitt') {
+        window.setTimeout(() => setLocation(routes.projectSolLewitt.href()), 600);
+      }
       onCardClick?.(cardId);
     },
-    [onCardClick]
+    [onCardClick, setLocation]
   );
 
   const activeColor = PIGMENTS[activePigment].color;
