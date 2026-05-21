@@ -1,7 +1,8 @@
 'use client';
 
 import '../globals.css';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { animated, useSpring } from '@react-spring/web';
 import type { PigmentOption, WashesInstance } from '../../lib/washes/washes.js';
 import { Washes } from '../../lib/washes/washes.js';
 
@@ -184,6 +185,20 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   const [tempIdx, setTempIdx] = useState(0);
   const [weather, setWeather] = useState<WeatherKey>('sunny');
 
+  // Annotation (Brush Indicator): "Brush indicator should follow mouse —
+  // adjust size with [ ] keys; the indicator scales with the brush." We
+  // hold both pieces of state here so the visible ring and the underlying
+  // Washes brush stay in sync.
+  const BRUSH_MIN = 12;
+  const BRUSH_MAX = 240;
+  const BRUSH_STEP = 8;
+  const [brushSize, setBrushSize] = useState(64);
+  const [brushCursor, setBrushCursor] = useState<{ x: number; y: number; visible: boolean }>({
+    x: 1125,
+    y: 69,
+    visible: false,
+  });
+
   // Bootstrap the hero's full-bleed wash. The background is a "dawn" time-
   // wash (cerulean → rose → yellow gradient — the warm "sunny weather
   // preset" the Figma calls out) paired with the matching atmospheric
@@ -238,6 +253,58 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     wash.setBackground(WEATHER_PRESETS[weather].background);
     wash.setAnimation(WEATHER_PRESETS[weather].animation);
   }, [weather]);
+
+  // Brush size <-> Washes lib sync. The visible indicator scales from this
+  // same value, so the on-screen circle always matches the actual brush.
+  useEffect(() => {
+    heroWashRef.current?.brushSize(brushSize);
+  }, [brushSize]);
+
+  // Mouse-follow + [ ] keyboard resize. Pointermove is bound to window
+  // because the Washes canvas captures pointer events for painting; the
+  // host div's listener wouldn't fire reliably during a stroke.
+  useEffect(() => {
+    const host = heroCanvasRef.current;
+    if (!host) return;
+    let rafId = 0;
+    let pending: PointerEvent | null = null;
+
+    const handle = () => {
+      rafId = 0;
+      if (!pending) return;
+      const e = pending;
+      pending = null;
+      const rect = host.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+      setBrushCursor({ x, y, visible: inside });
+    };
+    const onMove = (e: PointerEvent) => {
+      pending = e;
+      if (!rafId) rafId = window.requestAnimationFrame(handle);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      // Ignore when the user is typing in an input.
+      const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (e.key === '[') {
+        e.preventDefault();
+        setBrushSize((s) => Math.max(BRUSH_MIN, s - BRUSH_STEP));
+      } else if (e.key === ']') {
+        e.preventDefault();
+        setBrushSize((s) => Math.min(BRUSH_MAX, s + BRUSH_STEP));
+      }
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('keydown', onKey);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   const cyclePigment = useCallback(() => {
     setActivePigment((prev) => {
@@ -310,14 +377,11 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
           onSelect={setActivePigment}
           onPaintbrushClick={cyclePigment}
         />
-        <div
-          className="absolute top-[37px] right-[123px] h-[64px] w-[64px] rounded-full border-2"
-          style={{
-            backgroundColor: `${activeColor}40`,
-            borderColor: activeRing,
-            boxShadow: `0 0 12px ${activeRing}`,
-          }}
-          aria-hidden="true"
+        <BrushIndicator
+          cursor={brushCursor}
+          size={brushSize}
+          fill={`${activeColor}40`}
+          ring={activeRing}
         />
 
         {/* Intro blurb */}
@@ -427,6 +491,44 @@ function PigmentSelector({
         />
       ))}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Brush indicator — follows the mouse over the hero canvas. Size matches
+// the current Washes brush, which the user can shrink with `[` and grow
+// with `]`. We use a CSS transition for size so resize feels springy but
+// leave position untransitioned so the ring tracks the cursor 1:1.
+// ---------------------------------------------------------------------------
+
+function BrushIndicator({
+  cursor,
+  size,
+  fill,
+  ring,
+}: {
+  cursor: { x: number; y: number; visible: boolean };
+  size: number;
+  fill: string;
+  ring: string;
+}): React.ReactElement {
+  return (
+    <div
+      className="pointer-events-none absolute rounded-full border-2 transition-[width,height,opacity] duration-150 ease-out"
+      style={{
+        width: size,
+        height: size,
+        transform: `translate(${cursor.x - size / 2}px, ${cursor.y - size / 2}px)`,
+        top: 0,
+        left: 0,
+        backgroundColor: fill,
+        borderColor: ring,
+        boxShadow: `0 0 12px ${ring}`,
+        opacity: cursor.visible ? 1 : 0,
+        willChange: 'transform, opacity',
+      }}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -619,63 +721,16 @@ function CreativeToolsSection(): React.ReactElement {
 }
 
 function CreativeProjectCard({ card }: { card: CreativeCard }): React.ReactElement {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
-    if (wash.webglAvailable()) wash.webgl(false);
-    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
-    wash.gouacheMode('auto');
-    wash.scale(3);
-    wash.paperWetness('damp');
-    wash.fadePainting(0);
-
-    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = 'rgb(251,246,234)';
-
-    // Layer a couple of broad splashes in the card's two pigments to fake
-    // the "wash background" each card variant shows in Figma.
-    const t1 = window.setTimeout(() => {
-      const rect = host.getBoundingClientRect();
-      wash.pigment(card.pigment as PigmentOption);
-      wash.splash([{ x: rect.width * 0.3, y: rect.height * 0.4, velocity: 40 }], 'splash', {
-        radius: rect.width * 0.55,
-        pressure: 70,
-        liftRate: 0.97,
-      });
-    }, 60);
-    const t2 = window.setTimeout(() => {
-      const rect = host.getBoundingClientRect();
-      wash.pigment(card.accent as PigmentOption);
-      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.6, velocity: 38 }], 'spray', {
-        radius: rect.width * 0.5,
-        pressure: 60,
-        liftRate: 0.97,
-      });
-    }, 400);
-
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      try {
-        wash.destroy();
-      } catch {
-        /* ignore */
-      }
-    };
-  }, [card.id, card.pigment, card.accent]);
-
   return (
-    <article className="relative h-[182px] w-[272px] overflow-hidden rounded-[12px] bg-[#fbf6ea] shadow-[0_0_7px_0_rgba(251,246,234,0.4)]">
-      <div ref={hostRef} className="absolute inset-0" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(140%_120%_at_50%_140%,rgba(33,30,31,0.85)_0%,rgba(33,30,31,0)_55%)]" />
-      <div className="text-cream relative z-10 flex h-full flex-col justify-end p-[12px]">
-        <h3 className="font-display text-[18px] leading-[24px]">{card.title}</h3>
-        <p className="font-mono text-[14px] leading-[20px] text-[#fbf6eacc]">{card.description}</p>
-      </div>
-    </article>
+    <RevealCard
+      width={272}
+      height={182}
+      title={card.title}
+      description={card.description}
+      pigment={card.pigment}
+      accent={card.accent}
+      scale={3}
+    />
   );
 }
 
@@ -701,16 +756,76 @@ function ExperimentsSection(): React.ReactElement {
 }
 
 function ExperimentProjectCard({ card }: { card: ExperimentCard }): React.ReactElement {
-  const hostRef = useRef<HTMLDivElement | null>(null);
+  return (
+    <RevealCard
+      width={416}
+      height={275}
+      title={card.title}
+      description={card.description}
+      pigment={card.pigment}
+      accent={card.accent}
+      scale={2.5}
+    />
+  );
+}
 
+// ---------------------------------------------------------------------------
+// RevealCard — shared CreativeProjectCard / ExperimentProjectCard recipe.
+//
+// Annotation (CreativeProjectCard & ExperimentProjectCard):
+//   Inactive: only the title is visible.
+//   On hover: title + description slide up "until the bottom of the
+//   description is in view," AND the watercolor mask layers
+//   (Washes Multiplied, Noise, Desaturation) fade out to reveal the
+//   "original project image" underneath. Use react-spring.
+//
+// We render two pigment layers stacked: the "image" (bottom, vivid, stays
+// visible) and the "mask" (top, cream-tinted with noise — fades on hover).
+// Spring physics drive both the text slide and the mask fade.
+// ---------------------------------------------------------------------------
+
+type RevealCardProps = {
+  width: number;
+  height: number;
+  title: string;
+  description: string;
+  pigment: PigmentKey;
+  accent: PigmentKey;
+  scale: number;
+};
+
+function RevealCard({
+  width,
+  height,
+  title,
+  description,
+  pigment,
+  accent,
+  scale,
+}: RevealCardProps): React.ReactElement {
+  const imageHostRef = useRef<HTMLDivElement | null>(null);
+  const maskHostRef = useRef<HTMLDivElement | null>(null);
+  const descRef = useRef<HTMLParagraphElement | null>(null);
+  const [hovered, setHovered] = useState(false);
+  // 28px is a reasonable single-line description + gap; useLayoutEffect
+  // updates the real value once layout settles (handles 2-line copy).
+  const [descHeight, setDescHeight] = useState(28);
+
+  useLayoutEffect(() => {
+    if (descRef.current) {
+      setDescHeight(descRef.current.offsetHeight + 4);
+    }
+  }, [description]);
+
+  // Bottom "image" wash — vivid pigments, stays visible.
   useEffect(() => {
-    const host = hostRef.current;
+    const host = imageHostRef.current;
     if (!host) return;
     const wash = Washes.create(host, { cursorPreview: false, pointer: false });
     if (wash.webglAvailable()) wash.webgl(false);
     wash.paperColor(251 / 255, 246 / 255, 234 / 255);
     wash.gouacheMode('auto');
-    wash.scale(2.5);
+    wash.scale(scale);
     wash.paperWetness('damp');
     wash.fadePainting(0);
 
@@ -719,22 +834,22 @@ function ExperimentProjectCard({ card }: { card: ExperimentCard }): React.ReactE
 
     const t1 = window.setTimeout(() => {
       const rect = host.getBoundingClientRect();
-      wash.pigment(card.pigment as PigmentOption);
-      wash.splash([{ x: rect.width * 0.25, y: rect.height * 0.55, velocity: 50 }], 'deluge', {
-        radius: rect.width * 0.6,
-        pressure: 80,
+      wash.pigment(pigment as PigmentOption);
+      wash.splash([{ x: rect.width * 0.3, y: rect.height * 0.45, velocity: 55 }], 'deluge', {
+        radius: rect.width * 0.65,
+        pressure: 85,
         liftRate: 0.97,
       });
     }, 60);
     const t2 = window.setTimeout(() => {
       const rect = host.getBoundingClientRect();
-      wash.pigment(card.accent as PigmentOption);
-      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.45, velocity: 45 }], 'splash', {
-        radius: rect.width * 0.5,
+      wash.pigment(accent as PigmentOption);
+      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.55, velocity: 50 }], 'splash', {
+        radius: rect.width * 0.55,
         pressure: 70,
         liftRate: 0.97,
       });
-    }, 400);
+    }, 360);
 
     return () => {
       window.clearTimeout(t1);
@@ -745,15 +860,122 @@ function ExperimentProjectCard({ card }: { card: ExperimentCard }): React.ReactE
         /* ignore */
       }
     };
-  }, [card.id, card.pigment, card.accent]);
+  }, [pigment, accent, scale]);
+
+  // Top "mask" wash — cream-tinted, washes out on hover.
+  useEffect(() => {
+    const host = maskHostRef.current;
+    if (!host) return;
+    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
+    if (wash.webglAvailable()) wash.webgl(false);
+    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
+    wash.gouacheMode(false);
+    wash.scale(scale + 0.5);
+    wash.paperWetness('damp');
+    wash.fadePainting(0);
+
+    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
+    if (canvasEl) canvasEl.style.backgroundColor = 'rgb(251,246,234)';
+
+    const t1 = window.setTimeout(() => {
+      const rect = host.getBoundingClientRect();
+      // A wash in the accent pigment, broader and softer than the image
+      // layer, gives the mask its desaturated multiplied look.
+      wash.pigment(accent as PigmentOption);
+      wash.splash([{ x: rect.width * 0.5, y: rect.height * 0.5, velocity: 35 }], 'spray', {
+        radius: rect.width * 0.9,
+        pressure: 55,
+        liftRate: 0.96,
+      });
+    }, 80);
+
+    return () => {
+      window.clearTimeout(t1);
+      try {
+        wash.destroy();
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [accent, scale]);
+
+  const maskStyle = useSpring({
+    opacity: hovered ? 0 : 1,
+    config: { tension: 200, friction: 24 },
+  });
+  const noiseStyle = useSpring({
+    opacity: hovered ? 0 : 0.4,
+    config: { tension: 200, friction: 26 },
+    delay: hovered ? 40 : 0,
+  });
+  const desatStyle = useSpring({
+    opacity: hovered ? 0 : 1,
+    config: { tension: 200, friction: 28 },
+    delay: hovered ? 80 : 0,
+  });
+  const textStyle = useSpring({
+    transform: hovered ? 'translateY(0px)' : `translateY(${descHeight}px)`,
+    config: { tension: 220, friction: 22 },
+  });
 
   return (
-    <article className="relative h-[275px] w-[416px] overflow-hidden rounded-[12px] bg-[#fbf6ea]">
-      <div ref={hostRef} className="absolute inset-0" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_50%_140%,rgba(33,30,31,0.85)_0%,rgba(33,30,31,0)_55%)]" />
-      <div className="text-cream relative z-10 flex h-full flex-col justify-end p-[12px]">
-        <h3 className="font-display text-[18px] leading-[24px]">{card.title}</h3>
-        <p className="font-mono text-[14px] leading-[20px] text-[#fbf6eacc]">{card.description}</p>
+    <article
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+      tabIndex={0}
+      style={{ width, height }}
+      className="relative overflow-hidden rounded-[12px] bg-[#fbf6ea] shadow-[0_0_7px_0_rgba(251,246,234,0.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+    >
+      {/* "Original project image" — vivid pigments, always visible underneath. */}
+      <div ref={imageHostRef} className="absolute inset-0" aria-hidden="true" />
+
+      {/* Mask layer #1: Washes Multiplied — the second wash painted in the
+          accent pigment, multiplied over the image. */}
+      <animated.div
+        className="pointer-events-none absolute inset-0"
+        style={{ opacity: maskStyle.opacity, mixBlendMode: 'multiply' }}
+      >
+        <div ref={maskHostRef} className="absolute inset-0 opacity-80" />
+      </animated.div>
+
+      {/* Mask layer #2: Noise — fractal-noise SVG dataurl over the lot. */}
+      <animated.div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          opacity: noiseStyle.opacity,
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.96 0 0 0 0 0.91 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+          backgroundSize: '160px 160px',
+          mixBlendMode: 'overlay',
+        }}
+      />
+
+      {/* Mask layer #3: Desaturation — cream wash with mix-blend-color. */}
+      <animated.div
+        className="pointer-events-none absolute inset-0 bg-[#fbf6ea]"
+        style={{ opacity: desatStyle.opacity, mixBlendMode: 'color' }}
+      />
+
+      {/* Bottom gradient ensures the text legible against any pigment. */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          height: '80px',
+          background:
+            'linear-gradient(to top, rgba(33,30,31,0.92) 0%, rgba(33,30,31,0.5) 50%, rgba(33,30,31,0) 100%)',
+        }}
+      />
+
+      {/* Text — slides up so description comes into view on hover. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 px-[12px] pb-[12px]">
+        <animated.div style={textStyle} className="text-cream flex flex-col gap-[4px]">
+          <h3 className="font-display text-[18px] leading-[24px]">{title}</h3>
+          <p ref={descRef} className="font-mono text-[14px] leading-[20px] text-[#fbf6eacc]">
+            {description}
+          </p>
+        </animated.div>
       </div>
     </article>
   );
@@ -781,9 +1003,29 @@ function Footer(): React.ReactElement {
   );
 }
 
+// Annotation (Horse Tab): "On Hover — tab pulls out, ends at a slight
+// angle, uses a spring." The tab pokes up from below the page; hovering
+// its visible lip pulls the body up into view with a spring, finishing at
+// a tilted rest. We use react-spring so the animation eases physically
+// rather than linearly.
 function HorseTab(): React.ReactElement {
+  const [hovered, setHovered] = useState(false);
+  const tabStyle = useSpring({
+    transform: hovered
+      ? 'translateX(-50%) translateY(-420px) rotate(-3deg)'
+      : 'translateX(-50%) translateY(0px) rotate(0deg)',
+    config: { tension: 180, friction: 14 },
+  });
   return (
-    <div className="absolute -bottom-[480px] left-1/2 flex w-[200px] -translate-x-1/2 flex-col items-center gap-[24px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[36px]">
+    <animated.div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+      tabIndex={0}
+      style={tabStyle}
+      className="absolute -bottom-[480px] left-1/2 flex w-[200px] origin-bottom flex-col items-center gap-[24px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+    >
       <div className="bg-paper-purple-dark/30 h-[338px] w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
         <div
           aria-hidden="true"
@@ -800,6 +1042,6 @@ function HorseTab(): React.ReactElement {
         You will never regret it.&rdquo;
         <br />— Author Unknown
       </p>
-    </div>
+    </animated.div>
   );
 }
