@@ -41,13 +41,16 @@ type LocationInfo = {
   lon: number;
   fallbackTemp: number;
   fallbackWeather: WeatherKey;
+  // UTC offset used only when the Open-Meteo lookup is unavailable; the live
+  // fetch (timezone=auto) returns the real, DST-correct offset.
+  fallbackOffsetSec: number;
 };
 
 const LOCATIONS: LocationInfo[] = [
-  { city: 'Saint Louis, MO', phrase: 'is where I’m based.', lat: 38.627, lon: -90.199, fallbackTemp: 72, fallbackWeather: 'sunny' },
-  { city: 'Prescott, AZ', phrase: 'is where I grew up.', lat: 34.54, lon: -112.468, fallbackTemp: 64, fallbackWeather: 'sunny' },
-  { city: 'Osaka, Japan', phrase: 'is where my heart is.', lat: 34.694, lon: 135.502, fallbackTemp: 70, fallbackWeather: 'cloudy' },
-  { city: 'Taipei, Taiwan', phrase: 'is where I could see myself living.', lat: 25.033, lon: 121.565, fallbackTemp: 81, fallbackWeather: 'rainy' },
+  { city: 'Saint Louis, MO', phrase: 'is where I’m based.', lat: 38.627, lon: -90.199, fallbackTemp: 72, fallbackWeather: 'sunny', fallbackOffsetSec: -18000 },
+  { city: 'Prescott, AZ', phrase: 'is where I grew up.', lat: 34.54, lon: -112.468, fallbackTemp: 64, fallbackWeather: 'sunny', fallbackOffsetSec: -25200 },
+  { city: 'Osaka, Japan', phrase: 'is where my heart is.', lat: 34.694, lon: 135.502, fallbackTemp: 70, fallbackWeather: 'cloudy', fallbackOffsetSec: 32400 },
+  { city: 'Taipei, Taiwan', phrase: 'is where I could see myself living.', lat: 25.033, lon: 121.565, fallbackTemp: 81, fallbackWeather: 'rainy', fallbackOffsetSec: 28800 },
 ];
 
 type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy';
@@ -226,7 +229,11 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   const [locationIdx, setLocationIdx] = useState(0);
   const [weather, setWeather] = useState<WeatherKey>('sunny');
   const [temp, setTemp] = useState(72);
-  const [time, setTime] = useState(formatLocalTime);
+  // The clock shows the *selected location's* local time. `tzOffsetSec` is the
+  // location's UTC offset (from Open-Meteo); null until the first fetch lands,
+  // in which case we fall back to the viewer's own local time.
+  const [tzOffsetSec, setTzOffsetSec] = useState<number | null>(null);
+  const [time, setTime] = useState(() => formatClock(null));
   const [canvasVisible, setCanvasVisible] = useState(true);
 
   // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
@@ -247,21 +254,27 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   // if the network is unavailable.
   const refreshWeather = useCallback(async (loc: LocationInfo) => {
     try {
+      // `timezone=auto` makes Open-Meteo resolve the location's timezone and
+      // return its DST-correct `utc_offset_seconds`, which drives the clock.
       const url =
         `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
-        `&current=temperature_2m,weather_code&temperature_unit=fahrenheit`;
+        `&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as {
+        utc_offset_seconds?: number;
         current?: { temperature_2m?: number; weather_code?: number };
       };
       const t = data.current?.temperature_2m;
       const code = data.current?.weather_code;
+      const off = data.utc_offset_seconds;
       setTemp(typeof t === 'number' ? Math.round(t) : loc.fallbackTemp);
       setWeather(typeof code === 'number' ? weatherFromCode(code) : loc.fallbackWeather);
+      setTzOffsetSec(typeof off === 'number' ? off : loc.fallbackOffsetSec);
     } catch {
       setTemp(loc.fallbackTemp);
       setWeather(loc.fallbackWeather);
+      setTzOffsetSec(loc.fallbackOffsetSec);
     }
   }, []);
 
@@ -315,11 +328,12 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     };
   }, [refreshWeather]);
 
-  // Keep the live clock ticking.
+  // Keep the live clock ticking, in the selected location's timezone.
   useEffect(() => {
-    const id = window.setInterval(() => setTime(formatLocalTime()), 30_000);
+    setTime(formatClock(tzOffsetSec));
+    const id = window.setInterval(() => setTime(formatClock(tzOffsetSec)), 30_000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [tzOffsetSec]);
 
   // Re-apply pigment whenever it changes (selector, or a card hand-off).
   useEffect(() => {
@@ -515,10 +529,22 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   );
 }
 
-function formatLocalTime(): string {
-  const d = new Date();
-  let h = d.getHours();
-  const m = d.getMinutes();
+// Format the current wall-clock time for a given UTC offset (seconds). When
+// `offsetSec` is null we have no location timezone yet, so fall back to the
+// viewer's own local time. Shifting the epoch by the offset and reading the
+// UTC fields yields the location's local time independent of the browser's tz.
+function formatClock(offsetSec: number | null): string {
+  let h: number;
+  let m: number;
+  if (offsetSec == null) {
+    const d = new Date();
+    h = d.getHours();
+    m = d.getMinutes();
+  } else {
+    const d = new Date(Date.now() + offsetSec * 1000);
+    h = d.getUTCHours();
+    m = d.getUTCMinutes();
+  }
   const ampm = h >= 12 ? 'PM' : 'AM';
   h = h % 12 || 12;
   return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
