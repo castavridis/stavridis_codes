@@ -16,7 +16,7 @@ const BlogPostNotFound = lazy(() =>
 
 export function App() {
   return (
-    <main className="mx-auto min-h-screen max-w-3xl px-4 py-16 sm:py-20">
+    <main>
       <Suspense fallback={<RoutePending />}>
         <Switch>
           <Route path={routes.home.path} component={BlogIndex} />
