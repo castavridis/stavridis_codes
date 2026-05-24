@@ -1,50 +1,80 @@
 'use client';
 
 import '../globals.css';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { animated, useSpring } from '@react-spring/web';
 import type { PigmentOption, WashesInstance } from '../../lib/washes/washes.js';
 import { Washes } from '../../lib/washes/washes.js';
 
 // ---------------------------------------------------------------------------
-// Pigments — the three primaries the lib ships with. These drive both the
-// pigment selector in the hero and the per-card accent + brush trace.
+// Pigments — the three primaries the design ships with. They drive the
+// pigment selector, the per-card accent, and the active brush color.
 // ---------------------------------------------------------------------------
 
 type PigmentKey = 'rose' | 'yellow' | 'blue';
 
-const PIGMENTS: Record<PigmentKey, { label: string; color: string; ring: string }> = {
-  rose: { label: 'Quinacridone Magenta', color: '#a50e53', ring: 'rgba(165,14,83,0.5)' },
-  yellow: { label: 'Hansa Yellow', color: '#e3af08', ring: 'rgba(227,175,8,0.5)' },
-  blue: { label: 'Cerulean Blue', color: '#108ba0', ring: 'rgba(16,139,160,0.5)' },
+const PIGMENTS: Record<PigmentKey, { label: string; color: string }> = {
+  rose: { label: 'Quinacridone Magenta', color: '#a50e53' },
+  yellow: { label: 'Hansa Yellow', color: '#e3af08' },
+  blue: { label: 'Cerulean Blue', color: '#108ba0' },
 };
+// Selector order, top → bottom, matches the Figma (magenta, yellow, blue).
 const PIGMENT_ORDER: PigmentKey[] = ['rose', 'yellow', 'blue'];
 
+const CREAM = '#fbf6ea';
+const DARK = '#251900'; // the warm near-black the hero wash fades into
+
 // ---------------------------------------------------------------------------
-// Hero "preset widget" state — the saint-louis weather line at the bottom of
-// the hero doubles as a way to swap the background visualization. Each
-// segment ("location", "temp", "weather") is interactive: clicking cycles
-// through the available options, which retriggers the time-wash background.
+// Preset widget — "Saint Louis, MO is where I'm based. / It's currently
+// 9:52 AM 72°F and sunny."
+//
+// Annotation (Location selector): cycles through four places, each with its
+// own descriptive phrase; default Saint Louis, MO. Clicking resets the Washes
+// canvas — the canvas should quickly fade out and fade back in.
+// Annotation (Weather selector): "Use Open Meteo API to pull in data."
 // ---------------------------------------------------------------------------
+
+type LocationInfo = {
+  city: string;
+  phrase: string;
+  lat: number;
+  lon: number;
+  fallbackTemp: number;
+  fallbackWeather: WeatherKey;
+};
+
+const LOCATIONS: LocationInfo[] = [
+  { city: 'Saint Louis, MO', phrase: 'is where I’m based.', lat: 38.627, lon: -90.199, fallbackTemp: 72, fallbackWeather: 'sunny' },
+  { city: 'Prescott, AZ', phrase: 'is where I grew up.', lat: 34.54, lon: -112.468, fallbackTemp: 64, fallbackWeather: 'sunny' },
+  { city: 'Osaka, Japan', phrase: 'is where my heart is.', lat: 34.694, lon: 135.502, fallbackTemp: 70, fallbackWeather: 'cloudy' },
+  { city: 'Taipei, Taiwan', phrase: 'is where I could see myself living.', lat: 25.033, lon: 121.565, fallbackTemp: 81, fallbackWeather: 'rainy' },
+];
 
 type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy';
 const WEATHER_PRESETS: Record<WeatherKey, { label: string; background: string; animation: string }> =
   {
     sunny: { label: 'sunny', background: 'dawn', animation: 'sunny' },
     cloudy: { label: 'cloudy', background: 'tornado', animation: 'partlyCloudy' },
-    rainy: { label: 'rainy', background: 'dawn', animation: 'rainy' },
-    stormy: { label: 'stormy', background: 'tornado', animation: 'thunderstorm' },
+    rainy: { label: 'rainy', background: 'dusk', animation: 'rainy' },
+    stormy: { label: 'stormy', background: 'storm', animation: 'thunderstorm' },
     snowy: { label: 'snowy', background: 'night', animation: 'snowing' },
   };
 const WEATHER_ORDER: WeatherKey[] = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy'];
 
-const LOCATIONS = ['saint louis, mo', 'brooklyn, ny', 'austin, tx', 'tokyo, jp', 'lisbon, pt'];
-const TEMPS = [72, 65, 58, 52, 28];
+// Map an Open-Meteo WMO weather code to one of our visualization presets.
+function weatherFromCode(code: number): WeatherKey {
+  if (code === 0) return 'sunny';
+  if (code <= 48) return 'cloudy';
+  if (code >= 71 && code <= 77) return 'snowy';
+  if (code === 85 || code === 86) return 'snowy';
+  if (code >= 95) return 'stormy';
+  return 'rainy';
+}
 
 // ---------------------------------------------------------------------------
-// Hero project cards — the three overlapping watercolor cards. The SVG trace
-// is the existing portfolio's "watercolor cursive" — used as a visible brush
-// stroke on each card's surface.
+// Hero project cards — three overlapping watercolor cards. The watercolor is
+// real pigment (a live Washes canvas) rather than a static screenshot, with a
+// brush-stroke SVG traced onto each.
 // ---------------------------------------------------------------------------
 
 const HERO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-109.061 -9 2504.061 746.156"><g fill="none" stroke="#000" stroke-width="60" stroke-linecap="round"><path d="M-109.06 632.23C1.953 570.516 103.113 491.159 217.88 356.08 296 263.871 338 158.583 340 85.962 341 31.964 314.67-9 266-9c-54 0-88 40.964-109 134.995-23 103.341-40 221.921-83 602.161"/><path d="M78.215 690.995C100.229 497.473 184 356.156 291 356.156c64 0 104.675 51 93.125 124-6.501 43-14.038 87-22.819 138-10.235 64 19.02 114 107.656 114 129.263 0 270.282-71.834 342.45-183.094C836 511.156 846 477.156 847 444.156c1-60-33-105-93-105-76 0-134 86-134 196 0 118 64 201 199.918 201 184.806 0 389.507-221.848 483.563-469.423C1330.037 196.83 1340 131.921 1340 86.562c0-53.782-17-95.08-65-95.08-47 0-78 36.496-106 94.12-32.806 66.832-57.072 163.228-67 272.194-25 273.42 31 374.36 164.152 374.36 161.456 0 340.963-224.93 432.62-466.189C1725.037 196.83 1735 131.921 1735 86.562c0-53.782-17-95.08-65-95.08-47 0-78 36.496-106 94.12-32.806 66.832-57.072 163.228-67 272.194-25 273.42 31 374.36 149.906 374.36 118.718 0 183.209-103.485 221.873-213.371C1907 410.156 1954 343.156 2052 343.156c81 0 145 60 145 173 0 125-81.1 219-183.582 220-90.184 1-149.418-72-143.418-182 7-122 81-211 178-211 56 0 103.036 24.893 140 52 100.214 73.107 177.429 27.929 207-44.357"/></g></svg>`;
@@ -54,48 +84,63 @@ type HeroProject = {
   label: string;
   title: string;
   pigment: PigmentKey;
+  cta: { text: string; variant: 'filled' | 'outline' };
+  // Position inside the hero (Figma coordinates, hero-relative).
+  left: number;
+  top: number;
   rotation: number;
-  offsetX: number;
-  offsetY: number;
+  z: number;
+  bob: boolean; // Annotation: Project 01 "gently move up and down".
 };
 
+// Order matches the Figma stacking: the centre card (Project 01) sits highest
+// and on top; the two flanking cards are lower and behind it.
 const HERO_PROJECTS: HeroProject[] = [
   {
-    id: 'proj-careSignal-ds',
-    label: 'Project 02',
-    title: "Building CareSignal's\nDesign System",
-    pigment: 'blue',
-    rotation: 1,
-    offsetX: -290,
-    offsetY: 42,
-  },
-  {
     id: 'proj-careSignal-ai',
-    label: 'Project 01',
+    label: 'Project 02',
     title: 'Expressing the value\nof CareSignal AI',
-    pigment: 'yellow',
-    rotation: -1,
-    offsetX: 0,
-    offsetY: 0,
+    pigment: 'blue',
+    cta: { text: 'View Project', variant: 'filled' },
+    left: 198,
+    top: 328,
+    rotation: 1,
+    z: 10,
+    bob: false,
   },
   {
     id: 'proj-sol-lewitt',
     label: 'Project 03',
     title: 'Using ML to Conserve\nthe work of Sol LeWitt',
     pigment: 'rose',
+    cta: { text: 'Coming Soon', variant: 'outline' },
+    left: 807,
+    top: 328,
     rotation: 1,
-    offsetX: 290,
-    offsetY: 42,
+    z: 10,
+    bob: false,
+  },
+  {
+    id: 'proj-careSignal-ds',
+    label: 'Project 01',
+    title: 'Building CareSignal’s\nDesign System',
+    pigment: 'yellow',
+    cta: { text: 'View Project', variant: 'filled' },
+    left: 504,
+    top: 246,
+    rotation: -1,
+    z: 20,
+    bob: true,
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Lower sections — creative tools + experiments. Each card is rendered as a
-// little Washes canvas tinted with the card's intended hue, so the watercolor
-// background is real pigment instead of a static screenshot.
+// Lower sections — creative tools + UI experiments. Each card renders its
+// imagery as a live Washes canvas tinted with the card's hue, masked by the
+// three layers the Figma calls out (Washes Multiplied, Noise, Desaturation).
 // ---------------------------------------------------------------------------
 
-type CreativeCard = {
+type ProjectCard = {
   id: string;
   title: string;
   description: string;
@@ -103,7 +148,7 @@ type CreativeCard = {
   accent: PigmentKey;
 };
 
-const CREATIVE_CARDS: CreativeCard[] = [
+const CREATIVE_CARDS: ProjectCard[] = [
   {
     id: 'creative-washes',
     title: 'Washes',
@@ -127,15 +172,7 @@ const CREATIVE_CARDS: CreativeCard[] = [
   },
 ];
 
-type ExperimentCard = {
-  id: string;
-  title: string;
-  description: string;
-  pigment: PigmentKey;
-  accent: PigmentKey;
-};
-
-const EXPERIMENT_CARDS: ExperimentCard[] = [
+const EXPERIMENT_CARDS: ProjectCard[] = [
   {
     id: 'experiment-sandy',
     title: 'Sandy',
@@ -156,25 +193,30 @@ const EXPERIMENT_CARDS: ExperimentCard[] = [
 // Component
 // ---------------------------------------------------------------------------
 
-// `onCardClick` is forwarded to the hero project cards so the (legacy)
-// PageTransitionWrapper can swap to a project view on click. Optional —
-// the LandingPage works standalone when omitted.
+// `onCardClick` is forwarded to the hero project cards so a host wrapper can
+// swap to a project view on click. Optional — the page works standalone.
 type LandingPageProps = { onCardClick?: (id: string) => void };
 
 export default function LandingPage({ onCardClick }: LandingPageProps = {}): React.ReactElement {
   return (
-    <div className="font-body bg-cream-50 text-synthetic-black w-full">
+    <div className="font-body w-full text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
       <Hero onCardClick={onCardClick} />
       <CreativeToolsSection />
-      <ExperimentsSection />
       <Footer />
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Hero
+// Hero (watercolor band + intro + cards) and the preset widget below it.
+// They share a single component so the preset widget can drive the hero's
+// live Washes canvas.
 // ---------------------------------------------------------------------------
+
+const BRUSH_MIN = 16;
+const BRUSH_MAX = 240;
+const BRUSH_STEP = 8;
+const BRUSH_DEFAULT = 64; // matches the 64px Brush Indicator in the Figma
 
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
@@ -182,36 +224,56 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
 
   const [activePigment, setActivePigment] = useState<PigmentKey>('rose');
   const [locationIdx, setLocationIdx] = useState(0);
-  const [tempIdx, setTempIdx] = useState(0);
   const [weather, setWeather] = useState<WeatherKey>('sunny');
+  const [temp, setTemp] = useState(72);
+  const [time, setTime] = useState(formatLocalTime);
+  const [canvasVisible, setCanvasVisible] = useState(true);
 
-  // Annotation (Brush Indicator): "Brush indicator should follow mouse —
-  // adjust size with [ ] keys; the indicator scales with the brush." We
-  // hold both pieces of state here so the visible ring and the underlying
-  // Washes brush stay in sync.
-  const BRUSH_MIN = 12;
-  const BRUSH_MAX = 240;
-  const BRUSH_STEP = 8;
-  const [brushSize, setBrushSize] = useState(64);
+  // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
+  // brush size; the indicator scales with the brush and recolors to the
+  // active pigment.
+  const [brushSize, setBrushSize] = useState(BRUSH_DEFAULT);
   const [brushCursor, setBrushCursor] = useState<{ x: number; y: number; visible: boolean }>({
-    x: 1125,
-    y: 69,
+    x: 1093 + 32,
+    y: 37 + 32,
     visible: false,
   });
 
-  // Bootstrap the hero's full-bleed wash. The background is a "dawn" time-
-  // wash (cerulean → rose → yellow gradient — the warm "sunny weather
-  // preset" the Figma calls out) paired with the matching atmospheric
-  // animation for the active weather key. We let the user repaint over it
-  // with the active pigment.
+  const location = LOCATIONS[locationIdx];
+
+  // Annotation (Weather selector): "Use Open Meteo API to pull in data." We
+  // fetch the current temperature + weather code and translate the code into
+  // one of our visualization presets. Falls back to the location's defaults
+  // if the network is unavailable.
+  const refreshWeather = useCallback(async (loc: LocationInfo) => {
+    try {
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
+        `&current=temperature_2m,weather_code&temperature_unit=fahrenheit`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(String(res.status));
+      const data = (await res.json()) as {
+        current?: { temperature_2m?: number; weather_code?: number };
+      };
+      const t = data.current?.temperature_2m;
+      const code = data.current?.weather_code;
+      setTemp(typeof t === 'number' ? Math.round(t) : loc.fallbackTemp);
+      setWeather(typeof code === 'number' ? weatherFromCode(code) : loc.fallbackWeather);
+    } catch {
+      setTemp(loc.fallbackTemp);
+      setWeather(loc.fallbackWeather);
+    }
+  }, []);
+
+  // Bootstrap the hero wash. Annotation (Visualization Evolution) pins the
+  // Washes.js settings: paint load 0.15, water load 8.0, evaporation 4.0,
+  // resolution (scale) 1.75, closed-gravity edges pulling down, fading
+  // painting with a 4s half-life. The "sunny weather preset" seeds it.
   useEffect(() => {
     const host = heroCanvasRef.current;
     if (!host) return;
 
-    const wash = Washes.create(host, {
-      cursorPreview: false,
-      pointer: true,
-    });
+    const wash = Washes.create(host, { cursorPreview: false, pointer: true, scale: 1.75 });
     heroWashRef.current = wash;
     (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
 
@@ -219,16 +281,28 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     wash.paperColor(251 / 255, 246 / 255, 234 / 255);
     wash.gouacheMode('auto');
     wash.paperWetness('damp');
-    wash.fadePainting(0);
-    wash.pigment(activePigment as PigmentOption);
-    wash.setBackground(WEATHER_PRESETS[weather].background);
-    wash.setAnimation(WEATHER_PRESETS[weather].animation);
+    wash.paintLoad(0.15);
+    wash.waterLoad(8.0);
+    wash.evaporation(4.0);
+    wash.brushSize(BRUSH_DEFAULT);
+    wash.edgeMode('closed-gravity');
+    wash.gravityDirection('down');
+    wash.gravityStrength(0.2);
+    wash.edgeFade(24);
+    wash.fadeHalfLife(4000);
+    wash.fadePainting(0.05);
+    wash.pigment('rose' as PigmentOption);
+    wash.setBackground(WEATHER_PRESETS.sunny.background);
+    wash.setAnimation(WEATHER_PRESETS.sunny.animation);
 
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
     if (canvasEl) {
       canvasEl.style.cursor = 'crosshair';
-      canvasEl.style.backgroundColor = 'rgb(251,246,234)';
+      canvasEl.style.backgroundColor = `rgb(251,246,234)`;
     }
+
+    // Pull live weather for the default location (Open-Meteo, keyless).
+    void refreshWeather(LOCATIONS[0]);
 
     return () => {
       try {
@@ -239,14 +313,20 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       heroWashRef.current = null;
       delete (window as unknown as Record<string, WashesInstance | undefined>).Wash_hero;
     };
+  }, [refreshWeather]);
+
+  // Keep the live clock ticking.
+  useEffect(() => {
+    const id = window.setInterval(() => setTime(formatLocalTime()), 30_000);
+    return () => window.clearInterval(id);
   }, []);
 
-  // Re-apply pigment whenever the user toggles the swatch.
+  // Re-apply pigment whenever it changes (selector, or a card hand-off).
   useEffect(() => {
     heroWashRef.current?.pigment(activePigment as PigmentOption);
   }, [activePigment]);
 
-  // Re-trigger the weather visualization when the preset bug is clicked.
+  // Re-seed the visualization when the weather preset changes.
   useEffect(() => {
     const wash = heroWashRef.current;
     if (!wash) return;
@@ -254,15 +334,13 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     wash.setAnimation(WEATHER_PRESETS[weather].animation);
   }, [weather]);
 
-  // Brush size <-> Washes lib sync. The visible indicator scales from this
-  // same value, so the on-screen circle always matches the actual brush.
+  // Brush size ↔ Washes sync. The visible indicator reads the same value.
   useEffect(() => {
     heroWashRef.current?.brushSize(brushSize);
   }, [brushSize]);
 
-  // Mouse-follow + [ ] keyboard resize. Pointermove is bound to window
-  // because the Washes canvas captures pointer events for painting; the
-  // host div's listener wouldn't fire reliably during a stroke.
+  // Mouse-follow + `[` / `]` resize. Pointermove is bound to the window
+  // because the canvas captures pointer events while painting.
   useEffect(() => {
     const host = heroCanvasRef.current;
     if (!host) return;
@@ -285,7 +363,6 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       if (!rafId) rafId = window.requestAnimationFrame(handle);
     };
     const onKey = (e: KeyboardEvent) => {
-      // Ignore when the user is typing in an input.
       const tag = (e.target as HTMLElement | null)?.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
       if (e.key === '[') {
@@ -306,124 +383,135 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     };
   }, []);
 
-  const cyclePigment = useCallback(() => {
-    setActivePigment((prev) => {
-      const next = PIGMENT_ORDER[(PIGMENT_ORDER.indexOf(prev) + 1) % PIGMENT_ORDER.length];
-      return next;
-    });
-  }, []);
+  // Annotation (Location selector): clicking resets the canvas — fade it out,
+  // re-seed under the new weather, then fade back in.
+  const cycleLocation = useCallback(() => {
+    setCanvasVisible(false);
+    const nextIdx = (locationIdx + 1) % LOCATIONS.length;
+    window.setTimeout(() => {
+      setLocationIdx(nextIdx);
+      void refreshWeather(LOCATIONS[nextIdx]);
+      const wash = heroWashRef.current;
+      if (wash) {
+        // Re-trigger the time-wash so the canvas visibly "resets".
+        const w = LOCATIONS[nextIdx].fallbackWeather;
+        wash.setBackground(WEATHER_PRESETS[w].background);
+        wash.setAnimation(WEATHER_PRESETS[w].animation);
+      }
+      setCanvasVisible(true);
+    }, 260);
+  }, [locationIdx, refreshWeather]);
 
   const cycleWeather = useCallback(() => {
     setWeather((prev) => WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length]);
   }, []);
 
-  const cycleLocation = useCallback(() => {
-    setLocationIdx((i) => (i + 1) % LOCATIONS.length);
+  const cyclePigment = useCallback(() => {
+    setActivePigment(
+      (prev) => PIGMENT_ORDER[(PIGMENT_ORDER.indexOf(prev) + 1) % PIGMENT_ORDER.length]
+    );
   }, []);
 
-  const cycleTemp = useCallback(() => {
-    setTempIdx((i) => (i + 1) % TEMPS.length);
-  }, []);
-
+  // Annotation (Project cards): the brush/palette/pigment selector update to
+  // the project's hue, and clicking deluges the wash under the cursor.
   const handleCardClick = useCallback(
-    (cardId: string, cardPigment: PigmentKey) => {
+    (project: HeroProject) => {
+      setActivePigment(project.pigment);
       const wash = heroWashRef.current;
       if (wash) {
-        const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-        if (canvasEl) {
-          const rect = canvasEl.getBoundingClientRect();
-          wash.pigment(cardPigment as PigmentOption);
-          wash.splash([{ x: rect.width / 2, y: rect.height / 2, velocity: 60 }], 'deluge', {
-            radius: 360,
-            pressure: 90,
-            liftRate: 0.96,
-          });
-        }
+        const x = brushCursor.visible ? brushCursor.x : 640;
+        const y = brushCursor.visible ? brushCursor.y : 200;
+        wash.pigment(project.pigment as PigmentOption);
+        wash.splash([{ x, y, velocity: 70 }], 'deluge', {
+          radius: 360,
+          pressure: 90,
+          liftRate: 0.96,
+        });
       }
-      onCardClick?.(cardId);
+      onCardClick?.(project.id);
     },
-    [onCardClick]
+    [brushCursor, onCardClick]
   );
 
   const activeColor = PIGMENTS[activePigment].color;
-  const activeRing = PIGMENTS[activePigment].ring;
-  const localTime = useMemo(() => formatLocalTime(), []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#fbf6ea]">
-      <div className="relative mx-auto h-[752px] w-full max-w-[1280px]">
-        {/* Washes background canvas */}
-        <div ref={heroCanvasRef} className="absolute inset-0 select-none" aria-hidden="true" />
+    <>
+      <section
+        className="relative mx-auto h-[728px] w-full max-w-[1280px] overflow-hidden"
+        style={{ backgroundColor: DARK }}
+      >
+        {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
+        <div
+          className="absolute top-0 left-0 h-[437px] w-full select-none transition-opacity duration-200 ease-out"
+          style={{ opacity: canvasVisible ? 1 : 0 }}
+        >
+          <div ref={heroCanvasRef} className="absolute inset-0" aria-hidden="true" />
+        </div>
 
-        {/* Radial gradient to improve blurb legibility */}
+        {/* Connecting gradient — fades the wash band into the dark page. */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-[97px] h-[340px]"
+          style={{
+            background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, rgba(37,25,0,0) 28%, ${DARK} 100%)`,
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[200px]"
+          style={{ backgroundColor: DARK }}
+        />
+
+        {/* Radial gradient to improve blurb legibility. */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-[304px]"
           style={{
             background:
-              'radial-gradient(82% 100% at 50% 0%, rgba(255,251,240,0.55) 0%, rgba(255,251,240,0) 70%)',
+              'radial-gradient(82% 100% at 50% 0%, rgba(255,251,240,0.5) 0%, rgba(255,251,240,0) 70%)',
           }}
         />
 
-        {/* Availability widget — top-left */}
-        <div className="absolute top-[22px] left-[24px] flex h-[24px] items-center rounded-[12px] bg-[rgba(251,246,234,0.78)] px-[12px] shadow-[0_0_7px_0_#fbf6ea] backdrop-blur-[2px]">
-          <span className="font-mono text-[12px] leading-[24px] text-[#211e1f]">
-            Available for Hire
-          </span>
-        </div>
-
-        {/* Pigment selector + brush indicator — top-right */}
-        <PigmentSelector
-          active={activePigment}
-          onSelect={setActivePigment}
-          onPaintbrushClick={cyclePigment}
-        />
-        <BrushIndicator
-          cursor={brushCursor}
-          size={brushSize}
-          fill={`${activeColor}40`}
-          ring={activeRing}
-        />
-
-        {/* Intro blurb */}
-        <div className="absolute top-[70px] left-1/2 w-[420px] -translate-x-1/2 text-center leading-[28px]">
-          <p className="font-display text-[20px] tracking-tight text-black">I&rsquo;m C Stavridis,</p>
-          <p className="mt-[4px] text-[18px] leading-[26px] text-black">
+        {/* Intro blurb. */}
+        <div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[420px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black">
+          <p className="font-display text-[24px]">I’m C Stavridis,</p>
+          <p className="font-body text-[18px] leading-[24px]">
             an AI-Native Design Engineer who loves turning complex ideas into warm, approachable
             products.
           </p>
         </div>
 
-        {/* Project cards */}
-        <div className="absolute top-[228px] left-1/2 flex -translate-x-1/2 items-start">
-          {HERO_PROJECTS.map((project) => (
-            <HeroProjectCard
-              key={project.id}
-              project={project}
-              onClick={() => handleCardClick(project.id, project.pigment)}
-            />
-          ))}
-        </div>
+        {/* Project cards. */}
+        {HERO_PROJECTS.map((project) => (
+          <HeroProjectCard
+            key={project.id}
+            project={project}
+            onClick={() => handleCardClick(project)}
+            onActivate={() => setActivePigment(project.pigment)}
+          />
+        ))}
 
-        {/* Preset widget (bottom-left) */}
-        <PresetWidget
-          location={LOCATIONS[locationIdx]}
-          temperature={TEMPS[tempIdx]}
-          weather={weather}
-          time={localTime}
-          onLocation={cycleLocation}
-          onTemp={cycleTemp}
-          onWeather={cycleWeather}
+        {/* Pigment selector — vertical, right edge. */}
+        <PigmentSelector
+          active={activePigment}
+          onSelect={setActivePigment}
+          onPaintbrushClick={cyclePigment}
         />
 
-        {/* Credit (bottom-right) */}
-        <a
-          href="https://github.com/anthropics"
-          className="absolute right-[24px] bottom-[24px] flex h-[24px] items-center rounded-[12px] bg-[rgba(251,246,234,0.78)] px-[12px] font-mono text-[12px] leading-[24px] text-[#211e1f] shadow-[0_0_7px_0_#fbf6ea] backdrop-blur-[2px]"
-        >
-          Powered by Washes.js
-        </a>
+        {/* Brush indicator. */}
+        <BrushIndicator cursor={brushCursor} size={brushSize} color={activeColor} />
+      </section>
+
+      {/* Preset widget — centered on the dark band below the hero. */}
+      <div className="flex w-full justify-center" style={{ backgroundColor: DARK }}>
+        <PresetWidget
+          location={location}
+          time={time}
+          temperature={temp}
+          weather={weather}
+          onLocation={cycleLocation}
+          onWeather={cycleWeather}
+        />
       </div>
-    </section>
+    </>
   );
 }
 
@@ -437,7 +525,9 @@ function formatLocalTime(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Pigment selector
+// Pigment selector — vertical pill on the right edge of the hero. The paint-
+// brush glyph recolors to the active pigment (annotation), and the pill tints
+// to the active pigment ("Selector Background (Magenta)" in the Figma).
 // ---------------------------------------------------------------------------
 
 function PigmentSelector({
@@ -452,26 +542,18 @@ function PigmentSelector({
   const activeColor = PIGMENTS[active].color;
   return (
     <div
-      className="absolute top-[22px] right-[24px] flex h-[24px] items-center gap-[8px] rounded-[12px] px-[10px] shadow-[0_0_7px_0_#fbf6ea]"
-      style={{ backgroundColor: `${activeColor}80` }}
+      className="absolute top-[173px] right-[8px] z-30 flex w-[22px] flex-col items-center gap-[10px] rounded-[12px] py-[8px] backdrop-blur-[2px]"
+      style={{ backgroundColor: `${activeColor}59` }}
     >
       <button
         type="button"
         onClick={onPaintbrushClick}
         aria-label="Cycle active pigment"
-        className="-mx-[2px] flex h-[24px] w-[16px] items-center justify-center text-[14px] leading-[24px] text-[#fbf6ea]"
+        className="flex h-[14px] w-[14px] items-center justify-center"
+        style={{ color: activeColor }}
       >
-        {/* Paint brush glyph (heroicons "paint-brush") */}
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-[14px] w-[14px]"
-          aria-hidden="true"
-        >
+        {/* Paint brush glyph (heroicons "paint-brush"). */}
+        <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px]" aria-hidden="true">
           <path d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128zM18.42 5.547a4.498 4.498 0 0 0-3.187 2.137l-2.388 4.005a15.79 15.79 0 0 1 3.467 2.067l3.087-2.667a4.5 4.5 0 0 0-.98-5.542z" />
         </svg>
       </button>
@@ -485,8 +567,8 @@ function PigmentSelector({
           className="relative flex h-[10px] w-[10px] items-center justify-center rounded-full transition-transform hover:scale-110"
           style={{
             backgroundColor: PIGMENTS[key].color,
-            outline: active === key ? '2px solid #fbf6ea' : 'none',
-            outlineOffset: active === key ? '2px' : '0',
+            outline: active === key ? `2px solid ${CREAM}` : 'none',
+            outlineOffset: active === key ? '1.5px' : '0',
           }}
         />
       ))}
@@ -495,35 +577,31 @@ function PigmentSelector({
 }
 
 // ---------------------------------------------------------------------------
-// Brush indicator — follows the mouse over the hero canvas. Size matches
-// the current Washes brush, which the user can shrink with `[` and grow
-// with `]`. We use a CSS transition for size so resize feels springy but
-// leave position untransitioned so the ring tracks the cursor 1:1.
+// Brush indicator — a 64px (default) ring that follows the cursor over the
+// hero band, scales with the Washes brush size, and recolors to the pigment.
 // ---------------------------------------------------------------------------
 
 function BrushIndicator({
   cursor,
   size,
-  fill,
-  ring,
+  color,
 }: {
   cursor: { x: number; y: number; visible: boolean };
   size: number;
-  fill: string;
-  ring: string;
+  color: string;
 }): React.ReactElement {
   return (
     <div
-      className="pointer-events-none absolute rounded-full border-2 transition-[width,height,opacity] duration-150 ease-out"
+      className="pointer-events-none absolute z-20 rounded-full border-2 transition-[width,height,opacity] duration-150 ease-out"
       style={{
         width: size,
         height: size,
-        transform: `translate(${cursor.x - size / 2}px, ${cursor.y - size / 2}px)`,
         top: 0,
         left: 0,
-        backgroundColor: fill,
-        borderColor: ring,
-        boxShadow: `0 0 12px ${ring}`,
+        transform: `translate(${cursor.x - size / 2}px, ${cursor.y - size / 2}px)`,
+        backgroundColor: `${color}40`,
+        borderColor: `${color}80`,
+        boxShadow: `0 0 12px ${color}66`,
         opacity: cursor.visible ? 1 : 0,
         willChange: 'transform, opacity',
       }}
@@ -533,63 +611,60 @@ function BrushIndicator({
 }
 
 // ---------------------------------------------------------------------------
-// Preset widget — "in saint louis, mo it's 9:52 AM 72°F and sunny"
+// Preset widget
 // ---------------------------------------------------------------------------
 
 function PresetWidget({
   location,
+  time,
   temperature,
   weather,
-  time,
   onLocation,
-  onTemp,
   onWeather,
 }: {
-  location: string;
+  location: LocationInfo;
+  time: string;
   temperature: number;
   weather: WeatherKey;
-  time: string;
   onLocation: () => void;
-  onTemp: () => void;
   onWeather: () => void;
 }): React.ReactElement {
   return (
-    <div className="absolute bottom-[24px] left-[24px] flex h-[24px] items-center gap-[6px] font-mono text-[12px] leading-[24px] text-[#3d3735] mix-blend-multiply">
-      <span>in</span>
-      <PresetBug
-        color="#e3af08"
-        onClick={onLocation}
-        label={`Change location (currently ${location})`}
-      >
-        {location}
-      </PresetBug>
-      <span>it&rsquo;s {time}</span>
-      <PresetBug
-        color="#108ba0"
-        onClick={onTemp}
-        label={`Change temperature (currently ${temperature}°F)`}
-      >
-        {temperature}°F
-      </PresetBug>
-      <span>and</span>
-      <PresetBug
-        color="#a50e53"
-        onClick={onWeather}
-        label={`Change weather (currently ${WEATHER_PRESETS[weather].label})`}
-      >
-        {WEATHER_PRESETS[weather].label}
-      </PresetBug>
+    <div className="font-mono flex flex-col items-center gap-[6px] pt-[12px] text-[12px] leading-[24px] opacity-60">
+      <div className="flex items-center gap-[6px]">
+        <PresetBug
+          background="rgba(121,96,54,0.5)"
+          onClick={onLocation}
+          label={`Change location (currently ${location.city})`}
+        >
+          {location.city}
+        </PresetBug>
+        <span className="mix-blend-difference text-[#fbf6ea]">{location.phrase}</span>
+      </div>
+      <div className="flex items-center gap-[6px]">
+        <span className="mix-blend-difference text-[#fbf6ea]">It’s currently</span>
+        <span className="rounded-[4px] bg-[#4f3d1b] px-[8px] text-[#fbf6ea]">{time}</span>
+        <span className="mix-blend-difference text-[#fbf6ea]">{temperature}°F and</span>
+        <PresetBug
+          background="#4f3d1b"
+          onClick={onWeather}
+          label={`Change weather (currently ${WEATHER_PRESETS[weather].label})`}
+        >
+          {WEATHER_PRESETS[weather].label}
+        </PresetBug>
+        <span className="mix-blend-difference text-[#fbf6ea]">.</span>
+      </div>
     </div>
   );
 }
 
 function PresetBug({
-  color,
+  background,
   onClick,
   label,
   children,
 }: {
-  color: string;
+  background: string;
   onClick: () => void;
   label: string;
   children: React.ReactNode;
@@ -599,8 +674,8 @@ function PresetBug({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="inline-flex h-[19px] items-center rounded-[3px] px-[6px] font-mono text-[12px] leading-[19px] text-[#211e1f] transition-transform hover:translate-y-[-1px]"
-      style={{ backgroundColor: color, color: '#211e1f' }}
+      className="font-mono inline-flex items-center rounded-[4px] px-[8px] text-[12px] leading-[24px] text-[#fbf6ea] transition-transform hover:-translate-y-[1px]"
+      style={{ backgroundColor: background }}
     >
       {children}
     </button>
@@ -608,15 +683,18 @@ function PresetBug({
 }
 
 // ---------------------------------------------------------------------------
-// Hero project card
+// Hero project card — live watercolor surface with an instantly-traced brush
+// stroke (annotation: "SVG does not animate in, it's instantly on").
 // ---------------------------------------------------------------------------
 
 function HeroProjectCard({
   project,
   onClick,
+  onActivate,
 }: {
   project: HeroProject;
   onClick: () => void;
+  onActivate: () => void;
 }): React.ReactElement {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const washRef = useRef<WashesInstance | null>(null);
@@ -625,14 +703,10 @@ function HeroProjectCard({
     const host = hostRef.current;
     if (!host) return;
 
-    const wash = Washes.create(host, {
-      cursorPreview: false,
-      pointer: false,
-    });
+    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
     washRef.current = wash;
 
     if (wash.webglAvailable()) wash.webgl(false);
-
     wash.paperColor(251 / 255, 246 / 255, 234 / 255);
     wash.gouacheMode('auto');
     wash.scale(4);
@@ -642,13 +716,12 @@ function HeroProjectCard({
     wash.pigment(project.pigment as PigmentOption);
 
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = 'rgb(251,246,234)';
+    if (canvasEl) canvasEl.style.backgroundColor = `rgb(251,246,234)`;
 
-    // Defer the SVG trace until after the canvas has its layout, so it
-    // fits inside the card instead of overflowing while we're still
-    // mounting.
+    // Trace once layout settles. Annotation: the SVG is "instantly on" — no
+    // animated reveal — so `animate: false`.
     const tracer = window.setTimeout(() => {
-      wash.traceSVG(HERO_SVG, { flipY: false, durationMs: 1200, easing: 'penStroke' });
+      wash.traceSVG(HERO_SVG, { flipY: false, animate: false });
     }, 80);
 
     return () => {
@@ -663,169 +736,142 @@ function HeroProjectCard({
     };
   }, [project.id, project.pigment]);
 
+  const cta = project.cta;
+  const ctaColor = PIGMENTS[project.pigment].color;
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <div
+      className="absolute"
       style={{
-        transform: `translate(${project.offsetX}px, ${project.offsetY}px) rotate(${project.rotation}deg)`,
+        left: `${project.left}px`,
+        top: `${project.top}px`,
+        zIndex: project.z,
+        transform: `rotate(${project.rotation}deg)`,
       }}
-      className="group absolute top-0 left-1/2 -ml-[136px] flex w-[272px] cursor-pointer flex-col items-center gap-[16px] overflow-hidden rounded-[12px] bg-[#fbf6ea] px-[24px] pt-[24px] pb-[28px] text-left transition-transform hover:scale-[1.02]"
     >
-      <div
-        ref={hostRef}
-        className="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[12px] opacity-70 mix-blend-luminosity"
-        aria-hidden="true"
-      />
-      <div className="relative z-10 flex w-full flex-col gap-[16px]">
-        <p className="font-mono text-[12px] leading-[24px] text-[#7d7d7d]">{project.label}</p>
-        <p
-          className="font-body text-[18px] leading-[24px] whitespace-pre-line text-black"
-          style={{ minHeight: '168px' }}
+      <div className={project.bob ? 'animate-[card-bob_6s_ease-in-out_infinite]' : undefined}>
+        <button
+          type="button"
+          onClick={onClick}
+          onMouseEnter={onActivate}
+          onFocus={onActivate}
+          className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+          style={{ backgroundColor: CREAM }}
         >
-          {project.title}
-        </p>
-        <div
-          className="flex h-[36px] w-full items-center justify-center rounded-[4px] font-mono text-[12px] text-[#fbf6ea] transition-[filter] group-hover:brightness-110"
-          style={{
-            backgroundColor: PIGMENTS[project.pigment].color,
-            color: project.pigment === 'yellow' ? '#100e08' : '#fbf6ea',
-          }}
-        >
-          View Project
-        </div>
+          <div
+            ref={hostRef}
+            className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[12px] opacity-70 mix-blend-luminosity"
+            aria-hidden="true"
+          />
+          <div className="relative z-10 flex w-full flex-col gap-[24px]">
+            <p className="font-mono mix-blend-difference text-[12px] leading-[24px] text-[#7d7d7d]">
+              {project.label}
+            </p>
+            <p
+              className="font-body text-[18px] leading-[24px] whitespace-pre-line text-black"
+              style={{ minHeight: '202px' }}
+            >
+              {project.title}
+            </p>
+            {cta.variant === 'filled' ? (
+              <div
+                className="font-mono flex h-[36px] w-[180px] items-center justify-center rounded-[4px] text-[12px] leading-[24px] transition-[filter] group-hover:brightness-110"
+                style={{
+                  backgroundColor: ctaColor,
+                  color: project.pigment === 'yellow' ? '#100e08' : CREAM,
+                }}
+              >
+                {cta.text}
+              </div>
+            ) : (
+              <div
+                className="font-mono flex h-[36px] w-[180px] items-center justify-center rounded-[4px] border text-[12px] leading-[24px] text-black opacity-75"
+                style={{ borderColor: ctaColor }}
+              >
+                {cta.text}
+              </div>
+            )}
+          </div>
+        </button>
       </div>
-    </button>
+    </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Creative Tools section
+// Creative Tools + UI Experiments — one continuous dark section in the Figma.
 // ---------------------------------------------------------------------------
 
 function CreativeToolsSection(): React.ReactElement {
   return (
-    <section className="bg-coffee w-full px-[24px] py-[72px]">
-      <div className="mx-auto max-w-[1280px]">
-        <p className="text-cream/80 px-[144px] font-mono text-[12px] leading-[24px]">
-          AI-Native Creative Tooling I&rsquo;m Building
-        </p>
-        <div className="mt-[24px] flex flex-wrap justify-center gap-[32px] px-[144px]">
-          {CREATIVE_CARDS.map((card) => (
-            <CreativeProjectCard key={card.id} card={card} />
-          ))}
+    <section className="w-full" style={{ backgroundColor: DARK }}>
+      <div className="mx-auto max-w-[1280px] px-[24px]">
+        {/* AI-Native Creative Tools */}
+        <div className="px-[144px] pt-[144px]">
+          <p className="font-mono text-[12px] leading-[24px] text-[#fbf6ea]/80">
+            AI-Native Creative Tools
+          </p>
+          <div className="mt-[24px] flex flex-wrap justify-center gap-[64px]">
+            {CREATIVE_CARDS.map((card) => (
+              <RevealCard key={card.id} width={272} height={182} card={card} scale={3} />
+            ))}
+          </div>
+        </div>
+
+        {/* UI Experiments */}
+        <div className="px-[192px] pt-[64px] pb-[120px]">
+          <p className="font-mono text-[12px] leading-[24px] text-[#fbf6ea]/80">UI Experiments</p>
+          <div className="mt-[24px] flex flex-wrap justify-center gap-[64px]">
+            {EXPERIMENT_CARDS.map((card) => (
+              <RevealCard key={card.id} width={416} height={275} card={card} scale={2.5} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function CreativeProjectCard({ card }: { card: CreativeCard }): React.ReactElement {
-  return (
-    <RevealCard
-      width={272}
-      height={182}
-      title={card.title}
-      description={card.description}
-      pigment={card.pigment}
-      accent={card.accent}
-      scale={3}
-    />
-  );
-}
-
 // ---------------------------------------------------------------------------
-// Current Experiments section
-// ---------------------------------------------------------------------------
-
-function ExperimentsSection(): React.ReactElement {
-  return (
-    <section className="bg-coffee w-full px-[24px] py-[96px]">
-      <div className="mx-auto max-w-[1280px]">
-        <p className="text-cream/80 px-[212px] font-mono text-[12px] leading-[24px]">
-          Current Experiments
-        </p>
-        <div className="mt-[24px] flex flex-wrap justify-center gap-[24px] px-[212px]">
-          {EXPERIMENT_CARDS.map((card) => (
-            <ExperimentProjectCard key={card.id} card={card} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ExperimentProjectCard({ card }: { card: ExperimentCard }): React.ReactElement {
-  return (
-    <RevealCard
-      width={416}
-      height={275}
-      title={card.title}
-      description={card.description}
-      pigment={card.pigment}
-      accent={card.accent}
-      scale={2.5}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------
-// RevealCard — shared CreativeProjectCard / ExperimentProjectCard recipe.
+// RevealCard — shared Creative / Experiment recipe.
 //
 // Annotation (CreativeProjectCard & ExperimentProjectCard):
 //   Inactive: only the title is visible.
-//   On hover: title + description slide up "until the bottom of the
-//   description is in view," AND the watercolor mask layers
-//   (Washes Multiplied, Noise, Desaturation) fade out to reveal the
-//   "original project image" underneath. Use react-spring.
+//   On hover: title + description slide up until the description is in view,
+//   AND the watercolor mask layers (Washes Multiplied, Noise, Desaturation)
+//   fade out to reveal the "original project image" underneath.
 //
-// We render two pigment layers stacked: the "image" (bottom, vivid, stays
-// visible) and the "mask" (top, cream-tinted with noise — fades on hover).
-// Spring physics drive both the text slide and the mask fade.
+// The image is one live Washes canvas; the three masks are CSS overlays
+// matching the Figma's layer stack. react-spring drives the slide + fade.
 // ---------------------------------------------------------------------------
-
-type RevealCardProps = {
-  width: number;
-  height: number;
-  title: string;
-  description: string;
-  pigment: PigmentKey;
-  accent: PigmentKey;
-  scale: number;
-};
 
 function RevealCard({
   width,
   height,
-  title,
-  description,
-  pigment,
-  accent,
+  card,
   scale,
-}: RevealCardProps): React.ReactElement {
+}: {
+  width: number;
+  height: number;
+  card: ProjectCard;
+  scale: number;
+}): React.ReactElement {
+  const { title, description, pigment, accent } = card;
   const imageHostRef = useRef<HTMLDivElement | null>(null);
-  const maskHostRef = useRef<HTMLDivElement | null>(null);
   const descRef = useRef<HTMLParagraphElement | null>(null);
   const [hovered, setHovered] = useState(false);
 
-  // Hide distance for the inactive state. The text block sits inside a
-  // container with 4px gap + 12px padding-bottom, so the description ends
-  // 12px above the article's bottom edge. To bury the description fully
-  // below the fold we need to translate by its height + the gap + the pb.
-  // 36px is a fine default for a single-line description; the layout
-  // effect updates it once we can read offsetHeight for real (handles
-  // 2-line descriptions like Sandy's).
+  // Distance the text block hides below the fold while inactive: the
+  // description height + the 4px gap + the 12px bottom padding.
   const GAP_PX = 4;
   const PB_PX = 12;
-  const [hideDistance, setHideDistance] = useState(20 + GAP_PX + PB_PX);
+  const [hideDistance, setHideDistance] = useState(24 + GAP_PX + PB_PX);
 
   useLayoutEffect(() => {
-    if (descRef.current) {
-      setHideDistance(descRef.current.offsetHeight + GAP_PX + PB_PX);
-    }
+    if (descRef.current) setHideDistance(descRef.current.offsetHeight + GAP_PX + PB_PX);
   }, [description]);
 
-  // Bottom "image" wash — vivid pigments, stays visible.
+  // The "original project image" — vivid live wash, stays visible.
   useEffect(() => {
     const host = imageHostRef.current;
     if (!host) return;
@@ -838,7 +884,7 @@ function RevealCard({
     wash.fadePainting(0);
 
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = 'rgb(251,246,234)';
+    if (canvasEl) canvasEl.style.backgroundColor = `rgb(251,246,234)`;
 
     const t1 = window.setTimeout(() => {
       const rect = host.getBoundingClientRect();
@@ -870,56 +916,10 @@ function RevealCard({
     };
   }, [pigment, accent, scale]);
 
-  // Top "mask" wash — cream-tinted, washes out on hover.
-  useEffect(() => {
-    const host = maskHostRef.current;
-    if (!host) return;
-    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
-    if (wash.webglAvailable()) wash.webgl(false);
-    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
-    wash.gouacheMode(false);
-    wash.scale(scale + 0.5);
-    wash.paperWetness('damp');
-    wash.fadePainting(0);
-
-    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = 'rgb(251,246,234)';
-
-    const t1 = window.setTimeout(() => {
-      const rect = host.getBoundingClientRect();
-      // A wash in the accent pigment, broader and softer than the image
-      // layer, gives the mask its desaturated multiplied look.
-      wash.pigment(accent as PigmentOption);
-      wash.splash([{ x: rect.width * 0.5, y: rect.height * 0.5, velocity: 35 }], 'spray', {
-        radius: rect.width * 0.9,
-        pressure: 55,
-        liftRate: 0.96,
-      });
-    }, 80);
-
-    return () => {
-      window.clearTimeout(t1);
-      try {
-        wash.destroy();
-      } catch {
-        /* ignore */
-      }
-    };
-  }, [accent, scale]);
-
+  // Mask layers fade out together on hover; text slides up.
   const maskStyle = useSpring({
     opacity: hovered ? 0 : 1,
-    config: { tension: 200, friction: 24 },
-  });
-  const noiseStyle = useSpring({
-    opacity: hovered ? 0 : 0.4,
     config: { tension: 200, friction: 26 },
-    delay: hovered ? 40 : 0,
-  });
-  const desatStyle = useSpring({
-    opacity: hovered ? 0 : 1,
-    config: { tension: 200, friction: 28 },
-    delay: hovered ? 80 : 0,
   });
   const textStyle = useSpring({
     transform: hovered ? 'translateY(0px)' : `translateY(${hideDistance}px)`,
@@ -934,61 +934,56 @@ function RevealCard({
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={{ width, height }}
-      className="relative isolate overflow-hidden rounded-[12px] bg-[#fbf6ea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="relative isolate overflow-hidden rounded-[12px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
-      {/* "Original project image" — vivid pigments, always visible underneath.
-          Each layer carries its own `overflow-hidden rounded-[12px]` so the
-          canvas's rectangular bitmap is clipped against the card's curve in
-          browsers that don't always honor the parent's clip on
-          mix-blend-mode children (notably Safari). */}
+      {/* Original project image — vivid pigments, always visible underneath. */}
       <div
         ref={imageHostRef}
         className="absolute inset-0 overflow-hidden rounded-[12px]"
+        style={{ backgroundColor: CREAM }}
         aria-hidden="true"
       />
 
-      {/* Mask layer #1: Washes Multiplied — the second wash painted in the
-          accent pigment, multiplied over the image. */}
+      {/* Mask stack — Washes Multiplied + Noise + Desaturation. Fades on hover. */}
       <animated.div
         className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]"
-        style={{ opacity: maskStyle.opacity, mixBlendMode: 'multiply' }}
+        style={{ opacity: maskStyle.opacity }}
       >
-        <div ref={maskHostRef} className="absolute inset-0 opacity-80" />
+        {/* Washes Multiplied — accent wash multiplied over the image. */}
+        <div
+          className="absolute inset-0 opacity-70 mix-blend-multiply"
+          style={{
+            background: `radial-gradient(120% 120% at 35% 40%, ${PIGMENTS[accent].color} 0%, ${PIGMENTS[pigment].color} 70%)`,
+          }}
+        />
+        {/* Noise layer. */}
+        <div
+          className="absolute inset-0 mix-blend-overlay"
+          style={{
+            opacity: 0.4,
+            backgroundImage:
+              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.96 0 0 0 0 0.91 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
+            backgroundSize: '160px 160px',
+          }}
+        />
+        {/* Desaturation layer — cream wash with color blend. */}
+        <div className="absolute inset-0 mix-blend-color" style={{ backgroundColor: CREAM }} />
       </animated.div>
 
-      {/* Mask layer #2: Noise — fractal-noise SVG dataurl over the lot. */}
-      <animated.div
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]"
-        style={{
-          opacity: noiseStyle.opacity,
-          backgroundImage:
-            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.96 0 0 0 0 0.91 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-          backgroundSize: '160px 160px',
-          mixBlendMode: 'overlay',
-        }}
-      />
-
-      {/* Mask layer #3: Desaturation — cream wash with mix-blend-color. */}
-      <animated.div
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px] bg-[#fbf6ea]"
-        style={{ opacity: desatStyle.opacity, mixBlendMode: 'color' }}
-      />
-
-      {/* Bottom gradient ensures the text legible against any pigment. */}
+      {/* Bottom gradient keeps the text legible over any pigment. */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[80px]"
         style={{
-          height: '80px',
           background:
-            'linear-gradient(to top, rgba(33,30,31,0.92) 0%, rgba(33,30,31,0.5) 50%, rgba(33,30,31,0) 100%)',
+            'linear-gradient(to top, #211e1f 0%, rgba(33,30,31,0.5) 50%, rgba(33,30,31,0) 100%)',
         }}
       />
 
-      {/* Text — slides up so description comes into view on hover. */}
+      {/* Text — slides up so the description comes into view on hover. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 px-[12px] pb-[12px]">
-        <animated.div style={textStyle} className="text-cream flex flex-col gap-[4px]">
+        <animated.div style={textStyle} className="flex flex-col gap-[4px] text-[#fbf6ea]">
           <h3 className="font-display text-[18px] leading-[24px]">{title}</h3>
-          <p ref={descRef} className="font-mono text-[14px] leading-[20px] text-[#fbf6eacc]">
+          <p ref={descRef} className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]">
             {description}
           </p>
         </animated.div>
@@ -998,20 +993,28 @@ function RevealCard({
 }
 
 // ---------------------------------------------------------------------------
-// Footer
+// Footer — testimonial + the "horse tab" that pulls out of the bottom edge.
 // ---------------------------------------------------------------------------
 
 function Footer(): React.ReactElement {
   return (
-    <footer className="bg-coffee-deep text-cream relative w-full overflow-hidden pt-[120px] pb-[180px]">
-      <div className="text-cream mx-auto flex max-w-[560px] flex-col items-start gap-[24px]">
-        <p className="font-display text-[24px] leading-[32px]">I love working with you, C.</p>
-        <p className="font-body text-[24px] leading-[32px]">
-          You have an infectious energy and passion for what you do and you know how to push people in
-          the right directions or advise them to get the best out of them.
+    <footer
+      className="relative w-full overflow-hidden pt-[128px] pb-[144px] text-[#fbf6ea]"
+      style={{ backgroundColor: DARK }}
+    >
+      <div className="mx-auto flex max-w-[560px] flex-col items-center gap-[16px] text-center">
+        <p className="w-[504px] max-w-full">
+          <span className="font-display block text-[24px] leading-[32px]">
+            I love working with you, C.
+          </span>
+          <span className="font-body block text-[24px] leading-[32px]">
+            You have an infectious energy and passion for what you do and you know how to push people
+            in the right directions or advise them to get the best out of them.
+          </span>
         </p>
-        <p className="text-cream/80 font-mono text-[16px] leading-[24px]">
-          — Georgiana Ramona Turcsanyi, Senior Software Engineer
+        <p className="font-mono text-[16px] leading-[24px] opacity-75">
+          <span className="font-mono block font-bold">Georgiana Ramona Turcsanyi</span>
+          <span className="block">Senior Software Engineer</span>
         </p>
       </div>
       <HorseTab />
@@ -1019,18 +1022,16 @@ function Footer(): React.ReactElement {
   );
 }
 
-// Annotation (Horse Tab): "On Hover — tab pulls out, ends at a slight
-// angle, uses a spring." The tab pokes up from below the page; hovering
-// its visible lip pulls the body up into view with a spring, finishing at
-// a tilted rest. We use react-spring so the animation eases physically
-// rather than linearly.
+// Annotation (Horse Tab): "On Hover — 1. Tab pulls out 2. Ends at a slight
+// angle 3. Uses a spring." The tab pokes up from below the page; hovering its
+// visible lip pulls the body up with a spring, finishing tilted.
 function HorseTab(): React.ReactElement {
   const [hovered, setHovered] = useState(false);
   const tabStyle = useSpring({
     transform: hovered
-      ? 'translateX(-50%) translateY(-420px) rotate(-3deg)'
+      ? 'translateX(-50%) translateY(-430px) rotate(-3deg)'
       : 'translateX(-50%) translateY(0px) rotate(0deg)',
-    config: { tension: 180, friction: 14 },
+    config: { tension: 180, friction: 15 },
   });
   return (
     <animated.div
@@ -1040,22 +1041,26 @@ function HorseTab(): React.ReactElement {
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={tabStyle}
-      className="absolute -bottom-[480px] left-1/2 flex w-[200px] origin-bottom flex-col items-center gap-[24px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="absolute -bottom-[490px] left-1/2 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
-      <div className="bg-paper-purple-dark/30 h-[338px] w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
+      <div className="relative h-[339px] w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
         <div
           aria-hidden="true"
           className="h-full w-full"
           style={{
             background: 'linear-gradient(160deg, #2b2b2b 0%, #4a4640 35%, #6b5f55 60%, #2a221c 100%)',
-            mixBlendMode: 'screen',
           }}
         />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 rounded-[4px]"
+          style={{ backgroundColor: 'rgba(251,246,234,0.2)' }}
+        />
       </div>
-      <p className="text-cream w-full -rotate-[0.5deg] text-center font-mono text-[12px] leading-[24px]">
-        &ldquo;Let a horse whisper in your ear and breathe on your heart.
+      <p className="font-mono w-full -rotate-[0.5deg] text-center text-[12px] leading-[24px] text-[#fbf6ea]">
+        “Let a horse whisper in your ear and breathe on your heart.
         <br />
-        You will never regret it.&rdquo;
+        You will never regret it.”
         <br />— Author Unknown
       </p>
     </animated.div>

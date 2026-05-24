@@ -78,3 +78,16 @@
     transform: rotate(-8deg) scale(1) translate(0, 0);
   }
 }
+
+/* Hero "Project 01" card — annotation: "Gently move this card up and down."
+   The rotation lives on an outer wrapper; this only drives the vertical bob. */
+@keyframes card-bob {
+  0%,
+  100% {
+    transform: translateY(-6px);
+  }
+
+  50% {
+    transform: translateY(6px);
+  }
+}
