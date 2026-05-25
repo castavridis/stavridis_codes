@@ -267,7 +267,7 @@ export default function LandingPage({ onCardClick }: LandingPageProps = {}): Rea
 const BRUSH_MIN = 16;
 const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
-const BRUSH_DEFAULT = 160;
+const BRUSH_DEFAULT = 80;
 
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
@@ -434,7 +434,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
-      setBrushCursor({ x, y, visible: inside });
+      setBrushCursor({ x: x - 36, y, visible: inside });
     };
     const onMove = (e: PointerEvent) => {
       pending = e;
@@ -628,7 +628,7 @@ function PigmentSelector({
   const activeColor = PIGMENTS[active].color;
   return (
     <div
-      className="absolute top-[173px] right-[8px] z-30 flex w-[22px] flex-col items-center gap-[10px] rounded-[12px] py-[8px] backdrop-blur-[2px]"
+      className="absolute top-[173px] right-[24px] z-30 flex w-[22px] flex-col items-center gap-[10px] rounded-[12px] py-[8px] backdrop-blur-[2px]"
       style={{ backgroundColor: `${CREAM}` }}
     >
       <button
@@ -860,7 +860,7 @@ function CreativeToolsSection(): React.ReactElement {
     <section className="w-full" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-[1280px] px-[24px]">
         {/* AI-Native Creative Tools */}
-        <div className="px-[144px] pt-[144px]">
+        <div className="pt-[144px]">
           <p className="font-display text-center text-[24px] leading-[24px] text-[#fbf6ea]/80">
             AI-Native Creative Tools
           </p>
