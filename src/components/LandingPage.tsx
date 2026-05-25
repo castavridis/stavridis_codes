@@ -454,16 +454,26 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
           <div ref={heroCanvasRef} className="absolute inset-0" aria-hidden="true" />
         </div>
 
-        {/* Connecting gradient — fades the wash band into the dark page. */}
+        {/* Connecting Gradient — fades the wash band into the dark page using
+            the two stacked layers from the Figma, both bottom-aligned to the
+            437px wash band (so they end exactly where the section's #251900
+            background takes over). */}
+        {/* Radial Gradient (583:21712) — a dark pool at the bottom-centre:
+            an ellipse (rx 854 / ry 253) of #251900 fading to transparent. */}
         <div
           className="pointer-events-none absolute inset-x-0 top-[97px] h-[340px]"
           style={{
-            background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, rgba(37,25,0,0) 28%, ${DARK} 100%)`,
+            background:
+              'radial-gradient(ellipse 854px 253px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)',
           }}
         />
+        {/* Linear Gradient (583:21713) — transparent → #251900, top to bottom,
+            layered over the radial. */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[200px]"
-          style={{ backgroundColor: DARK }}
+          className="pointer-events-none absolute inset-x-0 top-[146px] h-[291px]"
+          style={{
+            background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, ${DARK} 100%)`,
+          }}
         />
 
         {/* Radial gradient to improve blurb legibility. */}
