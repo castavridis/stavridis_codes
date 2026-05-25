@@ -427,24 +427,15 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   }, []);
 
   // Annotation (Project cards): the brush/palette/pigment selector update to
-  // the project's hue, and clicking deluges the wash under the cursor.
+  // the project's hue. The deluge happens on the card's own canvas (see
+  // HeroProjectCard); here we just hand the pigment off and notify the host
+  // wrapper, which runs the page transition for whichever card links out.
   const handleCardClick = useCallback(
     (project: HeroProject) => {
       setActivePigment(project.pigment);
-      const wash = heroWashRef.current;
-      if (wash) {
-        const x = brushCursor.visible ? brushCursor.x : 640;
-        const y = brushCursor.visible ? brushCursor.y : 200;
-        wash.pigment(project.pigment as PigmentOption);
-        wash.splash([{ x, y, velocity: 70 }], 'deluge', {
-          radius: 360,
-          pressure: 90,
-          liftRate: 0.96,
-        });
-      }
       onCardClick?.(project.id);
     },
-    [brushCursor, onCardClick]
+    [onCardClick]
   );
 
   const activeColor = PIGMENTS[activePigment].color;
@@ -765,6 +756,30 @@ function HeroProjectCard({
   const cta = project.cta;
   const ctaColor = PIGMENTS[project.pigment].color;
 
+  // On click, deluge this card's own canvas from the cursor's position, then
+  // hand off to the parent (pigment update + page transition for linked cards).
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const host = hostRef.current;
+      const wash = washRef.current;
+      if (host && wash) {
+        const rect = host.getBoundingClientRect();
+        // Keyboard-activated clicks report (0,0); fall back to the card centre.
+        const fromKeyboard = e.detail === 0;
+        const x = fromKeyboard ? rect.width / 2 : e.clientX - rect.left;
+        const y = fromKeyboard ? rect.height / 2 : e.clientY - rect.top;
+        wash.pigment(project.pigment as PigmentOption);
+        wash.splash([{ x, y, velocity: 64 }], 'deluge', {
+          radius: rect.width * 0.7,
+          pressure: 92,
+          liftRate: 0.96,
+        });
+      }
+      onClick();
+    },
+    [project.pigment, onClick]
+  );
+
   return (
     <div
       className="absolute"
@@ -778,7 +793,7 @@ function HeroProjectCard({
       <div className={project.bob ? 'animate-[card-bob_6s_ease-in-out_infinite]' : undefined}>
         <button
           type="button"
-          onClick={onClick}
+          onClick={handleClick}
           onMouseEnter={onActivate}
           onFocus={onActivate}
           className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"

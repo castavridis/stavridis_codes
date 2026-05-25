@@ -2,13 +2,13 @@ import { Link } from 'wouter';
 import author from '../../../content/author.json';
 import { routes } from '../../routes.js';
 import { formatPostDate, posts } from './posts.js';
-import LandingPage from '../../components/LandingPage';
+import PageTransitionWrapper from '../../components/PageTransitionWrapper';
 
 export function BlogIndex() {
   return (
     <>
       <div className="relative left-1/2 w-screen -translate-x-1/2">
-        <LandingPage />
+        <PageTransitionWrapper />
       </div>
       <section className="border-b border-gray-200 pb-12">
         <p className="text-primary-700 mb-3 text-xs font-bold tracking-[0.12em] uppercase">
