@@ -6,21 +6,29 @@ import { formatPostDate, getPost, type Post } from './posts.js';
 
 const postComponentPromises = new Map<string, Promise<ComponentType>>();
 
-export function BlogPost({ slug }: { slug: string }) {
+// `onBack`, when provided, intercepts the "Back to posts" link so the host can
+// run a page transition before navigating home (see useRadialReveal).
+export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const post = getPost(slug);
 
   if (!post) {
     return <BlogPostNotFound />;
   }
 
+  const backClassName =
+    'text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 mb-8 inline-flex cursor-pointer text-sm font-medium underline';
+
   return (
     <article>
-      <Link
-        className="text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 mb-8 inline-flex text-sm font-medium underline"
-        href={routes.home.href()}
-      >
-        Back to posts
-      </Link>
+      {onBack ? (
+        <button type="button" className={backClassName} onClick={onBack}>
+          Back to posts
+        </button>
+      ) : (
+        <Link className={backClassName} href={routes.home.href()}>
+          Back to posts
+        </Link>
+      )}
       <header className="border-b border-gray-200 pb-8">
         <time className="mb-2 block text-sm text-gray-500" dateTime={post.date}>
           {formatPostDate(post.date)}
