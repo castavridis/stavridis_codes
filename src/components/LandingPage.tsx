@@ -54,17 +54,19 @@ const LOCATIONS: LocationInfo[] = [
 ];
 
 type WeatherKey = 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snowy';
-const WEATHER_PRESETS: Record<WeatherKey, { label: string; background: string; animation: string }> =
-  {
-    sunny: { label: 'sunny', background: 'dawn', animation: 'sunny' },
-    cloudy: { label: 'cloudy', background: 'tornado', animation: 'partlyCloudy' },
-    rainy: { label: 'rainy', background: 'dusk', animation: 'rainy' },
-    stormy: { label: 'stormy', background: 'storm', animation: 'thunderstorm' },
-    snowy: { label: 'snowy', background: 'night', animation: 'snowing' },
-  };
+// Weather drives the atmospheric *animation* overlay only. The *background*
+// time-wash is chosen by the local day phase (see DayPhase below), per the
+// Time Selector annotation.
+const WEATHER_PRESETS: Record<WeatherKey, { label: string; animation: string }> = {
+  sunny: { label: 'sunny', animation: 'sunny' },
+  cloudy: { label: 'cloudy', animation: 'partlyCloudy' },
+  rainy: { label: 'rainy', animation: 'rainy' },
+  stormy: { label: 'stormy', animation: 'thunderstorm' },
+  snowy: { label: 'snowy', animation: 'snowing' },
+};
 const WEATHER_ORDER: WeatherKey[] = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy'];
 
-// Map an Open-Meteo WMO weather code to one of our visualization presets.
+// Map an Open-Meteo WMO weather code to one of our animation presets.
 function weatherFromCode(code: number): WeatherKey {
   if (code === 0) return 'sunny';
   if (code <= 48) return 'cloudy';
@@ -72,6 +74,50 @@ function weatherFromCode(code: number): WeatherKey {
   if (code === 85 || code === 86) return 'snowy';
   if (code >= 95) return 'stormy';
   return 'rainy';
+}
+
+// Annotation (Time Selector): the background visualization tracks the selected
+// location's local day phase, derived from Open-Meteo's sunrise/sunset. Each
+// phase maps to one of the Washes time-wash backgrounds (TIME_WASHES).
+type DayPhase = 'sunrise' | 'day' | 'sunset' | 'night';
+const DAY_PHASE_BACKGROUND: Record<DayPhase, string> = {
+  sunrise: 'dawn',
+  day: 'day',
+  sunset: 'sunset',
+  night: 'night',
+};
+
+type SunTimes = { sunriseMin: number; sunsetMin: number };
+// Generic fallback (≈6:00 sunrise / ≈19:30 sunset) when the lookup is offline.
+const FALLBACK_SUN: SunTimes = { sunriseMin: 6 * 60, sunsetMin: 19 * 60 + 30 };
+
+// Minutes-since-midnight from an Open-Meteo local ISO time ("...THH:MM").
+function isoToMinutes(iso: string | undefined): number | null {
+  if (!iso) return null;
+  const m = /T(\d{2}):(\d{2})/.exec(iso);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+}
+
+// Classify a local time (minutes since midnight) into a day phase, using a
+// transition window straddling sunrise and sunset.
+function dayPhaseFor(nowMin: number, sun: SunTimes): DayPhase {
+  const W = 75; // minutes on each side of sunrise/sunset
+  if (nowMin < sun.sunriseMin) return 'night';
+  if (nowMin < sun.sunriseMin + W) return 'sunrise';
+  if (nowMin < sun.sunsetMin - W) return 'day';
+  if (nowMin < sun.sunsetMin + W) return 'sunset';
+  return 'night';
+}
+
+// The location's current wall-clock minutes-since-midnight, given its UTC
+// offset (null → the viewer's own local time).
+function localMinutes(offsetSec: number | null): number {
+  if (offsetSec == null) {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  }
+  const d = new Date(Date.now() + offsetSec * 1000);
+  return d.getUTCHours() * 60 + d.getUTCMinutes();
 }
 
 // ---------------------------------------------------------------------------
@@ -234,6 +280,10 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   // in which case we fall back to the viewer's own local time.
   const [tzOffsetSec, setTzOffsetSec] = useState<number | null>(null);
   const [time, setTime] = useState(() => formatClock(null));
+  // Sunrise/sunset for the selected location and the resulting day phase, which
+  // selects the background visualization.
+  const [sun, setSun] = useState<SunTimes>(FALLBACK_SUN);
+  const [dayPhase, setDayPhase] = useState<DayPhase>('day');
   const [canvasVisible, setCanvasVisible] = useState(true);
 
   // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
@@ -248,22 +298,24 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
 
   const location = LOCATIONS[locationIdx];
 
-  // Annotation (Weather selector): "Use Open Meteo API to pull in data." We
-  // fetch the current temperature + weather code and translate the code into
-  // one of our visualization presets. Falls back to the location's defaults
-  // if the network is unavailable.
+  // Annotation (Weather + Time selectors): "Use Open Meteo API to pull in
+  // data." We fetch the current temperature + weather code (→ animation), the
+  // timezone offset (→ clock), and today's sunrise/sunset (→ day phase, which
+  // drives the background). Falls back to the location's defaults if offline.
   const refreshWeather = useCallback(async (loc: LocationInfo) => {
     try {
       // `timezone=auto` makes Open-Meteo resolve the location's timezone and
-      // return its DST-correct `utc_offset_seconds`, which drives the clock.
+      // return its DST-correct `utc_offset_seconds` plus local sunrise/sunset.
       const url =
         `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
-        `&current=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=auto`;
+        `&current=temperature_2m,weather_code&daily=sunrise,sunset` +
+        `&temperature_unit=fahrenheit&timezone=auto`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as {
         utc_offset_seconds?: number;
         current?: { temperature_2m?: number; weather_code?: number };
+        daily?: { sunrise?: string[]; sunset?: string[] };
       };
       const t = data.current?.temperature_2m;
       const code = data.current?.weather_code;
@@ -271,17 +323,22 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       setTemp(typeof t === 'number' ? Math.round(t) : loc.fallbackTemp);
       setWeather(typeof code === 'number' ? weatherFromCode(code) : loc.fallbackWeather);
       setTzOffsetSec(typeof off === 'number' ? off : loc.fallbackOffsetSec);
+      const sr = isoToMinutes(data.daily?.sunrise?.[0]);
+      const ss = isoToMinutes(data.daily?.sunset?.[0]);
+      if (sr != null && ss != null) setSun({ sunriseMin: sr, sunsetMin: ss });
     } catch {
       setTemp(loc.fallbackTemp);
       setWeather(loc.fallbackWeather);
       setTzOffsetSec(loc.fallbackOffsetSec);
+      setSun(FALLBACK_SUN);
     }
   }, []);
 
   // Bootstrap the hero wash. Annotation (Visualization Evolution) pins the
   // Washes.js settings: paint load 0.15, water load 8.0, evaporation 4.0,
   // resolution (scale) 1.75, closed-gravity edges pulling down, fading
-  // painting with a 4s half-life. The "sunny weather preset" seeds it.
+  // painting with a 4s half-life. The background/animation are seeded by the
+  // day-phase effect once the first Open-Meteo lookup lands.
   useEffect(() => {
     const host = heroCanvasRef.current;
     if (!host) return;
@@ -305,8 +362,8 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     wash.fadeHalfLife(4000);
     wash.fadePainting(0.05);
     wash.pigment('rose' as PigmentOption);
-    wash.setBackground(WEATHER_PRESETS.sunny.background);
-    wash.setAnimation(WEATHER_PRESETS.sunny.animation);
+    // The background (day phase) + animation (weather) are applied by the
+    // effect below once state settles; see the [dayPhase, weather] effect.
 
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
     if (canvasEl) {
@@ -328,25 +385,30 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     };
   }, [refreshWeather]);
 
-  // Keep the live clock ticking, in the selected location's timezone.
+  // Keep the live clock + day phase in sync with the location's local time.
   useEffect(() => {
-    setTime(formatClock(tzOffsetSec));
-    const id = window.setInterval(() => setTime(formatClock(tzOffsetSec)), 30_000);
+    const update = () => {
+      setTime(formatClock(tzOffsetSec));
+      setDayPhase(dayPhaseFor(localMinutes(tzOffsetSec), sun));
+    };
+    update();
+    const id = window.setInterval(update, 30_000);
     return () => window.clearInterval(id);
-  }, [tzOffsetSec]);
+  }, [tzOffsetSec, sun]);
 
   // Re-apply pigment whenever it changes (selector, or a card hand-off).
   useEffect(() => {
     heroWashRef.current?.pigment(activePigment as PigmentOption);
   }, [activePigment]);
 
-  // Re-seed the visualization when the weather preset changes.
+  // Drive the visualization: the day phase picks the background time-wash; the
+  // weather picks the atmospheric animation.
   useEffect(() => {
     const wash = heroWashRef.current;
     if (!wash) return;
-    wash.setBackground(WEATHER_PRESETS[weather].background);
+    wash.setBackground(DAY_PHASE_BACKGROUND[dayPhase]);
     wash.setAnimation(WEATHER_PRESETS[weather].animation);
-  }, [weather]);
+  }, [dayPhase, weather]);
 
   // Brush size ↔ Washes sync. The visible indicator reads the same value.
   useEffect(() => {
@@ -398,20 +460,15 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   }, []);
 
   // Annotation (Location selector): clicking resets the canvas — fade it out,
-  // re-seed under the new weather, then fade back in.
+  // then fade back in. The new location's Open-Meteo lookup updates the
+  // timezone, weather, and sunrise/sunset, which re-seed the visualization
+  // (day-phase background + weather animation) via the effects above.
   const cycleLocation = useCallback(() => {
     setCanvasVisible(false);
     const nextIdx = (locationIdx + 1) % LOCATIONS.length;
     window.setTimeout(() => {
       setLocationIdx(nextIdx);
       void refreshWeather(LOCATIONS[nextIdx]);
-      const wash = heroWashRef.current;
-      if (wash) {
-        // Re-trigger the time-wash so the canvas visibly "resets".
-        const w = LOCATIONS[nextIdx].fallbackWeather;
-        wash.setBackground(WEATHER_PRESETS[w].background);
-        wash.setAnimation(WEATHER_PRESETS[w].animation);
-      }
       setCanvasVisible(true);
     }, 260);
   }, [locationIdx, refreshWeather]);
