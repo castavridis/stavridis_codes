@@ -193,31 +193,31 @@ type ProjectCard = {
   id: string;
   title: string;
   description: string;
-  pigment: PigmentKey;
-  accent: PigmentKey;
+  project_image: string;
+  washes_image: string;
 };
 
 const CREATIVE_CARDS: ProjectCard[] = [
   {
     id: 'creative-washes',
-    title: 'Washes',
-    description: 'a computational watercolor Javascript library',
-    pigment: 'rose',
-    accent: 'yellow',
+    title: 'Washes.js',
+    description: 'a computational watercolor library',
+    project_image: '/images/projects/Washes BG.png',
+    washes_image: '/images/projects/Washes Multiplier.png',
   },
   {
     id: 'creative-confetti',
     title: 'Confetti',
     description: 'a playful SVG sprinkle engine for celebratory UI',
-    pigment: 'yellow',
-    accent: 'blue',
+    project_image: '/images/projects/Confetti BG.png',
+    washes_image: '/images/projects/Confetti Multiplier.png',
   },
   {
     id: 'creative-facets',
     title: 'Facets',
     description: 'codify your taste with a compound AI tool',
-    pigment: 'blue',
-    accent: 'rose',
+    project_image: '/images/projects/Facets BG.png',
+    washes_image: '/images/projects/Facets Multiplier.png',
   },
 ];
 
@@ -226,15 +226,15 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
     id: 'experiment-sandy',
     title: 'Sandy',
     description: "A 3D visualization of Dave Long's esolang, Calder.",
-    pigment: 'rose',
-    accent: 'blue',
+    project_image: '/images/projects/Sandy BG.png',
+    washes_image: '/images/projects/Sandy Multiplier.png',
   },
   {
     id: 'experiment-rain-check',
     title: 'Rain Check',
     description: 'Thoughtful declines to events.',
-    pigment: 'blue',
-    accent: 'rose',
+    project_image: '/images/projects/Rain Check BG.png',
+    washes_image: '/images/projects/Rain Check Multiplier.png',
   },
 ];
 
@@ -916,10 +916,10 @@ function CreativeToolsSection(): React.ReactElement {
       <div className="mx-auto max-w-[1280px] px-[24px]">
         {/* AI-Native Creative Tools */}
         <div className="px-[144px] pt-[144px]">
-          <p className="font-mono text-[12px] leading-[24px] text-[#fbf6ea]/80">
+          <p className="font-display text-center text-[24px] leading-[24px] text-[#fbf6ea]/80">
             AI-Native Creative Tools
           </p>
-          <div className="mt-[24px] flex flex-wrap justify-center gap-[64px]">
+          <div className="mt-[36px] flex flex-wrap justify-center gap-[64px]">
             {CREATIVE_CARDS.map((card) => (
               <RevealCard key={card.id} width={272} height={182} card={card} scale={3} />
             ))}
@@ -927,9 +927,9 @@ function CreativeToolsSection(): React.ReactElement {
         </div>
 
         {/* UI Experiments */}
-        <div className="px-[192px] pt-[64px] pb-[120px]">
-          <p className="font-mono text-[12px] leading-[24px] text-[#fbf6ea]/80">UI Experiments</p>
-          <div className="mt-[24px] flex flex-wrap justify-center gap-[64px]">
+        <div className="pt-[144px] pb-[120px]">
+          <p className="font-display text-center text-[24px] leading-[24px] text-[#fbf6ea]/80">UI Experiments</p>
+          <div className="mt-[36px] flex flex-wrap justify-center gap-[64px]">
             {EXPERIMENT_CARDS.map((card) => (
               <RevealCard key={card.id} width={416} height={275} card={card} scale={2.5} />
             ))}
@@ -965,7 +965,6 @@ function RevealCard({
   scale: number;
 }): React.ReactElement {
   const { title, description, pigment, accent } = card;
-  const imageHostRef = useRef<HTMLDivElement | null>(null);
   const descRef = useRef<HTMLParagraphElement | null>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -979,58 +978,13 @@ function RevealCard({
     if (descRef.current) setHideDistance(descRef.current.offsetHeight + GAP_PX + PB_PX);
   }, [description]);
 
-  // The "original project image" — vivid live wash, stays visible.
-  useEffect(() => {
-    const host = imageHostRef.current;
-    if (!host) return;
-    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
-    if (wash.webglAvailable()) wash.webgl(false);
-    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
-    wash.gouacheMode('auto');
-    wash.scale(scale);
-    wash.paperWetness('damp');
-    wash.fadePainting(0);
-
-    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = `rgb(251,246,234)`;
-
-    const t1 = window.setTimeout(() => {
-      const rect = host.getBoundingClientRect();
-      wash.pigment(pigment as PigmentOption);
-      wash.splash([{ x: rect.width * 0.3, y: rect.height * 0.45, velocity: 55 }], 'deluge', {
-        radius: rect.width * 0.65,
-        pressure: 85,
-        liftRate: 0.97,
-      });
-    }, 60);
-    const t2 = window.setTimeout(() => {
-      const rect = host.getBoundingClientRect();
-      wash.pigment(accent as PigmentOption);
-      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.55, velocity: 50 }], 'deluge', {
-        radius: rect.width * 0.55,
-        pressure: 70,
-        liftRate: 0.97,
-      });
-    }, 360);
-
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      try {
-        wash.destroy();
-      } catch {
-        /* ignore */
-      }
-    };
-  }, [pigment, accent, scale]);
-
   // Mask layers fade out together on hover; text slides up.
   const maskStyle = useSpring({
-    opacity: hovered ? 0 : 1,
+    opacity: hovered ? 1 : 0,
     config: { tension: 200, friction: 26 },
   });
   const textStyle = useSpring({
-    transform: hovered ? 'translateY(0px)' : `translateY(${hideDistance}px)`,
+    transform: hovered ? `translateY(${hideDistance + PB_PX * 3.5 }px)` : `translateY(${hideDistance}px)`,
     config: { tension: 220, friction: 22 },
   });
 
@@ -1042,58 +996,47 @@ function RevealCard({
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={{ width, height }}
-      className="relative isolate overflow-hidden rounded-[12px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="relative isolate focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
-      {/* Original project image — vivid pigments, always visible underneath. */}
-      <div
-        ref={imageHostRef}
-        className="absolute inset-0 overflow-hidden rounded-[12px]"
-        style={{ backgroundColor: CREAM }}
-        aria-hidden="true"
-      />
+      {/* Container project image */}
+      <div className="absolute inset-0 overflow-hidden rounded-[12px]">
+        {/* Original project image — vivid pigments, always visible underneath. */}
+        <img
+          className="absolute inset-0"
+          src={card.project_image} />
 
-      {/* Mask stack — Washes Multiplied + Noise + Desaturation. Fades on hover. */}
-      <animated.div
-        className="pointer-events-none absolute inset-0 overflow-hidden rounded-[12px]"
-        style={{ opacity: maskStyle.opacity }}
-      >
-        {/* Washes Multiplied — accent wash multiplied over the image. */}
-        <div
-          className="absolute inset-0 opacity-70 mix-blend-multiply"
-          style={{
-            background: `radial-gradient(120% 120% at 35% 40%, ${PIGMENTS[accent].color} 0%, ${PIGMENTS[pigment].color} 70%)`,
-          }}
-        />
-        {/* Noise layer. */}
-        <div
-          className="absolute inset-0 mix-blend-overlay"
-          style={{
-            opacity: 0.4,
-            backgroundImage:
-              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.96 0 0 0 0 0.91 0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")",
-            backgroundSize: '160px 160px',
-          }}
-        />
+
         {/* Desaturation layer — cream wash with color blend. */}
         <div className="absolute inset-0 mix-blend-color" style={{ backgroundColor: CREAM }} />
-      </animated.div>
 
-      {/* Bottom gradient keeps the text legible over any pigment. */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[80px]"
-        style={{
-          background:
-            'linear-gradient(to top, #211e1f 0%, rgba(33,30,31,0.5) 50%, rgba(33,30,31,0) 100%)',
-        }}
-      />
+        {/* Washes Multiplied — accent wash multiplied over the image. */}
+        <img
+          src={card.washes_image}
+          className="absolute inset-0 opacity-70 mix-blend-multiply"
+        />
+      
+        {/* Mask stack — Washes Multiplied + Noise + Desaturation. Fades on hover. */}
+        <animated.div
+          className="pointer-events-none absolute inset-0"
+          style={{ opacity: maskStyle.opacity }}
+        >
 
+          {/* Original project image — vivid pigments, always visible underneath. */}
+          <img
+            className="absolute inset-0"
+            src={card.project_image} />
+      
+        </animated.div>
+      </div>
       {/* Text — slides up so the description comes into view on hover. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 px-[12px] pb-[12px]">
-        <animated.div style={textStyle} className="flex flex-col gap-[4px] text-[#fbf6ea]">
-          <h3 className="font-display text-[18px] leading-[24px]">{title}</h3>
-          <p ref={descRef} className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]">
+        <animated.div style={textStyle} className="flex flex-col text-[#fbf6ea]">
+          <h3 className="font-display text-[18px] leading-[36px]">{title}</h3>
+          <animated.p ref={descRef} className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]"
+            style={{ opacity: maskStyle.opacity }}
+            >
             {description}
-          </p>
+          </animated.p>
         </animated.div>
       </div>
     </article>
