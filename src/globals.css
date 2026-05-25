@@ -91,3 +91,16 @@
     transform: translateY(6px);
   }
 }
+
+/* Page transition — a soft cream light that expands from the cursor click
+   until it fills the viewport (see the Figma "Page Transition Mockups"). The
+   circle is positioned with its centre at the click point and scaled up. */
+@keyframes radial-reveal {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
