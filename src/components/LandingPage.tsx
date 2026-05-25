@@ -93,8 +93,6 @@ const DAY_PHASE_BACKGROUND: Record<DayPhase, string> = {
   sunset: 'sunset',
   night: 'night',
 };
-// Order the time selector cycles through when manually overriding the phase.
-const PHASE_ORDER: DayPhase[] = ['sunrise', 'day', 'sunset', 'night'];
 
 type SunTimes = { sunriseMin: number; sunsetMin: number };
 // Generic fallback (≈6:00 sunrise / ≈19:30 sunset) when the lookup is offline.
@@ -138,8 +136,6 @@ type PhaseForecast = {
   temp: number;
   weather: WeatherKey;
 };
-
-const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 function formatHourMinute(h: number, min: number): string {
   const ampm = h >= 12 ? 'PM' : 'AM';
@@ -371,8 +367,11 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   const [activePigment, setActivePigment] = useState<PigmentKey>('rose');
   const [locationIdx, setLocationIdx] = useState(0);
   const [weather, setWeather] = useState<WeatherKey>('sunny');
+  const [temp, setTemp] = useState(72);
   // The sunrise / mid-day / sunset forecast for the next 24h (Open-Meteo).
   const [forecast, setForecast] = useState<PhaseForecast[]>(() => fallbackForecast(LOCATIONS[0]));
+  // Which time the widget shows: 0 = now, 1..3 = forecast[sunrise|day|sunset].
+  const [slot, setSlot] = useState(0);
   // The clock shows the *selected location's* local time. `tzOffsetSec` is the
   // location's UTC offset (from Open-Meteo); null until the first fetch lands,
   // in which case we fall back to the viewer's own local time.
@@ -401,29 +400,32 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   const location = LOCATIONS[locationIdx];
 
   // Annotation (Weather + Time selectors): "Use Open Meteo API to pull in
-  // data." We fetch the current weather code (→ animation), the timezone offset
-  // (→ clock), today's sunrise/sunset (→ day phase + forecast times), and
-  // hourly temperature/weather (→ the 24h sunrise/mid-day/sunset forecast).
-  // Falls back to the location's defaults if offline.
+  // data." We fetch the current temperature + weather code (→ "now" line +
+  // animation), the timezone offset (→ clock), today's sunrise/sunset (→ day
+  // phase + forecast times), and hourly temperature/weather (→ the 24h
+  // sunrise/mid-day/sunset forecast). Falls back to defaults if offline.
   const refreshWeather = useCallback(async (loc: LocationInfo) => {
     try {
       // `timezone=auto` resolves the location's timezone (DST-correct offset +
       // local sunrise/sunset); `hourly` + `forecast_days=2` cover the next 24h.
       const url =
         `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}` +
-        `&current=weather_code&daily=sunrise,sunset&hourly=temperature_2m,weather_code` +
-        `&forecast_days=2&temperature_unit=fahrenheit&timezone=auto`;
+        `&current=temperature_2m,weather_code&daily=sunrise,sunset` +
+        `&hourly=temperature_2m,weather_code&forecast_days=2` +
+        `&temperature_unit=fahrenheit&timezone=auto`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as {
         utc_offset_seconds?: number;
-        current?: { weather_code?: number };
+        current?: { temperature_2m?: number; weather_code?: number };
         daily?: { sunrise?: string[]; sunset?: string[] };
         hourly?: { time?: string[]; temperature_2m?: number[]; weather_code?: number[] };
       };
+      const t = data.current?.temperature_2m;
       const code = data.current?.weather_code;
       const off =
         typeof data.utc_offset_seconds === 'number' ? data.utc_offset_seconds : loc.fallbackOffsetSec;
+      setTemp(typeof t === 'number' ? Math.round(t) : loc.fallbackTemp);
       setWeather(typeof code === 'number' ? weatherFromCode(code) : loc.fallbackWeather);
       setTzOffsetSec(off);
       const sr = isoToMinutes(data.daily?.sunrise?.[0]);
@@ -431,6 +433,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       if (sr != null && ss != null) setSun({ sunriseMin: sr, sunsetMin: ss });
       setForecast(buildForecast(data, off) ?? fallbackForecast(loc));
     } catch {
+      setTemp(loc.fallbackTemp);
       setWeather(loc.fallbackWeather);
       setTzOffsetSec(loc.fallbackOffsetSec);
       setSun(FALLBACK_SUN);
@@ -573,6 +576,9 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     window.setTimeout(() => {
       setLocationIdx(nextIdx);
       void refreshWeather(LOCATIONS[nextIdx]);
+      // Reset to the "now" slot (live phase) for the new location.
+      setSlot(0);
+      setPhaseOverride(null);
       setCanvasVisible(true);
     }, 260);
   }, [locationIdx, refreshWeather]);
@@ -581,14 +587,13 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     setWeather((prev) => WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length]);
   }, []);
 
-  // Manually cycle the day phase (sunrise → day → sunset → night), overriding
-  // the clock-derived phase. This drives the background visualization.
-  const cycleDayPhase = useCallback(() => {
-    setPhaseOverride((prev) => {
-      const cur = prev ?? autoPhase;
-      return PHASE_ORDER[(PHASE_ORDER.indexOf(cur) + 1) % PHASE_ORDER.length];
-    });
-  }, [autoPhase]);
+  // Cycle the displayed time slot (now → sunrise → mid-day → sunset) and point
+  // the background visualization at the selected slot's phase (now = live).
+  const cycleSlot = useCallback(() => {
+    const next = (slot + 1) % (forecast.length + 1);
+    setSlot(next);
+    setPhaseOverride(next === 0 ? null : forecast[next - 1].phase);
+  }, [slot, forecast]);
 
   const cyclePigment = useCallback(() => {
     setActivePigment(
@@ -689,12 +694,14 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       <div className="flex w-full justify-center" style={{ backgroundColor: DARK }}>
         <PresetWidget
           location={location}
+          slot={slot}
           time={time}
+          temp={temp}
           weather={weather}
           dayPhase={dayPhase}
           forecast={forecast}
           onLocation={cycleLocation}
-          onTime={cycleDayPhase}
+          onTime={cycleSlot}
           onWeather={cycleWeather}
         />
       </div>
@@ -824,7 +831,9 @@ function DisplayBug({ children }: { children: React.ReactNode }): React.ReactEle
 
 function PresetWidget({
   location,
+  slot,
   time,
+  temp,
   weather,
   dayPhase,
   forecast,
@@ -833,7 +842,9 @@ function PresetWidget({
   onWeather,
 }: {
   location: LocationInfo;
+  slot: number;
   time: string;
+  temp: number;
   weather: WeatherKey;
   dayPhase: DayPhase;
   forecast: PhaseForecast[];
@@ -841,6 +852,8 @@ function PresetWidget({
   onTime: () => void;
   onWeather: () => void;
 }): React.ReactElement {
+  // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
+  const f = slot > 0 ? forecast[slot - 1] : null;
   return (
     <div className="font-mono flex flex-col items-center gap-[6px] pt-[12px] text-[12px] leading-[24px] opacity-60">
       <div className="flex items-center gap-[6px]">
@@ -854,34 +867,37 @@ function PresetWidget({
         <span className="mix-blend-difference text-[#fbf6ea]">{location.phrase}</span>
       </div>
 
-      {/* 24h forecast — predicted conditions at each day phase (read-only). */}
-      {forecast.map((f) => (
-        <div key={f.phase} className="flex items-center gap-[6px]">
+      {f ? (
+        <div className="flex items-center gap-[6px]">
           <span className="mix-blend-difference text-[#fbf6ea]">At</span>
-          <DisplayBug>{`${f.time} (${f.label})`}</DisplayBug>
+          <PresetBug
+            background="#4f3d1b"
+            onClick={onTime}
+            label={`Show the next time (now showing ${f.label})`}
+          >
+            {`${f.time} (${f.label.toLowerCase()})`}
+          </PresetBug>
           <span className="mix-blend-difference text-[#fbf6ea]">it will be {f.temp}°F and</span>
-          <DisplayBug>{cap(weatherLabel(f.weather, f.phase))}</DisplayBug>
+          <DisplayBug>{weatherLabel(f.weather, f.phase)}</DisplayBug>
+          <span className="mix-blend-difference text-[#fbf6ea]">.</span>
         </div>
-      ))}
-
-      <div className="flex items-center gap-[6px]">
-        <span className="mix-blend-difference text-[#fbf6ea]">It’s currently</span>
-        <PresetBug
-          background="#4f3d1b"
-          onClick={onTime}
-          label={`Cycle day phase (currently ${dayPhase})`}
-        >
-          {time}
-        </PresetBug>
-        <span className="mix-blend-difference text-[#fbf6ea]">and</span>
-        <PresetBug
-          background="#4f3d1b"
-          onClick={onWeather}
-          label={`Change weather (currently ${cap(weatherLabel(weather, dayPhase))})`}
-        >
-          {cap(weatherLabel(weather, dayPhase))}
-        </PresetBug>
-      </div>
+      ) : (
+        <div className="flex items-center gap-[6px]">
+          <span className="mix-blend-difference text-[#fbf6ea]">It’s currently</span>
+          <PresetBug background="#4f3d1b" onClick={onTime} label="Show the next forecast time">
+            {time}
+          </PresetBug>
+          <span className="mix-blend-difference text-[#fbf6ea]">, {temp}°F and</span>
+          <PresetBug
+            background="#4f3d1b"
+            onClick={onWeather}
+            label={`Change weather (currently ${weatherLabel(weather, dayPhase)})`}
+          >
+            {weatherLabel(weather, dayPhase)}
+          </PresetBug>
+          <span className="mix-blend-difference text-[#fbf6ea]">.</span>
+        </div>
+      )}
     </div>
   );
 }
