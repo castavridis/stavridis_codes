@@ -219,7 +219,7 @@ export default function LandingPage({ onCardClick }: LandingPageProps = {}): Rea
 const BRUSH_MIN = 16;
 const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
-const BRUSH_DEFAULT = 64; // matches the 64px Brush Indicator in the Figma
+const BRUSH_DEFAULT = 160;
 
 function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
@@ -298,10 +298,10 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     wash.waterLoad(8.0);
     wash.evaporation(4.0);
     wash.brushSize(BRUSH_DEFAULT);
-    wash.edgeMode('closed-gravity');
+    wash.edgeMode('gravity');
     wash.gravityDirection('down');
-    wash.gravityStrength(0.2);
-    wash.edgeFade(24);
+    wash.gravityStrength(0.1);
+    // wash.edgeFade(24);
     wash.fadeHalfLife(4000);
     wash.fadePainting(0.05);
     wash.pigment('rose' as PigmentOption);
@@ -949,7 +949,7 @@ function RevealCard({
     const t2 = window.setTimeout(() => {
       const rect = host.getBoundingClientRect();
       wash.pigment(accent as PigmentOption);
-      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.55, velocity: 50 }], 'splash', {
+      wash.splash([{ x: rect.width * 0.75, y: rect.height * 0.55, velocity: 50 }], 'deluge', {
         radius: rect.width * 0.55,
         pressure: 70,
         liftRate: 0.97,
