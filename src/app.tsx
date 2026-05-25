@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
 import { routes } from './routes.js';
+import { useRadialReveal } from './components/useRadialReveal';
 
 const BlogIndex = lazy(() =>
   import('./features/blog/blog-index.js').then((module) => ({ default: module.BlogIndex }))
@@ -20,11 +21,23 @@ export function App() {
       <Suspense fallback={<RoutePending />}>
         <Switch>
           <Route path={routes.home.path} component={BlogIndex} />
-          <Route path={routes.blogPost.path}>{(params) => <BlogPost slug={params.slug} />}</Route>
+          <Route path={routes.blogPost.path}>{(params) => <BlogPostRoute slug={params.slug} />}</Route>
           <Route component={BlogPostNotFound} />
         </Switch>
       </Suspense>
     </main>
+  );
+}
+
+// Wraps the post in the same cream radial transition the landing page uses, so
+// "Back to posts" fades home from the cursor instead of cutting instantly.
+function BlogPostRoute({ slug }: { slug: string }) {
+  const { start, overlay } = useRadialReveal();
+  return (
+    <>
+      <BlogPost slug={slug} onBack={() => start(routes.home.href())} />
+      {overlay}
+    </>
   );
 }
 
