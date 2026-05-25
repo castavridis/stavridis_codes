@@ -76,6 +76,13 @@ function weatherFromCode(code: number): WeatherKey {
   return 'rainy';
 }
 
+// The widget label for the current weather. After sunset (night phase) a clear
+// sky reads as "clear" rather than "sunny".
+function weatherLabel(weather: WeatherKey, dayPhase: DayPhase): string {
+  if (weather === 'sunny' && dayPhase === 'night') return 'clear';
+  return WEATHER_PRESETS[weather].label;
+}
+
 // Annotation (Time Selector): the background visualization tracks the selected
 // location's local day phase, derived from Open-Meteo's sunrise/sunset. Each
 // phase maps to one of the Washes time-wash backgrounds (TIME_WASHES).
@@ -86,6 +93,8 @@ const DAY_PHASE_BACKGROUND: Record<DayPhase, string> = {
   sunset: 'sunset',
   night: 'night',
 };
+// Order the time selector cycles through when manually overriding the phase.
+const PHASE_ORDER: DayPhase[] = ['sunrise', 'day', 'sunset', 'night'];
 
 type SunTimes = { sunriseMin: number; sunsetMin: number };
 // Generic fallback (≈6:00 sunrise / ≈19:30 sunset) when the lookup is offline.
@@ -285,7 +294,11 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   // Sunrise/sunset for the selected location and the resulting day phase, which
   // selects the background visualization.
   const [sun, setSun] = useState<SunTimes>(FALLBACK_SUN);
-  const [dayPhase, setDayPhase] = useState<DayPhase>('day');
+  // The day phase that drives the background. `autoPhase` tracks the clock;
+  // cycling the time selector sets `phaseOverride` (null = follow the clock).
+  const [autoPhase, setAutoPhase] = useState<DayPhase>('day');
+  const [phaseOverride, setPhaseOverride] = useState<DayPhase | null>(null);
+  const dayPhase = phaseOverride ?? autoPhase;
   const [canvasVisible, setCanvasVisible] = useState(true);
 
   // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
@@ -391,7 +404,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   useEffect(() => {
     const update = () => {
       setTime(formatClock(tzOffsetSec));
-      setDayPhase(dayPhaseFor(localMinutes(tzOffsetSec), sun));
+      setAutoPhase(dayPhaseFor(localMinutes(tzOffsetSec), sun));
     };
     update();
     const id = window.setInterval(update, 30_000);
@@ -478,6 +491,15 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   const cycleWeather = useCallback(() => {
     setWeather((prev) => WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length]);
   }, []);
+
+  // Manually cycle the day phase (sunrise → day → sunset → night), overriding
+  // the clock-derived phase. This drives the background visualization.
+  const cycleDayPhase = useCallback(() => {
+    setPhaseOverride((prev) => {
+      const cur = prev ?? autoPhase;
+      return PHASE_ORDER[(PHASE_ORDER.indexOf(cur) + 1) % PHASE_ORDER.length];
+    });
+  }, [autoPhase]);
 
   const cyclePigment = useCallback(() => {
     setActivePigment(
@@ -581,7 +603,9 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
           time={time}
           temperature={temp}
           weather={weather}
+          dayPhase={dayPhase}
           onLocation={cycleLocation}
+          onTime={cycleDayPhase}
           onWeather={cycleWeather}
         />
       </div>
@@ -705,16 +729,21 @@ function PresetWidget({
   time,
   temperature,
   weather,
+  dayPhase,
   onLocation,
+  onTime,
   onWeather,
 }: {
   location: LocationInfo;
   time: string;
   temperature: number;
   weather: WeatherKey;
+  dayPhase: DayPhase;
   onLocation: () => void;
+  onTime: () => void;
   onWeather: () => void;
 }): React.ReactElement {
+  const label = weatherLabel(weather, dayPhase);
   return (
     <div className="font-mono flex flex-col items-center gap-[6px] pt-[12px] text-[12px] leading-[24px] opacity-60">
       <div className="flex items-center gap-[6px]">
@@ -729,14 +758,20 @@ function PresetWidget({
       </div>
       <div className="flex items-center gap-[6px]">
         <span className="mix-blend-difference text-[#fbf6ea]">It’s currently</span>
-        <span className="rounded-[4px] bg-[#4f3d1b] px-[8px] text-[#fbf6ea]">{time}</span>
+        <PresetBug
+          background="#4f3d1b"
+          onClick={onTime}
+          label={`Cycle day phase (currently ${dayPhase})`}
+        >
+          {time}
+        </PresetBug>
         <span className="mix-blend-difference text-[#fbf6ea]">{temperature}°F and</span>
         <PresetBug
           background="#4f3d1b"
           onClick={onWeather}
-          label={`Change weather (currently ${WEATHER_PRESETS[weather].label})`}
+          label={`Change weather (currently ${label})`}
         >
-          {WEATHER_PRESETS[weather].label}
+          {label}
         </PresetBug>
         <span className="mix-blend-difference text-[#fbf6ea]">.</span>
       </div>
