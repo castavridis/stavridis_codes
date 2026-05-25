@@ -126,12 +126,11 @@ function localMinutes(offsetSec: number | null): number {
 // brush-stroke SVG traced onto each.
 // ---------------------------------------------------------------------------
 
-const HERO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-109.061 -9 2504.061 746.156"><g fill="none" stroke="#000" stroke-width="60" stroke-linecap="round"><path d="M-109.06 632.23C1.953 570.516 103.113 491.159 217.88 356.08 296 263.871 338 158.583 340 85.962 341 31.964 314.67-9 266-9c-54 0-88 40.964-109 134.995-23 103.341-40 221.921-83 602.161"/><path d="M78.215 690.995C100.229 497.473 184 356.156 291 356.156c64 0 104.675 51 93.125 124-6.501 43-14.038 87-22.819 138-10.235 64 19.02 114 107.656 114 129.263 0 270.282-71.834 342.45-183.094C836 511.156 846 477.156 847 444.156c1-60-33-105-93-105-76 0-134 86-134 196 0 118 64 201 199.918 201 184.806 0 389.507-221.848 483.563-469.423C1330.037 196.83 1340 131.921 1340 86.562c0-53.782-17-95.08-65-95.08-47 0-78 36.496-106 94.12-32.806 66.832-57.072 163.228-67 272.194-25 273.42 31 374.36 164.152 374.36 161.456 0 340.963-224.93 432.62-466.189C1725.037 196.83 1735 131.921 1735 86.562c0-53.782-17-95.08-65-95.08-47 0-78 36.496-106 94.12-32.806 66.832-57.072 163.228-67 272.194-25 273.42 31 374.36 149.906 374.36 118.718 0 183.209-103.485 221.873-213.371C1907 410.156 1954 343.156 2052 343.156c81 0 145 60 145 173 0 125-81.1 219-183.582 220-90.184 1-149.418-72-143.418-182 7-122 81-211 178-211 56 0 103.036 24.893 140 52 100.214 73.107 177.429 27.929 207-44.357"/></g></svg>`;
-
 type HeroProject = {
   id: string;
   label: string;
   title: string;
+  image: string;
   pigment: PigmentKey;
   cta: { text: string; variant: 'filled' | 'outline' };
   // Position inside the hero (Figma coordinates, hero-relative).
@@ -149,6 +148,7 @@ const HERO_PROJECTS: HeroProject[] = [
     id: 'proj-careSignal-ai',
     label: 'Project 02',
     title: 'Expressing the value\nof CareSignal AI',
+    image: '/images/CareSignal AI Thumb.png',
     pigment: 'blue',
     cta: { text: 'View Project', variant: 'filled' },
     left: 198,
@@ -161,6 +161,7 @@ const HERO_PROJECTS: HeroProject[] = [
     id: 'proj-sol-lewitt',
     label: 'Project 03',
     title: 'Using ML to Conserve\nthe work of Sol LeWitt',
+    image: '/images/Sol LeWitt Thumb.png',
     pigment: 'rose',
     cta: { text: 'Coming Soon', variant: 'outline' },
     left: 807,
@@ -173,6 +174,7 @@ const HERO_PROJECTS: HeroProject[] = [
     id: 'proj-careSignal-ds',
     label: 'Project 01',
     title: 'Building CareSignal’s\nDesign System',
+    image: '/images/CareSignal Design System Thumb.png',
     pigment: 'yellow',
     cta: { text: 'View Project', variant: 'filled' },
     left: 504,
@@ -627,7 +629,7 @@ function PigmentSelector({
   return (
     <div
       className="absolute top-[173px] right-[8px] z-30 flex w-[22px] flex-col items-center gap-[10px] rounded-[12px] py-[8px] backdrop-blur-[2px]"
-      style={{ backgroundColor: `${activeColor}59` }}
+      style={{ backgroundColor: `${CREAM}` }}
     >
       <button
         type="button"
@@ -637,8 +639,8 @@ function PigmentSelector({
         style={{ color: activeColor }}
       >
         {/* Paint brush glyph (heroicons "paint-brush"). */}
-        <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px]" aria-hidden="true">
-          <path d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128zM18.42 5.547a4.498 4.498 0 0 0-3.187 2.137l-2.388 4.005a15.79 15.79 0 0 1 3.467 2.067l3.087-2.667a4.5 4.5 0 0 0-.98-5.542z" />
+        <svg fill="currentColor" width="13" height="12" viewBox="0 0 13 12" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0.133484 10.3655C0.0280151 10.2209 -0.0149536 10.094 0.00457764 9.9846C0.0280151 9.87523 0.0866089 9.79124 0.180359 9.73265C0.278015 9.66624 0.381531 9.63304 0.490906 9.63304C0.600281 9.63304 0.721375 9.62523 0.854187 9.6096C0.990906 9.59398 1.14325 9.52562 1.31122 9.40452C1.45966 9.29905 1.56122 9.16624 1.61591 9.00608C1.67059 8.84202 1.71747 8.66429 1.75653 8.47288C1.7995 8.28148 1.87177 8.08812 1.97333 7.8928C2.07489 7.69749 2.24677 7.5139 2.48895 7.34202C2.7702 7.1428 3.08661 7.03929 3.43817 7.03148C3.78973 7.02366 4.13348 7.10569 4.46942 7.27757C4.80536 7.44944 5.09052 7.7053 5.32489 8.04515C5.59052 8.42015 5.73895 8.80491 5.7702 9.19944C5.80145 9.59398 5.72333 9.97093 5.53583 10.3303C5.34833 10.6936 5.05536 11.0139 4.65692 11.2912C4.31317 11.5295 3.93036 11.6819 3.50848 11.7483C3.09052 11.8147 2.66864 11.803 2.24286 11.7131C1.81708 11.6272 1.41864 11.469 1.04755 11.2385C0.680359 11.008 0.375671 10.717 0.133484 10.3655ZM5.54755 7.17796C5.33661 6.96312 5.09833 6.78343 4.8327 6.6389C4.57098 6.49046 4.32489 6.39671 4.09442 6.35765C4.13348 6.12718 4.2077 5.91038 4.31708 5.70726C4.43036 5.50413 4.58661 5.30296 4.78583 5.10374C4.81708 5.07249 4.84833 5.04124 4.87958 5.00999C4.91473 4.97874 4.94989 4.94749 4.98505 4.91624C5.3327 4.98265 5.66278 5.09983 5.97528 5.2678C6.28778 5.43577 6.56903 5.64671 6.81903 5.90062C7.07294 6.15062 7.28583 6.43382 7.4577 6.75023C7.62958 7.06273 7.74677 7.39476 7.80927 7.74632C7.78192 7.78148 7.75262 7.81468 7.72137 7.84593C7.69012 7.87718 7.65887 7.90843 7.62762 7.93968C7.42841 8.1389 7.22919 8.29515 7.02997 8.40843C6.83075 8.52171 6.612 8.59788 6.37372 8.63694C6.33466 8.40648 6.24091 8.16038 6.09247 7.89866C5.94403 7.63304 5.76239 7.3928 5.54755 7.17796ZM11.0729 0.211163C11.2604 0.0744441 11.4499 0.00413161 11.6413 0.000225361C11.8366 -0.00368089 12.0163 0.0431941 12.1804 0.14085C12.3483 0.238507 12.4811 0.369366 12.5788 0.533428C12.6765 0.697491 12.7253 0.879132 12.7253 1.07835C12.7253 1.27366 12.6569 1.46702 12.5202 1.65843C12.4811 1.70921 12.3913 1.83421 12.2507 2.03343C12.114 2.23265 11.9382 2.4846 11.7233 2.78929C11.5085 3.09398 11.2643 3.43187 10.9909 3.80296C10.7214 4.17405 10.4343 4.55882 10.1296 4.95726C9.8288 5.35179 9.52216 5.74241 9.20966 6.12913C8.90106 6.51585 8.59833 6.87718 8.30145 7.21312C8.09052 6.54124 7.73895 5.96116 7.24677 5.47288C6.75848 4.9846 6.18231 4.63499 5.51825 4.42405C5.85419 4.13108 6.21552 3.8303 6.60223 3.52171C6.98895 3.20921 7.38153 2.90257 7.77997 2.60179C8.17841 2.2971 8.56317 2.00999 8.93427 1.74046C9.30536 1.46702 9.6413 1.22288 9.94208 1.00804C10.2468 0.793194 10.4987 0.61546 10.6979 0.474835C10.8972 0.33421 11.0222 0.246319 11.0729 0.211163Z" fill="currentColor"/>
         </svg>
       </button>
       {PIGMENT_ORDER.map((key) => (
@@ -773,80 +775,12 @@ function PresetBug({
 
 function HeroProjectCard({
   project,
-  onClick,
-  onActivate,
 }: {
   project: HeroProject;
-  onClick: () => void;
-  onActivate: () => void;
 }): React.ReactElement {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  const washRef = useRef<WashesInstance | null>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-
-    const wash = Washes.create(host, { cursorPreview: false, pointer: false });
-    washRef.current = wash;
-
-    if (wash.webglAvailable()) wash.webgl(false);
-    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
-    wash.gouacheMode('auto');
-    wash.scale(4);
-    wash.paperWetness('boneDry');
-    wash.paintLoad(3);
-    wash.waterLoad(0.2);
-    wash.pigment(project.pigment as PigmentOption);
-
-    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) canvasEl.style.backgroundColor = `rgb(251,246,234)`;
-
-    // Trace once layout settles. Annotation: the SVG is "instantly on" — no
-    // animated reveal — so `animate: false`.
-    const tracer = window.setTimeout(() => {
-      wash.traceSVG(HERO_SVG, { flipY: false, animate: false });
-    }, 80);
-
-    return () => {
-      window.clearTimeout(tracer);
-      try {
-        wash.cancelSVGTrace();
-        wash.destroy();
-      } catch {
-        /* ignore */
-      }
-      washRef.current = null;
-    };
-  }, [project.id, project.pigment]);
-
   const cta = project.cta;
   const ctaColor = PIGMENTS[project.pigment].color;
-
-  // On click, deluge this card's own canvas from the cursor's position, then
-  // hand off to the parent (pigment update + page transition for linked cards).
-  const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const host = hostRef.current;
-      const wash = washRef.current;
-      if (host && wash) {
-        const rect = host.getBoundingClientRect();
-        // Keyboard-activated clicks report (0,0); fall back to the card centre.
-        const fromKeyboard = e.detail === 0;
-        const x = fromKeyboard ? rect.width / 2 : e.clientX - rect.left;
-        const y = fromKeyboard ? rect.height / 2 : e.clientY - rect.top;
-        wash.pigment(project.pigment as PigmentOption);
-        wash.splash([{ x, y, velocity: 64 }], 'deluge', {
-          radius: rect.width * 0.7,
-          pressure: 92,
-          liftRate: 0.96,
-        });
-      }
-      onClick();
-    },
-    [project.pigment, onClick]
-  );
-
+  console.log(project);
   return (
     <div
       className="absolute"
@@ -860,16 +794,18 @@ function HeroProjectCard({
       <div className={project.bob ? 'animate-[card-bob_6s_ease-in-out_infinite]' : undefined}>
         <button
           type="button"
-          onClick={handleClick}
-          onMouseEnter={onActivate}
-          onFocus={onActivate}
           className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
           style={{ backgroundColor: CREAM }}
         >
           <div
-            ref={hostRef}
+            style={{
+              backgroundSize: '60%',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              top: '5rem',
+              backgroundImage: `url('${project.image}')`,
+            }}
             className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[12px] opacity-70 mix-blend-luminosity"
-            aria-hidden="true"
           />
           <div className="relative z-10 flex w-full flex-col gap-[24px]">
             <p className="font-mono mix-blend-difference text-[12px] leading-[24px] text-[#7d7d7d]">
@@ -883,7 +819,7 @@ function HeroProjectCard({
             </p>
             {cta.variant === 'filled' ? (
               <div
-                className="font-mono flex h-[36px] w-[180px] items-center justify-center rounded-[4px] text-[12px] leading-[24px] transition-[filter] group-hover:brightness-110"
+                className="font-mono mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] text-[12px] leading-[24px] transition-[filter] group-hover:brightness-110"
                 style={{
                   backgroundColor: ctaColor,
                   color: project.pigment === 'yellow' ? '#100e08' : CREAM,
@@ -893,8 +829,11 @@ function HeroProjectCard({
               </div>
             ) : (
               <div
-                className="font-mono flex h-[36px] w-[180px] items-center justify-center rounded-[4px] border text-[12px] leading-[24px] text-black opacity-75"
-                style={{ borderColor: ctaColor }}
+                className="font-mono mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] border text-[12px] leading-[24px] text-black opacity-75"
+                style={{
+                  backgroundColor: CREAM,
+                  borderColor: ctaColor,
+                }}
               >
                 {cta.text}
               </div>
