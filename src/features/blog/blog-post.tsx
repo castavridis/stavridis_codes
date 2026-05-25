@@ -7,7 +7,7 @@ import { formatPostDate, getPost, type Post } from './posts.js';
 const postComponentPromises = new Map<string, Promise<ComponentType>>();
 
 // `onBack`, when provided, intercepts the "Back to posts" link so the host can
-// run a page transition before navigating home (see useRadialReveal).
+// run a page transition before navigating home (see RadialTransition).
 export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const post = getPost(slug);
 
