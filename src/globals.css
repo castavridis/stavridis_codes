@@ -1,6 +1,5 @@
 @import 'tailwindcss';
-@source inline(
-  '{bg,text,border}-paper-{black,blue,blue-mid,blue-dark,green,green-mid,pink,pink-mid,purple,purple-mid,purple-dark,white,yellow,yellow-mid,yellow-dark,gray}'
+@source inline('{bg,text,border}-paper-{black,blue,blue-mid,blue-dark,green,green-mid,pink,pink-mid,purple,purple-mid,purple-dark,white,yellow,yellow-mid,yellow-dark,gray}'
 );
 @source inline('{bg,border}-accent-{blue,green,orange,red,white}');
 @source inline('border-b-paper-{blue-mid,pink} drop-shadow-fieldset');
@@ -82,13 +81,14 @@
 /* Hero "Project 01" card — annotation: "Gently move this card up and down."
    The rotation lives on an outer wrapper; this only drives the vertical bob. */
 @keyframes card-bob {
+
   0%,
   100% {
-    transform: translateY(-6px);
+    transform: translateY(-3px);
   }
 
   50% {
-    transform: translateY(6px);
+    transform: translateY(3px);
   }
 }
 
@@ -108,6 +108,7 @@
 /* Second half of the transition: the cream holds opaque briefly (so the
    destination route can mount/paint underneath) then fades away to reveal it. */
 @keyframes cream-fade-out {
+
   0%,
   20% {
     opacity: 1;

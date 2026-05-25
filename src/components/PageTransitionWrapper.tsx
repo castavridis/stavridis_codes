@@ -8,7 +8,9 @@ import { useTransition } from './RadialTransition';
 // ("Building CareSignal's Design System") links to the hello-world post; the
 // others have no destination yet and simply paint their canvas on click.
 const PROJECT_HREFS: Record<string, string> = {
-  'proj-careSignal-ds': routes.blogPost.href({ slug: 'hello-world' }),
+  'proj-careSignal-ds': routes.blogPost.href({ slug: 'caresignal-design-system' }),
+  'proj-careSignal-ai': routes.blogPost.href({ slug: 'caresignal-ai' }),
+  'proj-sol-lewitt': routes.blogPost.href({ slug: 'sol-lewitt' }),
 };
 
 // Bridges the landing page's project cards to the global page transition.

@@ -163,7 +163,7 @@ const HERO_PROJECTS: HeroProject[] = [
     title: 'Using ML to Conserve\nthe work of Sol LeWitt',
     image: '/images/Sol LeWitt Thumb.png',
     pigment: 'rose',
-    cta: { text: 'Coming Soon', variant: 'outline' },
+    cta: { text: 'View Project', variant: 'filled' },
     left: 807,
     top: 328,
     rotation: 1,
@@ -345,23 +345,23 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     const host = heroCanvasRef.current;
     if (!host) return;
 
-    const wash = Washes.create(host, { cursorPreview: false, pointer: true, scale: 1.75 });
+    const wash = Washes.create(host, { cursorPreview: false, pointer: true, scale: 2 });
     heroWashRef.current = wash;
-    (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
+  (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
 
     if (wash.webglAvailable()) wash.webgl(false);
     wash.paperColor(251 / 255, 246 / 255, 234 / 255);
     wash.gouacheMode('auto');
     wash.paperWetness('damp');
-    wash.paintLoad(0.15);
+    wash.paintLoad(0.25);
     wash.waterLoad(8.0);
-    wash.evaporation(4.0);
+    wash.evaporation(2.5);
     wash.brushSize(BRUSH_DEFAULT);
     wash.edgeMode('gravity');
     wash.gravityDirection('down');
     wash.gravityStrength(0.1);
     // wash.edgeFade(24);
-    wash.fadeHalfLife(4000);
+    wash.fadeHalfLife(10000);
     wash.fadePainting(0.05);
     wash.pigment('rose' as PigmentOption);
     // The background (day phase) + animation (weather) are applied by the
@@ -502,15 +502,15 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
   return (
     <>
       <section
-        className="relative mx-auto h-[728px] w-full max-w-[1280px] overflow-hidden"
+        className="relative mx-auto h-[728px] w-full max-w-[1280px] overflow-hidden color-[#251900]"
         style={{ backgroundColor: DARK }}
       >
         {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
         <div
-          className="absolute top-0 left-0 h-[437px] w-full select-none transition-opacity duration-200 ease-out"
+          className="absolute top-0 left-0 h-[560px] w-full select-none transition-opacity duration-200 ease-out"
           style={{ opacity: canvasVisible ? 1 : 0 }}
         >
-          <div ref={heroCanvasRef} className="absolute inset-0" aria-hidden="true" />
+          <div ref={heroCanvasRef} className="absolute top-0 bottom-1 -inset-x-[36px]" aria-hidden="true" />
         </div>
 
         {/* Connecting Gradient — fades the wash band into the dark page using
@@ -520,7 +520,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
         {/* Radial Gradient (583:21712) — a dark pool at the bottom-centre:
             an ellipse (rx 854 / ry 253) of #251900 fading to transparent. */}
         <div
-          className="pointer-events-none absolute inset-x-0 top-[97px] h-[340px]"
+          className="pointer-events-none absolute inset-x-0 top-[216px] h-[340px]"
           style={{
             background:
               'radial-gradient(ellipse 854px 253px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)',
@@ -529,7 +529,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
         {/* Linear Gradient (583:21713) — transparent → #251900, top to bottom,
             layered over the radial. */}
         <div
-          className="pointer-events-none absolute inset-x-0 top-[146px] h-[291px]"
+          className="pointer-events-none absolute inset-x-0 top-[269px] h-[291px]"
           style={{
             background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, ${DARK} 100%)`,
           }}
@@ -545,7 +545,7 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
         />
 
         {/* Intro blurb. */}
-        <div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[420px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black">
+        <div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[315px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black">
           <p className="font-display text-[24px]">I’m C Stavridis,</p>
           <p className="font-body text-[18px] leading-[24px]">
             an AI-Native Design Engineer who loves turning complex ideas into warm, approachable
@@ -775,12 +775,15 @@ function PresetBug({
 
 function HeroProjectCard({
   project,
+  onClick,
+  onActivate,
 }: {
   project: HeroProject;
+  onClick: () => void;
+  onActivate: () => void;
 }): React.ReactElement {
   const cta = project.cta;
   const ctaColor = PIGMENTS[project.pigment].color;
-  console.log(project);
   return (
     <div
       className="absolute"
@@ -794,6 +797,9 @@ function HeroProjectCard({
       <div className={project.bob ? 'animate-[card-bob_6s_ease-in-out_infinite]' : undefined}>
         <button
           type="button"
+          onClick={onClick}
+          onMouseEnter={onActivate}
+          onFocus={onActivate}
           className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
           style={{ backgroundColor: CREAM }}
         >
@@ -903,7 +909,7 @@ function RevealCard({
   card: ProjectCard;
   scale: number;
 }): React.ReactElement {
-  const { title, description, pigment, accent } = card;
+  const { title, description } = card;
   const descRef = useRef<HTMLParagraphElement | null>(null);
   const [hovered, setHovered] = useState(false);
 

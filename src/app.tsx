@@ -18,7 +18,7 @@ const BlogPostNotFound = lazy(() =>
 export function App() {
   return (
     <TransitionProvider>
-      <main>
+      <main className="font-light color-[#251900]">
         <Suspense fallback={<RoutePending />}>
           <Switch>
             <Route path={routes.home.path} component={BlogIndex} />
