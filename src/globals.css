@@ -104,3 +104,16 @@
     transform: scale(1);
   }
 }
+
+/* Second half of the transition: the cream holds opaque briefly (so the
+   destination route can mount/paint underneath) then fades away to reveal it. */
+@keyframes cream-fade-out {
+  0%,
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
