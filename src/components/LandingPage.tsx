@@ -1080,7 +1080,7 @@ function HorseTab(): React.ReactElement {
   const [hovered, setHovered] = useState(false);
   const tabStyle = useSpring({
     transform: hovered
-      ? 'translateX(-50%) translateY(-430px) rotate(-3deg)'
+      ? 'translateX(-50%) translateY(-525px) rotate(-3deg)'
       : 'translateX(-50%) translateY(0px) rotate(0deg)',
     config: { tension: 180, friction: 15 },
   });
@@ -1092,9 +1092,9 @@ function HorseTab(): React.ReactElement {
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={tabStyle}
-      className="absolute -bottom-[490px] left-1/2 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="fixed -bottom-[625px] left-1/2 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
-      <div className="relative h-[339px] w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
+      <div className="relative w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
         <div
           aria-hidden="true"
           className="h-full w-full"
@@ -1102,16 +1102,15 @@ function HorseTab(): React.ReactElement {
             background: 'linear-gradient(160deg, #2b2b2b 0%, #4a4640 35%, #6b5f55 60%, #2a221c 100%)',
           }}
         />
-        <div
+        <img
+          src="/images/Horse.png"
           aria-hidden="true"
-          className="absolute inset-0 rounded-[4px]"
-          style={{ backgroundColor: 'rgba(251,246,234,0.2)' }}
         />
       </div>
       <p className="font-mono w-full -rotate-[0.5deg] text-center text-[12px] leading-[24px] text-[#fbf6ea]">
         “Let a horse whisper in your ear and breathe on your heart.
         <br />
-        You will never regret it.”
+        You will never regret&nbsp;it.”
         <br />— Author Unknown
       </p>
     </animated.div>
