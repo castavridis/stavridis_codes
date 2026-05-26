@@ -15,6 +15,8 @@
 // Core types
 // =============================================================================
 
+import type { GpuSimHandle } from "./washes-gpu-sim";
+
 /** Pigment slot index. 0 = quinacridone rose, 1 = hansa yellow, 2 = cerulean blue. */
 export type PigmentIndex = 0 | 1 | 2;
 
@@ -26,7 +28,7 @@ export type PigmentIndex = 0 | 1 | 2;
  * - `'rainbow'`: time-varying rainbow color from a phase-shifted palette.
  * - `'mask'`: paints into the freeze-mask layer (cells that flow skips).
  */
-export type NamedBrush = 'water' | 'lift' | 'rainbow' | 'mask';
+export type NamedBrush = "water" | "lift" | "rainbow" | "mask";
 
 /**
  * Anything pigment-shaped that the lib will accept. Numbers select a pigment
@@ -35,12 +37,16 @@ export type NamedBrush = 'water' | 'lift' | 'rainbow' | 'mask';
  */
 export type PigmentOption =
   | PigmentIndex
-  | 'rose' | 'yellow' | 'blue'
-  | 'quinacridone-rose' | 'hansa-yellow' | 'cerulean-blue'
+  | "rose"
+  | "yellow"
+  | "blue"
+  | "quinacridone-rose"
+  | "hansa-yellow"
+  | "cerulean-blue"
   | NamedBrush;
 
 /** Advection scheme used by `movePigment()`. */
-export type AdvectionMode = 'standard' | 'clamp' | 'substep' | 'semilag';
+export type AdvectionMode = "standard" | "clamp" | "substep" | "semilag";
 
 /**
  * Edge boundary behavior. See the Open Boundaries section in the docs.
@@ -49,7 +55,7 @@ export type AdvectionMode = 'standard' | 'clamp' | 'substep' | 'semilag';
  * - `'open'`: all edges drain; no ambient bias.
  * - `'gravity'`: edges open in the direction of gravity, with active bias.
  */
-export type EdgeMode = 'closed' | 'closed-gravity' | 'open' | 'gravity';
+export type EdgeMode = "closed" | "closed-gravity" | "open" | "gravity";
 
 /**
  * Direction of the gravity velocity bias. 8-compass plus two radial modes.
@@ -61,9 +67,16 @@ export type EdgeMode = 'closed' | 'closed-gravity' | 'open' | 'gravity';
  * from them — opening would just leak mass that should have stayed put).
  */
 export type GravityDirection =
-  | 'up' | 'up-right' | 'right' | 'down-right'
-  | 'down' | 'down-left' | 'left' | 'up-left'
-  | 'radial' | 'radial-in';
+  | "up"
+  | "up-right"
+  | "right"
+  | "down-right"
+  | "down"
+  | "down-left"
+  | "left"
+  | "up-left"
+  | "radial"
+  | "radial-in";
 
 /**
  * Gouache rendering mode.
@@ -72,7 +85,7 @@ export type GravityDirection =
  * - `true`: opaque gouache pigments.
  * - `'auto'`: LERP between watercolor and gouache based on paper darkness.
  */
-export type GouacheMode = boolean | 'auto';
+export type GouacheMode = boolean | "auto";
 
 /** Pause options (v0.90). */
 export interface PauseOptions {
@@ -90,10 +103,10 @@ export interface PauseOptions {
 export type PauseState = false | { acceptInput: boolean };
 
 /** Quality preset bundling cost-vs-quality knobs (v0.89). */
-export type QualityPreset = 'high' | 'medium' | 'low' | 'minimum';
+export type QualityPreset = "high" | "medium" | "low" | "minimum";
 
 /** Hint for picking an initial quality preset based on a static device signal (v0.89). */
-export type QualityHint = 'auto-mobile';
+export type QualityHint = "auto-mobile";
 
 // =============================================================================
 // Splash / brush input shapes
@@ -157,7 +170,7 @@ export interface SplashOptions {
 }
 
 /** Style of splash. Different presets shape the radial profile differently. */
-export type SplashStyle = 'deluge' | 'splash' | 'spray';
+export type SplashStyle = "deluge" | "splash" | "spray";
 
 // =============================================================================
 // SVG / image / text rendering
@@ -208,7 +221,7 @@ export interface TraceSVGOptions {
    */
   durationMs?: number;
   /** Easing curve when durationMs is set. */
-  easing?: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut' | 'penStroke';
+  easing?: "linear" | "easeIn" | "easeOut" | "easeInOut" | "penStroke";
   /**
    * Pause N ms between each top-level path.
    * @minimum 0
@@ -273,7 +286,7 @@ export interface PaintTextOptions {
 // Animation, visualization, time-wash
 // =============================================================================
 
-export type AnimationName = 'off' | 'breathe' | 'drift' | 'pulse' | string;
+export type AnimationName = "off" | "breathe" | "drift" | "pulse" | string;
 export interface AnimationOptions {
   /**
    * @minimum 0
@@ -287,7 +300,13 @@ export interface AnimationOptions {
   amplitude?: number;
 }
 
-export type VisualizationName = 'off' | 'velocity' | 'pressure' | 'wet' | 'mask' | string;
+export type VisualizationName =
+  | "off"
+  | "velocity"
+  | "pressure"
+  | "wet"
+  | "mask"
+  | string;
 export interface VisualizationOptions {
   /**
    * @minimum 0
@@ -433,7 +452,11 @@ export interface WashesInstance {
   // -----------------------------------------------------------------------
 
   /** Inject a splash at one or more epicenters. */
-  splash(epicenters: SplashEpicenter[], style?: SplashStyle, opts?: SplashOptions): WashesInstance;
+  splash(
+    epicenters: SplashEpicenter[],
+    style?: SplashStyle,
+    opts?: SplashOptions,
+  ): WashesInstance;
 
   /**
    * Programmatic paint stamp at grid coordinates (not display coordinates).
@@ -458,14 +481,17 @@ export interface WashesInstance {
      * @minimum 0
      * @maximum 1
      */
-    strength?: number
+    strength?: number,
   ): WashesInstance;
 
   /** Stamp text using the active brush. */
   paintText(text: string, opts?: PaintTextOptions): Promise<void>;
 
   /** Stamp an image using the active brush (light/dark map to pigment density). */
-  paintImage(source: string | HTMLImageElement, opts?: PaintImageOptions): Promise<void>;
+  paintImage(
+    source: string | HTMLImageElement,
+    opts?: PaintImageOptions,
+  ): Promise<void>;
 
   /**
    * Trace an SVG onto the canvas. Returns the total number of stamp
@@ -638,6 +664,42 @@ export interface WashesInstance {
   webglAvailable(): boolean;
   /** Debug: tint visible cells green so you can see the active region. */
   webglDebugTint(v?: boolean): boolean;
+  /** Debug: replace WebGL output with a checkerboard smoke test. */
+  webglSmokeTest(v?: boolean): boolean;
+  /** Debug: render the GPU sim pigment texture directly. */
+  webglGpuTextureTest(v?: boolean): boolean;
+  /** Debug: render the GPU sim fluid wet channel directly. */
+  webglGpuWetTextureTest(v?: boolean): boolean;
+  /** Debug: render the GPU sim fluid velocity channels directly. */
+  webglGpuVelocityTextureTest(v?: boolean): boolean;
+  /** Debug: apply GPU brush stamps without running simulation passes. */
+  gpuSimBrushOnlyTest(v?: boolean): boolean;
+  /** Debug: apply GPU brush stamps, then only transfer/evaporate/drain. */
+  gpuSimTransferOnlyTest(v?: boolean): boolean;
+  /** Debug: apply GPU brush stamps, then only wet diffusion. */
+  gpuSimWetDiffusionOnlyTest(v?: boolean): boolean;
+  /** Debug: apply GPU brush stamps, wet diffusion, then velocity update only. */
+  gpuSimVelocityOnlyTest(v?: boolean): boolean;
+  /** Debug: apply GPU brush stamps, wet diffusion, velocity, then pigment advection only. */
+  gpuSimAdvectionOnlyTest(v?: boolean): boolean;
+
+  /**
+   * GPU simulation path. Pass an initialized GpuSimHandle to enable,
+   * false/null to disable, true to re-enable (if handle was previously set),
+   * or call with no args to query the current state.
+   */
+  gpuSim(v?: GpuSimHandle | boolean | null): boolean;
+
+  /**
+   * Expose the WebGL2 context and grid dimensions so external code can
+   * initialize the GPU sim module without creating a second context.
+   * Returns null if WebGL2 is unavailable.
+   */
+  gpuSimContext(): {
+    gl: WebGL2RenderingContext;
+    GW: number;
+    GH: number;
+  } | null;
 
   /** Background transparent (canvas paper rendered transparent). */
   transparent(v?: boolean): boolean;
@@ -734,7 +796,10 @@ export interface WashesInstance {
   getAnimation(): AnimationName;
 
   /** Toggle a debug visualization (velocity vectors, pressure heat, etc.). */
-  setVisualization(name: VisualizationName, opts?: VisualizationOptions): WashesInstance;
+  setVisualization(
+    name: VisualizationName,
+    opts?: VisualizationOptions,
+  ): WashesInstance;
   getVisualization(): VisualizationName;
 
   // -----------------------------------------------------------------------
@@ -770,7 +835,11 @@ export interface WashesInstance {
   // -----------------------------------------------------------------------
 
   /** Export the current canvas as a PNG blob. */
-  exportPNG(opts?: { width?: number; height?: number; transparent?: boolean }): Promise<Blob>;
+  exportPNG(opts?: {
+    width?: number;
+    height?: number;
+    transparent?: boolean;
+  }): Promise<Blob>;
 
   // -----------------------------------------------------------------------
   // Preset / state
