@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Switch } from 'wouter';
 import { routes } from './routes.js';
 import { TransitionProvider, useTransition } from './components/RadialTransition';
+import { Analytics } from "@vercel/analytics/next"
 
 const BlogIndex = lazy(() =>
   import('./features/blog/blog-index.js').then((module) => ({ default: module.BlogIndex }))
@@ -29,6 +30,7 @@ export function App() {
           </Switch>
         </Suspense>
       </main>
+      <Analytics />
     </TransitionProvider>
   );
 }
