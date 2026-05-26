@@ -198,10 +198,13 @@ function buildForecast(data: ForecastPayload, offsetSec: number): PhaseForecast[
     return { temp: Math.round(htemp[best] ?? 0), code: hcode[best] ?? 0 };
   };
   const noon = (iso: string) => `${iso.slice(0, 10)}T12:00`;
+  const midnight = (iso: string) => `${iso.slice(0, 10)}T00:00`;
   const rows: { phase: DayPhase; label: string; iso: string }[] = [
     { phase: 'sunrise', label: 'Sunrise', iso: next([sr[0], sr[1]]) },
     { phase: 'day', label: 'Mid-Day', iso: next([noon(sr[0]), noon(sr[1])]) },
     { phase: 'sunset', label: 'Sunset', iso: next([ss[0], ss[1]]) },
+    // Night is represented at local midnight (symmetric to Mid-Day at noon).
+    { phase: 'night', label: 'Night', iso: next([midnight(sr[0]), midnight(sr[1])]) },
   ];
   // Order by when each phase next occurs so cycling from "now" advances to the
   // next chronological time (after sunrise → mid-day; after sunset → sunrise).
@@ -225,6 +228,7 @@ function fallbackForecast(loc: LocationInfo): PhaseForecast[] {
     row('sunrise', 'Sunrise', FALLBACK_SUN.sunriseMin),
     row('day', 'Mid-Day', 12 * 60),
     row('sunset', 'Sunset', FALLBACK_SUN.sunsetMin),
+    row('night', 'Night', 0),
   ];
 }
 
