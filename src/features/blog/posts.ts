@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { MDXContent } from 'mdx/types';
 
 export type PostFrontmatter = {
   title: string;
@@ -8,7 +8,7 @@ export type PostFrontmatter = {
 
 export type Post = PostFrontmatter & {
   slug: string;
-  loadComponent: () => Promise<ComponentType>;
+  loadComponent: () => Promise<MDXContent>;
 };
 
 const postFrontmatterModules = import.meta.glob<PostFrontmatter>('../../../content/posts/*.mdx', {
@@ -16,7 +16,7 @@ const postFrontmatterModules = import.meta.glob<PostFrontmatter>('../../../conte
   import: 'frontmatter',
 });
 
-const postComponentModules = import.meta.glob<ComponentType>('../../../content/posts/*.mdx', {
+const postComponentModules = import.meta.glob<MDXContent>('../../../content/posts/*.mdx', {
   import: 'default',
 });
 

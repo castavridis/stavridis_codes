@@ -92,29 +92,7 @@
   }
 }
 
-/* Page transition — a soft cream light that expands from the cursor click
-   until it fills the viewport (see the Figma "Page Transition Mockups"). The
-   circle is positioned with its centre at the click point and scaled up. */
-@keyframes radial-reveal {
-  from {
-    transform: scale(0);
-  }
-
-  to {
-    transform: scale(1);
-  }
-}
-
-/* Second half of the transition: the cream holds opaque briefly (so the
-   destination route can mount/paint underneath) then fades away to reveal it. */
-@keyframes cream-fade-out {
-
-  0%,
-  20% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
+/* Page transition — radial clip-path mask. The project overlay is revealed
+   via an animated clip-path: circle() that grows from the cursor click point.
+   Closing reverses the mask, shrinking the circle back to nothing. The CSS
+   transition is driven from RadialTransition.tsx — no keyframes needed. */

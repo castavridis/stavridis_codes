@@ -358,14 +358,16 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
 
 // `onCardClick` is forwarded to the hero project cards so a host wrapper can
 // swap to a project view on click. Optional — the page works standalone.
-type LandingPageProps = { onCardClick?: (id: string) => void };
+// `paused` freezes the Washes canvas when a project overlay covers the page.
+type LandingPageProps = { onCardClick?: (id: string) => void; paused?: boolean };
 
-export default function LandingPage({ onCardClick }: LandingPageProps = {}): React.ReactElement {
+export default function LandingPage({ onCardClick, paused = false }: LandingPageProps = {}): React.ReactElement {
   return (
-    <div className="font-body w-full text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
-      <Hero onCardClick={onCardClick} />
+    <div className="font-body relative w-full overflow-hidden text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
+      <Hero onCardClick={onCardClick} paused={paused} />
       <CreativeToolsSection />
       <Footer />
+      <HorseTab />
     </div>
   );
 }
@@ -381,7 +383,7 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 80;
 
-function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.ReactElement {
+function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => void; paused?: boolean }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -512,6 +514,17 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
       delete (window as unknown as Record<string, WashesInstance | undefined>).Wash_hero;
     };
   }, [refreshWeather]);
+
+  // Pause / resume the Washes canvas when the project overlay covers the page.
+  useEffect(() => {
+    const wash = heroWashRef.current;
+    if (!wash) return;
+    if (paused && !wash.paused()) {
+      wash.pause({ acceptInput: false });
+    } else if (!paused && wash.paused()) {
+      wash.resume();
+    }
+  }, [paused]);
 
   // Keep the live clock + day phase in sync with the location's local time.
   useEffect(() => {
@@ -1197,7 +1210,6 @@ function Footer(): React.ReactElement {
           <span className="block">Senior Software Engineer</span>
         </p>
       </div>
-      <HorseTab />
     </footer>
   );
 }
@@ -1221,7 +1233,7 @@ function HorseTab(): React.ReactElement {
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={tabStyle}
-      className="fixed -bottom-[625px] left-1/2 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="absolute -bottom-[625px] left-1/2 z-40 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
       <div className="relative w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
         <div

@@ -1,10 +1,16 @@
-import { createElement, Suspense, use, type ComponentType } from 'react';
+import type { MDXContent } from 'mdx/types';
+import { createElement, Suspense, use } from 'react';
 import { Link } from 'wouter';
 import author from '../../../content/author.json';
+import { MDXColumn, MDXWrapper } from '../../components/mdx/Layout.js';
 import { routes } from '../../routes.js';
 import { formatPostDate, getPost, type Post } from './posts.js';
 
-const postComponentPromises = new Map<string, Promise<ComponentType>>();
+// Capitalized tags used in MDX that aren't imported in the .mdx file itself are
+// resolved from this map, so every post can use these without a per-file import.
+const mdxComponents = { MDXWrapper, MDXColumn };
+
+const postComponentPromises = new Map<string, Promise<MDXContent>>();
 
 // `onBack`, when provided, intercepts the "Back to posts" link so the host can
 // run a page transition before navigating home (see RadialTransition).
@@ -19,10 +25,10 @@ export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }
     'text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 mb-8 inline-flex cursor-pointer text-sm font-medium underline';
 
   return (
-    <article>
+    <article className="mx-auto max-w-3xl px-6 py-12">
       {onBack ? (
         <button type="button" className={backClassName} onClick={onBack}>
-          Back to posts
+          Close project
         </button>
       ) : (
         <Link className={backClassName} href={routes.home.href()}>
@@ -60,7 +66,7 @@ export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }
 function PostContent({ post }: { post: Post }) {
   const Component = use(getPostComponentPromise(post));
 
-  return createElement(Component);
+  return createElement(Component, { components: mdxComponents });
 }
 
 function getPostComponentPromise(post: Post) {
