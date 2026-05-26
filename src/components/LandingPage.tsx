@@ -94,6 +94,20 @@ const DAY_PHASE_BACKGROUND: Record<DayPhase, string> = {
   night: 'night',
 };
 
+// Paper tint per day phase, applied to both the Washes paper color and the
+// canvas background color.
+const DAY_PHASE_PAPER: Record<DayPhase, string> = {
+  sunrise: PIGMENTS.yellow.color, // Hansa Yellow
+  day: CREAM, // current cream
+  sunset: PIGMENTS.rose.color, // Quinacridone Magenta
+  night: PIGMENTS.blue.color, // Cerulean Blue
+};
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const n = Number.parseInt(hex.slice(1), 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
 type SunTimes = { sunriseMin: number; sunsetMin: number };
 // Generic fallback (≈6:00 sunrise / ≈19:30 sunset) when the lookup is offline.
 const FALLBACK_SUN: SunTimes = { sunriseMin: 6 * 60, sunsetMin: 19 * 60 + 30 };
@@ -184,15 +198,18 @@ function buildForecast(data: ForecastPayload, offsetSec: number): PhaseForecast[
     return { temp: Math.round(htemp[best] ?? 0), code: hcode[best] ?? 0 };
   };
   const noon = (iso: string) => `${iso.slice(0, 10)}T12:00`;
-  const row = (phase: DayPhase, label: string, iso: string): PhaseForecast => {
+  const rows: { phase: DayPhase; label: string; iso: string }[] = [
+    { phase: 'sunrise', label: 'Sunrise', iso: next([sr[0], sr[1]]) },
+    { phase: 'day', label: 'Mid-Day', iso: next([noon(sr[0]), noon(sr[1])]) },
+    { phase: 'sunset', label: 'Sunset', iso: next([ss[0], ss[1]]) },
+  ];
+  // Order by when each phase next occurs so cycling from "now" advances to the
+  // next chronological time (after sunrise → mid-day; after sunset → sunrise).
+  rows.sort((a, b) => toVal(a.iso) - toVal(b.iso));
+  return rows.map(({ phase, label, iso }) => {
     const { temp, code } = sampleAt(iso);
     return { phase, label, time: formatIsoTime(iso), temp, weather: weatherFromCode(code) };
-  };
-  return [
-    row('sunrise', 'Sunrise', next([sr[0], sr[1]])),
-    row('day', 'Mid-Day', next([noon(sr[0]), noon(sr[1])])),
-    row('sunset', 'Sunset', next([ss[0], ss[1]])),
-  ];
+  });
 }
 
 // Offline fallback so the widget always renders three rows.
@@ -508,13 +525,18 @@ function Hero({ onCardClick }: { onCardClick?: (id: string) => void }): React.Re
     heroWashRef.current?.pigment(activePigment as PigmentOption);
   }, [activePigment]);
 
-  // Drive the visualization: the day phase picks the background time-wash; the
-  // weather picks the atmospheric animation.
+  // Drive the visualization: the day phase picks the background time-wash and
+  // the paper/canvas tint; the weather picks the atmospheric animation.
   useEffect(() => {
     const wash = heroWashRef.current;
     if (!wash) return;
     wash.setBackground(DAY_PHASE_BACKGROUND[dayPhase]);
     wash.setAnimation(WEATHER_PRESETS[weather].animation);
+    const paper = DAY_PHASE_PAPER[dayPhase];
+    const { r, g, b } = hexToRgb(paper);
+    wash.paperColor(r / 255, g / 255, b / 255);
+    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
+    if (canvasEl) canvasEl.style.backgroundColor = paper;
   }, [dayPhase, weather]);
 
   // Brush size ↔ Washes sync. The visible indicator reads the same value.
