@@ -65,6 +65,10 @@ done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 
 # Resolve and add other allowed domains
 for domain in \
+    "figma.com" \
+    "www.figma.com" \
+    "mcp.figma.com" \
+    "api.figma.com" \
     "registry.npmjs.org" \
     "api.anthropic.com" \
     "sentry.io" \
@@ -134,3 +138,11 @@ if ! curl --connect-timeout 5 https://api.github.com/zen >/dev/null 2>&1; then
 else
     echo "Firewall verification passed - able to reach https://api.github.com as expected"
 fi
+
+# Verify Figma API access; this is important for authenticating to use the MCP server
+if ! curl --connect-timeout 5 https://api.figma.com/ >/dev/null 2>&1; then
+    echo "ERROR: Firewall verification failed - unable to reach https://api.figma.com"
+    exit 1
+else
+    echo "Firewall verification passed - able to reach https://api.figma.com/ as expected"
+fi    
