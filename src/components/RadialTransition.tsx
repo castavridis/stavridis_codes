@@ -182,7 +182,6 @@ export function ProjectOverlay({
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const onEndRef = useRef<(() => void) | null>(null);
-
   const isVisible =
     phase.kind === 'opening' || phase.kind === 'open' || phase.kind === 'closing';
 

@@ -413,12 +413,12 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
 // `onCardClick` is forwarded to the hero project cards so a host wrapper can
 // swap to a project view on click. Optional — the page works standalone.
 // `paused` freezes the Washes canvas when a project overlay covers the page.
-type LandingPageProps = { onCardClick?: (id: string) => void; paused?: boolean; transitioning?: boolean };
+type LandingPageProps = { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean };
 
-export default function LandingPage({ onCardClick, paused = false, transitioning = false }: LandingPageProps = {}): React.ReactElement {
+export default function LandingPage({ onCardClick, onCardHover, paused = false, transitioning = false }: LandingPageProps = {}): React.ReactElement {
   return (
     <div className="font-body relative w-full overflow-hidden text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
-      <Hero onCardClick={onCardClick} paused={paused} transitioning={transitioning} />
+      <Hero onCardClick={onCardClick} onCardHover={onCardHover} paused={paused} transitioning={transitioning} />
       <CreativeToolsSection />
       <Footer />
       <HorseTab />
@@ -437,7 +437,7 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 80;
 
-function Hero({ onCardClick, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
+function Hero({ onCardClick, onCardHover, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -751,6 +751,14 @@ function Hero({ onCardClick, paused = false, transitioning = false }: { onCardCl
     [onCardClick],
   );
 
+  const handleCardActivate = useCallback(
+    (project: HeroProject) => {
+      setActivePigment(project.pigment);
+      onCardHover?.(project.id);
+    },
+    [onCardHover],
+  );
+
   const activeColor = PIGMENTS[activePigment].color;
 
   const introSpring = useSpring({
@@ -828,7 +836,7 @@ function Hero({ onCardClick, paused = false, transitioning = false }: { onCardCl
               key={project.id}
               project={project}
               onClick={() => handleCardClick(project)}
-              onActivate={() => setActivePigment(project.pigment)}
+              onActivate={() => handleCardActivate(project)}
             />
           ))}
         </animated.div>

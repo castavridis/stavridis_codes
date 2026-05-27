@@ -72,6 +72,11 @@ function getProjectComponentPromise(project: Project) {
   return promise;
 }
 
+export function prefetchProject(slug: string): void {
+  const project = getProject(slug);
+  if (project) getProjectComponentPromise(project);
+}
+
 function ProjectNotFound() {
   return (
     <section className="py-20">

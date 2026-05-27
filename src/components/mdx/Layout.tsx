@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 export function ProjectSubheader ({ children, className }: {
   children: React.ReactNode;
@@ -13,15 +13,28 @@ export function ProjectSubheader ({ children, className }: {
   )
 }
 
-export function ProjectImage ({ src, alt, className }: {
+export function ProjectImage ({ src, alt, className, placeholderColor = 'rgba(255,255,255,0.00)' }: {
   src: string;
   alt: string;
   className?: string;
+  placeholderColor?: string;
 }) {
-  let classes = "my-0"
-  if (className) classes = classes.concat(" ", className)
+  const [loaded, setLoaded] = useState(false);
+  let wrapperClasses = "my-0 block"
+  if (className) wrapperClasses = wrapperClasses.concat(" ", className)
   return (
-    <img className={classes} src={src} alt={alt} />
+    <div className={wrapperClasses} style={{ backgroundColor: placeholderColor }}>
+      <img
+        className="my-0 block w-full"
+        src={src}
+        alt={alt}
+        style={{
+          opacity: loaded ? 1 : 0,
+          transition: loaded ? 'opacity 400ms ease-out' : 'none',
+        }}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
   )
 }
 

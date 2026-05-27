@@ -72,6 +72,14 @@ function ProjectRouter({ phase }: { phase: Phase }) {
     }
   }, [phase.kind]);
 
+  // Close on Escape.
+  useEffect(() => {
+    if (phase.kind !== 'open') return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase.kind, close]);
+
   // Handle browser back while overlay is open.
   const [location] = useLocation();
   useEffect(() => {
