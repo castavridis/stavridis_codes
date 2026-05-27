@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import { routes } from './routes.js';
 import {
@@ -43,6 +43,8 @@ function ProjectRouter({ phase }: { phase: Phase }) {
   const { close } = useTransition();
   const [, navigate] = useLocation();
   const [slug, setSlug] = useState<string | null>(null);
+  const slugRef = useRef(slug);
+  slugRef.current = slug;
 
   // When a transition starts, extract slug from href and push the URL.
   useEffect(() => {
@@ -55,15 +57,16 @@ function ProjectRouter({ phase }: { phase: Phase }) {
     }
   }, [phase, navigate]);
 
-  // When the close animation finishes (phase → idle), navigate home and
-  // clear the slug.
+  // When the close animation finishes (phase → idle), navigate home and clear
+  // the slug. Uses a ref so this only re-runs on phase changes — not when slug
+  // is set by a direct URL load, which would falsely trigger a home redirect.
   useEffect(() => {
-    if (phase.kind === 'idle' && slug !== null) {
+    if (phase.kind === 'idle' && slugRef.current !== null) {
       navigate(routes.home.href(), { replace: false });
       setSlug(null);
       window.scrollTo(0, 0);
     }
-  }, [phase.kind, slug, navigate]);
+  }, [phase.kind, navigate]);
 
   // Reset scroll when the open animation completes.
   useEffect(() => {
