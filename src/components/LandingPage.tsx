@@ -464,7 +464,6 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   const [autoPhase, setAutoPhase] = useState<DayPhase>("day");
   const [phaseOverride, setPhaseOverride] = useState<DayPhase | null>(null);
   const dayPhase = phaseOverride ?? autoPhase;
-  const [canvasVisible, setCanvasVisible] = useState(true);
 
   // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
   // brush size; the indicator scales with the brush and recolors to the
@@ -702,37 +701,52 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     };
   }, []);
 
-  // Annotation (Location selector): clicking resets the canvas — fade it out,
-  // then fade back in. The new location's Open-Meteo lookup updates the
-  // timezone, weather, and sunrise/sunset, which re-seed the visualization
-  // (day-phase background + weather animation) via the effects above.
-  const cycleLocation = useCallback(() => {
-    setCanvasVisible(false);
-    const nextIdx = (locationIdx + 1) % LOCATIONS.length;
+  // Speed up the Washes fade decay so current pigment melts to paper color,
+  // then fire `then()` and restore the normal slow half-life. This replaces
+  // the old CSS opacity blink with a visible in-canvas wipe.
+  const wipeCanvas = useCallback((then: () => void) => {
+    const wash = heroWashRef.current;
+    if (!wash) { then(); return; }
+    wash.fadeHalfLife(200);
     window.setTimeout(() => {
+      then();
+      window.setTimeout(() => wash.fadeHalfLife(10000), 32);
+    }, 420);
+  }, []);
+
+  // Annotation (Location selector): clicking resets the canvas. Wipes current
+  // pigment to paper color via a fast fade, then swaps to the new location.
+  // The new location's Open-Meteo lookup updates the timezone, weather, and
+  // sunrise/sunset, which re-seed the visualization via the effects above.
+  const cycleLocation = useCallback(() => {
+    const nextIdx = (locationIdx + 1) % LOCATIONS.length;
+    wipeCanvas(() => {
       setLocationIdx(nextIdx);
       void refreshWeather(LOCATIONS[nextIdx]);
       // Reset to the "now" slot (live phase) for the new location.
       setSlot(0);
       setPhaseOverride(null);
-      setCanvasVisible(true);
-    }, 260);
-  }, [locationIdx, refreshWeather]);
+    });
+  }, [locationIdx, refreshWeather, wipeCanvas]);
 
   const cycleWeather = useCallback(() => {
-    setWeather(
-      (prev) =>
-        WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length],
-    );
-  }, []);
+    wipeCanvas(() => {
+      setWeather(
+        (prev) =>
+          WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length],
+      );
+    });
+  }, [wipeCanvas]);
 
   // Cycle the displayed time slot (now → sunrise → mid-day → sunset) and point
   // the background visualization at the selected slot's phase (now = live).
   const cycleSlot = useCallback(() => {
     const next = (slot + 1) % (forecast.length + 1);
-    setSlot(next);
-    setPhaseOverride(next === 0 ? null : forecast[next - 1].phase);
-  }, [slot, forecast]);
+    wipeCanvas(() => {
+      setSlot(next);
+      setPhaseOverride(next === 0 ? null : forecast[next - 1].phase);
+    });
+  }, [slot, forecast, wipeCanvas]);
 
   const cyclePigment = useCallback(() => {
     setActivePigment(
@@ -781,8 +795,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
       >
         {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
         <div
-          className="absolute top-0 left-0 h-[560px] w-full transition-opacity duration-200 ease-out select-none"
-          style={{ opacity: canvasVisible ? 1 : 0 }}
+          className="absolute top-0 left-0 h-[560px] w-full select-none"
         >
           <div
             ref={heroCanvasRef}
