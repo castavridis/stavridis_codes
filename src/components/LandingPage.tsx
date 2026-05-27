@@ -709,8 +709,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     if (!wash) { then(); return; }
     wash.fadeHalfLife(200);
     window.setTimeout(() => {
+      wash.fadeHalfLife(10000);
       then();
-      window.setTimeout(() => wash.fadeHalfLife(10000), 32);
     }, 420);
   }, []);
 
