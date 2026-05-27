@@ -1,5 +1,40 @@
 import type { ReactNode } from 'react';
 
+export function ProjectSubheader ({ children, className }: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  let classes = "font-display font-light text-2xl mt-0";
+  if (className) classes = classes.concat(" ", className);
+  return (
+    <h2 className={classes}>
+      {children}
+    </h2>
+  )
+}
+
+export function ProjectImage ({ src, alt, className }: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  let classes = "my-0"
+  if (className) classes = classes.concat(" ", className)
+  return (
+    <img className={classes} src={src} alt={alt} />
+  )
+}
+
+export function ProjectDescription({ children }: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="h-full content-center">
+      { children }
+    </div>
+  )
+}
+
 // Tailwind's scanner only sees literal class names, so the spans are spelled out
 // rather than built with a `col-span-${n}` template. Columns are full width on
 // small screens and take their span at the `md` breakpoint and up.

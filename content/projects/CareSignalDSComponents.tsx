@@ -1,45 +1,19 @@
-import { MDXWrapper, MDXColumn } from '../../src/components/mdx/Layout';
-
-export function Subheader ({ children, className }: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  let classes = "font-display font-light text-2xl mt-0";
-  if (className) classes = classes.concat(" ", className);
-  return (
-    <h2 className={classes}>
-      {children}
-    </h2>
-  )
-}
-
-export function ProjectImage ({ src, alt }: {
-  src: string;
-  alt: string;
-}) {
-  return (
-    <img className="my-0" src={src} alt={alt} />
-  )
-}
-
-export function ProjectDescription({ children }: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="h-full content-center">
-      { children }
-    </div>
-  )
-}
+import {
+  ProjectDescription,
+  ProjectImage,
+  ProjectSubheader,
+  MDXWrapper,
+  MDXColumn
+} from '../../src/components/mdx/Layout';
 
 export function GuidingPrinciple () {
   return (
     <MDXWrapper>
       <MDXColumn span={4} start={2}>
         <div className="bg-cs-black text-cs-white rounded-lg px-9 h-full content-center">
-          <Subheader className="text-cs-white">
+          <ProjectSubheader className="text-cs-white">
             Guiding<br />Principle    
-          </Subheader>
+          </ProjectSubheader>
           <p className="text-xl" style={{
             hangingPunctuation: 'first',
           }}>
@@ -65,7 +39,7 @@ export function Alerts () {
     <MDXWrapper>
       <MDXColumn span={3} start={2}>
         <ProjectDescription>
-          <Subheader>Alerts</Subheader>
+          <ProjectSubheader>Alerts</ProjectSubheader>
           <p>
             CareSignal triggers alerts based on a patient’s data. They signal an opportunity for a provider to prevent deterioration of their condition and avert a costly ED visit.
           </p>
@@ -94,7 +68,7 @@ export function Patients () {
       </MDXColumn>
       <MDXColumn span={3} start={8}>
         <ProjectDescription>
-        <Subheader>Patients</Subheader>
+        <ProjectSubheader>Patients</ProjectSubheader>
           <p>
             Summaries take alerts into consideration but give users high-level overviews about their patients’ most recent clinical statuses.
           </p>
@@ -123,7 +97,7 @@ export function Dashboard () {
   return (
     <MDXWrapper>
       <MDXColumn span={12}>
-        <Subheader className="text-center mb-0">CareSignal Dashboard</Subheader>
+        <ProjectSubheader className="text-center mb-0">CareSignal Dashboard</ProjectSubheader>
       </MDXColumn>
       <MDXColumn span={6} start={4}>
         <ul>
@@ -146,7 +120,7 @@ export function DesignDetails () {
     <>
       <MDXWrapper>
         <MDXColumn span={12}>
-          <Subheader className="text-center mb-0">Design Details</Subheader>
+          <ProjectSubheader className="text-center mb-0">Design Details</ProjectSubheader>
         </MDXColumn>
         <MDXColumn span={12}>
           <ProjectImage
