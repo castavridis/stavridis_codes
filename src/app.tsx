@@ -10,8 +10,8 @@ import {
 import { Analytics } from '@vercel/analytics/react';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 
-const BlogPost = lazy(() =>
-  import('./features/blog/blog-post.js').then((m) => ({ default: m.BlogPost })),
+const ProjectPost = lazy(() =>
+  import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
 );
 
 export function App() {
@@ -46,7 +46,7 @@ function ProjectRouter({ phase }: { phase: Phase }) {
   // When a transition starts, extract slug from href and push the URL.
   useEffect(() => {
     if (phase.kind === 'opening') {
-      const match = (phase as { href: string }).href.match(/\/blog\/(.+)/);
+      const match = (phase as { href: string }).href.match(/\/project\/(.+)/);
       if (match) {
         setSlug(match[1]);
         navigate((phase as { href: string }).href, { replace: false });
@@ -79,9 +79,9 @@ function ProjectRouter({ phase }: { phase: Phase }) {
     }
   }, [location, phase.kind, slug, close]);
 
-  // Support direct navigation to /blog/:slug on page load.
+  // Support direct navigation to /project/:slug on page load.
   useEffect(() => {
-    const match = window.location.pathname.match(/\/blog\/(.+)/);
+    const match = window.location.pathname.match(/\/project\/(.+)/);
     if (match && !slug && phase.kind === 'idle') {
       setSlug(match[1]);
     }
@@ -105,7 +105,7 @@ function ProjectRouter({ phase }: { phase: Phase }) {
         }}
       >
         <Suspense fallback={<RoutePending />}>
-          <BlogPost
+          <ProjectPost
             slug={slug}
             onBack={() => {
               setSlug(null);
@@ -120,7 +120,7 @@ function ProjectRouter({ phase }: { phase: Phase }) {
   return (
     <ProjectOverlay>
       <Suspense fallback={<RoutePending />}>
-        <BlogPost slug={slug} onBack={close} />
+        <ProjectPost slug={slug} onBack={close} />
       </Suspense>
     </ProjectOverlay>
   );
@@ -132,17 +132,20 @@ function ScrollLock({ active }: { active: boolean }) {
   useLayoutEffect(() => {
     if (!active) return;
     const scrollY = window.scrollY;
+    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.left = '0';
     document.body.style.right = '0';
+    document.body.style.paddingRight = `${scrollbarW}px`;
     return () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.left = '';
       document.body.style.right = '';
+      document.body.style.paddingRight = '';
       window.scrollTo(0, scrollY);
     };
   }, [active]);

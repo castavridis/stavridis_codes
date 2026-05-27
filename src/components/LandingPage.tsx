@@ -1,5 +1,3 @@
-"use client";
-
 import "../globals.css";
 import {
   useCallback,
@@ -758,7 +756,7 @@ function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => v
   return (
     <>
       <section
-        className="color-[#251900] relative mx-auto h-[728px] w-full max-w-[1280px] overflow-hidden"
+        className="color-[#251900] relative mx-auto h-[728px] w-full overflow-hidden"
         style={{ backgroundColor: DARK }}
       >
         {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
@@ -814,14 +812,16 @@ function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => v
         </div>
 
         {/* Project cards. */}
-        {HERO_PROJECTS.map((project) => (
-          <HeroProjectCard
-            key={project.id}
-            project={project}
-            onClick={() => handleCardClick(project)}
-            onActivate={() => setActivePigment(project.pigment)}
-          />
-        ))}
+        <div className="w-full max-w-[1280px] relative m-auto">
+          {HERO_PROJECTS.map((project) => (
+            <HeroProjectCard
+              key={project.id}
+              project={project}
+              onClick={() => handleCardClick(project)}
+              onActivate={() => setActivePigment(project.pigment)}
+            />
+          ))}
+        </div>
 
         {/* Pigment selector — vertical, right edge. */}
         <PigmentSelector

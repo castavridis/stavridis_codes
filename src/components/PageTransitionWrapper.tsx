@@ -5,9 +5,9 @@ import { routes } from '../routes.js';
 import { useTransition } from './RadialTransition';
 
 const PROJECT_HREFS: Record<string, string> = {
-  'proj-careSignal-ds': routes.blogPost.href({ slug: 'caresignal-design-system' }),
-  'proj-careSignal-ai': routes.blogPost.href({ slug: 'caresignal-ai' }),
-  'proj-sol-lewitt': routes.blogPost.href({ slug: 'sol-lewitt' }),
+  'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
+  'proj-careSignal-ai': routes.project.href({ slug: 'caresignal-ai' }),
+  'proj-sol-lewitt': routes.project.href({ slug: 'sol-lewitt' }),
 };
 
 export default function PageTransitionWrapper({
