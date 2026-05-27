@@ -66,7 +66,7 @@ export function Patients () {
           alt="An example of patient data, alerts, and triage statuses displayed together."
           />
       </MDXColumn>
-      <MDXColumn span={3} start={8}>
+      <MDXColumn span={3} start={9}>
         <ProjectDescription>
         <ProjectSubheader>Patients</ProjectSubheader>
           <p>

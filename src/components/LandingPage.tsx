@@ -435,7 +435,7 @@ export default function LandingPage({ onCardClick, onCardHover, paused = false, 
 const BRUSH_MIN = 16;
 const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
-const BRUSH_DEFAULT = 80;
+const BRUSH_DEFAULT = 160;
 
 function Hero({ onCardClick, onCardHover, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
@@ -544,7 +544,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     const wash = Washes.create(host, {
       cursorPreview: false,
       pointer: true,
-      scale: 2,
+      scale: 1.5,
     });
     heroWashRef.current = wash;
     (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
@@ -586,6 +586,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     wash.fadeHalfLife(10000);
     wash.fadePainting(0.05);
     wash.pigment("rose" as PigmentOption);
+    wash.continuousFlow(false);
+    wash.keepSimulating(true);
     // The background (day phase) + animation (weather) are applied by the
     // effect below once state settles; see the [dayPhase, weather] effect.
 
