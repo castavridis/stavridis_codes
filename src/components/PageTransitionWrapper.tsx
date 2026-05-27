@@ -15,10 +15,12 @@ export default function PageTransitionWrapper({
 }: {
   paused?: boolean;
 }): React.ReactElement {
-  const { start } = useTransition();
+  const { start, phase } = useTransition();
+  const transitioning = phase.kind === 'opening' || phase.kind === 'open';
   return (
     <LandingPage
       paused={paused}
+      transitioning={transitioning}
       onCardClick={(id) => {
         const href = PROJECT_HREFS[id];
         if (href) start(href);

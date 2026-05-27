@@ -22,12 +22,12 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
     "cursor-pointer font-mono text-[12px] leading-normal text-[#7d7d7d] mix-blend-difference text-right transition-colors hover:text-black";
 
   return (
-    <article>
+    <article style={{ color: project.color }}>
       <div className="mx-auto max-w-[1280px] px-18 pt-4">
         <header className="grid grid-cols-12 pb-12">
           <div className="col-span-12 md:col-span-6 md:col-start-4">
             <div>
-              <ProjectNavigation closeElement={
+              <ProjectNavigation color={project.color} closeElement={
                 onBack ? (
                   <button type="button" className={backClassName} onClick={onBack}>
                     Close project
@@ -48,7 +48,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
           </div>
         </header>
       </div>
-      <div className="prose prose-gray mt-8 max-w-none bg-[rgb(251,246,234)]">
+      <div className="prose prose-gray mt-8 max-w-none" style={{ backgroundColor: project.background }}>
         <div className="max-w-[1280px] mx-auto p-18">
           <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
             <ProjectContent project={project} />

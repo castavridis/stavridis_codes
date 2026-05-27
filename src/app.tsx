@@ -7,6 +7,7 @@ import {
   useTransition,
   type Phase,
 } from './components/RadialTransition';
+import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 
@@ -92,6 +93,9 @@ function ProjectRouter({ phase }: { phase: Phase }) {
 
   if (!slug) return null;
 
+  const project = getProject(slug);
+  const background = project?.background ?? '#fbf6ea';
+
   // Direct-load (e.g. shared link): show project without animation.
   if (isDirectLoad) {
     return (
@@ -101,7 +105,7 @@ function ProjectRouter({ phase }: { phase: Phase }) {
           inset: 0,
           zIndex: 50,
           overflow: 'auto',
-          backgroundColor: '#fbf6ea',
+          backgroundColor: background,
         }}
       >
         <Suspense fallback={<RoutePending />}>
@@ -118,7 +122,7 @@ function ProjectRouter({ phase }: { phase: Phase }) {
   }
 
   return (
-    <ProjectOverlay>
+    <ProjectOverlay background={background}>
       <Suspense fallback={<RoutePending />}>
         <ProjectPost slug={slug} onBack={close} />
       </Suspense>

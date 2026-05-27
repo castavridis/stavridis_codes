@@ -29,7 +29,7 @@ export function DesignDetails () {
     <>
       <MDXWrapper>
         <MDXColumn span={12}>
-          <ProjectSubheader className="text-center">Design Details</ProjectSubheader>
+          <ProjectSubheader className="text-center text-cs-white">Design Details</ProjectSubheader>
         </MDXColumn>
       </MDXWrapper>
       <MDXWrapper>

@@ -154,10 +154,15 @@ function ease(t: number): number {
 
 const FEATHER_PX = 80;
 
-// Background color endpoints — the overlay bg blends between the landing
-// page's dark tone and the project page's cream during the mask animation.
-const DARK_RGB = [37, 25, 0] as const;   // rgb(37,25,0)  — #251900
-const CREAM_RGB = [251, 246, 234] as const; // rgb(251,246,234) — #fbf6ea
+const DARK_RGB = [37, 25, 0] as const;
+
+function hexToRgb(hex: string): readonly [number, number, number] {
+  const h = hex.replace('#', '');
+  const full = h.length === 3
+    ? h.split('').map(c => parseInt(c + c, 16))
+    : [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  return full as unknown as readonly [number, number, number];
+}
 
 function lerpRgb(a: readonly number[], b: readonly number[], t: number): string {
   const r = Math.round(a[0] + (b[0] - a[0]) * t);
@@ -168,8 +173,10 @@ function lerpRgb(a: readonly number[], b: readonly number[], t: number): string 
 
 export function ProjectOverlay({
   children,
+  background = '#fbf6ea',
 }: {
   children: ReactNode;
+  background?: string;
 }): ReactElement | null {
   const { phase, advanceOpen, advanceClose } = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -210,9 +217,10 @@ export function ProjectOverlay({
     const durationMs = phase.kind === 'opening' ? EXPAND_MS : CONTRACT_MS;
     const endCb = phase.kind === 'opening' ? advanceOpen : advanceClose;
     onEndRef.current = endCb;
+    const projectRgb = hexToRgb(background);
 
     // Set the initial mask so there's no unmasked flash before the first tick.
-    applyMask(el, x, y, 0, mode, 0);
+    applyMask(el, x, y, 0, mode, 0, projectRgb);
 
     const start = performance.now();
 
@@ -222,7 +230,7 @@ export function ProjectOverlay({
       const eased = ease(t);
       const r = eased * maxR;
 
-      applyMask(el, x, y, r, mode, eased);
+      applyMask(el, x, y, r, mode, eased, projectRgb);
 
       if (t < 1) {
         rafRef.current = requestAnimationFrame(tick);
@@ -246,7 +254,7 @@ export function ProjectOverlay({
         inset: 0,
         zIndex: 50,
         overflow: 'auto',
-        backgroundColor: '#fbf6ea',
+        backgroundColor: background,
         willChange: phase.kind === 'open' ? 'auto' : 'mask-image',
       }}
     >
@@ -262,18 +270,17 @@ function applyMask(
   r: number,
   mode: 'reveal' | 'dissolve',
   progress: number,
+  projectRgb: readonly [number, number, number],
 ) {
   let mask: string;
   if (mode === 'reveal') {
     const inner = Math.max(0, r - FEATHER_PX);
     mask = `radial-gradient(circle at ${x}px ${y}px, black ${inner}px, transparent ${r}px)`;
-    // Dark → cream as the project page reveals.
-    el.style.backgroundColor = lerpRgb(DARK_RGB, CREAM_RGB, progress);
+    el.style.backgroundColor = lerpRgb(DARK_RGB, projectRgb, progress);
   } else {
     const outer = r + FEATHER_PX;
     mask = `radial-gradient(circle at ${x}px ${y}px, transparent ${r}px, black ${outer}px)`;
-    // Cream → dark as the project page dissolves.
-    el.style.backgroundColor = lerpRgb(CREAM_RGB, DARK_RGB, progress);
+    el.style.backgroundColor = lerpRgb(projectRgb, DARK_RGB, progress);
   }
   el.style.maskImage = mask;
   el.style.webkitMaskImage = mask;

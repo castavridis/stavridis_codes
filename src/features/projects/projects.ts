@@ -4,6 +4,8 @@ export type ProjectFrontmatter = {
   title: string;
   date: string;
   summary: string;
+  background?: string;
+  color?: string;
 };
 
 export type Project = ProjectFrontmatter & {

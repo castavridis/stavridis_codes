@@ -413,12 +413,12 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
 // `onCardClick` is forwarded to the hero project cards so a host wrapper can
 // swap to a project view on click. Optional — the page works standalone.
 // `paused` freezes the Washes canvas when a project overlay covers the page.
-type LandingPageProps = { onCardClick?: (id: string) => void; paused?: boolean };
+type LandingPageProps = { onCardClick?: (id: string) => void; paused?: boolean; transitioning?: boolean };
 
-export default function LandingPage({ onCardClick, paused = false }: LandingPageProps = {}): React.ReactElement {
+export default function LandingPage({ onCardClick, paused = false, transitioning = false }: LandingPageProps = {}): React.ReactElement {
   return (
     <div className="font-body relative w-full overflow-hidden text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
-      <Hero onCardClick={onCardClick} paused={paused} />
+      <Hero onCardClick={onCardClick} paused={paused} transitioning={transitioning} />
       <CreativeToolsSection />
       <Footer />
       <HorseTab />
@@ -437,7 +437,7 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 80;
 
-function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => void; paused?: boolean }): React.ReactElement {
+function Hero({ onCardClick, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -753,6 +753,16 @@ function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => v
 
   const activeColor = PIGMENTS[activePigment].color;
 
+  const introSpring = useSpring({
+    opacity: transitioning ? 0 : 1,
+    config: { tension: 280, friction: 30 },
+  });
+  const cardsSpring = useSpring({
+    opacity: transitioning ? 0 : 1,
+    transform: transitioning ? 'translateY(60px)' : 'translateY(0px)',
+    config: { tension: 220, friction: 26 },
+  });
+
   return (
     <>
       <section
@@ -803,16 +813,16 @@ function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => v
         />
 
         {/* Intro blurb. */}
-        <div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[315px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black">
+        <animated.div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[315px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
           <p className="font-display text-[24px]">I’m C Stavridis,</p>
           <p className="font-body text-[18px] leading-[24px]">
             an AI-Native Design Engineer who loves turning complex ideas into
             warm, approachable products.
           </p>
-        </div>
+        </animated.div>
 
         {/* Project cards. */}
-        <div className="w-full max-w-[1280px] relative m-auto">
+        <animated.div className="w-full max-w-[1280px] relative m-auto" style={cardsSpring}>
           {HERO_PROJECTS.map((project) => (
             <HeroProjectCard
               key={project.id}
@@ -821,7 +831,7 @@ function Hero({ onCardClick, paused = false }: { onCardClick?: (id: string) => v
               onActivate={() => setActivePigment(project.pigment)}
             />
           ))}
-        </div>
+        </animated.div>
 
         {/* Pigment selector — vertical, right edge. */}
         <PigmentSelector
