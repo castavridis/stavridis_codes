@@ -20,6 +20,38 @@ const SPAN = {
 
 type Span = keyof typeof SPAN;
 
+const START = {
+  1: 'md:col-start-1',
+  2: 'md:col-start-2',
+  3: 'md:col-start-3',
+  4: 'md:col-start-4',
+  5: 'md:col-start-5',
+  6: 'md:col-start-6',
+  7: 'md:col-start-7',
+  8: 'md:col-start-8',
+  9: 'md:col-start-9',
+  10: 'md:col-start-10',
+  11: 'md:col-start-11',
+} as const;
+
+type Start = keyof typeof START;
+
+const END = {
+  2: 'md:col-end-2',
+  3: 'md:col-end-3',
+  4: 'md:col-end-4',
+  5: 'md:col-end-5',
+  6: 'md:col-end-6',
+  7: 'md:col-end-7',
+  8: 'md:col-end-8',
+  9: 'md:col-end-9',
+  10: 'md:col-end-10',
+  11: 'md:col-end-11',
+  12: 'md:col-end-12',
+} as const;
+
+type End = keyof typeof END;
+
 // A 12-column grid container. Place one or more <MDXColumn> children inside it.
 // The surrounding `.prose` (see blog-post.tsx) cascades into the columns via
 // descendant selectors, so markdown inside still gets typography styles.
@@ -30,6 +62,9 @@ export function MDXWrapper({ children }: { children: ReactNode }) {
 // A single grid item spanning `span` of 12 columns. Wrap markdown in exactly one
 // of these — a markdown block expands into many sibling elements, and the column
 // needs a single element to carry the span.
-export function MDXColumn({ span = 12, children }: { span?: Span; children: ReactNode }) {
-  return <div className={SPAN[span]}>{children}</div>;
+export function MDXColumn({ span = 12, start, end, children }: { span?: Span; start?: Start; end?: End; children: ReactNode }) {
+  let classes: string = SPAN[span];
+  if (start) { classes = classes.concat(" ", START[start]) }
+  if (end) { classes = classes.concat(" ", END[end]) }
+  return <div className={classes}>{children}</div>;
 }
