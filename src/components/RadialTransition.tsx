@@ -163,7 +163,7 @@ function lerpRgb(a: readonly number[], b: readonly number[], t: number): string 
   const r = Math.round(a[0] + (b[0] - a[0]) * t);
   const g = Math.round(a[1] + (b[1] - a[1]) * t);
   const bl = Math.round(a[2] + (b[2] - a[2]) * t);
-  return `rgb(${r},${g},${bl})`;
+  return `rgba(${r},${g},${bl},0.75)`;
 }
 
 export function ProjectOverlay({
@@ -198,7 +198,7 @@ export function ProjectOverlay({
       // Fully open — clear the mask, ensure cream background.
       el.style.maskImage = 'none';
       el.style.webkitMaskImage = 'none';
-      el.style.backgroundColor = '#fbf6ea';
+      // el.style.backgroundColor = '#fbf6ea';
       return;
     }
 

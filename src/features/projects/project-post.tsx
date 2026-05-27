@@ -22,27 +22,38 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
     "cursor-pointer font-mono text-[12px] leading-normal text-[#7d7d7d] mix-blend-difference text-right transition-colors hover:text-black";
 
   return (
-    <article className="mx-auto max-w-[1280px] px-18 py-12">
-      <div className="grid grid-cols-12">
-        <ProjectNavigation closeElement={
-          onBack ? (
-            <button type="button" className={backClassName} onClick={onBack}>
-              Close project
-            </button>
-          ) : (
-            <Link className={backClassName} href={routes.home.href()}>
-              Back home
-            </Link>
-          )}
-        />
+    <article className="pb-12">
+      <div className="mx-auto max-w-[1280px] px-18 pt-4">
+        <header className="grid grid-cols-12 pb-12">
+          <div className="col-span-12 md:col-span-6 md:col-start-4">
+            <div>
+              <ProjectNavigation closeElement={
+                onBack ? (
+                  <button type="button" className={backClassName} onClick={onBack}>
+                    Close project
+                  </button>
+                ) : (
+                  <Link className={backClassName} href={routes.home.href()}>
+                    Back home
+                  </Link>
+                )}
+              />
+            </div>
+            <h1 className="font-display text-2xl mt-14">
+              {project.summary}
+            </h1>
+            <p className="font-mono text-xs text-gray-600 mt-4">
+              Product Design &middot; Front-End Engineering
+            </p>
+          </div>
+        </header>
       </div>
-      <header className="border-b border-gray-200 pb-8">
-        <p className="max-w-2xl text-lg text-gray-600">{project.summary}</p>
-      </header>
-      <div className="prose prose-gray mt-8 max-w-none">
-        <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
-          <ProjectContent project={project} />
-        </Suspense>
+      <div className="prose prose-gray mt-8 max-w-none bg-[rgb(251,246,234)]">
+        <div className="max-w-[1280px] mx-auto p-18">
+          <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
+            <ProjectContent project={project} />
+          </Suspense>
+        </div>
       </div>
     </article>
   );
