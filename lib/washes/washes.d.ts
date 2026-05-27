@@ -7,15 +7,13 @@
 // helpers, debug methods (`_debug_*`), and private state are intentionally
 // omitted.
 //
-// Authored against lib v0.85. When the lib adds new public methods, add
+// Authored against lib v0.98. When the lib adds new public methods, add
 // them here. Methods removed from the lib should be removed here too —
 // keep this file in sync with the actual API.
 
 // =============================================================================
 // Core types
 // =============================================================================
-
-import type { GpuSimHandle } from "./washes-gpu-sim";
 
 /** Pigment slot index. 0 = quinacridone rose, 1 = hansa yellow, 2 = cerulean blue. */
 export type PigmentIndex = 0 | 1 | 2;
@@ -27,8 +25,12 @@ export type PigmentIndex = 0 | 1 | 2;
  * - `'lift'`: removes pigment from cells it touches.
  * - `'rainbow'`: time-varying rainbow color from a phase-shifted palette.
  * - `'mask'`: paints into the freeze-mask layer (cells that flow skips).
+ * - `'paper'`: erase brush; clears deposited + suspended pigment in the
+ *   footprint and adds wetness for a wash effect. (v0.32)
+ * - `'ink'`: single-channel ink layer that renders as a darkening multiplier
+ *   on top of K-M pigment. Default load: dense + low-bleed. (v0.97)
  */
-export type NamedBrush = "water" | "lift" | "rainbow" | "mask";
+export type NamedBrush = 'water' | 'lift' | 'rainbow' | 'mask' | 'paper' | 'ink';
 
 /**
  * Anything pigment-shaped that the lib will accept. Numbers select a pigment
@@ -37,46 +39,33 @@ export type NamedBrush = "water" | "lift" | "rainbow" | "mask";
  */
 export type PigmentOption =
   | PigmentIndex
-  | "rose"
-  | "yellow"
-  | "blue"
-  | "quinacridone-rose"
-  | "hansa-yellow"
-  | "cerulean-blue"
+  | 'rose' | 'yellow' | 'blue'
+  | 'quinacridone-rose' | 'hansa-yellow' | 'cerulean-blue'
   | NamedBrush;
 
 /** Advection scheme used by `movePigment()`. */
-export type AdvectionMode = "standard" | "clamp" | "substep" | "semilag";
+export type AdvectionMode = 'standard' | 'clamp' | 'substep' | 'semilag';
 
 /**
  * Edge boundary behavior. See the Open Boundaries section in the docs.
  *
- * - `'closed'`: walls reflect (mass conserved).
+ * - `'closed'`: walls reflect (mass conserved); no gravity bias applied.
+ * - `'closed-gravity'`: walls reflect (no drainage), but gravity bias IS
+ *   applied. Pigment piles at downwind edges; pair with `edgeFade()` to
+ *   hide the buildup visually. (v0.88)
  * - `'open'`: all edges drain; no ambient bias.
  * - `'gravity'`: edges open in the direction of gravity, with active bias.
  */
-export type EdgeMode = "closed" | "closed-gravity" | "open" | "gravity";
+export type EdgeMode = 'closed' | 'closed-gravity' | 'open' | 'gravity';
 
 /**
- * Direction of the gravity velocity bias. 8-compass plus two radial modes.
- * `'radial'` points outward from canvas center per-cell (mass drains toward edges);
- * `'radial-in'` points inward toward canvas center per-cell (mass piles toward center).
- *
- * In `'gravity'` edge mode, `'radial'` opens all four edges, `'radial-in'` keeps
- * them all closed (it's pointless to open edges when the bias pulls mass away
- * from them — opening would just leak mass that should have stayed put).
+ * Direction of the gravity velocity bias. 8-compass plus `'radial'`,
+ * which per-cell points outward from canvas center.
  */
 export type GravityDirection =
-  | "up"
-  | "up-right"
-  | "right"
-  | "down-right"
-  | "down"
-  | "down-left"
-  | "left"
-  | "up-left"
-  | "radial"
-  | "radial-in";
+  | 'up' | 'up-right' | 'right' | 'down-right'
+  | 'down' | 'down-left' | 'left' | 'up-left'
+  | 'radial';
 
 /**
  * Gouache rendering mode.
@@ -85,28 +74,39 @@ export type GravityDirection =
  * - `true`: opaque gouache pigments.
  * - `'auto'`: LERP between watercolor and gouache based on paper darkness.
  */
-export type GouacheMode = boolean | "auto";
+export type GouacheMode = boolean | 'auto';
 
-/** Pause options (v0.90). */
-export interface PauseOptions {
-  /**
-   * If true, pointer input is still accepted while paused — the user
-   * can paint deposits onto the frozen canvas, which become visible
-   * immediately but don't evolve via the sim until `resume()` is
-   * called. If false (default), pointer input is ignored entirely
-   * while paused.
-   */
-  acceptInput?: boolean;
-}
+/**
+ * Brush mode — first-class brush behavior alongside pigment selection.
+ * Composes with K-M pigments (rose/yellow/blue); ink/water/lift/mask/paper
+ * brushes ignore the mode. (v0.98)
+ *
+ * - `'wet'`: default — normal pigment deposition.
+ * - `'crayon'` (alias `'dry'`): paper-tooth rejection + bristle skip +
+ *   motion-direction anisotropy. Streaky, textured look.
+ * - `'dryBrush'`: similar to crayon but tuned for low-load broken color.
+ * - `'salt'`: granular dispersion as if salt were sprinkled into a wash.
+ * - `'splatter'`: scattered offset deposits — flicked-brush feel.
+ */
+export type BrushMode = 'wet' | 'crayon' | 'dry' | 'dryBrush' | 'salt' | 'splatter';
 
-/** Return value of `wc.paused()` — falsy when running, object when paused. */
-export type PauseState = false | { acceptInput: boolean };
+/**
+ * Named quality presets. Each bundles `scale`, `advectionMode`, and a
+ * couple of feature toggles into a single setting. (v0.89)
+ */
+export type QualityPreset = 'high' | 'medium' | 'low' | 'minimum';
 
-/** Quality preset bundling cost-vs-quality knobs (v0.89). */
-export type QualityPreset = "high" | "medium" | "low" | "minimum";
+/** Intensity tier passed to `obliterate({ intensity })`. */
+export type ObliterateIntensity = 'gentle' | 'normal' | 'extreme';
 
-/** Hint for picking an initial quality preset based on a static device signal (v0.89). */
-export type QualityHint = "auto-mobile";
+/** Mode for `obliterate()` — how the painting gets destroyed. */
+export type ObliterateMode = 'water' | 'pigment' | 'paper';
+
+/**
+ * Color accepted by `wetnessHeatmap()`. Either a CSS-style hex string
+ * (`'#rgb'` or `'#rrggbb'`) or an `[r, g, b]` triple of 0..255 ints.
+ */
+export type HeatmapColor = string | [number, number, number];
 
 // =============================================================================
 // Splash / brush input shapes
@@ -119,12 +119,7 @@ export type QualityHint = "auto-mobile";
 export interface SplashEpicenter {
   x: number;
   y: number;
-  /**
-   * Outward radial velocity at the epicenter. Default ~40.
-   * Below 5 is gentle; above 60 is dramatic.
-   * @minimum 0
-   * @maximum 200
-   */
+  /** Outward radial velocity at the epicenter. Default ~40. */
   velocity?: number;
 }
 
@@ -133,44 +128,24 @@ export interface SplashEpicenter {
  * library's current configuration (radius, pressure, etc.).
  */
 export interface SplashOptions {
-  /**
-   * Outer ring radius in display pixels.
-   * @minimum 1
-   * @maximum 2000
-   */
+  /** Outer ring radius in display pixels. */
   radius?: number;
-  /**
-   * Peak pressure at the epicenter. Drives the initial outward push.
-   * @minimum 0
-   * @maximum 100
-   */
+  /** Peak pressure at the epicenter. Drives the initial outward push. */
   pressure?: number;
-  /**
-   * Per-frame pressure decay multiplier. Range (0, 1]. Default ~0.94.
-   * @minimum 0.5
-   * @maximum 1
-   */
+  /** Per-frame pressure decay multiplier. Range (0, 1]. Default ~0.94. */
   liftRate?: number;
   /** Angular offset for ray patterns, radians. */
   angleOffset?: number;
-  /**
-   * Random jitter on epicenter position, 0..1.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** Random jitter on epicenter position, 0..1. */
   jitter?: number;
-  /**
-   * Number of rays in the splash pattern. 1 = pure circular.
-   * @minimum 1
-   * @maximum 64
-   */
+  /** Number of rays in the splash pattern. 1 = pure circular. */
   rays?: number;
   /** Pigment used by this splash. Default = active brush pigment. */
   pigment?: PigmentOption;
 }
 
 /** Style of splash. Different presets shape the radial profile differently. */
-export type SplashStyle = "deluge" | "splash" | "spray";
+export type SplashStyle = 'deluge' | 'splash' | 'spray';
 
 // =============================================================================
 // SVG / image / text rendering
@@ -183,80 +158,35 @@ export type SplashStyle = "deluge" | "splash" | "spray";
 export interface TraceSVGOptions {
   /** Pigment to use for paths without a recognized fill/stroke color. */
   pigment?: PigmentOption;
-  /**
-   * Display-pixel brush size while tracing.
-   * @minimum 1
-   * @maximum 2000
-   */
+  /** Display-pixel brush size while tracing. */
   brushSize?: number;
-  /**
-   * 0..1 stamp strength per point.
-   * @minimum 0
-   * @maximum 1
-   */
-  strength?: number;
+  /** Stroke speed in display pixels per second. */
+  speed?: number;
   /** Recognize chroma-key and pigment-hex colors as direct pigment assignments. Default true. */
   triggerColors?: boolean;
-  /** Recognize any color and decompose into pigment mix via subtractive theory. Default false. */
-  approximateColor?: boolean;
   /** Mirror the trace horizontally. */
   flipX?: boolean;
-  /** Mirror the trace vertically. Default true (SVG y-axis is screen-down). */
+  /** Mirror the trace vertically. */
   flipY?: boolean;
-  /**
-   * If false, paint every point synchronously in one frame — no animation.
-   * The drawn SVG appears whole instantly. (v0.90)
-   *
-   * Equivalent to the older `instant: true` option (kept for backward compat).
-   * When false, any `durationMs` is ignored since there's nothing to animate.
-   */
-  animate?: boolean;
-  /** @deprecated Use `animate: false` instead. */
-  instant?: boolean;
-  /**
-   * Spread the trace over roughly this many ms with easing.
-   * Mutually exclusive with `animate: false` (the latter wins).
-   * @minimum 1
-   * @maximum 600000
-   */
-  durationMs?: number;
-  /** Easing curve when durationMs is set. */
-  easing?: "linear" | "easeIn" | "easeOut" | "easeInOut" | "penStroke";
-  /**
-   * Pause N ms between each top-level path.
-   * @minimum 0
-   * @maximum 10000
-   */
-  perStrokePauseMs?: number;
-  /** Optional bounds (in grid coordinates) for the SVG to fit inside. */
-  bounds?: { x: number; y: number; w: number; h: number };
-  /** Called once when the trace completes. Only meaningful when animate is true. */
+  /** Multiplicative scale for the SVG path coordinates. */
+  scale?: number;
+  /** Translation in display pixels. */
+  translateX?: number;
+  translateY?: number;
+  /** Called once when the trace completes. */
   onComplete?: () => void;
 }
 
 /** Options for `paintImage`. Source can be a URL, a data URL, or an HTMLImageElement. */
 export interface PaintImageOptions {
   pigment?: PigmentOption;
-  /**
-   * @minimum 1
-   * @maximum 2000
-   */
   brushSize?: number;
-  /**
-   * 0..1 threshold for which pixels become pigment.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** 0..1 threshold for which pixels become pigment. */
   threshold?: number;
   flipX?: boolean;
   flipY?: boolean;
   /** Reverse light/dark mapping. */
   invert?: boolean;
-  /**
-   * Multiplicative scale for the image when stamping onto the canvas.
-   * @minimum 0.01
-   * @maximum 10
-   */
   scale?: number;
   translateX?: number;
   translateY?: number;
@@ -266,15 +196,7 @@ export interface PaintImageOptions {
 /** Options for `paintText`. */
 export interface PaintTextOptions {
   pigment?: PigmentOption;
-  /**
-   * @minimum 1
-   * @maximum 2000
-   */
   brushSize?: number;
-  /**
-   * @minimum 8
-   * @maximum 500
-   */
   fontSize?: number;
   fontFamily?: string;
   x?: number;
@@ -286,32 +208,14 @@ export interface PaintTextOptions {
 // Animation, visualization, time-wash
 // =============================================================================
 
-export type AnimationName = "off" | "breathe" | "drift" | "pulse" | string;
+export type AnimationName = 'off' | 'breathe' | 'drift' | 'pulse' | string;
 export interface AnimationOptions {
-  /**
-   * @minimum 0
-   * @maximum 10
-   */
   speed?: number;
-  /**
-   * @minimum 0
-   * @maximum 1
-   */
   amplitude?: number;
 }
 
-export type VisualizationName =
-  | "off"
-  | "velocity"
-  | "pressure"
-  | "wet"
-  | "mask"
-  | string;
+export type VisualizationName = 'off' | 'velocity' | 'pressure' | 'wet' | 'mask' | string;
 export interface VisualizationOptions {
-  /**
-   * @minimum 0
-   * @maximum 1
-   */
   opacity?: number;
 }
 
@@ -320,52 +224,107 @@ export interface VisualizationOptions {
 // =============================================================================
 
 export interface SketchModeOptions {
-  enabled?: boolean;
-  /**
-   * @minimum 0
-   * @maximum 1
-   */
-  strength?: number;
-  /**
-   * @minimum 0
-   * @maximum 1
-   */
-  paperContrast?: number;
+  /** Fine-tip brush size in display pixels. Default 7. */
+  brushSize?: number;
+  /** Per-stamp pigment density. Default 1.6 (denser than normal). */
+  paintLoad?: number;
+  /** Per-stamp water deposition. Default 0.25 (minimal moisture). */
+  waterLoad?: number;
+  /** Stamp strength. Default 0.95 (firm strokes). */
+  pressure?: number;
+  /** Wetness preset for the paper. Default `'boneDry'` (no bleed). */
+  paperWetness?: string;
 }
 
 export interface ObliterateOptions {
-  /**
-   * Duration of the obliterate animation, ms.
-   * @minimum 100
-   * @maximum 60000
-   */
-  duration?: number;
-  /** Easing function: 'linear' | 'ease-out' | 'cubic' or a custom (t: number) => number. */
-  easing?: string | ((t: number) => number);
-  onComplete?: () => void;
+  /** Destruction mode. `'water'` rinses; `'pigment'` covers in color; `'paper'` erases to paper. Default `'water'`. */
+  mode?: ObliterateMode;
+  /** Duration of the obliterate animation in ms. Default 500. */
+  durationMs?: number;
+  /** Epicenter X in grid coordinates. Default = grid center. */
+  x?: number;
+  /** Epicenter Y in grid coordinates. Default = grid center. */
+  y?: number;
+  /** Fraction of the shorter grid dimension used as the dab radius. Default 0.7. */
+  radiusFraction?: number;
+  /** Strength tier. `'gentle'` / `'normal'` / `'extreme'`. Default `'normal'`. */
+  intensity?: ObliterateIntensity;
+  /** Pigment used in `'pigment'` mode. Default = active brush pigment. */
+  pigment?: PigmentOption;
 }
+
+/**
+ * Options for `wetnessHeatmap()` when passed in object form. Equivalent
+ * to the (enabled, low, high) positional form. (v0.86)
+ */
+export interface WetnessHeatmapOptions {
+  enabled: boolean;
+  low?: HeatmapColor;
+  high?: HeatmapColor;
+}
+
+/**
+ * Options for `pause()`. (v0.90)
+ *
+ * When `acceptInput` is true, the sim is frozen (no flow / evaporation /
+ * animation) but the user can still deposit pigment via pointer or
+ * `splash` / `paintAt` / `traceSVG` — deposits sit inert until `resume()`.
+ */
+export interface PauseOptions {
+  acceptInput?: boolean;
+}
+
+/**
+ * Return value of `paused()`. `false` when running; otherwise an object
+ * describing the pause state. Lets callers write both
+ * `if (wc.paused()) …` and `wc.paused()?.acceptInput`.
+ */
+export type PausedState = false | { acceptInput: boolean };
 
 // =============================================================================
 // Performance metrics
 // =============================================================================
 
 export interface PerfMetrics {
+  /** Whether perf instrumentation is currently recording. */
+  enabled: boolean;
+  /** Frames per second averaged over the ring buffer. */
   fps: number;
-  p50: number;
-  p95: number;
-  p99: number;
+  /** 50th / 95th / 99th percentile frame time in ms. */
+  framep50: number;
+  framep95: number;
+  framep99: number;
+  /** Mean ms spent in the simulation step. */
+  sim: number;
+  /** Mean ms spent in the render step. */
+  render: number;
+  /** Mean ms spent in "extras" (animation step, visualization step, SVG trace). */
+  extra: number;
+  /** Mean ms spent in the post-render "wash" phase (time-wash, fade, etc.). */
+  wash: number;
+  /**
+   * Cells with content above threshold — what people intuitively mean by
+   * "active." Added in v0.48 to disambiguate from `activeRectCells`.
+   */
   activeCells: number;
-  activeCellsPct: number;
-  heapDeltaMB: number;
-  longAnimationFrames: number;
-  perPhaseMs: {
-    diffuse: number;
-    edge: number;
-    velocity: number;
-    advection: number;
-    transfer: number;
-    render: number;
-  };
+  /** Bounding-box area the sim iterates over per step. */
+  activeRectCells: number;
+  /** Total grid cell count (GW * GH). */
+  totalCells: number;
+  /** `activeCells / totalCells` as a percentage (0..100). */
+  activePct: number;
+  /** `activeRectCells / totalCells` as a percentage (0..100). */
+  activeRectPct: number;
+  /** Suspended-pigment mass across the entire grid. (v0.49) */
+  pigmentSuspended: number;
+  /** Deposited-pigment mass across the entire grid. (v0.49) */
+  pigmentDeposited: number;
+  /** `pigmentSuspended + pigmentDeposited`. (v0.49) */
+  pigmentTotal: number;
+  /** JS heap delta in MB since perf was activated. `null` if perf.memory isn't available (non-Chromium). */
+  heapDeltaMB: number | null;
+  /** Long Animation Frame count if PerformanceObserver supports it; `null` otherwise. */
+  longAnimationFrames: number | null;
 }
 
 // =============================================================================
@@ -375,22 +334,43 @@ export interface PerfMetrics {
 /**
  * Serializable subset of the lib's configuration. Round-trippable via
  * `getPreset()` and `applyPreset()`. Used for "save my current settings"
- * UX. Does NOT capture pigment fields — for that, use the canvas as an
- * image or call `state()` (which returns Float32Arrays not suitable for JSON).
+ * UX — JSON-stringifiable, suitable for `localStorage` or shareable URLs.
+ *
+ * Does NOT capture the painted artwork (`d[]` / `g[]` arrays — that's
+ * *content*, not settings), cursor state, system-dependent toggles
+ * (WebGL, mobile mode), or debug instrumentation (perf overlay). For the
+ * painted artwork, use the canvas as an image; `state()` returns
+ * Float32Arrays which aren't JSON-suitable.
+ *
+ * Versioned via `version: 1`. Forward-compat: unknown fields are
+ * preserved through round-trip and ignored by older readers.
  */
 export interface Preset {
+  /** Format version. Currently 1. */
+  version?: number;
+  // Brush
   pigment?: PigmentOption;
   brushSize?: number;
-  paperWetness?: string;
+  pressure?: number;
+  flow?: number;
+  paintLoad?: number;
+  waterLoad?: number;
+  // Paper / sim
+  paperColor?: { r: number; g: number; b: number };
   evaporation?: number;
-  edgeMode?: EdgeMode;
-  gravityDirection?: GravityDirection;
-  gravityStrength?: number;
-  velocityClamp?: number;
   gouacheMode?: GouacheMode;
+  edgeDarkening?: boolean;
+  pauseDrying?: boolean;
+  transparent?: boolean;
+  continuousFlow?: boolean;
+  // Fade
+  fadePainting?: boolean;
+  fadeHalfLifeMs?: number;
+  // Animation / visualization
+  animationMode?: AnimationName;
+  visualizationMode?: VisualizationName;
+  // Sim physics
   advectionMode?: AdvectionMode;
-  maskTint?: boolean;
-  webgl?: boolean;
   // Forward-compat: unknown keys are preserved through round-trip.
   [key: string]: unknown;
 }
@@ -404,18 +384,9 @@ export interface Preset {
  * are computed from the target element's size and the user's viewport.
  */
 export interface CreateOptions {
-  /**
-   * Pixels per simulation cell. Higher = lower-res, faster. Default = 1.75.
-   * URL `?scale=` also accepted.
-   * @minimum 1
-   * @maximum 6
-   */
+  /** Pixels per simulation cell. Higher = lower-res, faster. Default = 1.75. URL `?scale=` also accepted. */
   scale?: number;
-  /**
-   * Canvas DPI scale factor. Default = window.devicePixelRatio.
-   * @minimum 0.5
-   * @maximum 4
-   */
+  /** Canvas DPI scale factor. Default = window.devicePixelRatio. */
   canvasScale?: number;
   /** Force mobile-mode heuristics (palm rejection, etc.). Default auto-detected via `matchMedia('(pointer: coarse)')`. */
   mobile?: boolean;
@@ -427,14 +398,10 @@ export interface CreateOptions {
   continuousFlow?: boolean;
   /** Disable pointer event handling entirely. Useful for programmatic control. Default true. */
   pointer?: boolean;
-  /**
-   * Static hint for picking an initial quality preset (v0.89). Only
-   * 'auto-mobile' is currently supported, which raises starting
-   * `scale` for coarse-pointer devices. Any explicit `scale` option
-   * wins over the hint. Hint is one-shot — it doesn't enable runtime
-   * adaptation.
-   */
-  qualityHint?: QualityHint;
+  /** Initial paper color. Default = cream (≈ 0.98, 0.97, 0.92). Set later via {@link WashesInstance.paperColor}. */
+  paperColor?: { r: number; g: number; b: number };
+  /** Start with drying paused. Default false. Toggle later via {@link WashesInstance.pauseDrying}. */
+  pauseDrying?: boolean;
 }
 
 // =============================================================================
@@ -448,61 +415,52 @@ export interface CreateOptions {
  */
 export interface WashesInstance {
   // -----------------------------------------------------------------------
+  // Direct surface access
+  // -----------------------------------------------------------------------
+
+  /** The host element passed to `Washes.create()`. */
+  readonly target: HTMLElement;
+  /** The `<canvas>` element the lib appended into `target`. */
+  readonly canvas: HTMLCanvasElement;
+  /** Read-only grid dimensions in sim cells. */
+  readonly grid: {
+    readonly width: number;
+    readonly height: number;
+  };
+
+  // -----------------------------------------------------------------------
   // Painting input
   // -----------------------------------------------------------------------
 
   /** Inject a splash at one or more epicenters. */
-  splash(
-    epicenters: SplashEpicenter[],
-    style?: SplashStyle,
-    opts?: SplashOptions,
-  ): WashesInstance;
+  splash(epicenters: SplashEpicenter[], style?: SplashStyle, opts?: SplashOptions): WashesInstance;
+
+  /** List of named splash presets (e.g. `'default'`, `'bigSplash'`, `'fineSpritz'`). */
+  splashPresets(): string[];
+
+  /** Soak the entire canvas in water — reactivates any deposited pigment. */
+  rewet(): WashesInstance;
+
+  /** Force-evaporate all wetness. Pigment stays where it is. */
+  dry(): WashesInstance;
+
+  /** Clear the canvas and reset all sim fields to defaults. */
+  reset(): WashesInstance;
 
   /**
    * Programmatic paint stamp at grid coordinates (not display coordinates).
    * Use `toGrid(displayX, displayY)` to convert if you have display coords.
-   *
-   * @param gx grid X coordinate
-   * @param gy grid Y coordinate
-   * @param gridRadius radius in grid cells
-   * @param pigment optional pigment override (defaults to active)
-   * @param strength 0..1 stamp strength
    */
-  paintAt(
-    gx: number,
-    gy: number,
-    /**
-     * @minimum 0.5
-     * @maximum 200
-     */
-    gridRadius: number,
-    pigment?: PigmentOption,
-    /**
-     * @minimum 0
-     * @maximum 1
-     */
-    strength?: number,
-  ): WashesInstance;
+  paintAt(gx: number, gy: number, gridRadius: number, pigment?: PigmentOption, strength?: number): WashesInstance;
 
   /** Stamp text using the active brush. */
   paintText(text: string, opts?: PaintTextOptions): Promise<void>;
 
   /** Stamp an image using the active brush (light/dark map to pigment density). */
-  paintImage(
-    source: string | HTMLImageElement,
-    opts?: PaintImageOptions,
-  ): Promise<void>;
+  paintImage(source: string | HTMLImageElement, opts?: PaintImageOptions): Promise<void>;
 
-  /**
-   * Trace an SVG onto the canvas. Returns the total number of stamp
-   * points that will be (or were, for animate:false) painted. The
-   * actual painting either happens immediately (animate:false) or
-   * over multiple animation frames after this call returns.
-   *
-   * For Promise-based completion, listen on the host element for
-   * the 'svgtracedone' event, or pass an `onComplete` callback in opts.
-   */
-  traceSVG(svgText: string, opts?: TraceSVGOptions): number;
+  /** Trace an SVG, drawing each path with the active brush over time. */
+  traceSVG(svgText: string, opts?: TraceSVGOptions): Promise<void>;
   /** Cancel any in-flight SVG trace. */
   cancelSVGTrace(): WashesInstance;
 
@@ -510,11 +468,7 @@ export interface WashesInstance {
   // Brush state
   // -----------------------------------------------------------------------
 
-  /**
-   * Current brush diameter in display pixels. Default 28.
-   * @minimum 1
-   * @maximum 2000
-   */
+  /** Current brush diameter in display pixels. Default 28. */
   brushSize(v?: number): number;
 
   /**
@@ -529,33 +483,16 @@ export interface WashesInstance {
   /** Read-only list of available pigment indices. */
   pigments(): PigmentIndex[];
 
-  /**
-   * Paint load: how much pigment is delivered per stamp.
-   * @minimum 0.001
-   * @maximum 5
-   */
+  /** Paint load: how much pigment is delivered per stamp. 0..1. */
   paintLoad(v?: number): number;
 
-  /**
-   * Water load: how much water is delivered per stamp. v0.92 raised max to 8
-   * to support pooling effects.
-   * @minimum 0.2
-   * @maximum 8
-   */
+  /** Water load: how much water is delivered per stamp. 0..1. */
   waterLoad(v?: number): number;
 
-  /**
-   * Brush pressure: epicenter intensity multiplier.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** Brush pressure: epicenter intensity multiplier. */
   pressure(v?: number): number;
 
-  /**
-   * Flow rate: how quickly pigment spreads after stamping.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** Flow rate: how quickly pigment spreads after stamping. */
   flow(v?: number): number;
 
   /** Use pointer pressure (stylus) to modulate flow. Default true if supported. */
@@ -573,45 +510,84 @@ export interface WashesInstance {
   /** List available wetness presets. */
   paperWetnessPresets(): string[];
 
-  /**
-   * Direct evaporation rate. Higher = wash dries faster.
-   * Internally: rate = 0.9988^value. ~1 is very wet, ~50 is bone-dry.
-   * @minimum 0.1
-   * @maximum 200
-   */
+  /** Direct evaporation rate. Higher = wash dries faster. */
   evaporation(value?: number): number;
 
   /** Pause/resume the drying simulation. */
   pauseDrying(v?: boolean): boolean;
 
   /**
-   * Set paper color. Each channel is a normalized 0..1 float.
-   * @minimum 0
-   * @maximum 1
+   * Force the simulation to step every frame, even when the canvas is
+   * quiet (no fresh paint). Default false — the lib auto-idles after a
+   * brief grace period to save CPU/GPU. Set true to watch slow effects
+   * settle: wet dissipating, gravity drift continuing, edge darkening
+   * stabilizing. Independent of `pauseDrying`: `pauseDrying` freezes
+   * the evaporation phase only; `keepSimulating` re-runs every phase
+   * each frame.
    */
+  keepSimulating(v?: boolean): boolean;
+
+  // ─── GPU sim integration ───────────────────────────────────────────
+  /**
+   * Get the WebGL2 context + grid dimensions the lib uses for its
+   * render canvas, suitable for handing to `initGpuSim` from the
+   * `washes/gpu-sim` subpath. Returns `null` if WebGL2 is unavailable
+   * on this device.
+   */
+  gpuSimContext(): { gl: WebGL2RenderingContext; GW: number; GH: number } | null;
+
+  /**
+   * Activate GPU-backed simulation. Pass a handle returned by
+   * {@link initGpuSim} from the `washes/gpu-sim` module. After this
+   * call, every `paintAt`, `splash`, `rewet`, etc. routes through
+   * the GPU sim instead of the CPU loop. Pass `null` to disable
+   * and revert to CPU sim.
+   *
+   * Typical usage:
+   * ```ts
+   * import { initGpuSim } from 'washes/gpu-sim';
+   * const ctx = wc.gpuSimContext();
+   * if (ctx) {
+   *   const handle = initGpuSim(ctx.gl, ctx.GW, ctx.GH);
+   *   wc.gpuSim(handle);
+   *   wc.webgl(true);
+   * }
+   * ```
+   */
+  gpuSim(handle: object | null): WashesInstance;
+
+  /** Enable/disable the WebGL render path. Required for GPU sim output. */
+  webgl(v?: boolean): boolean;
+
+  /** Set paper color in 0..1 RGB. */
   paperColor(r: number, g: number, b: number): WashesInstance;
 
   /** Read the current rainbow brush color (for hover-state UI). */
   rainbowColor(): { r: number; g: number; b: number };
 
   // -----------------------------------------------------------------------
-  // Edge boundaries (v0.81-v0.84)
+  // Edge boundaries (v0.81-v0.88)
   // -----------------------------------------------------------------------
 
-  /** Edge boundary mode: closed, open, or gravity. */
+  /** Edge boundary mode: closed, closed-gravity, open, or gravity. */
   edgeMode(v?: EdgeMode): EdgeMode;
 
   /** Gravity direction (8-compass plus 'radial'). Ignored in `closed` mode. */
   gravityDirection(v?: GravityDirection): GravityDirection;
 
-  /**
-   * Gravity bias strength. 0 = no pull; ~0.10 = strong tilt; ~1.0 = max.
-   * Practical range: 0 to ~0.25. Values above 0.5 feel like the page is
-   * being shaken rather than tilted.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** Gravity bias strength. 0 = no pull; ~0.10 = strong tilt; ~1.0 = max. */
   gravityStrength(v?: number): number;
+
+  /**
+   * Smoothstep alpha falloff in the last N grid cells at each edge.
+   * 0 disables. Independent of edge mode — composes with any of them.
+   *
+   * Primary use case: pair with `'closed-gravity'` mode to get gravity
+   * dynamics without the visible edge buildup that closed-mode would
+   * otherwise show. The pigment is still mathematically present at the
+   * edge; the render just makes it transparent. (v0.88)
+   */
+  edgeFade(v?: number): number;
 
   /**
    * Per-cell velocity magnitude cap. Auto-computed from `scale` by default
@@ -620,23 +596,8 @@ export interface WashesInstance {
    *
    * Note: values above ~1.7 require semi-Lagrangian advection mode; donor-
    * cell modes will produce the cardinal-cross artifact above that bound.
-   * @minimum 0.5
-   * @maximum 7.5
    */
   velocityClamp(v?: number | null): number;
-
-  /**
-   * Render-time alpha falloff in the last N grid cells at each edge,
-   * using a smoothstep curve. The pigment is still mathematically
-   * present; the render just makes it transparent. 0 disables.
-   *
-   * Independent of edge mode — composes freely. Useful with
-   * 'closed-gravity' mode to get gravity dynamics without the
-   * visible edge buildup. (v0.88)
-   * @minimum 0
-   * @maximum 80
-   */
-  edgeFade(v?: number): number;
 
   // -----------------------------------------------------------------------
   // Rendering / display
@@ -658,110 +619,73 @@ export interface WashesInstance {
   /** Show the amber tint over masked cells. Default true. */
   maskTint(v?: boolean): boolean;
 
+  /**
+   * Wetness heatmap overlay. Visualizes the per-cell wet field as a
+   * two-color gradient on top of the painting. Cells below mask
+   * threshold render transparent so dry areas show through unchanged.
+   * Colors accept `'#rgb'`, `'#rrggbb'`, or `[r, g, b]` 0..255 arrays. (v0.86)
+   *
+   * - `wetnessHeatmap()` — returns current enabled state.
+   * - `wetnessHeatmap(true)` / `wetnessHeatmap(false)` — toggle.
+   * - `wetnessHeatmap(true, '#fcf3a7', '#296fa7')` — toggle + recolor.
+   * - `wetnessHeatmap({ enabled: true, low: '#abc', high: '#def' })` — object form.
+   */
+  wetnessHeatmap(): boolean;
+  wetnessHeatmap(enabled: boolean, low?: HeatmapColor, high?: HeatmapColor): boolean;
+  wetnessHeatmap(opts: WetnessHeatmapOptions): boolean;
+
   /** Toggle WebGL rendering. Falls back to CPU if WebGL2 isn't supported. */
   webgl(v?: boolean): boolean;
   /** Whether WebGL2 was available at init. */
   webglAvailable(): boolean;
   /** Debug: tint visible cells green so you can see the active region. */
   webglDebugTint(v?: boolean): boolean;
-  /** Debug: replace WebGL output with a checkerboard smoke test. */
-  webglSmokeTest(v?: boolean): boolean;
-  /** Debug: render the GPU sim pigment texture directly. */
-  webglGpuTextureTest(v?: boolean): boolean;
-  /** Debug: render the GPU sim fluid wet channel directly. */
-  webglGpuWetTextureTest(v?: boolean): boolean;
-  /** Debug: render the GPU sim fluid velocity channels directly. */
-  webglGpuVelocityTextureTest(v?: boolean): boolean;
-  /** Debug: apply GPU brush stamps without running simulation passes. */
-  gpuSimBrushOnlyTest(v?: boolean): boolean;
-  /** Debug: apply GPU brush stamps, then only transfer/evaporate/drain. */
-  gpuSimTransferOnlyTest(v?: boolean): boolean;
-  /** Debug: apply GPU brush stamps, then only wet diffusion. */
-  gpuSimWetDiffusionOnlyTest(v?: boolean): boolean;
-  /** Debug: apply GPU brush stamps, wet diffusion, then velocity update only. */
-  gpuSimVelocityOnlyTest(v?: boolean): boolean;
-  /** Debug: apply GPU brush stamps, wet diffusion, velocity, then pigment advection only. */
-  gpuSimAdvectionOnlyTest(v?: boolean): boolean;
-
-  /**
-   * GPU simulation path. Pass an initialized GpuSimHandle to enable,
-   * false/null to disable, true to re-enable (if handle was previously set),
-   * or call with no args to query the current state.
-   */
-  gpuSim(v?: GpuSimHandle | boolean | null): boolean;
-
-  /**
-   * Expose the WebGL2 context and grid dimensions so external code can
-   * initialize the GPU sim module without creating a second context.
-   * Returns null if WebGL2 is unavailable.
-   */
-  gpuSimContext(): {
-    gl: WebGL2RenderingContext;
-    GW: number;
-    GH: number;
-  } | null;
 
   /** Background transparent (canvas paper rendered transparent). */
   transparent(v?: boolean): boolean;
 
   /**
-   * Host-element CSS background (v0.89). Accepts any valid CSS
-   * background value: solid color, `linear-gradient(...)`,
-   * `radial-gradient(...)`, `url(...)`. Auto-enables transparent
-   * canvas mode so the background shows through pigment-less areas.
-   * Pass null or '' to clear.
+   * Host-element CSS background. Accepts any valid CSS background value:
+   * a solid color, `linear-gradient(...)`, `radial-gradient(...)`,
+   * `url(...)`, or any combination. Auto-enables transparent canvas mode
+   * so the background shows through pigment-less areas. Pass `null` or
+   * `''` to clear. (v0.89)
    *
-   * Pigment compositing (Kubelka-Munk) is unaffected — the gradient
-   * is purely a render-layer backdrop, not a physical paper tint.
+   * The painting itself is unaffected — pigment is still composited via
+   * Kubelka-Munk against the lib's internal paper color. The background
+   * only shows in regions where alpha is below the full-opacity threshold.
    */
   background(value?: string | null): string;
 
-  /**
-   * Apply a named quality preset bundling cost-vs-quality knobs
-   * (scale, advection mode, cursor preview, heatmap) into one call.
-   * No runtime adaptation — this is a manual knob. Pass nothing to
-   * read the most-recently-applied preset (null if none applied).
-   *
-   * - `'high'`    — scale 1.5, all features, fine grain.
-   * - `'medium'`  — scale 2.0, all features. Library default.
-   * - `'low'`     — scale 2.75, wetness heatmap forced off.
-   * - `'minimum'` — scale 3.5, donor-cell advection, no cursor
-   *                preview, no heatmap. WARNING: brings back the
-   *                cardinal-cross artifact (donor-cell).
-   */
-  quality(preset?: QualityPreset): QualityPreset | null;
-
-  /**
-   * Paper color/texture fade applied each frame to existing painted area.
-   * @minimum 0
-   * @maximum 1
-   */
+  /** Paper color/texture fade applied each frame to existing painted area. */
   fadePainting(v?: number): number;
-
-  /**
-   * Half-life of the fade-out, in milliseconds.
-   * @minimum 100
-   * @maximum 60000
-   */
+  /** Half-life of the fade-out (ms). */
   fadeHalfLife(ms?: number): number;
-
   /** Auto-fade the background between strokes. */
   autoDryBackground(v?: boolean): boolean;
 
-  /**
-   * Canvas resolution: display pixels per sim cell. Triggers a rescale event.
-   * Larger = lower-resolution sim = faster.
-   * @minimum 1
-   * @maximum 6
-   */
+  /** Canvas resolution: display pixels per sim cell. Triggers a rescale event. */
   scale(v?: number): number;
+  /** Canvas DPI scale factor. */
+  canvasScale(v?: number): number;
 
   /**
-   * Canvas DPI scale factor. Defaults to window.devicePixelRatio.
-   * @minimum 0.5
-   * @maximum 4
+   * Quality preset — bundles `scale`, `advectionMode`, and a couple of
+   * feature toggles. Calling with no arg returns the most-recently-applied
+   * preset name, or `null` if `quality()` has never been called. (v0.89)
+   *
+   * - `'high'` — scale 1.5, semi-Lagrangian advection. Best on desktop.
+   * - `'medium'` — scale 2.0, semi-Lagrangian. Library default-ish.
+   * - `'low'` — scale 2.75, semi-Lagrangian, heatmap forced off.
+   * - `'minimum'` — scale 3.5, donor-cell advection, no heatmap, no cursor.
+   *   WARNING: brings back the cardinal-cross artifact (donor-cell mode);
+   *   only use when frame budget is genuinely critical.
+   *
+   * Triggers a rescale + reallocation — expect a frame-or-two pause.
+   * Doesn't touch settings outside the preset's scope (gravity, edge mode,
+   * mask state, etc.).
    */
-  canvasScale(v?: number): number;
+  quality(preset?: QualityPreset): QualityPreset | null;
 
   /** Convert display coordinates to sim grid coordinates. */
   toGrid(displayX: number, displayY: number): { gx: number; gy: number };
@@ -773,14 +697,106 @@ export interface WashesInstance {
   /** Clear the freeze mask. */
   removeMask(): WashesInstance;
 
+  /**
+   * Stamp a rounded rectangle directly into the mask field. Crisper edges
+   * and faster than approximating with many overlapping
+   * `paintAt(MASK_INDEX)` circle stamps. (v0.95)
+   *
+   * Coordinates and dimensions are in display pixels (same coord space as
+   * `getBoundingClientRect`). `radii` follows the
+   * `CanvasRenderingContext2D.roundRect()` spec — a number for uniform
+   * corners or an array (`[tl, tr, br, bl]` etc.). Omit for square corners.
+   * Mask cells are set to 1.0 (fully frozen).
+   */
+  maskRect(
+    displayX: number,
+    displayY: number,
+    displayW: number,
+    displayH: number,
+    radii?: number | number[]
+  ): WashesInstance;
+
+  /**
+   * Inverse of `maskRect`. Clears mask cells inside a rounded rectangle so
+   * subsequent paint operations can deposit there. Useful for "open a
+   * window" effects in masked regions. (v0.96)
+   */
+  unmaskRect(
+    displayX: number,
+    displayY: number,
+    displayW: number,
+    displayH: number,
+    radii?: number | number[]
+  ): WashesInstance;
+
+  // -----------------------------------------------------------------------
+  // Ink layer (v0.97)
+  // -----------------------------------------------------------------------
+
+  /**
+   * Per-stamp ink paint load. Independent of `paintLoad()` which applies
+   * to K-M pigments. Default 1.0 (saturate immediately).
+   */
+  inkPaintLoad(v?: number): number;
+
+  /**
+   * Per-stamp ink water load. Independent of `waterLoad()` which applies
+   * to K-M pigments. Default 0.05 (minimal self-bleed).
+   */
+  inkWaterLoad(v?: number): number;
+
+  /** Zero out the ink field everywhere. */
+  clearInk(): WashesInstance;
+
+  // -----------------------------------------------------------------------
+  // Brush modes (v0.98)
+  // -----------------------------------------------------------------------
+
+  /**
+   * First-class brush behavior alongside pigment selection. Composes with
+   * K-M pigments (rose/yellow/blue) — ink/water/lift/mask/paper brushes
+   * ignore it. `'dry'` is a legacy alias for `'crayon'`.
+   */
+  brushMode(v?: BrushMode): BrushMode;
+
+  /**
+   * Composite "dryness" slider. 0..1. Drives the per-knob defaults below
+   * unless they're set individually.
+   */
+  dryness(v?: number): number;
+
+  /** Paper-tooth rejection strength. 0..1. Default 0.65. */
+  dryPaperReject(v?: number): number;
+  /** Motion-direction streak strength. 0..1. Default 0.6. */
+  dryAnisotropy(v?: number): number;
+  /** Fine random per-cell skip variance. 0..1. Default 0.5. */
+  dryBrushSkip(v?: number): number;
+
   // -----------------------------------------------------------------------
   // Composition modes
   // -----------------------------------------------------------------------
 
-  /** Sketch mode (paper-contrasting line drawing overlay). */
-  sketchMode(opts?: SketchModeOptions): SketchModeOptions;
+  /**
+   * Apply a bundle of brush + paper settings tuned for crisp fine-line
+   * drawings (felt-tip pen aesthetic). Pure setter — no separate mode
+   * flag. Any settings can be overridden afterward via the individual
+   * setter methods. Chainable: `wc.sketchMode().traceSVG(svg)`. (v0.30)
+   */
+  sketchMode(opts?: SketchModeOptions): WashesInstance;
 
-  /** Obliterate animation: progressively destroys the painting. */
+  /**
+   * Visually destroy the current drawing. Three modes:
+   *
+   * - `'water'` — splash water onto the canvas, lifting all deposited
+   *   pigment back into suspension. Best for "rinse" feel.
+   * - `'pigment'` — paint several large opaque dabs over the sketch in
+   *   the configured color. Best for "cover up" feel.
+   * - `'paper'` — paint several large dabs with the paper brush,
+   *   clearing the sketch back to paper color. Best for "erase" feel. (v0.32)
+   *
+   * Returns a Promise that resolves after `opts.durationMs` (default 500).
+   * (v0.30)
+   */
   obliterate(opts?: ObliterateOptions): Promise<void>;
 
   // -----------------------------------------------------------------------
@@ -796,10 +812,7 @@ export interface WashesInstance {
   getAnimation(): AnimationName;
 
   /** Toggle a debug visualization (velocity vectors, pressure heat, etc.). */
-  setVisualization(
-    name: VisualizationName,
-    opts?: VisualizationOptions,
-  ): WashesInstance;
+  setVisualization(name: VisualizationName, opts?: VisualizationOptions): WashesInstance;
   getVisualization(): VisualizationName;
 
   // -----------------------------------------------------------------------
@@ -831,15 +844,32 @@ export interface WashesInstance {
   buildPigmentSwatches(rootEl: HTMLElement): void;
 
   // -----------------------------------------------------------------------
+  // -----------------------------------------------------------------------
   // Export
   // -----------------------------------------------------------------------
 
-  /** Export the current canvas as a PNG blob. */
+  /**
+   * Export the current canvas. By default returns a data URL string;
+   * pass `asBlob: true` to receive a `Promise<Blob>` instead (more
+   * reliable for large canvases where data URLs may exceed browser
+   * limits).
+   *
+   * When `transparent` is omitted, defaults to the current `transparent()`
+   * setting. When `transparent: false` (or unspecified and the canvas
+   * isn't transparent), the lib composites the paper color underneath
+   * before encoding so the resulting image is self-contained.
+   */
   exportPNG(opts?: {
-    width?: number;
-    height?: number;
+    /** Force transparent background. Default: follows `transparent()` setting. */
     transparent?: boolean;
-  }): Promise<Blob>;
+    /** Return `Promise<Blob>` instead of a data URL string. (v0.64) */
+    asBlob?: boolean;
+    /** MIME type. Default `'image/png'`. */
+    mimeType?: string;
+    /** Encoder quality, 0..1, for lossy formats like `'image/jpeg'`. */
+    quality?: number;
+  }): string;
+  exportPNG(opts: { asBlob: true; transparent?: boolean; mimeType?: string; quality?: number }): Promise<Blob>;
 
   // -----------------------------------------------------------------------
   // Preset / state
@@ -850,44 +880,63 @@ export interface WashesInstance {
   /** Apply a previously-saved preset. */
   applyPreset(preset: Preset): WashesInstance;
 
-  /** Internal state object for debugging. Shape is intentionally unspecified. */
-  state(): Record<string, unknown>;
+  /**
+   * Lightweight state snapshot for debugging or UI display. NOT a full
+   * serialization — use `getPreset()` for settings round-trip and the
+   * canvas image for content.
+   */
+  state(): {
+    gridWidth: number;
+    gridHeight: number;
+    displayWidth: number;
+    displayHeight: number;
+    brushSize: number;
+    pigment: number;
+    canvasScale: number;
+    animationMode: AnimationName;
+    visualizationMode: VisualizationName;
+    backgroundRunning: boolean;
+    edgeDarkening: boolean;
+    fadePainting: boolean;
+    pauseDrying: boolean;
+    gouacheMode: GouacheMode;
+  };
 
   // -----------------------------------------------------------------------
-  // Lifecycle
+  // Pause / resume (v0.90)
   // -----------------------------------------------------------------------
 
   /**
-   * Pause the simulation (v0.90). Stops simStep, fadeStep, time-wash,
-   * animation, and visualization steps. The rAF loop continues so
-   * input still produces renders (when acceptInput is true) and so
-   * resume() takes effect on the next frame.
+   * Freeze the simulation. Stops sim step, fade, time-wash, and animation
+   * steps. The rAF loop continues so input can still produce renders
+   * (when `acceptInput` is true) and so `resume()` takes effect on the
+   * next frame.
    *
-   * Programmatic deposits (splash, paintAt, traceSVG) still work
-   * while paused — the pigment deposits visibly but doesn't evolve
-   * until resume(). With acceptInput: true, pointer input also
-   * deposits pigment.
+   * Pointer events are ignored when paused without `acceptInput`. With
+   * `acceptInput: true`, the user (or programmatic calls to `splash` /
+   * `paintAt` / `traceSVG`) can deposit new pigment; each deposit
+   * triggers a one-shot render so the user sees their stroke immediately,
+   * but the deposit sits inert until `resume()`.
    */
   pause(opts?: PauseOptions): WashesInstance;
 
   /**
-   * Resume from pause (v0.90). Adjusts wall-clock timer references
-   * for animations that were mid-flight at pause time so they pick
-   * up where they left off instead of jumping ahead by the pause
-   * duration.
+   * Resume from pause. Adjusts wall-clock timers for in-flight animations
+   * (e.g. SVG traces) so easing continues from where it was rather than
+   * jumping ahead by the pause duration.
    */
   resume(): WashesInstance;
 
   /**
-   * Pause state inspector (v0.90). Returns `false` when running,
-   * or `{ acceptInput: boolean }` when paused. The falsy-or-object
-   * return supports both:
-   * ```
-   * if (wc.paused()) { ... }
-   * const accepting = wc.paused() && wc.paused().acceptInput;
-   * ```
+   * Pause state inspector. Returns `false` when running; otherwise
+   * `{ acceptInput }`. Designed so callers can write both
+   * `if (wc.paused()) …` and `wc.paused()?.acceptInput`.
    */
-  paused(): PauseState;
+  paused(): PausedState;
+
+  // -----------------------------------------------------------------------
+  // Lifecycle
+  // -----------------------------------------------------------------------
 
   /** Tear down event listeners and free resources. */
   destroy(): void;
@@ -899,8 +948,13 @@ export interface WashesInstance {
 
 /**
  * The Washes constructor namespace, as imported from `'washes'` or as the
- * `window.Washes` global. The lib doesn't expose a `class Washes`; instead
- * it exposes a `create()` factory function on this object.
+ * `window.Washes` / `window.Watercolor` global. The lib doesn't expose a
+ * `class Washes`; instead it exposes a `create()` factory function on
+ * this object.
+ *
+ * `Watercolor` is the long-standing internal name; `Washes` is the
+ * user-facing brand alias added in v0.53. Both globals refer to the same
+ * factory.
  */
 export interface WashesStatic {
   /**
@@ -913,26 +967,39 @@ export interface WashesStatic {
    *   gouacheMode: 'auto',
    * });
    * wc.splash([{ x: 200, y: 200, velocity: 40 }], 'deluge');
+   *
+   * // v0.98 brush modes compose with K-M pigments:
+   * wc.pigment('blue').brushMode('crayon').dryness(0.8);
    */
   create(target: HTMLElement, options?: CreateOptions): WashesInstance;
 
-  /** Library version, e.g. "0.85.0". */
+  /**
+   * Runtime version string, e.g. `'0.98.0'`. Useful as a console
+   * sanity check after loading the file — if your demo errors out
+   * with "wc.someV098Method is not a function", confirm
+   * `Washes.version` first; if it's not what you expect, the browser
+   * is loading an older cached or co-located copy of the lib.
+   */
   readonly version: string;
 }
 
 /** Default export: the WashesStatic namespace. */
 declare const Washes: WashesStatic;
-export { Washes };
+/** Long-standing alias for {@link Washes}. Same factory, different name. */
+declare const Watercolor: WashesStatic;
+export { Washes, Watercolor };
 export default Washes;
 
 // =============================================================================
-// Global augmentation — the lib also attaches `window.Washes` for use in
-// no-bundler / classic-script contexts. TypeScript users who pull the lib
-// via a script tag rather than `import` can rely on this global.
+// Global augmentation — the lib attaches both `window.Washes` and
+// `window.Watercolor` for use in no-bundler / classic-script contexts.
+// TypeScript users who pull the lib via a script tag rather than `import`
+// can rely on these globals.
 // =============================================================================
 
 declare global {
   interface Window {
     Washes: WashesStatic;
+    Watercolor: WashesStatic;
   }
 }
