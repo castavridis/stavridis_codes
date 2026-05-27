@@ -730,23 +730,38 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   }, [locationIdx, refreshWeather, wipeCanvas]);
 
   const cycleWeather = useCallback(() => {
+    const nextWeather =
+      WEATHER_ORDER[(WEATHER_ORDER.indexOf(weather) + 1) % WEATHER_ORDER.length];
     wipeCanvas(() => {
-      setWeather(
-        (prev) =>
-          WEATHER_ORDER[(WEATHER_ORDER.indexOf(prev) + 1) % WEATHER_ORDER.length],
-      );
+      const wash = heroWashRef.current;
+      if (wash) {
+        wash.setBackground(DAY_PHASE_BACKGROUND[dayPhase]);
+        wash.setAnimation(WEATHER_PRESETS[nextWeather].animation);
+      }
+      setWeather(nextWeather);
     });
-  }, [wipeCanvas]);
+  }, [weather, dayPhase, wipeCanvas]);
 
   // Cycle the displayed time slot (now → sunrise → mid-day → sunset) and point
   // the background visualization at the selected slot's phase (now = live).
   const cycleSlot = useCallback(() => {
     const next = (slot + 1) % (forecast.length + 1);
+    const newOverride = next === 0 ? null : forecast[next - 1].phase;
+    const effectivePhase = newOverride ?? autoPhase;
     wipeCanvas(() => {
+      const wash = heroWashRef.current;
+      if (wash) {
+        wash.setBackground(DAY_PHASE_BACKGROUND[effectivePhase]);
+        const paper = DAY_PHASE_PAPER[effectivePhase];
+        const { r, g, b } = hexToRgb(paper);
+        wash.paperColor(r / 255, g / 255, b / 255);
+        const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
+        if (canvasEl) canvasEl.style.backgroundColor = paper;
+      }
       setSlot(next);
-      setPhaseOverride(next === 0 ? null : forecast[next - 1].phase);
+      setPhaseOverride(newOverride);
     });
-  }, [slot, forecast, wipeCanvas]);
+  }, [slot, forecast, autoPhase, wipeCanvas]);
 
   const cyclePigment = useCallback(() => {
     setActivePigment(
