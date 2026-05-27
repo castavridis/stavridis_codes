@@ -23,30 +23,37 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
 
   return (
     <article style={{ color: project.color }}>
-      <div className="mx-auto max-w-[1280px] px-18 pt-4">
+      <div
+        className="mix-blend-multiply"
+        style={{
+          background: 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
+          boxShadow: 'inset 0px -1px 0px rgba(0, 0, 0, 0.25)',
+        }}>
+        <div className="mx-auto max-w-[1280px] px-18 pt-4">
         <header className="grid grid-cols-12 pb-12">
           <div className="col-span-12 md:col-span-6 md:col-start-4">
             <div>
               <ProjectNavigation color={project.color} closeElement={
                 onBack ? (
                   <button type="button" className={backClassName} onClick={onBack}>
-                    Close project
-                  </button>
-                ) : (
-                  <Link className={backClassName} href={routes.home.href()}>
-                    Back home
-                  </Link>
-                )}
-              />
+                      Close project
+                    </button>
+                  ) : (
+                    <Link className={backClassName} href={routes.home.href()}>
+                      Back home
+                    </Link>
+                  )}
+                />
+              </div>
+              <h1 className="font-display text-2xl mt-14">
+                {project.summary}
+              </h1>
+              <p className="font-mono text-xs text-gray-600 mt-4">
+                Product Design &middot; Front-End Engineering
+              </p>
             </div>
-            <h1 className="font-display text-2xl mt-14">
-              {project.summary}
-            </h1>
-            <p className="font-mono text-xs text-gray-600 mt-4">
-              Product Design &middot; Front-End Engineering
-            </p>
-          </div>
-        </header>
+          </header>
+        </div>
       </div>
       <div className="prose prose-gray mt-8 max-w-none" style={{ backgroundColor: project.background }}>
         <div className="max-w-[1280px] mx-auto p-18">
