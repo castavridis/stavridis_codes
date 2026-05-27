@@ -22,7 +22,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
     "cursor-pointer font-mono text-[12px] leading-normal text-[#7d7d7d] mix-blend-difference text-right transition-colors hover:text-black";
 
   return (
-    <article className="pb-12">
+    <article>
       <div className="mx-auto max-w-[1280px] px-18 pt-4">
         <header className="grid grid-cols-12 pb-12">
           <div className="col-span-12 md:col-span-6 md:col-start-4">

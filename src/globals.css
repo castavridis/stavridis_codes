@@ -13,6 +13,15 @@
   --color-coffee-deep: #0e0000;
   --color-ink: #211e1f;
 
+  --color-cs-black: #211E1F;
+  --color-cs-white: #FFFBF0;
+  --color-cs-brand-text: #D08101;
+  --color-cs-primary: #1363BD;
+  --color-cs-success: #79B315;
+  --color-cs-warning: #F2AA35;
+  --color-cs-danger: #F06A41;
+  --color-cs-gray: #706C69;
+
   --color-washes-rose: #a50e53;
   --color-washes-yellow: #e3af08;
   --color-washes-blue: #108ba0;

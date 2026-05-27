@@ -63,7 +63,7 @@ export function MDXWrapper({ children }: { children: ReactNode }) {
 // of these — a markdown block expands into many sibling elements, and the column
 // needs a single element to carry the span.
 export function MDXColumn({ span = 12, start, end, children }: { span?: Span; start?: Start; end?: End; children: ReactNode }) {
-  let classes: string = SPAN[span];
+  let classes: string = SPAN[span].concat(" ", "h-full");
   if (start) { classes = classes.concat(" ", START[start]) }
   if (end) { classes = classes.concat(" ", END[end]) }
   return <div className={classes}>{children}</div>;
