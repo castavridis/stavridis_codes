@@ -23,7 +23,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
 
   return (
     <article className="mx-auto max-w-[1280px] px-18 py-12">
-      <div className="flex grid-col-12">
+      <div className="grid grid-cols-12">
         <ProjectNavigation closeElement={
           onBack ? (
             <button type="button" className={backClassName} onClick={onBack}>
