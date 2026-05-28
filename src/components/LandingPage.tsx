@@ -585,7 +585,10 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     wash.fadeHalfLife(10000);
     wash.fadePainting(0.05);
     wash.pigment("rose" as PigmentOption);
-    wash.continuousFlow(false);
+    // Enable continuous flow on touch devices so a drag produces a smooth
+    // stroke rather than scattered stamps (pointer events are sparse on mobile).
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    wash.continuousFlow(isTouch);
     wash.keepSimulating(true);
     // The background (day phase) + animation (weather) are applied by the
     // effect below once state settles; see the [dayPhase, weather] effect.
@@ -594,6 +597,12 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     if (canvasEl) {
       canvasEl.style.cursor = "crosshair";
       canvasEl.style.backgroundColor = `rgb(251,246,234)`;
+      // iOS Safari fires pointercancel and hands the gesture to the scroll
+      // container before touch-action:none takes effect on the canvas itself.
+      // A non-passive touchstart calling preventDefault() pre-empts this.
+      canvasEl.addEventListener("touchstart", (e) => e.preventDefault(), {
+        passive: false,
+      });
     }
 
     // Pull live weather for the default location (Open-Meteo, keyless).
@@ -806,7 +815,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     <>
       <section
         className="color-[#251900] relative mx-auto h-[728px] w-full overflow-hidden"
-        style={{ backgroundColor: DARK }}
+        style={{ backgroundColor: DARK, touchAction: "none" }}
       >
         {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
         <div
@@ -815,6 +824,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           <div
             ref={heroCanvasRef}
             className="absolute -inset-x-[36px] top-0 bottom-1"
+            style={{ touchAction: "none" }}
             aria-hidden="true"
           />
         </div>
