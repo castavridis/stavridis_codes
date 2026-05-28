@@ -1538,13 +1538,13 @@ function RevealCard({
     config: { tension: 220, friction: 22 },
   });
 
-  return (
+  const article = (
     <article
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
-      tabIndex={0}
+      onFocus={() => !card.link && setHovered(true)}
+      onBlur={() => !card.link && setHovered(false)}
+      tabIndex={card.link ? undefined : 0}
       style={{ width, height }}
       className="relative isolate focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
@@ -1622,6 +1622,14 @@ function RevealCard({
         }
       </div>
     </article>
+  );
+
+  return card.link ? (
+    <a href={card.link} target="_blank" rel="noreferrer" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocus={() => setHovered(true)} onBlur={() => setHovered(false)}>
+      {article}
+    </a>
+  ) : (
+    article
   );
 }
 
