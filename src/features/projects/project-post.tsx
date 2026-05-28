@@ -36,7 +36,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
           background: `${PROJECT_GRADIENT[project.gradient]}`,
           boxShadow: 'inset 0px -1px 0px rgba(0, 0, 0, 0.25)',
         }}>
-        <div className="mx-auto max-w-[1280px] px-18">
+        <div className="mx-auto max-w-[1280px] px-4 md:px-18">
         <header className="grid grid-cols-12 pb-12 pt-4">
           <div className="col-span-12 md:col-span-6 md:col-start-4">
             <div>
@@ -63,7 +63,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
         </div>
       </div>
       <div className="prose prose-gray pt-8 max-w-none" style={{ backgroundColor: project.background }}>
-        <div className="max-w-[1280px] mx-auto p-18">
+        <div className="max-w-[1280px] mx-auto p-4 md:p-18">
           <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
             <ProjectContent project={project} />
           </Suspense>

@@ -309,6 +309,7 @@ type HeroProject = {
 
 // Order matches the Figma stacking: the centre card (Project 01) sits highest
 // and on top; the two flanking cards are lower and behind it.
+// MOBILE_HERO_PROJECTS puts Project 01 in the middle slot so it opens centered.
 const HERO_PROJECTS: HeroProject[] = [
   {
     id: "proj-careSignal-ai",
@@ -350,6 +351,9 @@ const HERO_PROJECTS: HeroProject[] = [
     bob: true,
   },
 ];
+
+// Mobile order: 02 · 01 · 03 — Project 01 in the center slot opens centered.
+const MOBILE_HERO_PROJECTS = [HERO_PROJECTS[0], HERO_PROJECTS[2], HERO_PROJECTS[1]];
 
 // ---------------------------------------------------------------------------
 // Lower sections — creative tools + UI experiments. Each card renders its
@@ -479,6 +483,9 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     visible: false,
   });
 
+  const [canvasKey, setCanvasKey] = useState(0);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+
   const location = LOCATIONS[locationIdx];
 
   // Annotation (Weather + Time selectors): "Use Open Meteo API to pull in
@@ -536,9 +543,12 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   // resolution (scale) 1.75, closed-gravity edges pulling down, fading
   // painting with a 4s half-life. The background/animation are seeded by the
   // day-phase effect once the first Open-Meteo lookup lands.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const host = heroCanvasRef.current;
     if (!host) return;
+    // Clear any leftover canvas from a previous init (breakpoint reload).
+    host.replaceChildren();
 
     const wash = Washes.create(host, {
       cursorPreview: false,
@@ -618,7 +628,9 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
       delete (window as unknown as Record<string, WashesInstance | undefined>)
         .Wash_hero;
     };
-  }, [refreshWeather]);
+  // canvasKey increments on breakpoint crossing to force a full reinit.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshWeather, canvasKey]);
 
   // Pause / resume the Washes canvas when the project overlay covers the page.
   useEffect(() => {
@@ -799,69 +811,100 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     [onCardHover],
   );
 
+  const [drawMode, setDrawMode] = useState(false);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+  const centerCardRef = useRef<HTMLDivElement>(null);
+
+  // Exit draw mode and reload the canvas whenever the md breakpoint is crossed.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const handler = (e: MediaQueryListEvent) => {
+      setIsMobile(e.matches);
+      if (!e.matches) setDrawMode(false);
+      setCanvasKey((k) => k + 1);
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Scroll the mobile strip so Project 01 (center slot) is centered on mount.
+  useEffect(() => {
+    const container = mobileScrollRef.current;
+    const card = centerCardRef.current;
+    if (!container || !card) return;
+    container.scrollLeft = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
+  }, []);
+
   const activeColor = PIGMENTS[activePigment].color;
 
+  const canvasHeightSpring = useSpring({
+    height: drawMode && isMobile ? window.innerHeight : isMobile ? 240 : 560,
+    config: { tension: 200, friction: 28 },
+  });
+
   const introSpring = useSpring({
-    opacity: transitioning ? 0 : 1,
+    opacity: transitioning || drawMode ? 0 : 1,
     config: { tension: 280, friction: 30 },
   });
   const cardsSpring = useSpring({
-    opacity: transitioning ? 0 : 1,
-    transform: transitioning ? 'translateY(60px)' : 'translateY(0px)',
-    config: { tension: 220, friction: 26 },
+    opacity: transitioning || drawMode ? 0 : 1,
+    transform: drawMode
+      ? 'translateY(120vh)'
+      : transitioning ? 'translateY(60px)' : 'translateY(0px)',
+    config: { tension: 200, friction: 28 },
+  });
+  const gradientsSpring = useSpring({
+    opacity: drawMode ? 0 : 1,
+    config: { tension: 200, friction: 28 },
   });
 
   return (
     <>
       <section
-        className="color-[#251900] relative mx-auto h-[728px] w-full overflow-hidden"
-        style={{ backgroundColor: DARK, touchAction: "none" }}
+        className="color-[#251900] relative mx-auto h-auto md:h-[728px] w-full md:overflow-hidden"
+        style={{ backgroundColor: DARK }}
       >
-        {/* Live watercolor band — top 437px. Fades out/in on location reset. */}
-        <div
-          className="absolute top-0 left-0 h-[560px] w-full select-none"
+        {/* Live watercolor band — height spring-animates to viewport height in mobile draw mode. */}
+        <animated.div
+          className="absolute top-0 left-0 w-full select-none overflow-hidden"
+          style={canvasHeightSpring}
         >
           <div
             ref={heroCanvasRef}
-            className="absolute -inset-x-[36px] top-0 bottom-1"
-            style={{ touchAction: "none" }}
+            className="absolute -inset-x-[36px] top-0"
+            style={{ height: isMobile ? '100dvh' : '100%', touchAction: "none" }}
             aria-hidden="true"
           />
-        </div>
+        </animated.div>
 
-        {/* Connecting Gradient — fades the wash band into the dark page using
-            the two stacked layers from the Figma, both bottom-aligned to the
-            437px wash band (so they end exactly where the section's #251900
-            background takes over). */}
-        {/* Radial Gradient (583:21712) — a dark pool at the bottom-centre:
-            an ellipse (rx 854 / ry 253) of #251900 fading to transparent. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-[216px] h-[340px]"
-          style={{
-            background:
-              "radial-gradient(ellipse 854px 253px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
-          }}
-        />
-        {/* Linear Gradient (583:21713) — transparent → #251900, top to bottom,
-            layered over the radial. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-[269px] h-[291px]"
-          style={{
-            background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, ${DARK} 100%)`,
-          }}
-        />
-
-        {/* Radial gradient to improve blurb legibility. */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[304px]"
-          style={{
-            background:
-              "radial-gradient(82% 100% at 50% 0%, rgba(255,251,240,0.5) 0%, rgba(255,251,240,0) 70%)",
-          }}
-        />
+        <animated.div className="pointer-events-none" style={gradientsSpring}>
+          {/* Radial pool — dark centre at bottom of wash band. */}
+          <div
+            className="absolute inset-x-0 top-[216px] h-[340px]"
+            style={{
+              background:
+                "radial-gradient(ellipse 854px 253px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
+            }}
+          />
+          {/* Linear fade — wash band → DARK. */}
+          <div
+            className="absolute inset-x-0 top-[269px] h-[291px]"
+            style={{
+              background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, ${DARK} 100%)`,
+            }}
+          />
+          {/* Blurb legibility vignette. */}
+          <div
+            className="absolute inset-x-0 top-0 h-[304px]"
+            style={{
+              background:
+                "radial-gradient(82% 100% at 50% 0%, rgba(255,251,240,0.5) 0%, rgba(255,251,240,0) 70%)",
+            }}
+          />
+        </animated.div>
 
         {/* Intro blurb. */}
-        <animated.div className="pointer-events-none absolute top-[80px] left-1/2 flex w-[315px] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
+        <animated.div className="pointer-events-none absolute top-[60px] md:top-[80px] left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
           <p className="font-display text-[24px]">I’m C Stavridis,</p>
           <p className="font-body text-[18px] leading-[24px]">
             an AI-Native Design Engineer who loves turning complex ideas into
@@ -869,8 +912,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           </p>
         </animated.div>
 
-        {/* Project cards. */}
-        <animated.div className="w-full max-w-[1280px] relative m-auto" style={cardsSpring}>
+        {/* Project cards — desktop: absolutely positioned. */}
+        <animated.div className="hidden md:block w-full max-w-[1280px] relative m-auto" style={cardsSpring}>
           {HERO_PROJECTS.map((project) => (
             <HeroProjectCard
               key={project.id}
@@ -881,12 +924,58 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           ))}
         </animated.div>
 
-        {/* Pigment selector — vertical, right edge. */}
-        <PigmentSelector
-          active={activePigment}
-          onSelect={setActivePigment}
-          onPaintbrushClick={cyclePigment}
-        />
+        {/* Project cards — mobile: horizontal snap scroll, 02 · 01 · 03. */}
+        <animated.div
+          ref={mobileScrollRef}
+          className="md:hidden relative z-10 flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-6 pt-[180px] pb-12"
+          style={{ ...cardsSpring, scrollPaddingInline: 'calc(50% - 136px)' }}
+        >
+          {/* Leading spacer so the first card can snap to center. */}
+          <div className="flex-shrink-0 w-[calc(50vw-136px)]" aria-hidden="true" />
+          {MOBILE_HERO_PROJECTS.map((project, i) => (
+            <div
+              key={project.id}
+              ref={i === 1 ? centerCardRef : undefined}
+              className="snap-center flex-shrink-0"
+              style={{
+                transform: `rotate(${project.rotation}deg)`,
+                pointerEvents: drawMode ? 'none' : 'auto',
+              }}
+            >
+              <HeroProjectCardButton
+                project={project}
+                onClick={() => handleCardClick(project)}
+                onActivate={() => handleCardActivate(project)}
+              />
+            </div>
+          ))}
+          {/* Trailing spacer so the last card can snap to center. */}
+          <div className="flex-shrink-0 w-[calc(50vw-136px)]" aria-hidden="true" />
+        </animated.div>
+
+        {/* Draw mode toggle — mobile only. Comes after the canvas in DOM so it stacks above it. */}
+        <button
+          type="button"
+          onClick={() => setDrawMode((d) => !d)}
+          className="md:hidden absolute top-4 right-4 z-20 font-mono text-[12px] leading-normal px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
+          style={{
+            backgroundColor: drawMode ? activeColor : 'rgba(251,246,234,0.15)',
+            color: drawMode
+              ? activePigment === 'yellow' ? '#100e08' : CREAM
+              : CREAM,
+          }}
+        >
+          {drawMode ? 'Done' : 'Draw'}
+        </button>
+
+        {/* Pigment selector — always on desktop; draw-mode-only on mobile. */}
+        <div className={drawMode ? 'block' : 'hidden md:block'}>
+          <PigmentSelector
+            active={activePigment}
+            onSelect={setActivePigment}
+            onPaintbrushClick={cyclePigment}
+          />
+        </div>
 
         {/* Brush indicator — pointer devices only; no persistent cursor on touch. */}
         {!window.matchMedia("(pointer: coarse)").matches && (
@@ -1167,7 +1256,7 @@ function PresetBug({
 // stroke (annotation: "SVG does not animate in, it's instantly on").
 // ---------------------------------------------------------------------------
 
-function HeroProjectCard({
+function HeroProjectCardButton({
   project,
   onClick,
   onActivate,
@@ -1178,6 +1267,71 @@ function HeroProjectCard({
 }): React.ReactElement {
   const cta = project.cta;
   const ctaColor = PIGMENTS[project.pigment].color;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={onActivate}
+      onTouchStart={onActivate}
+      onFocus={onActivate}
+      className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      style={{ backgroundColor: CREAM }}
+    >
+      <div
+        style={{
+          backgroundSize: "60%",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          top: "5rem",
+          backgroundImage: `url('${project.image}')`,
+        }}
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[12px] opacity-70 mix-blend-luminosity"
+      />
+      <div className="relative z-10 flex w-full flex-col gap-[24px]">
+        <p className="font-mono text-[12px] leading-[24px] text-[#7d7d7d] mix-blend-difference">
+          {project.label}
+        </p>
+        <p
+          className="font-body text-[18px] leading-[24px] whitespace-pre-line text-black"
+          style={{ minHeight: "202px" }}
+        >
+          {project.title}
+        </p>
+        {cta.variant === "filled" ? (
+          <div
+            className="mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] font-mono text-[12px] leading-[24px] transition-[filter] group-hover:brightness-110"
+            style={{
+              backgroundColor: ctaColor,
+              color: project.pigment === "yellow" ? "#100e08" : CREAM,
+            }}
+          >
+            {cta.text}
+          </div>
+        ) : (
+          <div
+            className="mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] border font-mono text-[12px] leading-[24px] text-black opacity-75"
+            style={{
+              backgroundColor: CREAM,
+              borderColor: ctaColor,
+            }}
+          >
+            {cta.text}
+          </div>
+        )}
+      </div>
+    </button>
+  );
+}
+
+function HeroProjectCard({
+  project,
+  onClick,
+  onActivate,
+}: {
+  project: HeroProject;
+  onClick: () => void;
+  onActivate: () => void;
+}): React.ReactElement {
   return (
     <div
       className="absolute"
@@ -1193,57 +1347,7 @@ function HeroProjectCard({
           project.bob ? "animate-[card-bob_6s_ease-in-out_infinite]" : undefined
         }
       >
-        <button
-          type="button"
-          onClick={onClick}
-          onMouseEnter={onActivate}
-          onFocus={onActivate}
-          className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
-          style={{ backgroundColor: CREAM }}
-        >
-          <div
-            style={{
-              backgroundSize: "60%",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              top: "5rem",
-              backgroundImage: `url('${project.image}')`,
-            }}
-            className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[12px] opacity-70 mix-blend-luminosity"
-          />
-          <div className="relative z-10 flex w-full flex-col gap-[24px]">
-            <p className="font-mono text-[12px] leading-[24px] text-[#7d7d7d] mix-blend-difference">
-              {project.label}
-            </p>
-            <p
-              className="font-body text-[18px] leading-[24px] whitespace-pre-line text-black"
-              style={{ minHeight: "202px" }}
-            >
-              {project.title}
-            </p>
-            {cta.variant === "filled" ? (
-              <div
-                className="mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] font-mono text-[12px] leading-[24px] transition-[filter] group-hover:brightness-110"
-                style={{
-                  backgroundColor: ctaColor,
-                  color: project.pigment === "yellow" ? "#100e08" : CREAM,
-                }}
-              >
-                {cta.text}
-              </div>
-            ) : (
-              <div
-                className="mx-auto flex h-[36px] w-[180px] items-center justify-center rounded-[4px] border font-mono text-[12px] leading-[24px] text-black opacity-75"
-                style={{
-                  backgroundColor: CREAM,
-                  borderColor: ctaColor,
-                }}
-              >
-                {cta.text}
-              </div>
-            )}
-          </div>
-        </button>
+        <HeroProjectCardButton project={project} onClick={onClick} onActivate={onActivate} />
       </div>
     </div>
   );

@@ -8,6 +8,9 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
 
 export default defineConfig({
   base: '/',
+  server: {
+    allowedHosts: ["celeste.local"],
+  },
   plugins: [
     tailwindcss(),
     mdx({
