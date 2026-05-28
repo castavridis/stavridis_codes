@@ -143,10 +143,10 @@ const DAY_PHASE_BACKGROUND: Record<DayPhase, string> = {
 // Paper tint per day phase, applied to both the Washes paper color and the
 // canvas background color.
 const DAY_PHASE_PAPER: Record<DayPhase, string> = {
-  sunrise: PIGMENTS.yellow.color, // Hansa Yellow
-  day: CREAM, // current cream
-  sunset: PIGMENTS.rose.color, // Quinacridone Magenta
-  night: PIGMENTS.blue.color, // Cerulean Blue
+  sunrise: "#fdf3c8", // pastel yellow
+  day: CREAM,
+  sunset: "#f9d0e3", // pastel rose
+  night: "#c8eaf0", // pastel blue
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
