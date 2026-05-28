@@ -873,6 +873,25 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     container.scrollLeft = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
   }, []);
 
+  useEffect(() => {
+    const container = mobileScrollRef.current;
+    if (!container) return;
+    const updatePigment = () => {
+      const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+      const cards = Array.from(container.querySelectorAll<HTMLElement>('.snap-center'));
+      let closestIdx = 0;
+      let minDist = Infinity;
+      cards.forEach((card, i) => {
+        const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - containerCenter);
+        if (dist < minDist) { minDist = dist; closestIdx = i; }
+      });
+      const project = MOBILE_HERO_PROJECTS[closestIdx];
+      if (project) setActivePigment(project.pigment);
+    };
+    container.addEventListener('scrollend', updatePigment);
+    return () => container.removeEventListener('scrollend', updatePigment);
+  }, []);
+
   const activeColor = PIGMENTS[activePigment].color;
 
   const canvasHeightSpring = useSpring({
