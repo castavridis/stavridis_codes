@@ -469,6 +469,14 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   const [phaseOverride, setPhaseOverride] = useState<DayPhase | null>(null);
   const dayPhase = phaseOverride ?? autoPhase;
 
+  // Refs so initialize() can read current state without being in its dep array.
+  const dayPhaseRef = useRef<DayPhase>(dayPhase);
+  dayPhaseRef.current = dayPhase;
+  const weatherRef = useRef<WeatherKey>(weather);
+  weatherRef.current = weather;
+  const locationIdxRef = useRef(locationIdx);
+  locationIdxRef.current = locationIdx;
+
   // Annotation (Brush Indicator): follows the mouse; `[` / `]` adjust the
   // brush size; the indicator scales with the brush and recolors to the
   // active pigment.
@@ -585,7 +593,13 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           console.warn("GPU sim init failed, falling back to CPU:", e);
         }
       }
-      wash.paperColor(251 / 255, 246 / 255, 234 / 255);
+      // Apply the current day phase / weather immediately so the canvas never
+      // flashes CREAM on reinit (ResizeObserver or breakpoint canvasKey bump).
+      const initPhase = dayPhaseRef.current;
+      const initWeather = weatherRef.current;
+      const initPaper = DAY_PHASE_PAPER[initPhase];
+      const initRgb = hexToRgb(initPaper);
+      wash.paperColor(initRgb.r / 255, initRgb.g / 255, initRgb.b / 255);
       wash.gouacheMode("auto");
       wash.paperWetness("damp");
       wash.paintLoad(0.25);
@@ -604,13 +618,13 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
       const isTouch = window.matchMedia("(pointer: coarse)").matches;
       wash.continuousFlow(isTouch);
       wash.keepSimulating(true);
-      // The background (day phase) + animation (weather) are applied by the
-      // effect below once state settles; see the [dayPhase, weather] effect.
+      wash.setBackground(DAY_PHASE_BACKGROUND[initPhase]);
+      wash.setAnimation(WEATHER_PRESETS[initWeather].animation);
 
       const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
       if (canvasEl) {
         canvasEl.style.cursor = "crosshair";
-        canvasEl.style.backgroundColor = `rgb(251,246,234)`;
+        canvasEl.style.backgroundColor = initPaper;
         // iOS Safari fires pointercancel and hands the gesture to the scroll
         // container before touch-action:none takes effect on the canvas itself.
         // A non-passive touchstart calling preventDefault() pre-empts this.
@@ -619,8 +633,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
         });
       }
 
-      // Pull live weather for the default location (Open-Meteo, keyless).
-      void refreshWeather(LOCATIONS[0]);
+      // Refresh weather for whichever location is currently selected.
+      void refreshWeather(LOCATIONS[locationIdxRef.current]);
     };
 
     // Defer initialization until the host's parent container has a non-zero
