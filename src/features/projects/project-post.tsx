@@ -13,9 +13,9 @@ const projectComponentPromises = new Map<string, Promise<MDXContent>>();
 
 export type ProjectGradientType = 'magenta' | 'yellow' | 'blue'
 const PROJECT_GRADIENT: Record<ProjectGradientType, string> = {
-  'magenta': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(165, 14, 83, 0.5) 0%, rgba(165, 14, 83, 0) 100%)',
-  'yellow': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
-  'blue': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(16, 139, 160, 0.5) 0%, rgba(16, 139, 160, 0) 100%)',
+  'magenta': 'radial-gradient(500px 89px at 50% 100%, rgba(165, 14, 83, 0.5) 0%, rgba(165, 14, 83, 0) 100%)',
+  'yellow': 'radial-gradient(500px 89px at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
+  'blue': 'radial-gradient(500px 89px at 50% 100%, rgba(16, 139, 160, 0.5) 0%, rgba(16, 139, 160, 0) 100%)',
 }
 
 function formatTags(tags: string[]) {

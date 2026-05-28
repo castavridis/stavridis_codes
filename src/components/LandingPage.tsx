@@ -81,7 +81,7 @@ const LOCATIONS: LocationInfo[] = [
   },
   {
     city: "Taipei, Taiwan",
-    phrase: "is where I could see myself living.",
+    phrase: "is where see myself retiring.",
     lat: 25.033,
     lon: 121.565,
     fallbackTemp: 81,
@@ -770,7 +770,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     window.setTimeout(() => {
       wash.fadeHalfLife(10000);
       then();
-    }, 420);
+    }, 750);
   }, []);
 
   // Annotation (Location selector): clicking resets the canvas. Wipes current
@@ -1209,6 +1209,7 @@ function PresetWidget({
   onTime: () => void;
   onWeather: () => void;
 }): React.ReactElement {
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
   // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
   const f = slot > 0 ? forecast[slot - 1] : null;
   return (
@@ -1234,7 +1235,11 @@ function PresetWidget({
             onClick={onTime}
             label={`Show the next time (now showing ${f.label})`}
           >
-            {`${f.time} (${f.label.toLowerCase()})`}
+            {
+              isMobile
+               ? `${f.time}`
+               : `${f.time} (${f.label.toLowerCase()})`
+            }
           </PresetBug>
           <span className="text-[#fbf6ea] mix-blend-difference">
             it will be {f.temp}°F and
@@ -1561,11 +1566,11 @@ function RevealCard({
 function Footer(): React.ReactElement {
   return (
     <footer
-      className="relative w-full overflow-hidden pt-[128px] pb-[144px] text-[#fbf6ea]"
+      className="relative w-full overflow-hidden pt-0  md:pt-[128px] pb-[144px] text-[#fbf6ea]"
       style={{ backgroundColor: DARK }}
     >
       <div className="mx-auto flex max-w-[560px] flex-col items-center gap-[16px] text-center">
-        <p className="w-[504px] px-8 max-w-full">
+        <p className="w-[504px] md:px-8 max-w-full">
           <span className="font-display block text-[24px] leading-[32px] pb-1">
             I love working with&nbsp;you,&nbsp;C.
           </span>
