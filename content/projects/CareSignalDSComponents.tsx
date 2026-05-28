@@ -6,6 +6,18 @@ import {
   MDXColumn
 } from '../../src/components/mdx/Layout';
 
+export function CTA () {
+  return (
+    <MDXWrapper>
+      <MDXColumn span={4} start={5}>
+        <div className="bg-cs-warning/25 p-4 rounded-lg rotate-1 text-sm">
+          Note: This Design System is just one aspect of my role at CareSignal. If you'd like to learn about my approach to Product Design and Service Design <a className="!text-cs-black" href="https://cal.com/c-stavridis/caresignal-design-system" target="_blank">let's chat</a>!
+        </div>
+      </MDXColumn>
+    </MDXWrapper>
+  )
+}
+
 export function GuidingPrinciple () {
   return (
     <MDXWrapper>
