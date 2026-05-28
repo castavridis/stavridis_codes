@@ -862,7 +862,12 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   const activeColor = PIGMENTS[activePigment].color;
 
   const canvasHeightSpring = useSpring({
-    height: drawMode && isMobile ? window.innerHeight : isMobile ? 240 : 560,
+    height: (drawMode || transitioning) && isMobile ? window.innerHeight : isMobile ? 240 : 560,
+    config: { tension: 200, friction: 28 },
+  });
+
+  const paintButtonSpring = useSpring({
+    opacity: transitioning ? 0 : 1,
     config: { tension: 200, friction: 28 },
   });
 
@@ -978,11 +983,12 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
         </animated.div>
 
         {/* Draw mode toggle — mobile only. Comes after the canvas in DOM so it stacks above it. */}
-        <button
+        <animated.button
           type="button"
           onClick={() => setDrawMode((d) => !d)}
           className="md:hidden absolute top-4 right-4 z-20 font-mono text-[12px] leading-normal px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
           style={{
+            ...paintButtonSpring,
             backgroundColor: drawMode ? activeColor : 'rgba(79,61,27,0.5)',
             color: drawMode
               ? activePigment === 'yellow' ? '#100e08' : CREAM
@@ -990,7 +996,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           }}
         >
           {drawMode ? 'Done' : 'Paint'}
-        </button>
+        </animated.button>
 
         {/* Pigment selector — always on desktop; draw-mode-only on mobile. */}
         <div className={drawMode ? 'block' : 'hidden md:block'}>
