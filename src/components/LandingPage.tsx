@@ -550,79 +550,103 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     // Clear any leftover canvas from a previous init (breakpoint reload).
     host.replaceChildren();
 
-    const wash = Washes.create(host, {
-      cursorPreview: false,
-      pointer: true,
-      scale: 1.5,
-    });
-    heroWashRef.current = wash;
-    (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
+    let wash: WashesInstance | null = null;
+    let ro: ResizeObserver | null = null;
 
-    if (wash.webglAvailable()) {
-      wash.webgl(true);
-      wash.webglSmokeTest(false);
-    }
-
-    // Enable GPU simulation if WebGL2 context is available
-    const gpuCtx = wash.gpuSimContext();
-    if (gpuCtx) {
-      try {
-        const handle = initGpuSim(gpuCtx.gl, gpuCtx.GW, gpuCtx.GH);
-        wash.gpuSim(handle);
-        wash.gpuSimBrushOnlyTest(false);
-        wash.gpuSimTransferOnlyTest(false);
-        wash.gpuSimWetDiffusionOnlyTest(false);
-        wash.gpuSimVelocityOnlyTest(false);
-        wash.gpuSimAdvectionOnlyTest(false);
-        wash.webglGpuTextureTest(false);
-        wash.webglGpuWetTextureTest(false);
-        wash.webglGpuVelocityTextureTest(false);
-      } catch (e) {
-        console.warn("GPU sim init failed, falling back to CPU:", e);
-      }
-    }
-    wash.paperColor(251 / 255, 246 / 255, 234 / 255);
-    wash.gouacheMode("auto");
-    wash.paperWetness("damp");
-    wash.paintLoad(0.25);
-    wash.waterLoad(8.0);
-    wash.evaporation(2.5);
-    wash.brushSize(BRUSH_DEFAULT);
-    wash.edgeMode("gravity");
-    wash.gravityDirection("down");
-    wash.gravityStrength(0.1);
-    // wash.edgeFade(24);
-    wash.fadeHalfLife(10000);
-    wash.fadePainting(0.05);
-    wash.pigment("rose" as PigmentOption);
-    // Enable continuous flow on touch devices so a drag produces a smooth
-    // stroke rather than scattered stamps (pointer events are sparse on mobile).
-    const isTouch = window.matchMedia("(pointer: coarse)").matches;
-    wash.continuousFlow(isTouch);
-    wash.keepSimulating(true);
-    // The background (day phase) + animation (weather) are applied by the
-    // effect below once state settles; see the [dayPhase, weather] effect.
-
-    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
-    if (canvasEl) {
-      canvasEl.style.cursor = "crosshair";
-      canvasEl.style.backgroundColor = `rgb(251,246,234)`;
-      // iOS Safari fires pointercancel and hands the gesture to the scroll
-      // container before touch-action:none takes effect on the canvas itself.
-      // A non-passive touchstart calling preventDefault() pre-empts this.
-      canvasEl.addEventListener("touchstart", (e) => e.preventDefault(), {
-        passive: false,
+    const initialize = () => {
+      wash = Washes.create(host, {
+        cursorPreview: false,
+        pointer: true,
+        scale: 1.5,
       });
-    }
+      heroWashRef.current = wash;
+      (window as unknown as Record<string, WashesInstance>).Wash_hero = wash;
 
-    // Pull live weather for the default location (Open-Meteo, keyless).
-    void refreshWeather(LOCATIONS[0]);
+      if (wash.webglAvailable()) {
+        wash.webgl(true);
+        wash.webglSmokeTest(false);
+      }
+
+      // Enable GPU simulation if WebGL2 context is available
+      const gpuCtx = wash.gpuSimContext();
+      if (gpuCtx) {
+        try {
+          const handle = initGpuSim(gpuCtx.gl, gpuCtx.GW, gpuCtx.GH);
+          wash.gpuSim(handle);
+          wash.gpuSimBrushOnlyTest(false);
+          wash.gpuSimTransferOnlyTest(false);
+          wash.gpuSimWetDiffusionOnlyTest(false);
+          wash.gpuSimVelocityOnlyTest(false);
+          wash.gpuSimAdvectionOnlyTest(false);
+          wash.webglGpuTextureTest(false);
+          wash.webglGpuWetTextureTest(false);
+          wash.webglGpuVelocityTextureTest(false);
+        } catch (e) {
+          console.warn("GPU sim init failed, falling back to CPU:", e);
+        }
+      }
+      wash.paperColor(251 / 255, 246 / 255, 234 / 255);
+      wash.gouacheMode("auto");
+      wash.paperWetness("damp");
+      wash.paintLoad(0.25);
+      wash.waterLoad(8.0);
+      wash.evaporation(2.5);
+      wash.brushSize(BRUSH_DEFAULT);
+      wash.edgeMode("gravity");
+      wash.gravityDirection("down");
+      wash.gravityStrength(0.1);
+      // wash.edgeFade(24);
+      wash.fadeHalfLife(10000);
+      wash.fadePainting(0.05);
+      wash.pigment("rose" as PigmentOption);
+      // Enable continuous flow on touch devices so a drag produces a smooth
+      // stroke rather than scattered stamps (pointer events are sparse on mobile).
+      const isTouch = window.matchMedia("(pointer: coarse)").matches;
+      wash.continuousFlow(isTouch);
+      wash.keepSimulating(true);
+      // The background (day phase) + animation (weather) are applied by the
+      // effect below once state settles; see the [dayPhase, weather] effect.
+
+      const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
+      if (canvasEl) {
+        canvasEl.style.cursor = "crosshair";
+        canvasEl.style.backgroundColor = `rgb(251,246,234)`;
+        // iOS Safari fires pointercancel and hands the gesture to the scroll
+        // container before touch-action:none takes effect on the canvas itself.
+        // A non-passive touchstart calling preventDefault() pre-empts this.
+        canvasEl.addEventListener("touchstart", (e) => e.preventDefault(), {
+          passive: false,
+        });
+      }
+
+      // Pull live weather for the default location (Open-Meteo, keyless).
+      void refreshWeather(LOCATIONS[0]);
+    };
+
+    // Defer initialization until the host's parent container has a non-zero
+    // width, so Washes receives correct canvas dimensions from the start.
+    const parent = host.parentElement;
+    if ((parent?.getBoundingClientRect().width ?? 0) > 0) {
+      initialize();
+    } else {
+      ro = new ResizeObserver(() => {
+        if ((parent?.getBoundingClientRect().width ?? 0) > 0) {
+          ro?.disconnect();
+          ro = null;
+          initialize();
+        }
+      });
+      if (parent) ro.observe(parent);
+    }
 
     return () => {
-      try {
-        wash.destroy();
-      } catch {
-        /* ignore */
+      ro?.disconnect();
+      if (wash) {
+        try {
+          wash.destroy();
+        } catch {
+          /* ignore */
+        }
       }
       heroWashRef.current = null;
       delete (window as unknown as Record<string, WashesInstance | undefined>)
@@ -959,13 +983,13 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           onClick={() => setDrawMode((d) => !d)}
           className="md:hidden absolute top-4 right-4 z-20 font-mono text-[12px] leading-normal px-3 py-1.5 rounded-md backdrop-blur-sm transition-colors"
           style={{
-            backgroundColor: drawMode ? activeColor : 'rgba(251,246,234,0.15)',
+            backgroundColor: drawMode ? activeColor : 'rgba(79,61,27,0.5)',
             color: drawMode
               ? activePigment === 'yellow' ? '#100e08' : CREAM
               : CREAM,
           }}
         >
-          {drawMode ? 'Done' : 'Draw'}
+          {drawMode ? 'Done' : 'Paint'}
         </button>
 
         {/* Pigment selector — always on desktop; draw-mode-only on mobile. */}
@@ -1168,10 +1192,10 @@ function PresetWidget({
   // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
   const f = slot > 0 ? forecast[slot - 1] : null;
   return (
-    <div className="flex flex-col items-center gap-[6px] pt-[12px] font-mono text-[12px] leading-[24px] opacity-60">
+    <div className="flex flex-col items-center gap-[6px] px-[16px] py-[12px] font-mono text-[12px] leading-[24px] opacity-60 bg-[rgb(37,25,0)]">
       <div className="flex items-center gap-[6px]">
         <PresetBug
-          background="rgba(121,96,54,0.5)"
+          background="#4f3d1b"
           onClick={onLocation}
           label={`Change location (currently ${location.city})`}
         >
