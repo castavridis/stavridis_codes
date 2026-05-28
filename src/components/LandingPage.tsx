@@ -318,7 +318,7 @@ const HERO_PROJECTS: HeroProject[] = [
     image: "/images/CareSignal AI Thumb.png",
     pigment: "blue",
     cta: { text: "View Project", variant: "filled" },
-    left: 198,
+    left: -55,
     top: 328,
     rotation: 1,
     z: 10,
@@ -331,7 +331,7 @@ const HERO_PROJECTS: HeroProject[] = [
     image: "/images/Sol LeWitt Thumb.png",
     pigment: "rose",
     cta: { text: "View Project", variant: "filled" },
-    left: 807,
+    left: 554,
     top: 328,
     rotation: 1,
     z: 10,
@@ -344,7 +344,7 @@ const HERO_PROJECTS: HeroProject[] = [
     image: "/images/CareSignal Design System Thumb.png",
     pigment: "yellow",
     cta: { text: "View Project", variant: "filled" },
-    left: 504,
+    left: 251,
     top: 246,
     rotation: -1,
     z: 20,
@@ -937,7 +937,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
         </animated.div>
 
         {/* Project cards — desktop: absolutely positioned. */}
-        <animated.div className="hidden md:block w-full max-w-[1280px] relative m-auto" style={cardsSpring}>
+        <animated.div className="hidden md:block w-full max-w-[770px] relative m-auto z-20" style={cardsSpring}>
           {HERO_PROJECTS.map((project) => (
             <HeroProjectCard
               key={project.id}
@@ -1192,7 +1192,7 @@ function PresetWidget({
   // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
   const f = slot > 0 ? forecast[slot - 1] : null;
   return (
-    <div className="flex flex-col items-center gap-[6px] px-[16px] py-[12px] font-mono text-[12px] leading-[24px] opacity-60 bg-[rgb(37,25,0)]">
+    <div className="flex flex-col items-center gap-[6px] px-[16px] py-[12px] font-mono text-[12px] leading-[24px] opacity-60 bg-[rgb(37,25,0)] rounded-md">
       <div className="flex items-center gap-[6px]">
         <PresetBug
           background="#4f3d1b"
@@ -1299,7 +1299,10 @@ function HeroProjectCardButton({
       onTouchStart={onActivate}
       onFocus={onActivate}
       className="group relative flex w-[272px] cursor-pointer flex-col items-center gap-[24px] overflow-hidden rounded-[12px] px-[24px] pt-[24px] pb-[36px] text-left transition-transform hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
-      style={{ backgroundColor: CREAM }}
+      style={{
+        backgroundColor: CREAM,
+        border: '1px solid rgba(79, 61, 27, 0.25)',
+      }}
     >
       <div
         style={{
