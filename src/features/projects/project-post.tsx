@@ -11,6 +11,13 @@ const mdxComponents = { MDXWrapper, MDXColumn };
 
 const projectComponentPromises = new Map<string, Promise<MDXContent>>();
 
+export type ProjectGradientType = 'magenta' | 'yellow' | 'blue'
+const PROJECT_GRADIENT: Record<ProjectGradientType, string> = {
+  'magenta': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(165, 14, 83, 0.5) 0%, rgba(165, 14, 83, 0) 100%)',
+  'yellow': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
+  'blue': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(16, 139, 160, 0.5) 0%, rgba(16, 139, 160, 0) 100%)',
+} 
+
 export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const project = getProject(slug);
 
@@ -26,11 +33,11 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
       <div
         className="mix-blend-multiply"
         style={{
-          background: 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
+          background: `${PROJECT_GRADIENT[project.gradient]}`,
           boxShadow: 'inset 0px -1px 0px rgba(0, 0, 0, 0.25)',
         }}>
-        <div className="mx-auto max-w-[1280px] px-18 pt-4">
-        <header className="grid grid-cols-12 pb-12">
+        <div className="mx-auto max-w-[1280px] px-18">
+        <header className="grid grid-cols-12 pb-12 pt-4">
           <div className="col-span-12 md:col-span-6 md:col-start-4">
             <div>
               <ProjectNavigation color={project.color} closeElement={
@@ -49,13 +56,13 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
                 {project.summary}
               </h1>
               <p className="font-mono text-xs text-gray-600 mt-4">
-                Product Design &middot; Front-End Engineering
+                {project.tags.join(` · `)}
               </p>
             </div>
           </header>
         </div>
       </div>
-      <div className="prose prose-gray mt-8 max-w-none" style={{ backgroundColor: project.background }}>
+      <div className="prose prose-gray pt-8 max-w-none" style={{ backgroundColor: project.background }}>
         <div className="max-w-[1280px] mx-auto p-18">
           <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
             <ProjectContent project={project} />

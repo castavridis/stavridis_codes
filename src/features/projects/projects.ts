@@ -1,9 +1,12 @@
 import type { MDXContent } from 'mdx/types';
+import type { ProjectGradientType } from '../../../src/features/projects/project-post';
 
 export type ProjectFrontmatter = {
   title: string;
   date: string;
   summary: string;
+  tags: string[];
+  gradient?: ProjectGradientType;
   background?: string;
   color?: string;
 };
