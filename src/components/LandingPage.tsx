@@ -1405,17 +1405,18 @@ function HeroProjectCard({
 // ---------------------------------------------------------------------------
 
 function CreativeToolsSection(): React.ReactElement {
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
   return (
     <section className="w-full" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-[1280px] px-[24px]">
         {/* AI-Native Creative Tools */}
         <div className="pt-[144px]">
-          <p className="font-display text-center text-[24px] leading-[24px] text-[#fbf6ea]/80">
-            AI-Native Creative Tools
+          <p className="font-display text-center text-[24px] leading-[28px] text-[#fbf6ea]/80">
+            AI-Native Creative&nbsp;Tools
           </p>
-          <div className="mt-[36px] flex flex-wrap justify-center gap-[64px]">
+          <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
             {CREATIVE_CARDS.map((card) => (
-              <RevealCard key={card.id} width={272} height={182} card={card} />
+              <RevealCard key={card.id} width={isMobile ? 312 : 272} height={isMobile ? 206 : 182} card={card} />
             ))}
           </div>
         </div>
@@ -1425,9 +1426,9 @@ function CreativeToolsSection(): React.ReactElement {
           <p className="font-display text-center text-[24px] leading-[24px] text-[#fbf6ea]/80">
             UI Experiments
           </p>
-          <div className="mt-[36px] flex flex-wrap justify-center gap-[64px]">
+          <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
             {EXPERIMENT_CARDS.map((card) => (
-              <RevealCard key={card.id} width={416} height={275} card={card} />
+              <RevealCard key={card.id} width={isMobile ? 312 : 416} height={isMobile ? 206 : 275} card={card} />
             ))}
           </div>
         </div>
@@ -1496,10 +1497,19 @@ function RevealCard({
       className="relative isolate focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
       {/* Container project image */}
-      <div className="absolute inset-0 overflow-hidden rounded-[12px]">
-        {/* Original project image — vivid pigments, always visible underneath. */}
-        <img className="absolute inset-0" src={card.project_image} />
-
+      <div className="absolute inset-0 overflow-hidden rounded-[12px]" style={{
+        backgroundImage: `url('${card.project_image})`,
+        backgroundSize: 'cover',
+      }}>
+        {/* Original project image */}
+        <div
+          className="absolute inset-0 mix-blend-color"
+          style={{
+            backgroundImage: `url('${card.project_image}')`,
+            backgroundSize: 'cover',
+          }}
+        />
+      
         {/* Desaturation layer — cream wash with color blend. */}
         <div
           className="absolute inset-0 mix-blend-color"
@@ -1507,10 +1517,10 @@ function RevealCard({
         />
 
         {/* Washes Multiplied — accent wash multiplied over the image. */}
-        <img
-          src={card.washes_image}
-          className="absolute inset-0 opacity-70 mix-blend-multiply"
-        />
+        <div className="absolute inset-0 opacity-70 mix-blend-multiply" style={{
+          backgroundImage: `url('${card.washes_image}')`,
+          backgroundSize: 'cover',
+        }} />
 
         {/* Mask stack — Washes Multiplied + Noise + Desaturation. Fades on hover. */}
         <animated.div
@@ -1518,7 +1528,10 @@ function RevealCard({
           style={{ opacity: maskStyle.opacity }}
         >
           {/* Original project image — vivid pigments, always visible underneath. */}
-          <img className="absolute inset-0" src={card.project_image} />
+          <div className="absolute inset-0 overflow-hidden rounded-[12px]" style={{
+            backgroundImage: `url('${card.project_image}')`,
+            backgroundSize: 'cover',
+          }} />
         </animated.div>
       </div>
       {/* Text — slides up so the description comes into view on hover. */}
@@ -1552,9 +1565,9 @@ function Footer(): React.ReactElement {
       style={{ backgroundColor: DARK }}
     >
       <div className="mx-auto flex max-w-[560px] flex-col items-center gap-[16px] text-center">
-        <p className="w-[504px] max-w-full">
-          <span className="font-display block text-[24px] leading-[32px]">
-            I love working with you, C.
+        <p className="w-[504px] px-8 max-w-full">
+          <span className="font-display block text-[24px] leading-[32px] pb-1">
+            I love working with&nbsp;you,&nbsp;C.
           </span>
           <span className="font-body block text-[24px] leading-[32px]">
             You have an infectious energy and passion for what you do and you

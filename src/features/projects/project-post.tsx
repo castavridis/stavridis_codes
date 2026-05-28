@@ -16,7 +16,24 @@ const PROJECT_GRADIENT: Record<ProjectGradientType, string> = {
   'magenta': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(165, 14, 83, 0.5) 0%, rgba(165, 14, 83, 0) 100%)',
   'yellow': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(227, 175, 8, 0.5) 0%, rgba(227, 175, 8, 0) 100%)',
   'blue': 'radial-gradient(32.19% 32.19% at 50% 100%, rgba(16, 139, 160, 0.5) 0%, rgba(16, 139, 160, 0) 100%)',
-} 
+}
+
+function formatTags(tags: string[]) {
+  let _tags = ``;
+  for (let i = 0; i < tags.length; i++) {
+    const tagArr = tags[i].split(' ');
+    let _tag = ``;
+    for (let j = 0; j < tagArr.length; j++) {
+      const part = tagArr[j];
+      _tag += `${part}&nbsp;`;
+    }
+    _tags += _tag;
+    if (i < tagArr.length) {
+      _tags += '·&nbsp;';
+    }
+  }
+  return _tags;
+}
 
 export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const project = getProject(slug);
@@ -26,14 +43,14 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
   }
 
   const backClassName =
-    "cursor-pointer font-mono text-[12px] leading-normal text-[#7d7d7d] mix-blend-difference text-right transition-colors hover:text-black";
+    "cursor-pointer font-mono text-[12px] leading-normal text-cream rounded-md py-[4px] px-[8px] mix-blend-difference text-right transition-colors hover:text-black bg-[rgba(79,61,27,0.5)]";
 
   return (
     <article style={{ color: project.color }}>
       <div
         className="mix-blend-multiply"
         style={{
-          background: `${PROJECT_GRADIENT[project.gradient]}`,
+          background: `${PROJECT_GRADIENT[project.gradient || 'yellow']}`,
           boxShadow: 'inset 0px -1px 0px rgba(0, 0, 0, 0.25)',
         }}>
         <div className="mx-auto max-w-[1280px] px-4 md:px-18">
@@ -43,7 +60,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
               <ProjectNavigation color={project.color} closeElement={
                 onBack ? (
                   <button type="button" className={backClassName} onClick={onBack}>
-                      Close project
+                      Close
                     </button>
                   ) : (
                     <Link className={backClassName} href={routes.home.href()}>
@@ -55,8 +72,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
               <h1 className="font-display text-2xl mt-14">
                 {project.summary}
               </h1>
-              <p className="font-mono text-xs text-gray-600 mt-4">
-                {project.tags.join(` · `)}
+              <p className="font-mono text-xs text-gray-600 mt-4" dangerouslySetInnerHTML={{__html: formatTags(project.tags)}}>
               </p>
             </div>
           </header>
