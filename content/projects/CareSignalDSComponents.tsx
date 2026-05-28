@@ -10,7 +10,7 @@ export function GuidingPrinciple () {
   return (
     <MDXWrapper>
       <MDXColumn span={4} start={2}>
-        <div className="bg-cs-black text-cs-white rounded-lg px-9 h-full content-center">
+        <div className="bg-cs-black text-cs-white rounded-lg py-8 md:py-0 px-9 h-full content-center">
           <ProjectSubheader className="text-cs-white">
             Guiding<br />Principle    
           </ProjectSubheader>

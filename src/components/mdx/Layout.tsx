@@ -104,7 +104,7 @@ type End = keyof typeof END;
 // The surrounding `.prose` (see blog-post.tsx) cascades into the columns via
 // descendant selectors, so markdown inside still gets typography styles.
 export function MDXWrapper({ children }: { children: ReactNode }) {
-  return <div className="my-8 grid grid-cols-12 gap-6">{children}</div>;
+  return <div className="mb-8 grid grid-cols-12 gap-6 leading-normal">{children}</div>;
 }
 
 // A single grid item spanning `span` of 12 columns. Wrap markdown in exactly one

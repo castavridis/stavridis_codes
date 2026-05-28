@@ -78,7 +78,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
           </header>
         </div>
       </div>
-      <div className="prose prose-gray pt-8 max-w-none" style={{ backgroundColor: project.background }}>
+      <div className="prose prose-gray max-w-none" style={{ backgroundColor: project.background }}>
         <div className="max-w-[1280px] mx-auto p-4 md:p-18">
           <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
             <ProjectContent project={project} />

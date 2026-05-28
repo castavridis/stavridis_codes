@@ -380,7 +380,7 @@ const CREATIVE_CARDS: ProjectCard[] = [
   {
     id: "creative-confetti",
     title: "Confetti",
-    description: "a playful SVG sprinkle engine for celebratory UI",
+    description: "a playful pixel art tool",
     project_image: "/images/projects/Confetti BG.png",
     washes_image: "/images/projects/Confetti Multiplier.png",
   },
@@ -397,14 +397,14 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
   {
     id: "experiment-sandy",
     title: "Sandy",
-    description: "A 3D visualization of Dave Long's esolang, Calder.",
+    description: "A 3D visualization of Dave Long's esolang, Calder",
     project_image: "/images/projects/Sandy BG.png",
     washes_image: "/images/projects/Sandy Multiplier.png",
   },
   {
     id: "experiment-rain-check",
     title: "Rain Check",
-    description: "Thoughtful declines to events.",
+    description: "Create thoughtful declines to your loved ones' events",
     project_image: "/images/projects/Rain Check BG.png",
     washes_image: "/images/projects/Rain Check Multiplier.png",
   },
@@ -1467,6 +1467,7 @@ function RevealCard({
   const { title, description } = card;
   const descRef = useRef<HTMLParagraphElement | null>(null);
   const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
 
   // Distance the text block hides below the fold while inactive: the
   // description height + the 4px gap + the 12px bottom padding.
@@ -1527,10 +1528,18 @@ function RevealCard({
           backgroundSize: 'cover',
         }} />
 
+        {
+          isMobile && (
+            <div className="absolute inset-0 mix-blend-multiply opacity-25" style={{
+              backgroundColor: 'rgb(37,25,0)'
+            }} />
+          )
+        }
+
         {/* Mask stack — Washes Multiplied + Noise + Desaturation. Fades on hover. */}
         <animated.div
           className="pointer-events-none absolute inset-0"
-          style={{ opacity: maskStyle.opacity }}
+          style={{ opacity: isMobile ? 0 : maskStyle.opacity }}
         >
           {/* Original project image — vivid pigments, always visible underneath. */}
           <div className="absolute inset-0 overflow-hidden rounded-[12px]" style={{
@@ -1541,19 +1550,30 @@ function RevealCard({
       </div>
       {/* Text — slides up so the description comes into view on hover. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 px-[12px] pb-[12px]">
-        <animated.div
-          style={textStyle}
-          className="flex flex-col text-[#fbf6ea]"
-        >
-          <h3 className="font-display text-[18px] leading-[36px]">{title}</h3>
-          <animated.p
-            ref={descRef}
-            className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]"
-            style={{ opacity: maskStyle.opacity }}
-          >
-            {description}
-          </animated.p>
-        </animated.div>
+        {
+          isMobile
+            ? <animated.div className="text-[#fbf6ae]">
+                <h3 className="font-display text-[18px] leading-[36px]">{title}</h3>
+                <p
+                  className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]"
+                >
+                  {description}
+                </p>
+              </animated.div>
+            : <animated.div
+                style={textStyle}
+                className="flex flex-col text-[#fbf6ea]"
+              >
+                <h3 className="font-display text-[18px] leading-[36px]">{title}</h3>
+                <animated.p
+                  ref={descRef}
+                  className="font-mono text-[16px] leading-[24px] text-[#fbf6ea]"
+                  style={{ opacity: maskStyle.opacity }}
+                >
+                  {description}
+                </animated.p>
+              </animated.div>
+        }
       </div>
     </article>
   );
@@ -1598,7 +1618,7 @@ function HorseTab(): React.ReactElement {
   const [hovered, setHovered] = useState(false);
   const tabStyle = useSpring({
     transform: hovered
-      ? "translateX(-50%) translateY(-525px) rotate(-3deg)"
+      ? "translateX(-50%) translateY(-550px) rotate(-3deg)"
       : "translateX(-50%) translateY(0px) rotate(0deg)",
     config: { tension: 180, friction: 15 },
   });
@@ -1610,7 +1630,7 @@ function HorseTab(): React.ReactElement {
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={tabStyle}
-      className="absolute -bottom-[625px] left-1/2 z-40 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-black px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="absolute -bottom-[650px] left-1/2 z-40 flex w-[201px] origin-bottom flex-col items-center gap-[28px] rounded-t-[8px] bg-cream px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
       <div className="relative w-[154px] overflow-hidden rounded-[4px] border border-[#d4d4d4]">
         <div
@@ -1621,13 +1641,13 @@ function HorseTab(): React.ReactElement {
               "linear-gradient(160deg, #2b2b2b 0%, #4a4640 35%, #6b5f55 60%, #2a221c 100%)",
           }}
         />
-        <img src="/images/Horse.png" aria-hidden="true" />
+        <img className="mix-blend-multiply" src="/images/Horse.png" aria-hidden="true" />
       </div>
-      <p className="w-full -rotate-[0.5deg] text-center font-mono text-[12px] leading-[24px] text-[#fbf6ea]">
+      <p className="w-full -rotate-[0.5deg] text-center font-mono text-[12px] leading-[24px] text-black">
         “Let a horse whisper in your ear and breathe on your heart.
         <br />
         You will never regret&nbsp;it.”
-        <br />— Author Unknown
+        <br /><br />— Author Unknown
       </p>
     </animated.div>
   );
