@@ -921,7 +921,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
             className="absolute inset-x-0 top-[216px] h-[340px]"
             style={{
               background:
-                "radial-gradient(ellipse 854px 253px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
+                "radial-gradient(ellipse 500px 275px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
             }}
           />
           {/* Linear fade — wash band → DARK. */}
