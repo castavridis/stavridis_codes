@@ -670,16 +670,18 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshWeather, canvasKey]);
 
-  // Pause / resume the Washes canvas when the project overlay covers the page.
+  // Pause / resume the Washes canvas when the project overlay covers the page
+  // or when the canvas has scrolled fully out of view on mobile.
   useEffect(() => {
     const wash = heroWashRef.current;
     if (!wash) return;
-    if (paused && !wash.paused()) {
+    const effectivePaused = paused || scrollPaused;
+    if (effectivePaused && !wash.paused()) {
       wash.pause({ acceptInput: false });
-    } else if (!paused && wash.paused()) {
+    } else if (!effectivePaused && wash.paused()) {
       wash.resume();
     }
-  }, [paused]);
+  }, [paused, scrollPaused]);
 
   // Keep the live clock + day phase in sync with the location's local time.
   useEffect(() => {
@@ -852,6 +854,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   const [drawMode, setDrawMode] = useState(false);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
   const centerCardRef = useRef<HTMLDivElement>(null);
+  const [scrollPaused, setScrollPaused] = useState(false);
+  const canvasThresholdRef = useRef<number>(240);
 
   // Exit draw mode and reload the canvas whenever the md breakpoint is crossed.
   useEffect(() => {
@@ -872,6 +876,24 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
     if (!container || !card) return;
     container.scrollLeft = card.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2;
   }, []);
+
+  // Pause the canvas when it has scrolled fully out of the viewport on mobile;
+  // resume when it's visible again. Re-runs when draw mode or transitioning
+  // changes so the threshold updates immediately and the pause state is re-checked.
+  useEffect(() => {
+    if (!isMobile) {
+      setScrollPaused(false);
+      return;
+    }
+    canvasThresholdRef.current = (drawMode || transitioning) ? window.innerHeight : 240;
+    setScrollPaused(window.scrollY >= canvasThresholdRef.current);
+
+    const onScroll = () => {
+      setScrollPaused(window.scrollY >= canvasThresholdRef.current);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isMobile, drawMode, transitioning]);
 
   const activeColor = PIGMENTS[activePigment].color;
 
