@@ -888,12 +888,14 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
           onPaintbrushClick={cyclePigment}
         />
 
-        {/* Brush indicator. */}
-        <BrushIndicator
-          cursor={brushCursor}
-          size={brushSize}
-          color={activeColor}
-        />
+        {/* Brush indicator — pointer devices only; no persistent cursor on touch. */}
+        {!window.matchMedia("(pointer: coarse)").matches && (
+          <BrushIndicator
+            cursor={brushCursor}
+            size={brushSize}
+            color={activeColor}
+          />
+        )}
       </section>
 
       {/* Preset widget — centered on the dark band below the hero. */}
