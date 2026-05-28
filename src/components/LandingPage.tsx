@@ -493,6 +493,8 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
 
   const [canvasKey, setCanvasKey] = useState(0);
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+  const [scrollPaused, setScrollPaused] = useState(false);
+  const canvasThresholdRef = useRef<number>(240);
 
   const location = LOCATIONS[locationIdx];
 
@@ -854,9 +856,6 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
   const [drawMode, setDrawMode] = useState(false);
   const mobileScrollRef = useRef<HTMLDivElement>(null);
   const centerCardRef = useRef<HTMLDivElement>(null);
-  const [scrollPaused, setScrollPaused] = useState(false);
-  const canvasThresholdRef = useRef<number>(240);
-
   // Exit draw mode and reload the canvas whenever the md breakpoint is crossed.
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -1074,7 +1073,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
 
       {/* Preset widget — centered on the dark band below the hero. */}
       <div
-        className="flex w-full justify-center"
+        className={drawMode ? "flex w-full justify-center fixed bottom-0" : "flex w-full justify-center"}
         style={{ backgroundColor: DARK }}
       >
         <PresetWidget
