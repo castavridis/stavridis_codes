@@ -367,6 +367,7 @@ type ProjectCard = {
   description: string;
   project_image: string;
   washes_image: string;
+  link?: string;
 };
 
 const CREATIVE_CARDS: ProjectCard[] = [
@@ -376,6 +377,7 @@ const CREATIVE_CARDS: ProjectCard[] = [
     description: "a computational watercolor library",
     project_image: "/images/projects/Washes BG.png",
     washes_image: "/images/projects/Washes Multiplier.png",
+    link: "https://castavridis.github.io/washes-js",
   },
   {
     id: "creative-confetti",
@@ -383,6 +385,7 @@ const CREATIVE_CARDS: ProjectCard[] = [
     description: "a playful pixel art tool",
     project_image: "/images/projects/Confetti BG.png",
     washes_image: "/images/projects/Confetti Multiplier.png",
+    link: "https://rc-confetti.vercel.app/",
   },
   {
     id: "creative-facets",
@@ -390,6 +393,7 @@ const CREATIVE_CARDS: ProjectCard[] = [
     description: "codify your taste with a compound AI tool",
     project_image: "/images/projects/Facets BG.png",
     washes_image: "/images/projects/Facets Multiplier.png",
+    link: "https://github.com/castavridis/rc_vv",
   },
 ];
 
@@ -400,6 +404,7 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
     description: "A 3D visualization of Dave Long's esolang, Calder",
     project_image: "/images/projects/Sandy BG.png",
     washes_image: "/images/projects/Sandy Multiplier.png",
+    link: "https://rc-castavridis.vercel.app/toys/sandy/bezierTests/",
   },
   {
     id: "experiment-rain-check",
@@ -407,6 +412,7 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
     description: "Create thoughtful declines to your loved ones' events",
     project_image: "/images/projects/Rain Check BG.png",
     washes_image: "/images/projects/Rain Check Multiplier.png",
+    link: "https://rc-rain-check.vercel.app/",
   },
 ];
 
