@@ -721,17 +721,15 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
 function CompanyBadge({ company, onDismiss }: { company: string; onDismiss: () => void }): React.ReactElement {
   return (
-    <div className="flex items-center gap-[6px] rounded-[4px] px-[8px] py-[4px] font-mono text-[11px] leading-[20px]" style={{ backgroundColor: 'rgba(79,61,27,0.75)', color: 'rgba(251,246,234,0.75)' }}>
+    <button
+      type="button"
+      onClick={onDismiss}
+      aria-label={`Dismiss personalization for ${company}`}
+      className="flex min-h-[44px] items-center gap-[6px] rounded-[4px] px-[10px] font-mono text-[11px] leading-[20px] transition-opacity hover:opacity-80 active:opacity-60"
+      style={{ backgroundColor: 'rgba(79,61,27,0.75)', color: 'rgba(251,246,234,0.75)' }}
+    >
       <span>Personalized for {company}</span>
-      <button
-        type="button"
-        onClick={onDismiss}
-        aria-label={`Dismiss personalization for ${company}`}
-        className="flex items-center transition-opacity hover:opacity-100"
-        style={{ opacity: 0.75 }}
-      >
-        ×
-      </button>
-    </div>
+      <span aria-hidden="true">×</span>
+    </button>
   );
 }
