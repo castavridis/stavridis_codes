@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useRoute } from 'wouter';
 import { routes } from './routes.js';
 import {
   TransitionProvider,
@@ -10,6 +10,7 @@ import {
 import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
+import { getCompany, type CompanyConfig } from './features/companies/companies.js';
 
 const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
@@ -18,19 +19,28 @@ const ProjectPost = lazy(() =>
 export function App() {
   return (
     <TransitionProvider>
-      {(phase) => (
-        <main className="font-light color-[#251900] overflow-x-hidden">
-          <ScrollLock active={phase.kind !== 'idle'} />
-          {/* Landing page — always mounted, paused when project is fully open. */}
-          <div className="w-full">
-            <PageTransitionWrapper paused={phase.kind === 'open'} />
-          </div>
-
-          <ProjectRouter phase={phase} />
-          <Analytics />
-        </main>
-      )}
+      {(phase) => <AppInner phase={phase} />}
     </TransitionProvider>
+  );
+}
+
+function AppInner({ phase }: { phase: Phase }) {
+  const [matchForCompany, params] = useRoute(routes.forCompany.path);
+  const company: CompanyConfig | null = matchForCompany && params?.company
+    ? getCompany(params.company)
+    : null;
+
+  return (
+    <main className="font-light color-[#251900] overflow-x-hidden">
+      <ScrollLock active={phase.kind !== 'idle'} />
+      {/* Landing page — always mounted, paused when project is fully open. */}
+      <div className="w-full">
+        <PageTransitionWrapper paused={phase.kind === 'open'} company={company} />
+      </div>
+
+      <ProjectRouter phase={phase} />
+      <Analytics />
+    </main>
   );
 }
 

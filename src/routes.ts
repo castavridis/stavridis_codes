@@ -11,4 +11,8 @@ export const routes = {
     path: '/project/:slug',
     href: ({ slug }: { slug: string }) => `/project/${encodeURIComponent(slug)}`,
   },
+  forCompany: {
+    path: '/for/:company',
+    href: ({ company }: { company: string }) => `/for/${encodeURIComponent(company)}`,
+  },
 } as const;
