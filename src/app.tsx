@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { routes } from './routes.js';
 import {
@@ -11,6 +11,7 @@ import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import PageTransitionWrapper from './components/PageTransitionWrapper';
 import { getCompany, type CompanyConfig } from './features/companies/companies.js';
+import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
 
 const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
@@ -26,16 +27,44 @@ export function App() {
 
 function AppInner({ phase }: { phase: Phase }) {
   const [matchForCompany, params] = useRoute(routes.forCompany.path);
-  const company: CompanyConfig | null = matchForCompany && params?.company
+
+  // Route-matched config (visitor is on /for/:company right now).
+  const routeCompany: CompanyConfig | null = matchForCompany && params?.company
     ? getCompany(params.company)
     : null;
+
+  // Persisted config (visitor was on /for/:company in a previous session).
+  const [storedCompany, setStoredCompanyState] = useState<CompanyConfig | null>(() => {
+    const stored = getStoredCompany();
+    if (!stored) return null;
+    return getCompany(stored.slug);
+  });
+
+  // On each /for/:company visit: write to localStorage (resets TTL).
+  useEffect(() => {
+    if (routeCompany && params?.company) {
+      setStoredCompany(params.company, routeCompany.name);
+      setStoredCompanyState(routeCompany);
+    }
+  }, [routeCompany, params?.company]);
+
+  const company = routeCompany ?? storedCompany;
+
+  const handleDismiss = useCallback(() => {
+    clearStoredCompany();
+    setStoredCompanyState(null);
+  }, []);
 
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
       <ScrollLock active={phase.kind !== 'idle'} />
       {/* Landing page — always mounted, paused when project is fully open. */}
       <div className="w-full">
-        <PageTransitionWrapper paused={phase.kind === 'open'} company={company} />
+        <PageTransitionWrapper
+          paused={phase.kind === 'open'}
+          company={company}
+          onDismiss={company ? handleDismiss : undefined}
+        />
       </div>
 
       <ProjectRouter phase={phase} />

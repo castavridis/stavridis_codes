@@ -19,9 +19,11 @@ function slugFromHref(href: string): string | null {
 export default function PageTransitionWrapper({
   paused = false,
   company,
+  onDismiss,
 }: {
   paused?: boolean;
   company?: CompanyConfig | null;
+  onDismiss?: () => void;
 }): React.ReactElement {
   const { start, phase } = useTransition();
   const transitioning = phase.kind === 'opening' || phase.kind === 'open';
@@ -47,6 +49,7 @@ export default function PageTransitionWrapper({
       }}
       company={company?.name}
       blurb={company?.blurb}
+      onDismiss={onDismiss}
     />
   );
 }

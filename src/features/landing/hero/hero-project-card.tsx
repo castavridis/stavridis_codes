@@ -93,10 +93,12 @@ export function HeroProjectCardButton({
 
 export function HeroProjectCard({
   project,
+  topOffset = 0,
   onClick,
   onActivate,
 }: {
   project: HeroProject;
+  topOffset?: number;
   onClick: () => void;
   onActivate: () => void;
 }): React.ReactElement {
@@ -105,7 +107,7 @@ export function HeroProjectCard({
       className="absolute"
       style={{
         left: `${project.left}px`,
-        top: `${project.top}px`,
+        top: `${project.top + topOffset}px`,
         zIndex: project.z,
         transform: `rotate(${project.rotation}deg)`,
       }}

@@ -20,6 +20,7 @@ type LandingPageProps = {
   transitioning?: boolean;
   company?: string;
   blurb?: string;
+  onDismiss?: () => void;
   heroProjects?: HeroProject[];
   creativeCards?: ProjectCard[];
   experimentCards?: ProjectCard[];
@@ -32,6 +33,7 @@ export default function LandingPage({
   transitioning = false,
   company,
   blurb,
+  onDismiss,
   heroProjects,
   creativeCards,
   experimentCards,
@@ -45,6 +47,7 @@ export default function LandingPage({
         transitioning={transitioning}
         company={company}
         blurb={blurb}
+        onDismiss={onDismiss}
         heroProjects={heroProjects}
       />
       <CreativeToolsSection creativeCards={creativeCards} experimentCards={experimentCards} />
