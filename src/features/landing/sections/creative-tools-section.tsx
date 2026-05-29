@@ -4,11 +4,13 @@
 
 import { useState } from "react";
 import { DARK } from "../lib/colors.js";
-import { RevealCard } from "./reveal-card.js";
+import { RevealCard, type ProjectCard } from "./reveal-card.js";
 import { CREATIVE_CARDS, EXPERIMENT_CARDS } from "./project-cards.data.js";
 
-export function CreativeToolsSection(): React.ReactElement {
+export function CreativeToolsSection({ creativeCards, experimentCards }: { creativeCards?: ProjectCard[]; experimentCards?: ProjectCard[] }): React.ReactElement {
   const [isMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+  const activeCreativeCards = creativeCards ?? CREATIVE_CARDS;
+  const activeExperimentCards = experimentCards ?? EXPERIMENT_CARDS;
   return (
     <section className="w-full" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-[1280px] px-[24px]">
@@ -18,7 +20,7 @@ export function CreativeToolsSection(): React.ReactElement {
             AI-Native Creative&nbsp;Tools
           </p>
           <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
-            {CREATIVE_CARDS.map((card) => (
+            {activeCreativeCards.map((card) => (
               <RevealCard key={card.id} width={isMobile ? 312 : 272} height={isMobile ? 206 : 182} card={card} />
             ))}
           </div>
@@ -30,7 +32,7 @@ export function CreativeToolsSection(): React.ReactElement {
             UI Experiments
           </p>
           <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
-            {EXPERIMENT_CARDS.map((card) => (
+            {activeExperimentCards.map((card) => (
               <RevealCard key={card.id} width={isMobile ? 312 : 416} height={isMobile ? 206 : 275} card={card} />
             ))}
           </div>

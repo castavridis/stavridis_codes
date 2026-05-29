@@ -47,7 +47,11 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 160;
 
-export function Hero({ onCardClick, onCardHover, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
+export function Hero({ onCardClick, onCardHover, paused = false, transitioning = false, company, blurb, heroProjects }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean; company?: string; blurb?: string; heroProjects?: HeroProject[] }): React.ReactElement {
+  const activeHeroProjects = heroProjects ?? HERO_PROJECTS;
+  const activeMobileHeroProjects = heroProjects
+    ? [heroProjects[1] ?? heroProjects[0], heroProjects[0], heroProjects[2] ?? heroProjects[1] ?? heroProjects[0]]
+    : MOBILE_HERO_PROJECTS;
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -594,16 +598,18 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
         {/* Intro blurb. */}
         <animated.div className="pointer-events-none absolute top-[60px] md:top-[80px] left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
-          <p className="font-display text-[24px]">I’m C Stavridis,</p>
+          <p className="font-display font-light text-[24px] leading-[28px]">
+            {company && (<>Hi, {company}!<br /></>)}
+            I’m C Stavridis,
+          </p>
           <p className="font-body text-[18px] leading-[24px]">
-            an AI-Native Design Engineer who loves turning complex ideas into
-            warm, approachable products.
+            {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>
         </animated.div>
 
         {/* Project cards — desktop: absolutely positioned. */}
         <animated.div className="hidden md:block w-full max-w-[770px] relative m-auto z-20" style={cardsSpring}>
-          {HERO_PROJECTS.map((project) => (
+          {activeHeroProjects.map((project) => (
             <HeroProjectCard
               key={project.id}
               project={project}
@@ -621,7 +627,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         >
           {/* Leading spacer so the first card can snap to center. */}
           <div className="flex-shrink-0 w-[calc(50vw-136px)]" aria-hidden="true" />
-          {MOBILE_HERO_PROJECTS.map((project, i) => (
+          {activeMobileHeroProjects.map((project, i) => (
             <div
               key={project.id}
               ref={i === 1 ? centerCardRef : undefined}

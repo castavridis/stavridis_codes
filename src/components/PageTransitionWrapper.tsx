@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import LandingPage from '../features/landing';
 import { routes } from '../routes.js';
 import { useTransition } from './RadialTransition';
+import type { CompanyConfig } from '../features/companies/companies.js';
 
 const PROJECT_HREFS: Record<string, string> = {
   'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
@@ -17,8 +18,10 @@ function slugFromHref(href: string): string | null {
 
 export default function PageTransitionWrapper({
   paused = false,
+  company,
 }: {
   paused?: boolean;
+  company?: CompanyConfig | null;
 }): React.ReactElement {
   const { start, phase } = useTransition();
   const transitioning = phase.kind === 'opening' || phase.kind === 'open';
@@ -42,6 +45,8 @@ export default function PageTransitionWrapper({
         const href = PROJECT_HREFS[id];
         if (href) start(href);
       }}
+      company={company?.name}
+      blurb={company?.blurb}
     />
   );
 }
