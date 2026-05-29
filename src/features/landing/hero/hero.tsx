@@ -725,7 +725,7 @@ function CompanyBadge({ company, onDismiss }: { company: string; onDismiss: () =
       type="button"
       onClick={onDismiss}
       aria-label={`Dismiss personalization for ${company}`}
-      className="mt-2 md:mt-0 flex items-center gap-[6px] rounded-[4px] px-[10px] py-[4px] font-mono text-[11px] leading-[20px] transition-opacity hover:opacity-80 active:opacity-60"
+      className="mt-2 flex items-center gap-[6px] rounded-[4px] px-[10px] py-[4px] font-mono text-[11px] leading-[20px] transition-opacity hover:opacity-80 active:opacity-60"
       style={{ backgroundColor: 'rgba(79,61,27,0.75)', color: 'rgba(251,246,234,0.75)' }}
     >
       <span>Personalized for {company}</span>
