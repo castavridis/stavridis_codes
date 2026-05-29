@@ -428,7 +428,7 @@ type LandingPageProps = {
   onCardHover?: (id: string) => void;
   paused?: boolean;
   transitioning?: boolean;
-  greeting?: string;
+  company?: string;
   blurb?: string;
   heroProjects?: HeroProject[];
   creativeCards?: ProjectCard[];
@@ -440,7 +440,7 @@ export default function LandingPage({
   onCardHover,
   paused = false,
   transitioning = false,
-  greeting,
+  company,
   blurb,
   heroProjects,
   creativeCards,
@@ -453,7 +453,7 @@ export default function LandingPage({
         onCardHover={onCardHover}
         paused={paused}
         transitioning={transitioning}
-        greeting={greeting}
+        company={company}
         blurb={blurb}
         heroProjects={heroProjects}
       />
@@ -475,7 +475,7 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 160;
 
-function Hero({ onCardClick, onCardHover, paused = false, transitioning = false, greeting, blurb, heroProjects }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean; greeting?: string; blurb?: string; heroProjects?: HeroProject[] }): React.ReactElement {
+function Hero({ onCardClick, onCardHover, paused = false, transitioning = false, company, blurb, heroProjects }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean; company?: string; blurb?: string; heroProjects?: HeroProject[] }): React.ReactElement {
   const activeHeroProjects = heroProjects ?? HERO_PROJECTS;
   const activeMobileHeroProjects = heroProjects
     ? [heroProjects[1] ?? heroProjects[0], heroProjects[0], heroProjects[2] ?? heroProjects[1] ?? heroProjects[0]]
@@ -1026,7 +1026,10 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false,
 
         {/* Intro blurb. */}
         <animated.div className="pointer-events-none absolute top-[60px] md:top-[80px] left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
-          <p className="font-display text-[24px]">{greeting ?? "I’m C Stavridis,"}</p>
+          <p className="font-display font-light text-[24px] leading-[28px]">
+            {company && (<>Hi, {company}!<br /></>)}
+            I’m C Stavridis,
+          </p>
           <p className="font-body text-[18px] leading-[24px]">
             {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>

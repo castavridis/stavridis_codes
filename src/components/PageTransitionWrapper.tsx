@@ -45,7 +45,7 @@ export default function PageTransitionWrapper({
         const href = PROJECT_HREFS[id];
         if (href) start(href);
       }}
-      greeting={company ? `Hi, ${company.name}! I'm C Stavridis,` : undefined}
+      company={company?.name}
       blurb={company?.blurb}
     />
   );
