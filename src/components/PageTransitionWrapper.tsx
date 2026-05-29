@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import LandingPage from './LandingPage';
+import LandingPage from '../features/landing';
 import { routes } from '../routes.js';
 import { useTransition } from './RadialTransition';
 
