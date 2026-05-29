@@ -423,13 +423,41 @@ const EXPERIMENT_CARDS: ProjectCard[] = [
 // `onCardClick` is forwarded to the hero project cards so a host wrapper can
 // swap to a project view on click. Optional — the page works standalone.
 // `paused` freezes the Washes canvas when a project overlay covers the page.
-type LandingPageProps = { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean };
+type LandingPageProps = {
+  onCardClick?: (id: string) => void;
+  onCardHover?: (id: string) => void;
+  paused?: boolean;
+  transitioning?: boolean;
+  greeting?: string;
+  blurb?: string;
+  heroProjects?: HeroProject[];
+  creativeCards?: ProjectCard[];
+  experimentCards?: ProjectCard[];
+};
 
-export default function LandingPage({ onCardClick, onCardHover, paused = false, transitioning = false }: LandingPageProps = {}): React.ReactElement {
+export default function LandingPage({
+  onCardClick,
+  onCardHover,
+  paused = false,
+  transitioning = false,
+  greeting,
+  blurb,
+  heroProjects,
+  creativeCards,
+  experimentCards,
+}: LandingPageProps = {}): React.ReactElement {
   return (
     <div className="font-body relative w-full overflow-hidden text-[#fbf6ea]" style={{ backgroundColor: DARK }}>
-      <Hero onCardClick={onCardClick} onCardHover={onCardHover} paused={paused} transitioning={transitioning} />
-      <CreativeToolsSection />
+      <Hero
+        onCardClick={onCardClick}
+        onCardHover={onCardHover}
+        paused={paused}
+        transitioning={transitioning}
+        greeting={greeting}
+        blurb={blurb}
+        heroProjects={heroProjects}
+      />
+      <CreativeToolsSection creativeCards={creativeCards} experimentCards={experimentCards} />
       <Footer />
       <HorseTab />
     </div>
@@ -447,7 +475,11 @@ const BRUSH_MAX = 240;
 const BRUSH_STEP = 8;
 const BRUSH_DEFAULT = 160;
 
-function Hero({ onCardClick, onCardHover, paused = false, transitioning = false }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean }): React.ReactElement {
+function Hero({ onCardClick, onCardHover, paused = false, transitioning = false, greeting, blurb, heroProjects }: { onCardClick?: (id: string) => void; onCardHover?: (id: string) => void; paused?: boolean; transitioning?: boolean; greeting?: string; blurb?: string; heroProjects?: HeroProject[] }): React.ReactElement {
+  const activeHeroProjects = heroProjects ?? HERO_PROJECTS;
+  const activeMobileHeroProjects = heroProjects
+    ? [heroProjects[1] ?? heroProjects[0], heroProjects[0], heroProjects[2] ?? heroProjects[1] ?? heroProjects[0]]
+    : MOBILE_HERO_PROJECTS;
   const heroCanvasRef = useRef<HTMLDivElement | null>(null);
   const heroWashRef = useRef<WashesInstance | null>(null);
 
@@ -994,16 +1026,15 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
 
         {/* Intro blurb. */}
         <animated.div className="pointer-events-none absolute top-[60px] md:top-[80px] left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black" style={introSpring}>
-          <p className="font-display text-[24px]">I’m C Stavridis,</p>
+          <p className="font-display text-[24px]">{greeting ?? "I’m C Stavridis,"}</p>
           <p className="font-body text-[18px] leading-[24px]">
-            an AI-Native Design Engineer who loves turning complex ideas into
-            warm, approachable products.
+            {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>
         </animated.div>
 
         {/* Project cards — desktop: absolutely positioned. */}
         <animated.div className="hidden md:block w-full max-w-[770px] relative m-auto z-20" style={cardsSpring}>
-          {HERO_PROJECTS.map((project) => (
+          {activeHeroProjects.map((project) => (
             <HeroProjectCard
               key={project.id}
               project={project}
@@ -1021,7 +1052,7 @@ function Hero({ onCardClick, onCardHover, paused = false, transitioning = false 
         >
           {/* Leading spacer so the first card can snap to center. */}
           <div className="flex-shrink-0 w-[calc(50vw-136px)]" aria-hidden="true" />
-          {MOBILE_HERO_PROJECTS.map((project, i) => (
+          {activeMobileHeroProjects.map((project, i) => (
             <div
               key={project.id}
               ref={i === 1 ? centerCardRef : undefined}
@@ -1455,8 +1486,10 @@ function HeroProjectCard({
 // Creative Tools + UI Experiments — one continuous dark section in the Figma.
 // ---------------------------------------------------------------------------
 
-function CreativeToolsSection(): React.ReactElement {
+function CreativeToolsSection({ creativeCards, experimentCards }: { creativeCards?: ProjectCard[]; experimentCards?: ProjectCard[] }): React.ReactElement {
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
+  const activeCreativeCards = creativeCards ?? CREATIVE_CARDS;
+  const activeExperimentCards = experimentCards ?? EXPERIMENT_CARDS;
   return (
     <section className="w-full" style={{ backgroundColor: DARK }}>
       <div className="mx-auto max-w-[1280px] px-[24px]">
@@ -1466,7 +1499,7 @@ function CreativeToolsSection(): React.ReactElement {
             AI-Native Creative&nbsp;Tools
           </p>
           <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
-            {CREATIVE_CARDS.map((card) => (
+            {activeCreativeCards.map((card) => (
               <RevealCard key={card.id} width={isMobile ? 312 : 272} height={isMobile ? 206 : 182} card={card} />
             ))}
           </div>
@@ -1478,7 +1511,7 @@ function CreativeToolsSection(): React.ReactElement {
             UI Experiments
           </p>
           <div className="mt-[36px] flex flex-wrap justify-center gap-[24px] md:gap-[64px]">
-            {EXPERIMENT_CARDS.map((card) => (
+            {activeExperimentCards.map((card) => (
               <RevealCard key={card.id} width={isMobile ? 312 : 416} height={isMobile ? 206 : 275} card={card} />
             ))}
           </div>
