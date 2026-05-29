@@ -526,7 +526,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
   const activeColor = PIGMENTS[activePigment].color;
 
   const canvasHeightSpring = useSpring({
-    height: (drawMode || transitioning) && isMobile ? window.innerHeight : isMobile ? 240 : 560,
+    height: (drawMode || transitioning) && isMobile ? window.innerHeight : isMobile ? (company ? 312 : 240) : 560,
     config: { tension: 200, friction: 28 },
   });
 
@@ -600,7 +600,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
             and badge chip add ~60px; we pull the block up 28px (extra greeting
             line) and push cards down 32px (chip) to keep visual balance. */}
         <animated.div
-          className={`absolute left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
+          className={`absolute left-1/2 z-30 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
           style={introSpring}
         >
           <p className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
