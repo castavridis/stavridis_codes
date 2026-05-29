@@ -26,6 +26,7 @@ export function App() {
 }
 
 function AppInner({ phase }: { phase: Phase }) {
+  const [, navigate] = useLocation();
   const [matchForCompany, params] = useRoute(routes.forCompany.path);
 
   // Route-matched config (visitor is on /for/:company right now).
@@ -53,7 +54,8 @@ function AppInner({ phase }: { phase: Phase }) {
   const handleDismiss = useCallback(() => {
     clearStoredCompany();
     setStoredCompanyState(null);
-  }, []);
+    if (matchForCompany) navigate(routes.home.href());
+  }, [matchForCompany, navigate]);
 
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
