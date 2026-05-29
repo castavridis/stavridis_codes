@@ -600,14 +600,14 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
             and badge chip add ~60px; we pull the block up 28px (extra greeting
             line) and push cards down 32px (chip) to keep visual balance. */}
         <animated.div
-          className={`pointer-events-none absolute left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
+          className={`absolute left-1/2 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
           style={introSpring}
         >
-          <p className="font-display font-light text-[24px] leading-[28px]">
+          <p className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
             {company && (<>Hi, {company}!<br /></>)}
-            I"m C Stavridis,
+            I'm C Stavridis,
           </p>
-          <p className="font-body text-[18px] leading-[24px]">
+          <p className="pointer-events-none font-body text-[18px] leading-[24px]">
             {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>
           {company && onDismiss && (
@@ -632,7 +632,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         <animated.div
           ref={mobileScrollRef}
           className="md:hidden relative z-10 flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-6 pb-12"
-          style={{ ...cardsSpring, scrollPaddingInline: "calc(50% - 136px)", paddingTop: company ? "212px" : "180px" }}
+          style={{ ...cardsSpring, scrollPaddingInline: "calc(50% - 136px)", paddingTop: company ? "252px" : "180px" }}
         >
           {/* Leading spacer so the first card can snap to center. */}
           <div className="flex-shrink-0 w-[calc(50vw-136px)]" aria-hidden="true" />
@@ -721,13 +721,14 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
 function CompanyBadge({ company, onDismiss }: { company: string; onDismiss: () => void }): React.ReactElement {
   return (
-    <div className="pointer-events-auto flex items-center gap-[6px] rounded-[4px] bg-[#4f3d1b]/40 px-[8px] py-[4px] font-mono text-[11px] leading-[20px] text-black/60 backdrop-blur-sm">
+    <div className="flex items-center gap-[6px] rounded-[4px] px-[8px] py-[4px] font-mono text-[11px] leading-[20px]" style={{ backgroundColor: 'rgba(79,61,27,0.75)', color: 'rgba(251,246,234,0.75)' }}>
       <span>Personalized for {company}</span>
       <button
         type="button"
         onClick={onDismiss}
         aria-label={`Dismiss personalization for ${company}`}
-        className="flex items-center opacity-60 transition-opacity hover:opacity-100"
+        className="flex items-center transition-opacity hover:opacity-100"
+        style={{ opacity: 0.75 }}
       >
         ×
       </button>
