@@ -565,8 +565,8 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
   );
   const preset = CARD_TRANSITION_PRESETS[selectedPresetId] ?? CARD_TRANSITION_PRESETS[DEFAULT_PRESET_ID];
 
-  // Track the previous (x, y) of each card by ID so FLIP/Arc know where to start.
-  const prevPosRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  // Track the previous (left, top) of each card by ID so FLIP/Arc know where to start.
+  const prevPosRef = useRef<Map<string, { left: number; top: number }>>(new Map());
 
   // Displayed projects for watercolor-dissolve: updated after blur-out settles.
   const [displayedProjects, setDisplayedProjects] = useState(activeHeroProjects);
@@ -574,15 +574,15 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
   const topOffset = company ? 32 : 0;
 
   const [cardSprings, cardApi] = useSprings(HERO_PROJECTS.length, (i) => ({
-    x: HERO_PROJECTS[i].left,
-    y: HERO_PROJECTS[i].top + topOffset,
+    left: HERO_PROJECTS[i].left,
+    top: HERO_PROJECTS[i].top + topOffset,
     rotateZ: HERO_PROJECTS[i].rotation,
     opacity: 1,
     scale: 1,
     blurPx: 0,
   }));
 
-  // Sync topOffset changes (company on/off) into spring y targets without a full reorder animation.
+  // Sync topOffset changes (company on/off) into spring top targets without a full reorder animation.
   const prevTopOffsetRef = useRef(topOffset);
   useEffect(() => {
     if (prevTopOffsetRef.current === topOffset) return;
@@ -590,9 +590,9 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     cardApi.start((i) => {
       const id = HERO_PROJECTS[i].id;
       const proj = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
-      // Update stored y to include new offset so next FLIP starts from the right place.
-      prevPosRef.current.set(id, { x: proj.left, y: proj.top + topOffset });
-      return { y: proj.top + topOffset, config: { tension: 200, friction: 28 } };
+      // Update stored top to include new offset so next FLIP starts from the right place.
+      prevPosRef.current.set(id, { left: proj.left, top: proj.top + topOffset });
+      return { top: proj.top + topOffset, config: { tension: 200, friction: 28 } };
     });
   }, [topOffset, activeHeroProjects, cardApi]);
 
@@ -613,14 +613,14 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
           setDisplayedProjects(activeHeroProjects);
           // Update prevPos so positions are current when blurring back in.
           activeHeroProjects.forEach((p) => {
-            prevPosRef.current.set(p.id, { x: p.left, y: p.top + topOffset });
+            prevPosRef.current.set(p.id, { left: p.left, top: p.top + topOffset });
           });
           // Phase 2: blur in at new positions.
           cardApi.start((j) => {
             const proj = activeHeroProjects.find((p) => p.id === HERO_PROJECTS[j].id) ?? HERO_PROJECTS[j];
             return {
-              x: proj.left,
-              y: proj.top + topOffset,
+              left: proj.left,
+              top: proj.top + topOffset,
               opacity: 1,
               blurPx: 0,
               config: preset.config,
@@ -635,10 +635,10 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     cardApi.start((i) => {
       const id = HERO_PROJECTS[i].id;
       const next = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
-      const prevPos = prev.get(id) ?? { x: next.left, y: next.top + topOffset };
+      const prevPos = prev.get(id) ?? { left: next.left, top: next.top + topOffset };
       return {
-        from: { x: prevPos.x, y: prevPos.y, opacity: 1, scale: 1, blurPx: 0 },
-        to: preset.getTo(prevPos, { x: next.left, y: next.top + topOffset }, i),
+        from: { left: prevPos.left, top: prevPos.top, opacity: 1, scale: 1, blurPx: 0 },
+        to: preset.getTo(prevPos, { left: next.left, top: next.top + topOffset }, i),
         delay: preset.trail ? i * preset.trail : 0,
         config: preset.config,
       };
@@ -646,7 +646,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
     // Advance prev positions after triggering.
     activeHeroProjects.forEach((p) => {
-      prevPosRef.current.set(p.id, { x: p.left, y: p.top + topOffset });
+      prevPosRef.current.set(p.id, { left: p.left, top: p.top + topOffset });
     });
     setDisplayedProjects(activeHeroProjects);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -741,8 +741,8 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
                 key={baseProject.id}
                 style={{
                   position: 'absolute',
-                  x: sp.x,
-                  y: sp.y,
+                  left: sp.left,
+                  top: sp.top,
                   rotateZ: sp.rotateZ,
                   opacity: sp.opacity,
                   scale: sp.scale,
@@ -760,8 +760,12 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
               </animated.div>
             );
           })}
-          <AnimationSelector onSelect={setSelectedPresetId} />
         </animated.div>
+
+        {/* Animation preset selector — desktop only, bottom-left of hero canvas. */}
+        <div className="hidden md:block">
+          <AnimationSelector onSelect={setSelectedPresetId} />
+        </div>
 
         {/* Project cards — mobile: horizontal snap scroll, 02 · 01 · 03. */}
         <animated.div

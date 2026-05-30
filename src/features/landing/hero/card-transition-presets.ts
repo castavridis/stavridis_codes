@@ -1,10 +1,10 @@
 import type { SpringConfig } from '@react-spring/web';
 
-export type CardPos = { x: number; y: number };
+export type CardPos = { left: number; top: number };
 
 export type CardSpringStep = {
-  x?: number;
-  y?: number;
+  left?: number;
+  top?: number;
   opacity?: number;
   scale?: number;
   blurPx?: number;
@@ -30,8 +30,8 @@ export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
     id: 'flip-slide',
     label: 'FLIP Slide',
     getTo: (_prev, next) => ({
-      x: next.x,
-      y: next.y,
+      left: next.left,
+      top: next.top,
       opacity: 1,
       scale: 1,
       blurPx: 0,
@@ -44,9 +44,9 @@ export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
     label: 'Arc Float',
     getTo: (prev, next) => [
       // Lift up and scale slightly
-      { x: prev.x, y: prev.y - 24, scale: 1.05, config: { tension: 420, friction: 18 } },
+      { left: prev.left, top: prev.top - 24, scale: 1.05, config: { tension: 420, friction: 18 } },
       // Arc to destination and settle
-      { x: next.x, y: next.y, scale: 1, config: { tension: 160, friction: 26 } },
+      { left: next.left, top: next.top, scale: 1, config: { tension: 160, friction: 26 } },
     ],
     trail: 110,
   },
@@ -54,7 +54,7 @@ export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
   'watercolor-dissolve': {
     id: 'watercolor-dissolve',
     label: 'Watercolor Dissolve',
-    // The dissolve preset doesn't move cards — it blurs out then blurs in.
+    // Positions don't animate — only blur and opacity change.
     // The hero handles the two-phase content swap via onRest.
     getTo: (_prev, _next) => ({ opacity: 0, blurPx: 10 }),
     config: { tension: 90, friction: 22 },

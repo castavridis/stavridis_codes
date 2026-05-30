@@ -19,7 +19,7 @@ export function AnimationSelector({
   };
 
   return (
-    <div className="absolute bottom-3 left-3 z-40 flex flex-col items-start gap-1">
+    <div className="absolute bottom-3 left-3 z-40 flex flex-col items-start gap-1" style={{ pointerEvents: 'auto' }}>
       {open ? (
         <div className="flex flex-col gap-1 rounded-[4px] bg-[rgba(37,25,0,0.7)] px-2 py-1.5 backdrop-blur-sm">
           <p className="font-mono text-[9px] leading-none text-[rgba(251,246,234,0.5)] mb-1">
