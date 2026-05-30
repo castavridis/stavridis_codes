@@ -29,11 +29,21 @@ export default function PageTransitionWrapper({
   const { start, phase } = useTransition();
   const transitioning = phase.kind === 'opening' || phase.kind === 'open';
 
+  // heroProjectIds order: [center/featured, left, right]
+  // HERO_PROJECTS slot order: [left(0), right(1), center(2)]
+  // Assigns project content to slots while keeping each slot's layout (position, z, bob).
   const heroProjects = useMemo(() => {
     if (!company?.heroProjectIds?.length) return undefined;
     const byId = Object.fromEntries(HERO_PROJECTS.map((p) => [p.id, p]));
-    const ordered = company.heroProjectIds.map((id) => byId[id]).filter(Boolean);
-    return ordered.length ? ordered : undefined;
+    const [centerId, leftId, rightId] = company.heroProjectIds;
+    const fill = (slotIdx: number, id: string | undefined) => {
+      const slot = HERO_PROJECTS[slotIdx];
+      if (!id) return slot;
+      const c = byId[id];
+      if (!c) return slot;
+      return { ...slot, id: c.id, title: c.title, image: c.image, pigment: c.pigment, cta: c.cta };
+    };
+    return [fill(0, leftId), fill(1, rightId), fill(2, centerId)];
   }, [company?.heroProjectIds]);
 
   const handleCardHover = useCallback((id: string) => {
