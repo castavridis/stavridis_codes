@@ -7,6 +7,10 @@ export type CompanyConfig = {
 };
 
 export const companies: Record<string, CompanyConfig> = {
+  civai: {
+    name: 'CivAI',
+    heroProjectIds: ['proj-careSignal-ai', 'proj-sol-lewitt', 'proj-careSignal-ds'],
+  },
   ramp: {
     name: 'Ramp',
   },

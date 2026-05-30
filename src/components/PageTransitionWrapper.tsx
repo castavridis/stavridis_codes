@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import LandingPage from '../features/landing';
 import { routes } from '../routes.js';
 import { useTransition } from './RadialTransition';
 import type { CompanyConfig } from '../features/companies/companies.js';
+import { HERO_PROJECTS } from '../features/landing/hero/hero-projects.data.js';
 
 const PROJECT_HREFS: Record<string, string> = {
   'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
@@ -28,6 +29,13 @@ export default function PageTransitionWrapper({
   const { start, phase } = useTransition();
   const transitioning = phase.kind === 'opening' || phase.kind === 'open';
 
+  const heroProjects = useMemo(() => {
+    if (!company?.heroProjectIds?.length) return undefined;
+    const byId = Object.fromEntries(HERO_PROJECTS.map((p) => [p.id, p]));
+    const ordered = company.heroProjectIds.map((id) => byId[id]).filter(Boolean);
+    return ordered.length ? ordered : undefined;
+  }, [company?.heroProjectIds]);
+
   const handleCardHover = useCallback((id: string) => {
     const href = PROJECT_HREFS[id];
     const slug = href ? slugFromHref(href) : null;
@@ -50,6 +58,7 @@ export default function PageTransitionWrapper({
       company={company?.name}
       blurb={company?.blurb}
       onDismiss={onDismiss}
+      heroProjects={heroProjects}
     />
   );
 }
