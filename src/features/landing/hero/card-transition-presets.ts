@@ -5,6 +5,7 @@ export type CardPos = { left: number; top: number };
 export type CardSpringStep = {
   left?: number;
   top?: number;
+  rotateZ?: number;
   opacity?: number;
   scale?: number;
   blurPx?: number;
