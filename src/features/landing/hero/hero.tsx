@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { animated, useSpring } from "@react-spring/web";
+import { animated, useSpring, useSprings } from "@react-spring/web";
 import type { PigmentOption, WashesInstance } from "../../../../lib/washes/washes.js";
 import { Washes } from "../../../../lib/washes/washes.js";
 import { initGpuSim } from "../../../../lib/washes/washes-gpu-sim.js";
@@ -36,11 +36,16 @@ import { PigmentSelector } from "./pigment-selector.js";
 import { BrushIndicator } from "./brush-indicator.js";
 import { PresetWidget } from "./preset-widget.js";
 import {
-  HeroProjectCard,
   HeroProjectCardButton,
   type HeroProject,
 } from "./hero-project-card.js";
 import { HERO_PROJECTS, MOBILE_HERO_PROJECTS } from "./hero-projects.data.js";
+import {
+  CARD_TRANSITION_PRESETS,
+  ANIM_STORAGE_KEY,
+  DEFAULT_PRESET_ID,
+} from "./card-transition-presets.js";
+import { AnimationSelector } from "./AnimationSelector.js";
 
 const BRUSH_MIN = 16;
 const BRUSH_MAX = 240;
@@ -551,6 +556,102 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     config: { tension: 200, friction: 28 },
   });
 
+  // ---------------------------------------------------------------------------
+  // Per-card springs for animated reorder when heroProjects changes.
+  // Springs are keyed by HERO_PROJECTS order (stable IDs), not by slot.
+  // ---------------------------------------------------------------------------
+  const [selectedPresetId, setSelectedPresetId] = useState(
+    () => localStorage.getItem(ANIM_STORAGE_KEY) ?? DEFAULT_PRESET_ID,
+  );
+  const preset = CARD_TRANSITION_PRESETS[selectedPresetId] ?? CARD_TRANSITION_PRESETS[DEFAULT_PRESET_ID];
+
+  // Track the previous (x, y) of each card by ID so FLIP/Arc know where to start.
+  const prevPosRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
+  // Displayed projects for watercolor-dissolve: updated after blur-out settles.
+  const [displayedProjects, setDisplayedProjects] = useState(activeHeroProjects);
+
+  const topOffset = company ? 32 : 0;
+
+  const [cardSprings, cardApi] = useSprings(HERO_PROJECTS.length, (i) => ({
+    x: HERO_PROJECTS[i].left,
+    y: HERO_PROJECTS[i].top + topOffset,
+    rotateZ: HERO_PROJECTS[i].rotation,
+    opacity: 1,
+    scale: 1,
+    blurPx: 0,
+  }));
+
+  // Sync topOffset changes (company on/off) into spring y targets without a full reorder animation.
+  const prevTopOffsetRef = useRef(topOffset);
+  useEffect(() => {
+    if (prevTopOffsetRef.current === topOffset) return;
+    prevTopOffsetRef.current = topOffset;
+    cardApi.start((i) => {
+      const id = HERO_PROJECTS[i].id;
+      const proj = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
+      // Update stored y to include new offset so next FLIP starts from the right place.
+      prevPosRef.current.set(id, { x: proj.left, y: proj.top + topOffset });
+      return { y: proj.top + topOffset, config: { tension: 200, friction: 28 } };
+    });
+  }, [topOffset, activeHeroProjects, cardApi]);
+
+  // Fire reorder animation when the project assignment changes.
+  useEffect(() => {
+    const prev = prevPosRef.current;
+
+    if (preset.id === 'watercolor-dissolve') {
+      // Phase 1: blur out all cards.
+      let restCount = 0;
+      cardApi.start((_i) => ({
+        to: { opacity: 0, blurPx: 10 },
+        config: preset.config,
+        onRest: () => {
+          restCount += 1;
+          // Wait for all cards to finish blurring before swapping content.
+          if (restCount < HERO_PROJECTS.length) return;
+          setDisplayedProjects(activeHeroProjects);
+          // Update prevPos so positions are current when blurring back in.
+          activeHeroProjects.forEach((p) => {
+            prevPosRef.current.set(p.id, { x: p.left, y: p.top + topOffset });
+          });
+          // Phase 2: blur in at new positions.
+          cardApi.start((j) => {
+            const proj = activeHeroProjects.find((p) => p.id === HERO_PROJECTS[j].id) ?? HERO_PROJECTS[j];
+            return {
+              x: proj.left,
+              y: proj.top + topOffset,
+              opacity: 1,
+              blurPx: 0,
+              config: preset.config,
+            };
+          });
+        },
+      }));
+      return;
+    }
+
+    // FLIP Slide / Arc Float — animate each card from its old position to its new one.
+    cardApi.start((i) => {
+      const id = HERO_PROJECTS[i].id;
+      const next = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
+      const prevPos = prev.get(id) ?? { x: next.left, y: next.top + topOffset };
+      return {
+        from: { x: prevPos.x, y: prevPos.y, opacity: 1, scale: 1, blurPx: 0 },
+        to: preset.getTo(prevPos, { x: next.left, y: next.top + topOffset }, i),
+        delay: preset.trail ? i * preset.trail : 0,
+        config: preset.config,
+      };
+    });
+
+    // Advance prev positions after triggering.
+    activeHeroProjects.forEach((p) => {
+      prevPosRef.current.set(p.id, { x: p.left, y: p.top + topOffset });
+    });
+    setDisplayedProjects(activeHeroProjects);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeHeroProjects, preset]);
+
   return (
     <>
       <section
@@ -630,17 +731,36 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
           )}
         </animated.div>
 
-        {/* Project cards — desktop: absolutely positioned. */}
+        {/* Project cards — desktop: spring-animated absolute positioning. */}
         <animated.div className="hidden md:block w-full max-w-[770px] relative m-auto z-20" style={cardsSpring}>
-          {activeHeroProjects.map((project) => (
-            <HeroProjectCard
-              key={project.id}
-              project={project}
-              topOffset={company ? 32 : 0}
-              onClick={() => handleCardClick(project)}
-              onActivate={() => handleCardActivate(project)}
-            />
-          ))}
+          {HERO_PROJECTS.map((baseProject, i) => {
+            const current = displayedProjects.find((p) => p.id === baseProject.id) ?? baseProject;
+            const sp = cardSprings[i];
+            return (
+              <animated.div
+                key={baseProject.id}
+                style={{
+                  position: 'absolute',
+                  x: sp.x,
+                  y: sp.y,
+                  rotateZ: sp.rotateZ,
+                  opacity: sp.opacity,
+                  scale: sp.scale,
+                  filter: sp.blurPx.to((b) => (b > 0 ? `blur(${b}px)` : 'none')),
+                  zIndex: current.z,
+                }}
+              >
+                <div className={current.bob ? 'animate-[card-bob_6s_ease-in-out_infinite]' : undefined}>
+                  <HeroProjectCardButton
+                    project={current}
+                    onClick={() => handleCardClick(current)}
+                    onActivate={() => handleCardActivate(current)}
+                  />
+                </div>
+              </animated.div>
+            );
+          })}
+          <AnimationSelector onSelect={setSelectedPresetId} />
         </animated.div>
 
         {/* Project cards — mobile: horizontal snap scroll, 02 · 01 · 03. */}
