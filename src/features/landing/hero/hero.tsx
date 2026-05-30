@@ -594,6 +594,21 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
                 "radial-gradient(82% 100% at 50% 0%, rgba(255,251,240,0.5) 0%, rgba(255,251,240,0) 70%)",
             }}
           />
+          {/* Film grain — a pre-baked 128px seamless noise tile repeated over
+              the gradient band. Per-pixel noise has no spatial correlation, so
+              the tile edges match the interior and it repeats without a seam.
+              mix-blend-mode:overlay lets mid-gray pixels pass through and only
+              the deviations grain the gradients/wash beneath; element opacity
+              is the single strength knob. Cheap static raster — no per-frame
+              feTurbulence repaint. */}
+          <div
+            className="absolute inset-x-0 top-0 h-[560px] opacity-[0.6]"
+            style={{
+              backgroundImage: "url('/images/noise.png')",
+              backgroundRepeat: "repeat",
+              mixBlendMode: "overlay",
+            }}
+          />
         </animated.div>
 
         {/* Intro blurb. When company context is active, the two-line greeting
