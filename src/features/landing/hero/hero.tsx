@@ -570,80 +570,66 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
   const topOffset = company ? 32 : 0;
 
-  // Stable lookup: position + rotation for a card at its current slot.
-  const activePosOf = (id: string) => {
-    const proj = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS.find((p) => p.id === id)!;
-    return { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation };
-  };
+  // Where a card (by content id) currently lives: its slot geometry in
+  // activeHeroProjects, plus the company badge top offset. This is the single
+  // source of truth for a card's target — slot is tied to the card content.
+  const targetOf = useCallback(
+    (id: string) => {
+      const proj =
+        activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS.find((p) => p.id === id)!;
+      return { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation };
+    },
+    [activeHeroProjects, topOffset],
+  );
 
   // Initialize springs at the correct positions for the current company state.
   const [cardSprings, cardApi] = useSprings(HERO_PROJECTS.length, (i) => {
-    const { left, top, rotateZ } = activePosOf(HERO_PROJECTS[i].id);
+    const { left, top, rotateZ } = targetOf(HERO_PROJECTS[i].id);
     return { left, top, rotateZ, opacity: 1, scale: 1, blurPx: 0 };
   });
 
-  // Track previous (left, top, rotateZ) per card ID so FLIP/Arc know where to start from.
-  type CardPosRecord = { left: number; top: number; rotateZ: number };
-  const prevPosRef = useRef<Map<string, CardPosRecord>>(
-    new Map(HERO_PROJECTS.map((bp) => [bp.id, activePosOf(bp.id)])),
-  );
+  // Read the live current position straight from the springs (no manual
+  // bookkeeping) so FLIP/Arc always animate from exactly where each card is.
+  const currentOf = (i: number) => ({
+    left: cardSprings[i].left.get(),
+    top: cardSprings[i].top.get(),
+    rotateZ: cardSprings[i].rotateZ.get(),
+  });
 
-  // Sync topOffset changes by adjusting prevPosRef by the delta.
-  // Must NOT replace prevPosRef values with destination positions — the reorder effect
-  // reads prevPosRef immediately after this effect and needs the cards' *current* positions
-  // so it can animate from them to the new slot positions.
-  const prevTopOffsetRef = useRef(topOffset);
-  useEffect(() => {
-    if (prevTopOffsetRef.current === topOffset) return;
-    const delta = topOffset - prevTopOffsetRef.current;
-    prevTopOffsetRef.current = topOffset;
-    cardApi.start((i) => {
-      const id = HERO_PROJECTS[i].id;
-      const cur = prevPosRef.current.get(id);
-      if (!cur) return {};
-      const newTop = cur.top + delta;
-      prevPosRef.current.set(id, { ...cur, top: newTop });
-      return { top: newTop, config: { tension: 200, friction: 28 } };
-    });
-  }, [topOffset, cardApi]);
+  // Read preset via ref so a dropdown change doesn't re-fire the reorder effect.
+  const presetRef = useRef(preset);
+  presetRef.current = preset;
 
-  // Skip the animation on mount — springs are already at the correct positions.
+  // Skip the first run — springs are already initialized to the right spots.
   const mountedRef = useRef(false);
 
-  // Fire reorder animation when the project assignment changes.
+  // One effect drives every reorder. It fires when the project assignment OR the
+  // badge offset changes; both happen together when navigating to/from a company
+  // route, so a single cardApi.start avoids the two-effect race that mislaid cards.
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
       return;
     }
-    const prev = prevPosRef.current;
+    const activePreset = presetRef.current;
 
-    if (preset.id === 'watercolor-dissolve') {
-      // Phase 1: blur out all cards.
+    if (activePreset.id === 'watercolor-dissolve') {
+      // Phase 1: blur every card out. When the last one settles, swap content and
+      // snap each card to its new slot while invisible, then blur back in.
       let restCount = 0;
-      cardApi.start((_i) => ({
+      cardApi.start(() => ({
         to: { opacity: 0, blurPx: 10 },
-        config: preset.config,
+        config: activePreset.config,
         onRest: () => {
           restCount += 1;
           if (restCount < HERO_PROJECTS.length) return;
           setDisplayedProjects(activeHeroProjects);
-          activeHeroProjects.forEach((p) => {
-            prevPosRef.current.set(p.id, { left: p.left, top: p.top + topOffset, rotateZ: p.rotation });
-          });
-          // Phase 2: snap positions immediately (invisible), then blur in.
           cardApi.start((j) => {
-            const proj = activeHeroProjects.find((p) => p.id === HERO_PROJECTS[j].id) ?? HERO_PROJECTS[j];
+            const t = targetOf(HERO_PROJECTS[j].id);
             return {
-              from: {
-                left: proj.left,
-                top: proj.top + topOffset,
-                rotateZ: proj.rotation,
-                opacity: 0,
-                blurPx: 10,
-              },
+              from: { left: t.left, top: t.top, rotateZ: t.rotateZ, opacity: 0, blurPx: 10 },
               to: { opacity: 1, blurPx: 0 },
-              config: preset.config,
+              config: activePreset.config,
             };
           });
         },
@@ -651,34 +637,25 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
       return;
     }
 
-    // FLIP Slide / Arc Float — animate each card from its old position to its new one.
+    // FLIP Slide / Arc Float — animate from each card's live position to its target.
     cardApi.start((i) => {
-      const id = HERO_PROJECTS[i].id;
-      const next = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
-      const prevPos = prev.get(id) ?? { left: next.left, top: next.top + topOffset, rotateZ: next.rotation };
-      const targetPos = { left: next.left, top: next.top + topOffset };
-
-      // Inject rotateZ into the final animation step so the card ends at the correct rotation.
-      const rawTo = preset.getTo(prevPos, targetPos, i);
+      const cur = currentOf(i);
+      const t = targetOf(HERO_PROJECTS[i].id);
+      const rawTo = activePreset.getTo(cur, t, i);
+      // Ensure the final step lands at the slot's rotation.
       const toWithRotation = Array.isArray(rawTo)
-        ? [...rawTo.slice(0, -1), { ...rawTo[rawTo.length - 1], rotateZ: next.rotation }]
-        : { ...rawTo, rotateZ: next.rotation };
-
+        ? [...rawTo.slice(0, -1), { ...rawTo[rawTo.length - 1], rotateZ: t.rotateZ }]
+        : { ...rawTo, rotateZ: t.rotateZ };
       return {
-        from: { left: prevPos.left, top: prevPos.top, rotateZ: prevPos.rotateZ, opacity: 1, scale: 1, blurPx: 0 },
         to: toWithRotation,
-        delay: preset.trail ? i * preset.trail : 0,
-        config: preset.config,
+        delay: activePreset.trail ? i * activePreset.trail : 0,
+        config: activePreset.config,
       };
     });
-
-    // Advance prev positions after triggering.
-    activeHeroProjects.forEach((p) => {
-      prevPosRef.current.set(p.id, { left: p.left, top: p.top + topOffset, rotateZ: p.rotation });
-    });
     setDisplayedProjects(activeHeroProjects);
+  // currentOf intentionally omitted: it reads live spring values, not deps.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeHeroProjects, preset]);
+  }, [activeHeroProjects, topOffset, targetOf, cardApi]);
 
   return (
     <>
