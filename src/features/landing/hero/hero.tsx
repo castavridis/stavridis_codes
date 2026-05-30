@@ -588,18 +588,24 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     new Map(HERO_PROJECTS.map((bp) => [bp.id, activePosOf(bp.id)])),
   );
 
-  // Sync topOffset changes (company badge appearing/dismissing) without a reorder animation.
+  // Sync topOffset changes by adjusting prevPosRef by the delta.
+  // Must NOT replace prevPosRef values with destination positions — the reorder effect
+  // reads prevPosRef immediately after this effect and needs the cards' *current* positions
+  // so it can animate from them to the new slot positions.
   const prevTopOffsetRef = useRef(topOffset);
   useEffect(() => {
     if (prevTopOffsetRef.current === topOffset) return;
+    const delta = topOffset - prevTopOffsetRef.current;
     prevTopOffsetRef.current = topOffset;
     cardApi.start((i) => {
       const id = HERO_PROJECTS[i].id;
-      const proj = activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS[i];
-      prevPosRef.current.set(id, { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation });
-      return { top: proj.top + topOffset, config: { tension: 200, friction: 28 } };
+      const cur = prevPosRef.current.get(id);
+      if (!cur) return {};
+      const newTop = cur.top + delta;
+      prevPosRef.current.set(id, { ...cur, top: newTop });
+      return { top: newTop, config: { tension: 200, friction: 28 } };
     });
-  }, [topOffset, activeHeroProjects, cardApi]);
+  }, [topOffset, cardApi]);
 
   // Skip the animation on mount — springs are already at the correct positions.
   const mountedRef = useRef(false);
