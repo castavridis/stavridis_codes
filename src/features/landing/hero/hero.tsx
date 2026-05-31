@@ -666,7 +666,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
                   top: sp.top,
                   rotateZ: sp.rotateZ,
                   opacity: sp.opacity,
-                  filter: sp.blurPx.to((b: number) => (b > 0 ? `blur(${b}px)` : 'none')),
+                  filter: sp.blurPx ? sp.blurPx.to((b: number) => (b > 0 ? `blur(${b}px)` : 'none')) : 'none',
                   zIndex: current.z,
                 }}
               >

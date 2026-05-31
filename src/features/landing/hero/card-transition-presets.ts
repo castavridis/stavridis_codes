@@ -8,6 +8,14 @@ type Next = (props: Record<string, unknown>) => Promise<void>;
 // The animatable spring state for a card. All keys are declared (even when a given
 // preset only sets some, or sets them via an async `to`) so react-spring can infer
 // the SpringValues shape — sp.left / sp.top / etc. are then correctly typed.
+type CardSpringValues = {
+  left: number;
+  top: number;
+  rotateZ: number;
+  opacity: number;
+  blurPx: number;
+};
+
 export type CardSpringProps = {
   left?: number;
   top?: number;
@@ -16,6 +24,9 @@ export type CardSpringProps = {
   blurPx?: number;
   delay?: number;
   config?: SpringConfig;
+  // `from` declares the initial values (mount-only) so every spring always has all
+  // animated keys, even when a preset drives them through an async `to`.
+  from?: CardSpringValues;
   to?: (next: Next) => Promise<void>;
 };
 
@@ -67,7 +78,10 @@ export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
     id: 'watercolor-dissolve',
     label: 'Watercolor Dissolve',
     // Blur+fade out, snap to the new slot while invisible, then blur+fade back in.
+    // `from` registers all keys on mount; on later runs it's ignored and the async
+    // `to` animates from each card's current value.
     build: (t) => ({
+      from: { left: t.left, top: t.top, rotateZ: t.rotateZ, opacity: 1, blurPx: 0 },
       to: async (next: Next) => {
         await next({ opacity: 0, blurPx: 8 });
         await next({ left: t.left, top: t.top, rotateZ: t.rotateZ, immediate: true });
