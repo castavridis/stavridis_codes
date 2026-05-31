@@ -556,6 +556,27 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     config: { tension: 200, friction: 28 },
   });
 
+  // Personalization dismiss: when the chip is clicked we don't clear the company
+  // immediately — we first fade the "Hi, {company}!" line up + out and the chip
+  // down + out, then call the real onDismiss (which clears company, reshuffles the
+  // cards, and resets the layout). Keeping company truthy during the exit keeps
+  // both elements mounted so they can animate.
+  const [dismissing, setDismissing] = useState(false);
+  const handleDismissStart = useCallback(() => setDismissing(true), []);
+  const dismissSpring = useSpring({
+    greetOpacity: dismissing ? 0 : 1,
+    greetY: dismissing ? -16 : 0,
+    chipOpacity: dismissing ? 0 : 1,
+    chipY: dismissing ? 16 : 0,
+    config: { tension: 220, friction: 26 },
+    onRest: () => {
+      if (dismissing) {
+        onDismiss?.();
+        setDismissing(false);
+      }
+    },
+  });
+
   // ---------------------------------------------------------------------------
   // Per-card springs for animated reorder when heroProjects changes.
   // Springs are keyed by HERO_PROJECTS order (stable IDs), not by slot.
@@ -658,15 +679,21 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
           className={`absolute left-1/2 z-30 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
           style={introSpring}
         >
-          <p className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
-            {company && (<>Hi, {company}!<br /></>)}
-            I'm C Stavridis,
-          </p>
+          <div className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
+            {company && (
+              <animated.p style={{ opacity: dismissSpring.greetOpacity, y: dismissSpring.greetY }}>
+                Hi, {company}!
+              </animated.p>
+            )}
+            <p>I'm C Stavridis,</p>
+          </div>
           <p className="pointer-events-none font-body text-[18px] leading-[24px]">
             {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>
           {company && onDismiss && (
-            <CompanyBadge company={company} onDismiss={onDismiss} />
+            <animated.div style={{ opacity: dismissSpring.chipOpacity, y: dismissSpring.chipY }}>
+              <CompanyBadge company={company} onDismiss={handleDismissStart} />
+            </animated.div>
           )}
         </animated.div>
 
