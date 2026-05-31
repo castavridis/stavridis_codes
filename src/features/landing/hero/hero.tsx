@@ -569,22 +569,25 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
 
   // Each spring is keyed by HERO_PROJECTS content id; its target is that card's
   // slot in the current arrangement (activeHeroProjects) plus the badge offset.
-  // The declarative useSprings(n, props, deps) form animates from each card's live
-  // position to the new target whenever `arrangementKey` changes — no effect, so
-  // it's immune to StrictMode's mount double-invoke and to the frequent re-renders
-  // from the brush cursor / clock (those don't change the key, so nothing re-fires).
+  // The function form useSprings(n, (i) => props, deps) re-runs the builder ONLY
+  // when `arrangementKey` changes, animating from each card's live position to its
+  // new target. Using the function-with-deps form (not the array form) is critical:
+  // it's immune to StrictMode's mount double-invoke AND to the frequent re-renders
+  // from hover/brush cursor/clock — those rebuild nothing, so presets that animate
+  // through an async `to` (watercolor-dissolve) don't replay on every re-render.
   const arrangementKey =
     activeHeroProjects.map((p) => p.id).join('|') + `@${topOffset}@${preset.id}`;
 
   const [cardSprings] = useSprings(
     HERO_PROJECTS.length,
-    HERO_PROJECTS.map((bp, i) => {
+    (i) => {
+      const bp = HERO_PROJECTS[i];
       const proj = activeHeroProjects.find((p) => p.id === bp.id) ?? bp;
       return preset.build(
         { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation },
         i,
       );
-    }),
+    },
     [arrangementKey],
   );
 
