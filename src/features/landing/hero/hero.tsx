@@ -556,26 +556,44 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
     config: { tension: 200, friction: 28 },
   });
 
-  // Personalization dismiss: when the chip is clicked we don't clear the company
-  // immediately — we first fade the "Hi, {company}!" line up + out and the chip
-  // down + out, then call the real onDismiss (which clears company, reshuffles the
-  // cards, and resets the layout). Keeping company truthy during the exit keeps
-  // both elements mounted so they can animate.
-  const [dismissing, setDismissing] = useState(false);
-  const handleDismissStart = useCallback(() => setDismissing(true), []);
-  const dismissSpring = useSpring({
-    greetOpacity: dismissing ? 0 : 1,
-    greetY: dismissing ? -16 : 0,
-    chipOpacity: dismissing ? 0 : 1,
-    chipY: dismissing ? 16 : 0,
-    config: { tension: 220, friction: 26 },
-    onRest: () => {
-      if (dismissing) {
-        onDismiss?.();
-        setDismissing(false);
-      }
-    },
-  });
+  // Personalization enter / exit for the "Hi, {company}!" line and the chip.
+  //  • Enter: on load (or when a company first appears) the greeting fades down
+  //    into place and the chip fades up into place.
+  //  • Exit: clicking the chip fades the greeting up + out and the chip down + out,
+  //    then calls the real onDismiss (which clears the company, reshuffles the
+  //    cards, and resets the layout). company stays truthy through the exit so both
+  //    elements remain mounted to animate.
+  const [introStyle, introApi] = useSpring(() => ({
+    from: company
+      ? { greetOpacity: 0, greetY: -12, chipOpacity: 0, chipY: 12 }
+      : undefined,
+    to: { greetOpacity: 1, greetY: 0, chipOpacity: 1, chipY: 0 },
+    config: { tension: 280, friction: 24 },
+  }));
+
+  // Replay the entrance when a company appears after mount (home → /for/:company).
+  // Mount-with-company is handled by the `from` above, so this only covers the
+  // absent → present transition.
+  const prevCompanyRef = useRef(company);
+  useEffect(() => {
+    const had = prevCompanyRef.current;
+    prevCompanyRef.current = company;
+    if (!had && company) {
+      introApi.start({
+        from: { greetOpacity: 0, greetY: -12, chipOpacity: 0, chipY: 12 },
+        to: { greetOpacity: 1, greetY: 0, chipOpacity: 1, chipY: 0 },
+        config: { tension: 280, friction: 24 },
+      });
+    }
+  }, [company, introApi]);
+
+  const handleDismissStart = useCallback(() => {
+    introApi.start({
+      to: { greetOpacity: 0, greetY: -16, chipOpacity: 0, chipY: 16 },
+      config: { tension: 220, friction: 26 },
+      onRest: () => onDismiss?.(),
+    });
+  }, [introApi, onDismiss]);
 
   // ---------------------------------------------------------------------------
   // Per-card springs for animated reorder when heroProjects changes.
@@ -666,7 +684,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         >
           <div className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
             {company && (
-              <animated.p style={{ opacity: dismissSpring.greetOpacity, y: dismissSpring.greetY }}>
+              <animated.p style={{ opacity: introStyle.greetOpacity, y: introStyle.greetY }}>
                 Hi, {company}!
               </animated.p>
             )}
@@ -676,7 +694,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
             {blurb ?? "an AI-Native Design Engineer who loves turning complex ideas into warm, approachable products."}
           </p>
           {company && onDismiss && (
-            <animated.div style={{ opacity: dismissSpring.chipOpacity, y: dismissSpring.chipY }}>
+            <animated.div style={{ opacity: introStyle.chipOpacity, y: introStyle.chipY }}>
               <CompanyBadge company={company} onDismiss={handleDismissStart} />
             </animated.div>
           )}
