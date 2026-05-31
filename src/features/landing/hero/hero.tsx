@@ -643,8 +643,8 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         >
           <div
             ref={heroCanvasRef}
-            className="absolute -inset-x-[36px] top-0"
-            style={{ height: isMobile ? '100dvh' : '100%', touchAction: "none" }}
+            className="absolute -inset-x-[36px] -top-[24px]"
+            style={{ height: isMobile ? '100dvh' : 'calc(100% + 24px)', touchAction: "none" }}
             aria-hidden="true"
           />
         </animated.div>
@@ -654,14 +654,16 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
           <div
             className="absolute inset-x-0 top-[216px] h-[340px]"
             style={{
+              display: isMobile ? 'none' : 'block',
               background:
-                "radial-gradient(ellipse 500px 275px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
+                "radial-gradient(ellipse 45% 255px at 50% 100%, rgba(37,25,0,1) 0%, rgba(37,25,0,0) 100%)",
             }}
           />
           {/* Linear fade — wash band → DARK. */}
           <div
             className="absolute inset-x-0 top-[269px] h-[291px]"
             style={{
+              display: isMobile ? 'none' : 'block',
               background: `linear-gradient(to bottom, rgba(37,25,0,0) 0%, ${DARK} 100%)`,
             }}
           />
@@ -679,15 +681,18 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
               mix-blend-mode:overlay lets mid-gray pixels pass through and only
               the deviations grain the gradients/wash beneath; element opacity
               is the single strength knob. Cheap static raster — no per-frame
-              feTurbulence repaint. */}
+              feTurbulence repaint.
+         */}
           <div
-            className="absolute inset-x-0 top-0 h-[560px] opacity-[0.6]"
+            className="absolute inset-x-0 top-0 opacity-[0.6]"
             style={{
+              display: isMobile ? 'none' : 'block',
+              height: '100%',
               backgroundImage: "url('/images/noise.png')",
               backgroundRepeat: "repeat",
               mixBlendMode: "overlay",
             }}
-          />
+        />
         </animated.div>
 
         {/* Intro blurb. When company context is active, the two-line greeting
