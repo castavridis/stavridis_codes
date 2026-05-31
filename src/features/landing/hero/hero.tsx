@@ -565,97 +565,28 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
   );
   const preset = CARD_TRANSITION_PRESETS[selectedPresetId] ?? CARD_TRANSITION_PRESETS[DEFAULT_PRESET_ID];
 
-  // Displayed projects for watercolor-dissolve: updated after blur-out settles.
-  const [displayedProjects, setDisplayedProjects] = useState(activeHeroProjects);
-
   const topOffset = company ? 32 : 0;
 
-  // Where a card (by content id) currently lives: its slot geometry in
-  // activeHeroProjects, plus the company badge top offset. This is the single
-  // source of truth for a card's target — slot is tied to the card content.
-  const targetOf = useCallback(
-    (id: string) => {
-      const proj =
-        activeHeroProjects.find((p) => p.id === id) ?? HERO_PROJECTS.find((p) => p.id === id)!;
-      return { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation };
-    },
-    [activeHeroProjects, topOffset],
+  // Each spring is keyed by HERO_PROJECTS content id; its target is that card's
+  // slot in the current arrangement (activeHeroProjects) plus the badge offset.
+  // The declarative useSprings(n, props, deps) form animates from each card's live
+  // position to the new target whenever `arrangementKey` changes — no effect, so
+  // it's immune to StrictMode's mount double-invoke and to the frequent re-renders
+  // from the brush cursor / clock (those don't change the key, so nothing re-fires).
+  const arrangementKey =
+    activeHeroProjects.map((p) => p.id).join('|') + `@${topOffset}@${preset.id}`;
+
+  const [cardSprings] = useSprings(
+    HERO_PROJECTS.length,
+    HERO_PROJECTS.map((bp, i) => {
+      const proj = activeHeroProjects.find((p) => p.id === bp.id) ?? bp;
+      return preset.build(
+        { left: proj.left, top: proj.top + topOffset, rotateZ: proj.rotation },
+        i,
+      );
+    }),
+    [arrangementKey],
   );
-
-  // Initialize springs at the correct positions for the current company state.
-  const [cardSprings, cardApi] = useSprings(HERO_PROJECTS.length, (i) => {
-    const { left, top, rotateZ } = targetOf(HERO_PROJECTS[i].id);
-    return { left, top, rotateZ, opacity: 1, scale: 1, blurPx: 0 };
-  });
-
-  // Read the live current position straight from the springs (no manual
-  // bookkeeping) so FLIP/Arc always animate from exactly where each card is.
-  const currentOf = (i: number) => ({
-    left: cardSprings[i].left.get(),
-    top: cardSprings[i].top.get(),
-    rotateZ: cardSprings[i].rotateZ.get(),
-  });
-
-  // Read preset via ref so a dropdown change doesn't re-fire the reorder effect.
-  const presetRef = useRef(preset);
-  presetRef.current = preset;
-
-  // Skip the first run — springs are already initialized to the right spots.
-  const mountedRef = useRef(false);
-
-  // One effect drives every reorder. It fires when the project assignment OR the
-  // badge offset changes; both happen together when navigating to/from a company
-  // route, so a single cardApi.start avoids the two-effect race that mislaid cards.
-  useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true;
-      return;
-    }
-    const activePreset = presetRef.current;
-
-    if (activePreset.id === 'watercolor-dissolve') {
-      // Phase 1: blur every card out. When the last one settles, swap content and
-      // snap each card to its new slot while invisible, then blur back in.
-      let restCount = 0;
-      cardApi.start(() => ({
-        to: { opacity: 0, blurPx: 10 },
-        config: activePreset.config,
-        onRest: () => {
-          restCount += 1;
-          if (restCount < HERO_PROJECTS.length) return;
-          setDisplayedProjects(activeHeroProjects);
-          cardApi.start((j) => {
-            const t = targetOf(HERO_PROJECTS[j].id);
-            return {
-              from: { left: t.left, top: t.top, rotateZ: t.rotateZ, opacity: 0, blurPx: 10 },
-              to: { opacity: 1, blurPx: 0 },
-              config: activePreset.config,
-            };
-          });
-        },
-      }));
-      return;
-    }
-
-    // FLIP Slide / Arc Float — animate from each card's live position to its target.
-    cardApi.start((i) => {
-      const cur = currentOf(i);
-      const t = targetOf(HERO_PROJECTS[i].id);
-      const rawTo = activePreset.getTo(cur, t, i);
-      // Ensure the final step lands at the slot's rotation.
-      const toWithRotation = Array.isArray(rawTo)
-        ? [...rawTo.slice(0, -1), { ...rawTo[rawTo.length - 1], rotateZ: t.rotateZ }]
-        : { ...rawTo, rotateZ: t.rotateZ };
-      return {
-        to: toWithRotation,
-        delay: activePreset.trail ? i * activePreset.trail : 0,
-        config: activePreset.config,
-      };
-    });
-    setDisplayedProjects(activeHeroProjects);
-  // currentOf intentionally omitted: it reads live spring values, not deps.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeHeroProjects, topOffset, targetOf, cardApi]);
 
   return (
     <>
@@ -739,7 +670,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         {/* Project cards — desktop: spring-animated absolute positioning. */}
         <animated.div className="hidden md:block w-full max-w-[770px] relative m-auto z-20" style={cardsSpring}>
           {HERO_PROJECTS.map((baseProject, i) => {
-            const current = displayedProjects.find((p) => p.id === baseProject.id) ?? baseProject;
+            const current = activeHeroProjects.find((p) => p.id === baseProject.id) ?? baseProject;
             const sp = cardSprings[i];
             return (
               <animated.div
@@ -750,8 +681,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
                   top: sp.top,
                   rotateZ: sp.rotateZ,
                   opacity: sp.opacity,
-                  scale: sp.scale,
-                  filter: sp.blurPx.to((b) => (b > 0 ? `blur(${b}px)` : 'none')),
+                  filter: sp.blurPx.to((b: number) => (b > 0 ? `blur(${b}px)` : 'none')),
                   zIndex: current.z,
                 }}
               >
