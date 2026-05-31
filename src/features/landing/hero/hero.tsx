@@ -699,7 +699,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
             and badge chip add ~60px; we pull the block up 28px (extra greeting
             line) and push cards down 32px (chip) to keep visual balance. */}
         <animated.div
-          className={`absolute left-1/2 z-30 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
+          className={`select-none absolute left-1/2 z-30 flex w-[min(315px,calc(100vw-48px))] -translate-x-1/2 flex-col items-center gap-[8px] text-center leading-[24px] text-black ${company ? "top-[32px] md:top-[52px]" : "top-[60px] md:top-[80px]"}`}
           style={introSpring}
         >
           <div className="pointer-events-none font-display font-light text-[24px] leading-[28px]">
@@ -751,7 +751,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
         </animated.div>
 
         {/* Animation preset selector — desktop only, bottom-left of hero canvas. */}
-        <div className="hidden md:block">
+        <div className="hidden">
           <AnimationSelector onSelect={setSelectedPresetId} />
         </div>
 
@@ -822,7 +822,7 @@ export function Hero({ onCardClick, onCardHover, paused = false, transitioning =
       {/* Preset widget — centered on the dark band below the hero. */}
       <div
         className={drawMode ? "flex w-full justify-center fixed bottom-0" : "flex w-full justify-center"}
-        style={{ backgroundColor: DARK }}
+        style={{ backgroundColor: isMobile ? DARK : 'transparent' }}
       >
         <PresetWidget
           location={location}

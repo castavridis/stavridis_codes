@@ -25,7 +25,7 @@ export type CardTransitionPreset = {
 };
 
 export const ANIM_STORAGE_KEY = 'hero-card-animation';
-export const DEFAULT_PRESET_ID = 'flip-slide';
+export const DEFAULT_PRESET_ID = 'arc-float';
 
 export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
   'flip-slide': {
