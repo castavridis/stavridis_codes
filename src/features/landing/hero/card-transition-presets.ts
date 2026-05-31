@@ -1,26 +1,33 @@
 import type { SpringConfig } from '@react-spring/web';
 
-export type CardPos = { left: number; top: number };
+export type CardTarget = { left: number; top: number; rotateZ: number };
 
-export type CardSpringStep = {
+// react-spring's async update fn, passed to the `to: async (next) => {}` form.
+type Next = (props: Record<string, unknown>) => Promise<void>;
+
+// The animatable spring state for a card. All keys are declared (even when a given
+// preset only sets some, or sets them via an async `to`) so react-spring can infer
+// the SpringValues shape — sp.left / sp.top / etc. are then correctly typed.
+export type CardSpringProps = {
   left?: number;
   top?: number;
   rotateZ?: number;
   opacity?: number;
-  scale?: number;
   blurPx?: number;
+  delay?: number;
   config?: SpringConfig;
+  to?: (next: Next) => Promise<void>;
 };
 
+// A preset builds the declarative spring props for a single card heading to its
+// slot `target` at index `i`. Returning plain { left, top, ... } animates straight
+// there; returning { to: async (next) => ... } sequences keyframes. These props are
+// fed to useSprings(n, props, deps) so react-spring animates from each card's live
+// position to the new target whenever the arrangement or preset changes.
 export type CardTransitionPreset = {
   id: string;
   label: string;
-  // Returns a single target or multi-step array for the `to` prop of api.start().
-  // `prev` is the card's position before the swap; `next` is the target slot.
-  getTo: (prev: CardPos, next: CardPos, cardIndex: number) => CardSpringStep | CardSpringStep[];
-  config?: SpringConfig;
-  // ms delay between each card's animation start (stagger).
-  trail?: number;
+  build: (target: CardTarget, i: number) => CardSpringProps;
 };
 
 export const ANIM_STORAGE_KEY = 'hero-card-animation';
@@ -30,34 +37,43 @@ export const CARD_TRANSITION_PRESETS: Record<string, CardTransitionPreset> = {
   'flip-slide': {
     id: 'flip-slide',
     label: 'FLIP Slide',
-    getTo: (_prev, next) => ({
-      left: next.left,
-      top: next.top,
+    // Tight, simultaneous slide to the new slot.
+    build: (t) => ({
+      left: t.left,
+      top: t.top,
+      rotateZ: t.rotateZ,
       opacity: 1,
-      scale: 1,
       blurPx: 0,
+      config: { tension: 180, friction: 22 } as SpringConfig,
     }),
-    config: { tension: 180, friction: 22 },
   },
 
   'arc-float': {
     id: 'arc-float',
     label: 'Arc Float',
-    getTo: (prev, next) => [
-      // Lift up and scale slightly
-      { left: prev.left, top: prev.top - 24, scale: 1.05, config: { tension: 420, friction: 18 } },
-      // Arc to destination and settle
-      { left: next.left, top: next.top, scale: 1, config: { tension: 160, friction: 26 } },
-    ],
-    trail: 110,
+    // Staggered, gently overshooting float (lower friction) so cards drift into place.
+    build: (t, i) => ({
+      left: t.left,
+      top: t.top,
+      rotateZ: t.rotateZ,
+      opacity: 1,
+      blurPx: 0,
+      delay: i * 90,
+      config: { tension: 150, friction: 16 } as SpringConfig,
+    }),
   },
 
   'watercolor-dissolve': {
     id: 'watercolor-dissolve',
     label: 'Watercolor Dissolve',
-    // Positions don't animate — only blur and opacity change.
-    // The hero handles the two-phase content swap via onRest.
-    getTo: (_prev, _next) => ({ opacity: 0, blurPx: 10 }),
-    config: { tension: 90, friction: 22 },
+    // Blur+fade out, snap to the new slot while invisible, then blur+fade back in.
+    build: (t) => ({
+      to: async (next: Next) => {
+        await next({ opacity: 0, blurPx: 8 });
+        await next({ left: t.left, top: t.top, rotateZ: t.rotateZ, immediate: true });
+        await next({ opacity: 1, blurPx: 0 });
+      },
+      config: { tension: 90, friction: 20 } as SpringConfig,
+    }),
   },
 };
