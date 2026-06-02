@@ -16,6 +16,7 @@ export const companies: Record<string, CompanyConfig> = {
   },
   stripe: {
     name: 'Stripe',
+    heroProjectIds: ['proj-careSignal-ai', 'proj-careSignal-ds', 'proj-sol-lewitt'],
   },
 };
 
