@@ -4,6 +4,38 @@
 @source inline('{bg,border}-accent-{blue,green,orange,red,white}');
 @source inline('border-b-paper-{blue-mid,pink} drop-shadow-fieldset');
 
+/* PP Kyoto — Pangram Pangram Foundry. Headline + logotype face for the v2
+   redesign. Files belong in /public/fonts/ and are not yet committed; until
+   they land, browsers fall back to Young Serif / Georgia per the font stack. */
+@font-face {
+  font-family: 'PP Kyoto';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/PPKyoto-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PP Kyoto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPKyoto-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PP Kyoto';
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/PPKyoto-MediumItalic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PP Kyoto';
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/PPKyoto-ExtraboldItalic.woff2') format('woff2');
+}
+
 @theme {
   --color-cream: #fbf6ea;
   --color-cream-50: #fffefc;
@@ -25,6 +57,25 @@
   --color-washes-rose: #a50e53;
   --color-washes-yellow: #e3af08;
   --color-washes-blue: #108ba0;
+
+  /* v2 redesign palette — names mirror the Figma variable groups
+     (CareSignal / Washes / Confetti / status gradients). Several values
+     duplicate legacy tokens (cs-black, cream, washes-yellow, washes-blue);
+     both names are valid during the migration. */
+  --color-caresignal-black: #211e1f;
+  --color-caresignal-white: #fffbf0;
+  --color-caresignal-none: #706c69;
+
+  --color-confetti-black: #391f00;
+
+  --color-washes-hansa-yellow: #e3af08;
+  --color-washes-cerulean-blue: #108ba0;
+  --color-washes-paper: #fbf6ea;
+
+  --color-grad-danger-start: #e5562e40;
+  --color-grad-warning-start: #f9ac3140;
+  --color-grad-success-start: #b2d07f40;
+  --color-grad-none-start: #211e1f40;
 
   --color-paper-blue: #cae7ed;
   --color-paper-blue-mid: rgb(149, 207, 219);
@@ -59,6 +110,7 @@
   --font-body: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
   --font-serif: 'Young Serif', Georgia, serif;
+  --font-kyoto: 'PP Kyoto', 'Young Serif', Georgia, serif;
 
   --drop-shadow-fieldset: 2px 2px 0px black;
 }
