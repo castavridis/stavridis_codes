@@ -1,33 +1,28 @@
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { routes } from './routes.js';
-import {
-  TransitionProvider,
-  ProjectOverlay,
-  useTransition,
-  type Phase,
-} from './components/RadialTransition';
 import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
-import PageTransitionWrapper from './components/PageTransitionWrapper';
+import LandingPage from './features/landing/index.js';
+import SheetOverlay from './components/anim/SheetOverlay.js';
 import { getCompany, type CompanyConfig } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
+import { HERO_PROJECTS } from './features/landing/hero/hero-projects.data.js';
 
 const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
 );
 
-export function App() {
-  return (
-    <TransitionProvider>
-      {(phase) => <AppInner phase={phase} />}
-    </TransitionProvider>
-  );
-}
+const PROJECT_HREFS: Record<string, string> = {
+  'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
+  'proj-careSignal-ai': routes.project.href({ slug: 'caresignal-ai' }),
+  'proj-sol-lewitt': routes.project.href({ slug: 'sol-lewitt' }),
+};
 
-function AppInner({ phase }: { phase: Phase }) {
+export function App() {
   const [, navigate] = useLocation();
   const [matchForCompany, params] = useRoute(routes.forCompany.path);
+  const [matchProject, projectParams] = useRoute(routes.project.path);
 
   // Route-matched config (visitor is on /for/:company right now).
   const routeCompany: CompanyConfig | null = matchForCompany && params?.company
@@ -57,155 +52,92 @@ function AppInner({ phase }: { phase: Phase }) {
     if (matchForCompany) navigate(routes.home.href());
   }, [matchForCompany, navigate]);
 
+  // heroProjectIds order: [center/featured, left, right]
+  // HERO_PROJECTS slot order: [left(0), right(1), center(2)]
+  const heroProjects = useMemo(() => {
+    if (!company?.heroProjectIds?.length) return undefined;
+    const byId = Object.fromEntries(HERO_PROJECTS.map((p) => [p.id, p]));
+    const [centerId, leftId, rightId] = company.heroProjectIds;
+    const fill = (slotIdx: number, id: string | undefined) => {
+      const slot = HERO_PROJECTS[slotIdx];
+      if (!id) return slot;
+      const c = byId[id];
+      if (!c) return slot;
+      return { ...slot, id: c.id, title: c.title, image: c.image, pigment: c.pigment, cta: c.cta };
+    };
+    return [fill(0, leftId), fill(1, rightId), fill(2, centerId)];
+  }, [company?.heroProjectIds]);
+
+  const handleCardHover = useCallback((id: string) => {
+    const href = PROJECT_HREFS[id];
+    const slug = href?.match(/\/project\/(.+)/)?.[1] ?? null;
+    if (!slug) return;
+    // Prefetch the ProjectPost chunk; once resolved, prime the MDX promise cache.
+    void import('./features/projects/project-post.js').then(({ prefetchProject }) => {
+      prefetchProject(slug);
+    });
+  }, []);
+
+  const handleCardClick = useCallback(
+    (id: string) => {
+      const href = PROJECT_HREFS[id];
+      if (href) navigate(href);
+    },
+    [navigate],
+  );
+
+  const projectSlug = matchProject ? projectParams?.slug ?? null : null;
+  const projectOpen = projectSlug !== null;
+
+  const handleCloseProject = useCallback(() => {
+    navigate(routes.home.href());
+  }, [navigate]);
+
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
-      <ScrollLock active={phase.kind !== 'idle'} />
-      {/* Landing page — always mounted, paused when project is fully open. */}
+      {/* Landing page — always mounted beneath the project sheet overlay. */}
       <div className="w-full">
-        <PageTransitionWrapper
-          paused={phase.kind === 'open'}
-          company={company}
+        <LandingPage
+          paused={projectOpen}
+          transitioning={projectOpen}
+          onCardHover={handleCardHover}
+          onCardClick={handleCardClick}
+          company={company?.name}
+          blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
+          heroProjects={heroProjects}
         />
       </div>
 
-      <ProjectRouter phase={phase} />
+      <SheetOverlay open={projectOpen} onClose={handleCloseProject}>
+        {projectSlug ? <ProjectSheetContent slug={projectSlug} onBack={handleCloseProject} /> : null}
+      </SheetOverlay>
+
       <Analytics />
     </main>
   );
 }
 
-// ---------------------------------------------------------------------------
-// ProjectRouter — tracks the active project slug and renders it inside the
-// radial clip-path overlay. Syncs the browser URL.
-// ---------------------------------------------------------------------------
-
-function ProjectRouter({ phase }: { phase: Phase }) {
-  const { close } = useTransition();
-  const [, navigate] = useLocation();
-  const [slug, setSlug] = useState<string | null>(null);
-  const slugRef = useRef(slug);
-  slugRef.current = slug;
-
-  // When a transition starts, extract slug from href and push the URL.
-  useEffect(() => {
-    if (phase.kind === 'opening') {
-      const match = (phase as { href: string }).href.match(/\/project\/(.+)/);
-      if (match) {
-        setSlug(match[1]);
-        navigate((phase as { href: string }).href, { replace: false });
-      }
-    }
-  }, [phase, navigate]);
-
-  // When the close animation finishes (phase → idle), navigate home and clear
-  // the slug. Uses a ref so this only re-runs on phase changes — not when slug
-  // is set by a direct URL load, which would falsely trigger a home redirect.
-  useEffect(() => {
-    if (phase.kind === 'idle' && slugRef.current !== null) {
-      navigate(routes.home.href(), { replace: false });
-      setSlug(null);
-      window.scrollTo(0, 0);
-    }
-  }, [phase.kind, navigate]);
-
-  // Reset scroll when the open animation completes.
-  useEffect(() => {
-    if (phase.kind === 'open') {
-      window.scrollTo(0, 0);
-    }
-  }, [phase.kind]);
-
-  // Close on Escape.
-  useEffect(() => {
-    if (phase.kind !== 'open') return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [phase.kind, close]);
-
-  // Handle browser back while overlay is open.
-  const [location] = useLocation();
-  useEffect(() => {
-    if (location === '/' && phase.kind === 'open' && slug) {
-      close();
-    }
-  }, [location, phase.kind, slug, close]);
-
-  // Support direct navigation to /project/:slug on page load.
-  useEffect(() => {
-    const match = window.location.pathname.match(/\/project\/(.+)/);
-    if (match && !slug && phase.kind === 'idle') {
-      setSlug(match[1]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const isDirectLoad = phase.kind === 'idle' && slug !== null;
-
-  if (!slug) return null;
-
+// Wraps ProjectPost with a Suspense boundary and the cream-paper backdrop the
+// sheet slides up over. Background color matches the project so there's no
+// flash on lazy load.
+function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => void }) {
   const project = getProject(slug);
   const background = project?.background ?? '#fbf6ea';
-
-  // Direct-load (e.g. shared link): show project without animation.
-  if (isDirectLoad) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 50,
-          overflow: 'auto',
-          backgroundColor: background,
-        }}
-      >
-        <Suspense fallback={<RoutePending />}>
-          <ProjectPost
-            slug={slug}
-            onBack={() => {
-              setSlug(null);
-              navigate(routes.home.href(), { replace: false });
-            }}
-          />
-        </Suspense>
-      </div>
-    );
-  }
-
   return (
-    <ProjectOverlay background={background}>
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'auto',
+        backgroundColor: background,
+      }}
+    >
       <Suspense fallback={<RoutePending />}>
-        <ProjectPost slug={slug} onBack={close} />
+        <ProjectPost slug={slug} onBack={onBack} />
       </Suspense>
-    </ProjectOverlay>
+    </div>
   );
-}
-
-// Lock body scroll while the project overlay is visible so the landing page
-// doesn't scroll behind it.
-function ScrollLock({ active }: { active: boolean }) {
-  useLayoutEffect(() => {
-    if (!active) return;
-    const scrollY = window.scrollY;
-    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.paddingRight = `${scrollbarW}px`;
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.paddingRight = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, [active]);
-  return null;
 }
 
 function RoutePending() {
