@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { routes } from './routes.js';
+import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
@@ -124,19 +125,19 @@ export function App() {
   );
 }
 
-// Wraps ProjectPost with a Suspense boundary and provides the scroll
-// container the sheet slides up over. The container itself is transparent so
-// the landing wash beneath remains visible during the slide-up transition —
-// the v2 MDXLayout supplies its own washes-paper backdrop once mounted, and
-// any v1 posts paint their own `project.background` on their inner article.
+// Wraps ProjectPost with a Suspense boundary and the cream-paper backdrop the
+// sheet slides up over. Background color matches the project so there's no
+// flash on lazy load.
 function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => void }) {
+  const project = getProject(slug);
+  const background = project?.background ?? '#fbf6ea';
   return (
     <div
       style={{
         position: 'absolute',
         inset: 0,
         overflow: 'auto',
-        backgroundColor: 'transparent',
+        backgroundColor: background,
       }}
     >
       <Suspense fallback={<RoutePending />}>

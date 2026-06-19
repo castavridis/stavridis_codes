@@ -75,14 +75,8 @@ function V1ProjectPost({ project, onBack }: { project: Project; onBack?: () => v
   const backClassName =
     "cursor-pointer font-mono text-[12px] leading-normal text-cream rounded-md py-[4px] px-[8px] mix-blend-difference text-right transition-colors hover:text-black bg-[rgba(79,61,27,0.5)]";
 
-  // V1 posts paint their own page-fill background here. The project sheet
-  // wrapper went transparent so the landing wash shows through during the
-  // slide-up; v1 chrome relies on an opaque page-cream/project color to read
-  // correctly, so we apply it on the article itself.
   return (
-    <article
-      style={{ color: project.color, backgroundColor: project.background ?? '#fbf6ea', minHeight: '100%' }}
-    >
+    <article style={{ color: project.color }}>
       <div
         className="mix-blend-multiply"
         style={{
