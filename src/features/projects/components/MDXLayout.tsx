@@ -55,12 +55,25 @@ export const mdxComponents = {
 };
 
 export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) {
+  // Spec lives in Figma `CareSignal Platform` (2232:32241):
+  //   - Outer canvas: 1280px wide.
+  //   - Washes Canvas (instance 2232:34104): x=72, y=72, w=1136, h=391,
+  //     rounded-tl/tr 12px. The wash extends 16px past the Project Detail
+  //     card on each side (88-72 = 16px gutter inset).
+  //   - Project Detail (frame 2232:32277): x=88, w=1104. Inner card.
+  //   - Front Matter (instance 4014:42840): x=80 within Project Detail,
+  //     y=72 within Project Detail (so y=200 from canvas top), w=944.
+  //
+  // Translating to the v2 sheet: the wash starts 72px below the sheet top
+  // and the FrontMatter starts 200px below the sheet top. The 1104-wide
+  // Project Detail card is realized via `max-w-[1280px] px-[88px]`, and the
+  // 1136-wide wash extends past that with -mx-[16px] (16px each side).
   return (
     <div className="min-h-full w-full bg-washes-paper">
       <div className="relative mx-auto max-w-[1280px] px-[88px]">
         <div className="relative">
-          <WashesCanvas className="absolute left-0 right-0 top-0 mx-auto h-[391px] w-[1104px] rounded-tl-[12px] rounded-tr-[12px] bg-gradient-to-b from-[#fbf6ea] to-transparent" />
-          <div className="relative pt-[128px] pb-[64px]">
+          <WashesCanvas className="absolute -left-[16px] -right-[16px] top-[72px] mx-auto h-[391px] w-[1136px] rounded-tl-[12px] rounded-tr-[12px] bg-gradient-to-b from-[#fbf6ea] to-transparent" />
+          <div className="relative pt-[200px] pb-[64px]">
             <div className="mx-auto w-[944px]">
               <FrontMatter
                 headline={front.headline}
