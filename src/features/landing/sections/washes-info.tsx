@@ -3,24 +3,24 @@
 // Canvas region. Clicking it opens a Popover ("Powered by Washes.js")
 // extracted verbatim from Figma `Landing Page – Paint 02` (node 4014:43015).
 //
-// The button itself stays visible in both resting and paint modes so the
-// user can always look up the wash credits; the popover only opens on a
-// user click and closes on outside-click or the popover's own close button.
+// Visible only in paint mode. Fades in when `paintActive` flips true, fades
+// out when it flips false. The open popover auto-closes if the user leaves
+// paint mode while it's open.
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import Popover from "../../../components/Popover.js";
 import FadeUp from "../../../components/anim/FadeUp.js";
+import { usePaintStore } from "../../../lib/paint-store.js";
 
 export function WashesInfo(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const paintActive = usePaintStore((s) => s.paintActive);
 
   // Outside-click handler — close the popover when the user clicks/taps
-  // anywhere outside the wrapper. Bound to `pointerdown` so it fires
-  // before the paint-brush's own `pointerdown` (which would otherwise
-  // spawn a wash through the open popover).
+  // anywhere outside the wrapper.
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (e: PointerEvent) => {
@@ -34,6 +34,11 @@ export function WashesInfo(): React.ReactElement {
     return () => window.removeEventListener("pointerdown", onPointerDown, true);
   }, [open]);
 
+  // Auto-close if paint mode ends while the popover is open.
+  useEffect(() => {
+    if (!paintActive) setOpen(false);
+  }, [paintActive]);
+
   const toggle = useCallback(() => setOpen((v) => !v), []);
   const close = useCallback(() => setOpen(false), []);
 
@@ -41,10 +46,18 @@ export function WashesInfo(): React.ReactElement {
     // `data-paint-skip` keeps paint-brush from spawning a wash when the
     // pointer-down lands on the info button or its popover children
     // (paint-brush.tsx looks for that attribute via `closest`).
+    //
+    // Fades in/out with paintActive. `pointer-events` is gated so the
+    // hidden button isn't accidentally clickable.
     <div
       ref={wrapperRef}
       data-paint-skip
-      className="absolute bottom-[8px] left-[8px] z-30"
+      className="absolute bottom-[8px] left-[8px] z-30 transition-opacity duration-300 ease-out"
+      style={{
+        opacity: paintActive ? 1 : 0,
+        pointerEvents: paintActive ? "auto" : "none",
+      }}
+      aria-hidden={!paintActive}
     >
       <button
         type="button"

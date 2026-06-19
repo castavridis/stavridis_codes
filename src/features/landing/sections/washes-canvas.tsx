@@ -6,11 +6,10 @@
 //     and re-seeding. The preset widget bumps `resetVersion` on every
 //     location/time/weather change so the canvas wipes and re-applies its
 //     visualization preset.
-//   - The `washesWorld` Koota world — every `Wash` entity spawned by the
-//     paint-brush is observed via `onAdd(Wash)`, read for its Position +
-//     Color + Radius, and piped into the WebGL sim via `paintAt()`. The
-//     entity is then destroyed (it's a fire-and-forget event — the actual
-//     pigment lives inside the Washes sim grid afterwards).
+//   - The Washes lib's built-in pointer handlers (pointer:true +
+//     continuousFlow) — paint events flow directly through the lib's
+//     internal pointermove stream. Header swatches update the lib's
+//     active pigment via a `usePaintStore.subscribe` on brushColor.
 //
 // Annotation (Visualization Evolution / hero.tsx): the canvas uses the same
 // Washes settings as the hero — paint load 0.25, water load 8.0,
@@ -36,13 +35,8 @@ import {
 } from "../lib/weather.js";
 
 import { usePaintStore } from "../../../lib/paint-store.js";
-import {
-  washesWorld,
-  Wash,
-  Position,
-  Color,
-  Radius,
-} from "../../../lib/washes-world.js";
+
+import type { PigmentOption } from "../../../../lib/washes/washes.js";
 
 export type WashesCanvasProps = {
   // Imperative ref the surrounding page can use to scroll to the canvas
@@ -95,7 +89,7 @@ export function WashesCanvas({
     host.replaceChildren();
 
     let wash: WashesInstance | null = null;
-    let unsubscribeWashAdd: (() => void) | null = null;
+    let unsubscribeBrushColor: (() => void) | null = null;
     let ro: ResizeObserver | null = null;
 
     const applyVisualization = (phase: DayPhase, w: WeatherKey) => {
@@ -112,10 +106,14 @@ export function WashesCanvas({
     const initialize = () => {
       wash = Washes.create(host, {
         cursorPreview: false,
-        // Pointer disabled — the v2 paint flow goes through the
-        // PaintBrush overlay + Koota world, NOT the Washes built-in
-        // pointer handling. We pipe paint via `paintAt()` ourselves.
-        pointer: false,
+        // Pointer ENABLED — paint flows through the Washes lib's built-in
+        // pointer handlers (pointermove + pointerdown stream tiny stamps as
+        // the cursor travels). This matches the legacy hero behavior and is
+        // what `paintLoad` + `brushSize` + `continuousFlow` are calibrated
+        // for. The PaintBrush overlay is now purely visual (soft 10%-fill
+        // disc + "Click to Paint" ring); its custom pointerdown spawn-Wash
+        // pipeline was removed in favor of the lib's native handling.
+        pointer: true,
         scale: 1.5,
       });
       washRef.current = wash;
@@ -139,47 +137,48 @@ export function WashesCanvas({
       wash.paintLoad(0.25);
       wash.waterLoad(8.0);
       wash.evaporation(2.5);
-      wash.brushSize(88);
+      // 160 matches the legacy hero (BRUSH_DEFAULT). Smaller values feel
+      // pinched; the lib's stamp calibration assumes ~160px.
+      wash.brushSize(160);
       wash.edgeMode("gravity");
       wash.gravityDirection("down");
       wash.gravityStrength(0.1);
       wash.fadeHalfLife(10000);
       wash.fadePainting(0.05);
+      // Smooth strokes on touch devices where pointermove is sparse.
+      const isTouch = window.matchMedia("(pointer: coarse)").matches;
+      wash.continuousFlow(isTouch);
       wash.keepSimulating(true);
+      // Initial pigment from the current brush color in the store.
+      const initColor = usePaintStore.getState().brushColor;
+      wash.pigment(
+        nearestPigment(initColor.r, initColor.g, initColor.b) as PigmentOption,
+      );
       applyVisualization(dayPhase, weather);
 
       const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
       if (canvasEl) {
-        canvasEl.style.cursor = "none";
+        // OS crosshair, not 'none' — the PaintBrush overlay does NOT
+        // render a custom cursor anymore; the soft fill disc just tracks
+        // the cursor for color preview.
+        canvasEl.style.cursor = "crosshair";
+        // iOS Safari hands the gesture to the scroll container before
+        // touch-action:none takes effect on the canvas; a non-passive
+        // touchstart calling preventDefault() pre-empts that. Matches
+        // the legacy hero treatment.
+        canvasEl.addEventListener("touchstart", (e) => e.preventDefault(), {
+          passive: false,
+        });
       }
 
-      // Subscribe to new `Wash` entities. Each is a single click-to-paint
-      // event from the PaintBrush overlay. Read its Position/Color/Radius,
-      // convert display coords to grid coords, and stamp via paintAt.
-      //
-      // Rationale: we don't poll an animation-frame loop because clicks
-      // are sparse events (vs. continuous-stroke painting). onAdd lets us
-      // pipe each click into the sim exactly once. After the stamp, the
-      // entity is destroyed — its "logical" state is now living in the
-      // sim's pigment grid.
-      unsubscribeWashAdd = washesWorld.onAdd(Wash, (entity) => {
+      // Subscribe to brushColor and route it to the lib's pigment slot —
+      // user picks a Header swatch, the next stroke uses that pigment.
+      unsubscribeBrushColor = usePaintStore.subscribe((state, prev) => {
+        if (state.brushColor === prev?.brushColor) return;
         const w = washRef.current;
         if (!w) return;
-        const pos = entity.get(Position);
-        const col = entity.get(Color);
-        const rad = entity.get(Radius);
-        if (!pos || !col) return;
-        const radius = rad?.value ?? 24;
-
-        // Color → pigment selection. We approximate by picking the closest
-        // of the three K-M pigments. The Washes lib's paintAt accepts a
-        // pigment by index/name; arbitrary RGB isn't supported.
-        const pigment = nearestPigment(col.r, col.g, col.b);
-        const { gx, gy } = w.toGrid(pos.x, pos.y);
-        const gridRadius = Math.max(2, radius / 1.5);
-        w.paintAt(gx, gy, gridRadius, pigment, 1.0);
-
-        entity.destroy();
+        const c = state.brushColor;
+        w.pigment(nearestPigment(c.r, c.g, c.b) as PigmentOption);
       });
 
       // Fade in once the canvas has rendered its first frame.
@@ -204,11 +203,7 @@ export function WashesCanvas({
 
     return () => {
       ro?.disconnect();
-      unsubscribeWashAdd?.();
-      // Destroy any stray Wash entities so they don't accumulate across
-      // hot-reloads in dev.
-      const stray = washesWorld.query(Wash);
-      stray.forEach((e) => e.destroy());
+      unsubscribeBrushColor?.();
       if (wash) {
         try {
           wash.destroy();
@@ -257,9 +252,6 @@ export function WashesCanvas({
     // while we're faded out.
     wash.fadeHalfLife(200);
     const timeout = window.setTimeout(() => {
-      // Clear logical Wash entities + reset the sim.
-      const stray = washesWorld.query(Wash);
-      stray.forEach((e) => e.destroy());
       try {
         wash.reset();
       } catch {

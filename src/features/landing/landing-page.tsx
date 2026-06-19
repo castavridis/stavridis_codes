@@ -1,6 +1,7 @@
 import "../../globals.css";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { animated, useSpring } from "@react-spring/web";
 
 import Header from "../../components/Header.js";
@@ -72,6 +73,10 @@ function HoverPopover({
   children,
 }: HoverPopoverProps): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(
+    null,
+  );
+  const wrapperRef = useRef<HTMLSpanElement | null>(null);
   const closeTimer = useRef<number | null>(null);
 
   const cancelClose = useCallback(() => {
@@ -89,8 +94,16 @@ function HoverPopover({
     }, 120);
   }, [cancelClose]);
 
+  // Measure the wrapper's viewport rect on open; the popover renders into a
+  // portal at document.body anchored to those coords. The 12px below-the-
+  // phrase offset matches the previous inline `mt-[12px]`.
   const openNow = useCallback(() => {
     cancelClose();
+    const el = wrapperRef.current;
+    if (el) {
+      const r = el.getBoundingClientRect();
+      setCoords({ top: r.bottom + 12, left: r.left });
+    }
     setOpen(true);
   }, [cancelClose]);
 
@@ -101,30 +114,35 @@ function HoverPopover({
   }, []);
 
   return (
-    // pointerEvents: 'auto' overrides the parent glass card's
-    // `pointer-events: none`. The card-as-a-whole passes clicks through to
-    // the wash beneath so the paint brush can stamp anywhere; only the
-    // interactive phrases (this hover-popover wrapper) are re-enabled.
+    // The wrapper stays inline (phrasing content) — only the popover is
+    // portaled out to document.body so the hero <p> stays valid HTML. The
+    // glass card body is `pointer-events: none`; `auto` here re-enables
+    // the phrase + popover so hover/focus + clicks work.
     <span
+      ref={wrapperRef}
       className="relative inline-block"
-      style={{ pointerEvents: 'auto' }}
+      style={{ pointerEvents: "auto" }}
       onMouseEnter={openNow}
       onMouseLeave={scheduleClose}
       onFocus={openNow}
       onBlur={scheduleClose}
     >
       {children}
-      {open ? (
-        <span
-          className="absolute top-full left-0 z-10 mt-[12px] block"
-          onMouseEnter={openNow}
-          onMouseLeave={scheduleClose}
-        >
-          <FadeUp from={6} duration={240}>
-            <Popover title={title}>{content}</Popover>
-          </FadeUp>
-        </span>
-      ) : null}
+      {open && coords
+        ? createPortal(
+            <div
+              className="fixed z-50"
+              style={{ top: coords.top, left: coords.left }}
+              onMouseEnter={openNow}
+              onMouseLeave={scheduleClose}
+            >
+              <FadeUp from={6} duration={240}>
+                <Popover title={title}>{content}</Popover>
+              </FadeUp>
+            </div>,
+            document.body,
+          )
+        : null}
     </span>
   );
 }
@@ -354,7 +372,7 @@ export default function LandingPage({
             wash painting can't bleed outside. */}
         <div
           ref={washesRef}
-          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px]"
+          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px]"
           // OS crosshair cursor — PR 4c-paint-4. Replaces the custom
           // crosshair SVG previously rendered inside the PaintBrush. The
           // soft 10%-fill brush indicator (paint-brush.tsx) still tracks
@@ -412,7 +430,7 @@ export default function LandingPage({
             establishes the canonical resting structure. */}
         <animated.div
           ref={glassCardRef}
-          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
+          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
           style={{
             top: "9.42%",
             bottom: "0.2%",
@@ -511,23 +529,18 @@ export default function LandingPage({
       </section>
 
       {/* PresetWidget — paint-mode instance. Sits exactly 24px below the
-          wash canvas (Figma `Landing Page – Paint 01/02`) and fades in
-          when `paintActive` is true. The container reserves its 24px
-          height + 24px top-margin in both states so the rest of the
-          page doesn't reflow as the widget appears. `pointer-events:
-          none` when invisible so it doesn't intercept clicks at rest.
-          No `scrollTargetRef` — clicking a bug while in paint mode
-          should only reset the visualization, not scroll. */}
-      <animated.div
-        className="mt-[24px] flex h-[24px] w-full max-w-[1136px] justify-center"
-        style={{
-          opacity: paintWidgetSpring.opacity,
-          pointerEvents: paintActive ? "auto" : "none",
-        }}
-        aria-hidden={!paintActive}
-      >
-        <PresetWidget {...presetWidgetCommon} />
-      </animated.div>
+          wash canvas (Figma `Landing Page – Paint 01/02`). Only rendered
+          while painting; conditional render avoids reserving an invisible
+          24px slot in the resting layout. No `scrollTargetRef` — clicking
+          a bug while in paint mode should only reset the visualization. */}
+      {paintActive ? (
+        <animated.div
+          className="mt-[24px] flex w-full max-w-[1136px] justify-center"
+          style={{ opacity: paintWidgetSpring.opacity }}
+        >
+          <PresetWidget {...presetWidgetCommon} />
+        </animated.div>
+      ) : null}
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} />

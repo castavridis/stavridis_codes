@@ -1,49 +1,25 @@
 // ---------------------------------------------------------------------------
 // Paint brush — soft-tinted 88px disc that follows the cursor over the
-// Washes canvas. Spawns a `Wash` entity into the Koota world on each click;
-// the WashesCanvas subscribes to those entities and pipes them into the sim.
+// Washes canvas, plus the rotating "❦ CLICK TO PAINT ❦" affordance ring.
+// Purely visual — paint is driven by the Washes lib's built-in pointer
+// handlers (pointer:true + continuousFlow in washes-canvas.tsx). This
+// component:
+//
+//   - Tracks pointermove for the brush indicator position.
+//   - On the first pointerdown inside the canvas region, latches
+//     `paintActive = true` so the glass card fades + slides and the Header
+//     swaps in the paint controls.
+//   - Suppresses the ring while the cursor is over the resting glass card.
 //
 // Annotation (Figma node 4003:30680): "'Click to Paint' shows up each time
-// the washes panel is re-activated. Disappears while the user is painting.
-// Text rotates around the brush while visible." → the SVG <textPath> ring
-// fades in when washesVisible && !isPainting, and rotates continuously via
-// CSS keyframe.
-//
-// PR 4c-paint-4 changes (paint pipeline root cause):
-//   - Pointer listener now binds to `window` (capture phase) with a manual
-//     bounds check against `targetRef`. The previous `target.addEventListener`
-//     relied on pointerdown events on the WebGL <canvas> bubbling to the
-//     wrapping div — bubbling DID work in dev, but in production builds the
-//     React Compiler memoized the effect callback so closure-captured
-//     `brushColor` could stale and (in some browsers with implicit pointer
-//     capture on canvas) the bubble target swallowed propagation. Listening
-//     on window with capture eliminates both classes of bug.
-//   - `paintActive` + `brushColor` are no longer effect deps — they're read
-//     fresh from `usePaintStore.getState()` inside the handler so the
-//     listener never has to be torn down + re-attached mid-stroke (which
-//     was racing with the synchronous `setPaintActive(true) → spawnWash`
-//     in the same handler).
-//
-// PR 4c-paint-4 visual changes:
-//   - Brush stroke + custom crosshair SVG removed; the indicator is now a
-//     soft 10%-opacity fill of the current brush color with
-//     `mix-blend-mode: plus-darker`.
-//   - The Washes region uses the OS `crosshair` cursor instead of a
-//     custom rendered crosshair.
-//   - The rotating "CLICK TO PAINT" ring is unchanged.
+// the washes panel is re-activated. Disappears while the user is painting."
+// → the SVG <textPath> ring fades when washesVisible && !isPainting,
+// continuously rotated via a CSS keyframe.
 // ---------------------------------------------------------------------------
 
 import { useEffect, useRef } from "react";
 
 import { usePaintStore } from "../../../lib/paint-store.js";
-import {
-  washesWorld,
-  Wash,
-  Position,
-  Color,
-  Radius,
-  Lifetime,
-} from "../../../lib/washes-world.js";
 
 export type PaintBrushProps = {
   // The region the brush is constrained to — typically the Washes canvas
@@ -136,21 +112,20 @@ export function PaintBrush({
       if (!rafId) rafId = window.requestAnimationFrame(handle);
     };
 
+    // PR-paint-arch: the Washes lib now handles ALL paint events itself
+    // (pointer: true, continuousFlow). This handler is purely a STATE LATCH
+    // — when the user first clicks inside the wash area, flip paintActive
+    // so the glass card fades + slides out of the way and the Header
+    // swaps in the paint controls. No paintAt / spawn pipeline anymore.
     const onPointerDown = (e: PointerEvent) => {
       const target = targetRef.current;
       if (!target) return;
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      // Only react to clicks INSIDE the canvas region.
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-      // Don't paint when the click was on an interactive element — e.g. the
-      // Header nav buttons that share the canvas container in v2, or the
-      // HoverPopover spans inside the glass card. Without this, every
-      // Contact / About / Resume click would spawn a wash. The card body
-      // itself is `pointer-events: none` so non-interactive clicks pass
-      // through to the wash beneath and DO spawn a stroke — that's how
-      // paintActive latches the first time.
+      // Don't latch when the click was on an interactive element (Header
+      // nav, HoverPopover spans, swatches).
       const targetEl = e.target as Element | null;
       if (
         targetEl &&
@@ -161,11 +136,7 @@ export function PaintBrush({
       }
       const store = usePaintStore.getState();
       store.setIsPainting(true);
-      // Latch paintActive on first stroke — the LandingPage subscribes
-      // to this to fade + shift the Intro glass card out of the way so
-      // the user can paint into the full wash area.
       store.setPaintActive(true);
-      spawnWash(x, y, store.brushColor);
     };
 
     const onPointerUp = () => {
@@ -244,8 +215,13 @@ export function PaintBrush({
             ~upright as it cycles past the top; otherwise the slow 16s
             rotation keeps the ring feeling alive without forcing the
             reader to crane their neck. */}
+        {/* Rotation lives on the inner <g>, NOT the <svg> host. Rotating
+            the host creates a CSS-compositor layer; combined with the
+            mix-blend-mode brush fill in the same brushRef, Chrome briefly
+            renders that layer's bounding box as opaque black between paint
+            frames. Rotating the <g> keeps everything in one paint pass. */}
         <svg
-          className="paint-brush-ring absolute"
+          className="absolute"
           width={BRUSH_SIZE * 1.4}
           height={BRUSH_SIZE * 1.4}
           viewBox="0 0 104 104"
@@ -269,29 +245,33 @@ export function PaintBrush({
               fill="none"
             />
           </defs>
-          <text
-            fill="#391f00"
-            textAnchor="middle"
-            style={{
-              fontFamily:
-                "'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace",
-              fontSize: "8px",
-              letterSpacing: "0.14em",
-              fontWeight: 500,
-            }}
-          >
-            <textPath href="#paint-brush-ring-path" startOffset="25%">
-              ❦ CLICK TO PAINT ❦
-            </textPath>
-          </text>
+          <g className="paint-brush-ring-spin">
+            <text
+              fill="#391f00"
+              textAnchor="middle"
+              style={{
+                fontFamily:
+                  "'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace",
+                fontSize: "8px",
+                letterSpacing: "0.14em",
+                fontWeight: 500,
+              }}
+            >
+              <textPath href="#paint-brush-ring-path" startOffset="25%">
+                ❦ CLICK TO PAINT ❦
+              </textPath>
+            </text>
+          </g>
         </svg>
       </div>
 
-      {/* Local keyframe for the ring rotation. Scoped via a unique class. */}
+      {/* Local keyframe for the ring rotation. Rotation is on the inner
+          <g> (transform-origin in SVG user units = center of viewBox). */}
       <style>{`
-        .paint-brush-ring {
+        .paint-brush-ring-spin {
           animation: paint-brush-ring-spin 16s linear infinite;
-          transform-origin: 50% 50%;
+          transform-origin: 52px 52px;
+          transform-box: view-box;
         }
         @keyframes paint-brush-ring-spin {
           from { transform: rotate(0deg); }
@@ -302,20 +282,3 @@ export function PaintBrush({
   );
 }
 
-// ---------------------------------------------------------------------------
-// spawnWash — fire-and-forget. The WashesCanvas's onAdd(Wash) subscriber
-// will pick this up, paint it into the sim, and destroy it.
-// ---------------------------------------------------------------------------
-function spawnWash(
-  x: number,
-  y: number,
-  color: { r: number; g: number; b: number },
-): void {
-  washesWorld.spawn(
-    Wash,
-    Position({ x, y }),
-    Color({ r: color.r, g: color.g, b: color.b, a: 1 }),
-    Radius({ value: 44 }),
-    Lifetime({ born: performance.now(), ttl: 4000 }),
-  );
-}
