@@ -1,19 +1,15 @@
 import type { MDXContent } from 'mdx/types';
 import { createElement, Suspense, use } from 'react';
 import { Link } from 'wouter';
-import author from '../../../content/author.json';
-import { MDXColumn, MDXWrapper } from '../../components/mdx/Layout.js';
 import { routes } from '../../routes.js';
-import { formatPostDate, getPost, type Post } from './posts.js';
-
-// Capitalized tags used in MDX that aren't imported in the .mdx file itself are
-// resolved from this map, so every post can use these without a per-file import.
-const mdxComponents = { MDXWrapper, MDXColumn };
+import BlogLayout, { blogMdxComponents } from './components/BlogLayout.js';
+import { formatPostDate, getPost, readingTimeForPost, type Post } from './posts.js';
 
 const postComponentPromises = new Map<string, Promise<MDXContent>>();
 
-// `onBack`, when provided, intercepts the "Back to posts" link so the host can
-// run a page transition before navigating home (see RadialTransition).
+// `onBack`, when provided, intercepts the back affordance so the host can run
+// a page transition before navigating (mirrors ProjectPost's `onBack`). When
+// absent, BlogTopNavigation falls back to a plain <Link> to /blog.
 export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
   const post = getPost(slug);
 
@@ -21,52 +17,33 @@ export function BlogPost({ slug, onBack }: { slug: string; onBack?: () => void }
     return <BlogPostNotFound />;
   }
 
-  const backClassName =
-    'text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 mb-8 inline-flex cursor-pointer text-sm font-medium underline';
+  const front = {
+    title: post.title,
+    dek: post.dek ?? post.summary,
+    date: formatPostDate(post.date),
+    readingTime: readingTimeForPost(post),
+    tags: post.tags,
+  };
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
-      {onBack ? (
-        <button type="button" className={backClassName} onClick={onBack}>
-          Close project
-        </button>
-      ) : (
-        <Link className={backClassName} href={routes.home.href()}>
-          Back to posts
-        </Link>
-      )}
-      <header className="border-b border-gray-200 pb-8">
-        <time className="mb-2 block text-sm text-gray-500" dateTime={post.date}>
-          {formatPostDate(post.date)}
-        </time>
-        <h1 className="mb-4 text-5xl leading-none font-bold text-gray-950 sm:text-6xl">
-          {post.title}
-        </h1>
-        <p className="max-w-2xl text-lg text-gray-600">{post.summary}</p>
-        <p className="mt-4 text-base text-gray-600">
-          By{' '}
-          <a
-            className="text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 underline"
-            href={author.site}
-            rel="noreferrer"
-          >
-            {author.name}
-          </a>
-        </p>
-      </header>
-      <div className="prose prose-gray mt-8 max-w-none">
-        <Suspense fallback={<p className="text-sm text-gray-500">Loading post...</p>}>
-          <PostContent post={post} />
-        </Suspense>
-      </div>
-    </article>
+    <BlogLayout front={front} onBack={onBack}>
+      <Suspense
+        fallback={
+          <p className="font-mono text-[12px] leading-[20px] text-confetti-black opacity-50">
+            Loading post...
+          </p>
+        }
+      >
+        <PostContent post={post} />
+      </Suspense>
+    </BlogLayout>
   );
 }
 
 function PostContent({ post }: { post: Post }) {
   const Component = use(getPostComponentPromise(post));
 
-  return createElement(Component, { components: mdxComponents });
+  return createElement(Component, { components: blogMdxComponents });
 }
 
 function getPostComponentPromise(post: Post) {
@@ -83,22 +60,35 @@ function getPostComponentPromise(post: Post) {
   return promise;
 }
 
+export function prefetchPost(slug: string): void {
+  const post = getPost(slug);
+  if (post) getPostComponentPromise(post);
+}
+
 export function BlogPostNotFound() {
   return (
-    <section className="py-20">
-      <p className="text-primary-700 mb-3 text-xs font-bold tracking-[0.12em] uppercase">404</p>
-      <h1 className="mb-4 text-5xl leading-none font-bold text-gray-950 sm:text-6xl">
-        Post not found
-      </h1>
-      <p className="mb-6 max-w-2xl text-lg text-gray-600">
-        This route does not have a matching MDX post.
-      </p>
-      <Link
-        className="text-primary-700 decoration-primary-200 hover:text-primary-800 hover:decoration-primary-400 underline"
-        href={routes.home.href()}
-      >
-        Return to the post list
-      </Link>
-    </section>
+    <div className="min-h-full w-full bg-washes-paper">
+      <div className="relative mx-auto max-w-[1280px] px-[88px]">
+        <div className="relative pt-[128px] pb-[128px]">
+          <div className="mx-auto flex w-[944px] flex-col items-start gap-[24px] text-confetti-black">
+            <p className="font-mono text-[12px] leading-[20px] text-confetti-black opacity-50">
+              404
+            </p>
+            <h1 className="font-kyoto m-0 w-full text-[48px] font-medium leading-[60px]">
+              Post not found
+            </h1>
+            <p className="font-body m-0 max-w-[704px] text-[18px] leading-[30px] text-confetti-black opacity-70">
+              This route does not have a matching MDX post.
+            </p>
+            <Link
+              href={routes.blogIndex.href()}
+              className="font-body text-confetti-black underline decoration-dotted decoration-from-font [text-underline-position:from-font]"
+            >
+              Return to the post list
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

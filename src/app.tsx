@@ -13,6 +13,14 @@ const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
 );
 
+const BlogIndex = lazy(() =>
+  import('./features/blog/index.js').then((m) => ({ default: m.BlogIndex })),
+);
+
+const BlogPost = lazy(() =>
+  import('./features/blog/index.js').then((m) => ({ default: m.BlogPost })),
+);
+
 const PROJECT_HREFS: Record<string, string> = {
   'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
   'proj-careSignal-ai': routes.project.href({ slug: 'caresignal-ai' }),
@@ -23,6 +31,8 @@ export function App() {
   const [, navigate] = useLocation();
   const [matchForCompany, params] = useRoute(routes.forCompany.path);
   const [matchProject, projectParams] = useRoute(routes.project.path);
+  const [matchBlogPost, blogPostParams] = useRoute(routes.blogPost.path);
+  const [matchBlogIndex] = useRoute(routes.blogIndex.path);
 
   // Route-matched config (visitor is on /for/:company right now).
   const routeCompany: CompanyConfig | null = matchForCompany && params?.company
@@ -93,6 +103,20 @@ export function App() {
     navigate(routes.home.href());
   }, [navigate]);
 
+  // Blog routes ride the same SheetOverlay as projects so the landing stays
+  // mounted beneath. Either the index (/blog) or a single post (/blog/:slug)
+  // triggers the sheet; the inner content branches on which matched.
+  const blogPostSlug = matchBlogPost ? blogPostParams?.slug ?? null : null;
+  const blogOpen = Boolean(matchBlogIndex) || blogPostSlug !== null;
+
+  const handleCloseBlog = useCallback(() => {
+    navigate(routes.home.href());
+  }, [navigate]);
+
+  const handleCloseBlogPost = useCallback(() => {
+    navigate(routes.blogIndex.href());
+  }, [navigate]);
+
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
       {/* Landing page — always mounted beneath the project sheet overlay. */}
@@ -112,6 +136,13 @@ export function App() {
 
       <SheetOverlay open={projectOpen} onClose={handleCloseProject}>
         {projectSlug ? <ProjectSheetContent slug={projectSlug} onBack={handleCloseProject} /> : null}
+      </SheetOverlay>
+
+      <SheetOverlay open={blogOpen} onClose={handleCloseBlog}>
+        <BlogSheetContent
+          postSlug={blogPostSlug}
+          onBackToIndex={handleCloseBlogPost}
+        />
       </SheetOverlay>
 
       <Analytics />
@@ -136,6 +167,33 @@ function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => voi
     >
       <Suspense fallback={<RoutePending />}>
         <ProjectPost slug={slug} onBack={onBack} />
+      </Suspense>
+    </div>
+  );
+}
+
+// Mirrors ProjectSheetContent but for the blog: cream-paper backdrop, lazy
+// boundary around BlogIndex/BlogPost. `postSlug === null` renders the index
+// (/blog); a slug renders the single post (/blog/:slug). The sheet is opened
+// by the parent for either route, so this just branches on payload.
+function BlogSheetContent({
+  postSlug,
+  onBackToIndex,
+}: {
+  postSlug: string | null;
+  onBackToIndex: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'auto',
+        backgroundColor: '#fbf6ea',
+      }}
+    >
+      <Suspense fallback={<RoutePending />}>
+        {postSlug ? <BlogPost slug={postSlug} onBack={onBackToIndex} /> : <BlogIndex />}
       </Suspense>
     </div>
   );

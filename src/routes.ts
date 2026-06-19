@@ -3,6 +3,10 @@ export const routes = {
     path: '/',
     href: () => '/',
   },
+  blogIndex: {
+    path: '/blog',
+    href: () => '/blog',
+  },
   blogPost: {
     path: '/blog/:slug',
     href: ({ slug }: { slug: string }) => `/blog/${encodeURIComponent(slug)}`,
