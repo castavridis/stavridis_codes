@@ -257,100 +257,163 @@ export default function LandingPage({
     setPhaseOverride(newOverride);
   }, [slot, forecast]);
 
-  // The element the preset widget scrolls to + the paint brush targets.
+  // The Washes Canvas region — the paint brush hit target. This is the
+  // top ~67% of the shell where the WebGL wash lives. The PresetWidget
+  // also scrolls to this element on a reset.
   const washesRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <div className="font-body bg-washes-paper text-confetti-black relative w-full overflow-hidden">
-      <Header />
+    // -----------------------------------------------------------------------
+    // Page root — Figma node 4012:42490 / 4003:23311. The outer page has a
+    // 72px gutter on top + sides and 80px on bottom; everything is
+    // centered. Background is washes-paper (#fbf6ea), text confetti-black.
+    // -----------------------------------------------------------------------
+    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-[72px] pt-[72px] pb-[80px]">
+      {/* -------------------------------------------------------------------
+          Washes Shell — Figma node 4012:42332 "Header". The single rounded
+          container that holds the Header (logo + nav), the Washes Canvas
+          (top 66.93%), and the Intro glass card (overlaid at the bottom
+          90.58%). The whole shell is 1136×584.169 with 12px rounded top
+          corners; everything inside is absolutely positioned.
+          ------------------------------------------------------------------- */}
+      <section className="relative w-full max-w-[1136px]" style={{ height: "584.169px" }}>
+        {/* Washes Canvas region — Figma node 4002:21177. Takes the top
+            66.93% of the shell (inset bottom = 33.07%). Owns the wash
+            WebGL host, the Connecting Gradients overlays, the Header
+            (Name + Links), and the PaintBrush overlay. The shell's
+            overflow-hidden + rounded-tl/tr radii are applied here so the
+            wash painting can't bleed outside. */}
+        <div
+          ref={washesRef}
+          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px]"
+          style={{ bottom: "33.07%" }}
+        >
+          {/* No `scrollRef` — the outer wrapper IS the scroll target.
+              PresetWidget + PaintBrush both reference `washesRef` (the
+              outer div), so the WashesCanvas can stay agnostic. */}
+          <WashesCanvas dayPhase={dayPhase} weather={weather} />
 
-      {/* Hero — Figma node 4002:21130 ("Intro"). Copy is canonical from Figma. */}
-      <section className="relative mx-auto flex w-full max-w-[1104px] flex-col items-start gap-[24px] px-[160px] pt-[200px]">
-        <FadeDown>
-          <p className="font-kyoto text-confetti-black w-[784px] text-[48px] leading-[60px] font-medium">
-            <span>
-              {"Hey! I’m C Stavridis, "}
-              <br aria-hidden />
-              {"a "}
-            </span>
-            <HoverPopover
-              title="Tools I like to build with"
-              content="React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP, react-three-fiber, Figma."
-            >
-              <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
-                Design Engineer
-              </span>
-            </HoverPopover>
-            <span>
-              {" with"}
-              <br aria-hidden />
-            </span>
-            <HoverPopover
-              title="My role model, Bailey"
-              content="A very good dog. Equal parts curious, enthusiastic, and warm — the energy I try to bring to the work."
-            >
-              <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
-                big golden retriever energy
-              </span>
-            </HoverPopover>
-            <span>.</span>
-          </p>
-        </FadeDown>
-
-        <FadeDown delay={120}>
-          <div className="text-confetti-black flex items-start gap-[16px] text-[16px] leading-[24px]">
-            <div className="w-[385px]">
-              <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-extrabold italic">
-                then
-              </p>
-              <p className="mb-0">
-                {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
-                <br aria-hidden />
-                {"an enterprise digital health company (acquired "}
-                <br aria-hidden />
-                {"by Lightbeam), where I led Product and Brand."}
-              </p>
-              <p className="mb-0">&nbsp;</p>
-              <p>
-                In 2024, I decided to step away to be with my young family. I
-                spent the time learning and building, too.
-              </p>
-            </div>
-            <div className="w-[385px]">
-              <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-extrabold italic">
-                now
-              </p>
-              <p className="mb-0">
-                {"I’ve finished two batches at the Recurse Center,"}
-                <br aria-hidden />
-                {"built AI-native tooling, and I’m currently building"}
-                <br aria-hidden />
-                {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
-              </p>
-              <p className="mb-0">&nbsp;</p>
-              <p>
-                {"I am looking to join a dynamic team that values"}
-                <br aria-hidden />
-                {"high-craft design and engineering."}
-              </p>
-            </div>
+          {/* Header — Name (left) and Links (right) at top:16.17px per
+              Figma. Header.tsx renders a fragment (Name, Links); a flex
+              strip with justify-between puts them at the correct edges
+              within the 16px-inset slot. z-20 keeps it above the wash +
+              gradients, and the parent `overflow-hidden` clips it to the
+              rounded shell corners. */}
+          <div className="absolute left-[16px] right-[16px] top-[16.17px] z-20 flex items-center justify-between">
+            <Header />
           </div>
-        </FadeDown>
-      </section>
 
-      {/* Washes canvas + paint brush + preset widget — the interactive band
-          that sits between hero and featured work. The PaintBrush overlay
-          shares the WashesCanvas's container as its target so pointer
-          events line up exactly with the painted surface. */}
-      <section className="relative mx-auto mt-[120px] flex w-full max-w-[1136px] flex-col items-center gap-[24px]">
-        <div ref={washesRef} className="relative w-full">
-          <WashesCanvas
-            scrollRef={washesRef}
-            dayPhase={dayPhase}
-            weather={weather}
-          />
+          {/* PaintBrush overlay — pointer events target the washesRef
+              (this very container). */}
           <PaintBrush targetRef={washesRef} />
         </div>
+
+        {/* Intro glass card — Figma node 4002:21178 / 4002:21130.
+            Absolutely positioned over the bottom 90.58% of the shell
+            (inset top = 9.42%) with 1.41% horizontal insets. Carries the
+            backdrop-blur, the top-down white→transparent gradient that
+            creates the "frosted glass at the top, wash bleeds through at
+            the bottom" look, and a 0.972px cream border. z-index is
+            below the Header so the nav stays clickable; the wash sits
+            beneath.
+
+            Pointer note: the glass card consumes clicks in its area, so
+            painting via PaintBrush is only reachable in the strip ABOVE
+            the card (top ~55px) and through the Header gaps. The Figma
+            "click paintbrush" state at node 4003:23311 shows the card
+            fading to 50% opacity + sliding down to reveal the full wash
+            for painting — that interaction is a future PR; this one
+            establishes the canonical resting structure. */}
+        <div
+          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
+          style={{
+            top: "9.42%",
+            bottom: "0.2%",
+            left: "1.41%",
+            right: "1.41%",
+            backdropFilter: "blur(1.944px)",
+            WebkitBackdropFilter: "blur(1.944px)",
+            borderWidth: "0.972px",
+            background:
+              "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.35) 60%, rgba(255,255,255,0) 100%)",
+          }}
+        >
+          <FadeDown>
+            <p className="font-kyoto text-confetti-black w-[784px] text-[48px] leading-[60px] font-medium">
+              <span>
+                {"Hey! I’m C Stavridis, "}
+                <br aria-hidden />
+                {"a "}
+              </span>
+              <HoverPopover
+                title="Tools I like to build with"
+                content="React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP, react-three-fiber, Figma."
+              >
+                <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                  Design Engineer
+                </span>
+              </HoverPopover>
+              <span>
+                {" with"}
+                <br aria-hidden />
+              </span>
+              <HoverPopover
+                title="My role model, Bailey"
+                content="A very good dog. Equal parts curious, enthusiastic, and warm — the energy I try to bring to the work."
+              >
+                <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                  big golden retriever energy
+                </span>
+              </HoverPopover>
+              <span>.</span>
+            </p>
+          </FadeDown>
+
+          <FadeDown delay={120}>
+            <div className="text-confetti-black mt-[24px] flex items-start gap-[16px] text-[16px] leading-[24px]">
+              <div className="w-[385px]">
+                <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                  then
+                </p>
+                <p className="mb-0">
+                  {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
+                  <br aria-hidden />
+                  {"an enterprise digital health company (acquired "}
+                  <br aria-hidden />
+                  {"by Lightbeam), where I led Product and Brand."}
+                </p>
+                <p className="mb-0">&nbsp;</p>
+                <p>
+                  In 2024, I decided to step away to be with my young family. I
+                  spent the time learning and building, too.
+                </p>
+              </div>
+              <div className="w-[385px]">
+                <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                  now
+                </p>
+                <p className="mb-0">
+                  {"I’ve finished two batches at the Recurse Center,"}
+                  <br aria-hidden />
+                  {"built AI-native tooling, and I’m currently building"}
+                  <br aria-hidden />
+                  {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
+                </p>
+                <p className="mb-0">&nbsp;</p>
+                <p>
+                  {"I am looking to join a dynamic team that values"}
+                  <br aria-hidden />
+                  {"high-craft design and engineering."}
+                </p>
+              </div>
+            </div>
+          </FadeDown>
+        </div>
+      </section>
+
+      {/* PresetWidget — sits centered below the shell. Scroll target is
+          the washesRef so a reset scrolls back to the wash region. */}
+      <div className="mt-[40px] flex w-full max-w-[1136px] justify-center">
         <PresetWidget
           location={location}
           slot={slot}
@@ -364,18 +427,22 @@ export default function LandingPage({
           onWeather={cycleWeather}
           scrollTargetRef={washesRef}
         />
-      </section>
+      </div>
 
-      <div className="mx-auto mt-[120px] flex w-full max-w-[944px] justify-center">
+      <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} />
       </div>
 
-      <div className="mx-auto mt-[120px] flex w-full max-w-[944px] justify-center">
+      <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <Testimonial />
       </div>
 
-      {/* Colophon strip — dark band per Figma node 4013:42567. */}
-      <div className="bg-confetti-black mt-[120px] w-full">
+      {/* Colophon strip — dark band per Figma node 4013:42567. Breaks out
+          of the 72px side gutter and the 80px bottom pad so the dark fill
+          spans the page-card edges. Width is parent + 144px to cancel
+          the px-[72px] on both sides; the parent `overflow-hidden`
+          guards against any sub-pixel overflow. */}
+      <div className="bg-confetti-black -mx-[72px] -mb-[80px] mt-[120px] w-[calc(100%+144px)]">
         <div className="mx-auto flex w-full max-w-[944px] justify-center">
           <Colophon />
         </div>

@@ -82,6 +82,17 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+      // Don't paint when the click was on an interactive element — e.g. the
+      // Header nav buttons that share the canvas container in v2. Without
+      // this, every Contact / About / Resume click would spawn a wash.
+      const targetEl = e.target as Element | null;
+      if (
+        targetEl &&
+        (targetEl.closest("a, button, [role='button']") ||
+          targetEl.closest("[data-paint-skip]"))
+      ) {
+        return;
+      }
       setIsPainting(true);
       spawnWash(x, y, brushColor);
     };
@@ -144,15 +155,19 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
         </div>
 
         {/* Click-to-paint ring — SVG textPath wrapped around a circle.
-            Rotates continuously while shown. Hidden while painting. */}
+            Rotates continuously while shown. Hidden while painting.
+            The ring sits just outside the 88px brush perimeter; viewBox
+            and path radius are sized so the text orbits at ~52px from
+            center (i.e. ~8px outside the 44px brush radius). Fill is a
+            static dark cream-on-paper to stay legible over any pigment. */}
         <svg
           className="paint-brush-ring absolute"
-          width={BRUSH_SIZE * 2}
-          height={BRUSH_SIZE * 2}
-          viewBox="0 0 176 176"
+          width={BRUSH_SIZE * 1.4}
+          height={BRUSH_SIZE * 1.4}
+          viewBox="0 0 104 104"
           style={{
-            top: -BRUSH_SIZE / 2,
-            left: -BRUSH_SIZE / 2,
+            top: -BRUSH_SIZE * 0.2,
+            left: -BRUSH_SIZE * 0.2,
             opacity: showRing ? 1 : 0,
             transition: "opacity 200ms ease-out",
           }}
@@ -160,16 +175,16 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
           <defs>
             <path
               id="paint-brush-ring-path"
-              d="M 88, 88 m -68, 0 a 68,68 0 1,1 136,0 a 68,68 0 1,1 -136,0"
+              d="M 52, 52 m -42, 0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"
               fill="none"
             />
           </defs>
           <text
-            fill={colorCss}
+            fill="#391f00"
             style={{
               fontFamily:
                 "'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace",
-              fontSize: "10px",
+              fontSize: "9px",
               letterSpacing: "0.12em",
               fontWeight: 600,
             }}

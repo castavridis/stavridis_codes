@@ -5,15 +5,9 @@
 @source inline('border-b-paper-{blue-mid,pink} drop-shadow-fieldset');
 
 /* PP Kyoto — Pangram Pangram Foundry. Headline + logotype face for the v2
-   redesign. Files belong in /public/fonts/ and are not yet committed; until
-   they land, browsers fall back to Young Serif / Georgia per the font stack. */
-@font-face {
-  font-family: 'PP Kyoto';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url('/fonts/PPKyoto-Light.woff2') format('woff2');
-}
+   redesign. Only Medium and Medium Italic are used (Light + Extrabold Italic
+   were dropped to reduce licensing cost). Files belong in /public/fonts/;
+   until they land, browsers fall back to Young Serif / Georgia. */
 @font-face {
   font-family: 'PP Kyoto';
   font-style: normal;
@@ -27,13 +21,6 @@
   font-weight: 500;
   font-display: swap;
   src: url('/fonts/PPKyoto-MediumItalic.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'PP Kyoto';
-  font-style: italic;
-  font-weight: 800;
-  font-display: swap;
-  src: url('/fonts/PPKyoto-ExtraboldItalic.woff2') format('woff2');
 }
 
 @theme {

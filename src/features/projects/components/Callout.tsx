@@ -9,7 +9,7 @@ export default function Callout({ title, content, attribution }: CalloutProps) {
     <div className="flex w-[944px] flex-col items-center justify-center overflow-clip rounded-[8px] bg-[#f0eeeb] px-[80px] py-[60px]">
       <div className="flex w-full flex-col items-start gap-[24px] text-black">
         {title ? (
-          <p className="font-kyoto m-0 w-full text-[24px] font-extrabold italic leading-none">
+          <p className="font-kyoto m-0 w-full text-[24px] font-medium italic leading-none">
             {title}
           </p>
         ) : null}

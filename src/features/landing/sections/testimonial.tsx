@@ -11,14 +11,18 @@
 export function Testimonial(): React.ReactElement {
   return (
     <section className="relative w-[944px] overflow-clip rounded-[12px]">
-      {/* Faded washes backdrop. */}
+      {/* Faded washes backdrop. Anchored to the left so the wash reads as
+          a soft warm blob behind the "My Favorite Testimonial" label, with
+          the quote sitting in cleaner cream space to the right. Spread is
+          tighter than the previous centered gradient so the wash doesn't
+          wash out the body copy. */}
       <div
         className="pointer-events-none absolute inset-0"
         aria-hidden="true"
         style={{
-          opacity: 0.16,
+          opacity: 0.22,
           background:
-            "radial-gradient(ellipse 75% 70% at 30% 35%, rgba(227,175,8,0.55) 0%, rgba(165,14,83,0.45) 45%, rgba(16,139,160,0.45) 85%)",
+            "radial-gradient(ellipse 55% 90% at 15% 50%, rgba(227,175,8,0.6) 0%, rgba(165,14,83,0.45) 40%, rgba(16,139,160,0.25) 75%, rgba(251,246,234,0) 95%)",
         }}
       />
       <div
@@ -26,12 +30,12 @@ export function Testimonial(): React.ReactElement {
         aria-hidden="true"
         style={{
           backgroundColor: "#fbf6ea",
-          opacity: 0.6,
+          opacity: 0.35,
         }}
       />
 
       <div className="relative flex h-[312px] flex-col gap-[24px] px-[80px] pt-[72px]">
-        <p className="font-kyoto text-[24px] leading-[28px] font-light text-[#251900]">
+        <p className="font-kyoto text-[24px] leading-[28px] font-medium italic text-[#251900]">
           My Favorite Testimonial
         </p>
 

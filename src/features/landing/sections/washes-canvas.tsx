@@ -274,14 +274,62 @@ export function WashesCanvas({
             node;
         }
       }}
-      className="relative w-full overflow-hidden"
-      style={{ ...fadeSpring, height: "391px" }}
+      className="absolute inset-0"
+      style={fadeSpring}
       aria-hidden="true"
     >
+      {/* WebGL wash host — fills the canvas region. */}
       <div
         ref={hostRef}
         className="absolute inset-0"
         style={{ touchAction: "none" }}
+      />
+
+      {/* Connecting Gradients — Figma node 2232:32030. Three overlay layers
+          that sit on top of the WebGL host but inside the same clipping
+          shell so they get rounded corners + overflow-hidden for free.
+          Layered bottom-up:
+            1. Noise — white mix-blend-darken placeholder (no asset yet).
+               Per Figma node 2232:32031, this is supposed to be a noise
+               texture; until that lands, a flat white mix-blend-darken
+               div is acceptable (it visibly desaturates the wash, which
+               is the right direction). */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-white mix-blend-darken"
+        aria-hidden="true"
+      />
+
+      {/* 2. Radial gradient — Figma node 2232:32032. Paper cream blooms
+            from the bottom-center (cx=568, cy=340 in the original
+            1136-wide design) and fades outward to transparent. Combined
+            with overlay #3 this is what melts the bottom of the wash
+            into the page-cream background. The Figma export uses an
+            inline SVG with a custom gradientTransform; we replicate via
+            CSS radial-gradient ellipse 50%×100% centered at 50% 100% —
+            visually equivalent, no SVG cost. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 50% 75% at 50% 100%, #fbf6ea 0%, rgba(251,246,234,0) 100%)",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* 3. Linear bottom fade — Figma node 2232:32033. Vertical fade from
+            transparent to paper-cream, anchored ~100px from the top with
+            ~291px height — together with #2 this melts the wash into the
+            cream page background so the bottom of the wash doesn't have a
+            hard edge. */}
+      <div
+        className="pointer-events-none absolute inset-x-0"
+        style={{
+          top: "100.82px",
+          height: "291.176px",
+          background:
+            "linear-gradient(to bottom, rgba(251,246,234,0) 0%, #fbf6ea 100%)",
+        }}
+        aria-hidden="true"
       />
     </animated.div>
   );
