@@ -105,6 +105,7 @@ export function App() {
           company={company?.name}
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
+          featuredSlugs={company?.featuredSlugs}
           heroProjects={heroProjects}
         />
       </div>

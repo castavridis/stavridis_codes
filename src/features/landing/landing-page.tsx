@@ -51,6 +51,10 @@ type LandingPageProps = {
   company?: string;
   blurb?: string;
   onDismiss?: () => void;
+  // Ordered list of FeaturedWork project slugs to surface for this
+  // visitor — see CompanyConfig.featuredSlugs. Undefined renders the
+  // canonical 4.
+  featuredSlugs?: string[];
   heroProjects?: HeroProject[];
   creativeCards?: ProjectCard[];
   experimentCards?: ProjectCard[];
@@ -165,9 +169,10 @@ export default function LandingPage({
   onCardHover: _onCardHover,
   paused: _paused = false,
   transitioning: _transitioning = false,
-  company: _company,
-  blurb: _blurb,
-  onDismiss: _onDismiss,
+  company,
+  blurb,
+  onDismiss,
+  featuredSlugs,
   heroProjects: _heroProjects,
   creativeCards: _creativeCards,
   experimentCards: _experimentCards,
@@ -468,6 +473,34 @@ export default function LandingPage({
             pointerEvents: "none",
           }}
         >
+          {company ? (
+            <FadeDown>
+              {/* Per-company greeting tag. Sits above the headline so the
+                  visitor immediately sees the page was tailored. The
+                  dismiss affordance (when wired via onDismiss) returns to
+                  the canonical `/` landing — see app.tsx#handleDismiss
+                  which also clears the persisted company context. The
+                  position is provisional; final placement may need
+                  Figma input. `pointer-events: auto` so the dismiss link
+                  is clickable through the otherwise-transparent glass
+                  card. */}
+              <p
+                className="font-kyoto text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px] text-[16px] leading-[24px] font-medium italic"
+                style={{ pointerEvents: "auto" }}
+              >
+                <span>Hi {company}!</span>
+                {onDismiss ? (
+                  <button
+                    type="button"
+                    onClick={onDismiss}
+                    className="font-body decoration-from-font [text-underline-position:from-font] text-confetti-black/50 hover:text-confetti-black cursor-pointer text-[12px] not-italic underline decoration-dotted"
+                  >
+                    dismiss
+                  </button>
+                ) : null}
+              </p>
+            </FadeDown>
+          ) : null}
           <FadeDown>
             <p className="font-kyoto text-confetti-black w-[784px] text-[48px] leading-[60px] font-medium">
               <span>
@@ -499,45 +532,58 @@ export default function LandingPage({
             </p>
           </FadeDown>
 
-          <FadeDown delay={120}>
-            <div className="text-confetti-black mt-[24px] flex items-start gap-[16px] text-[16px] leading-[24px]">
-              <div className="w-[385px]">
-                <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
-                  then
-                </p>
-                <p className="mb-0">
-                  {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
-                  <br aria-hidden />
-                  {"an enterprise digital health company (acquired "}
-                  <br aria-hidden />
-                  {"by Lightbeam), where I led Product and Brand."}
-                </p>
-                <p className="mb-0">&nbsp;</p>
-                <p>
-                  In 2024, I decided to step away to be with my young family. I
-                  spent the time learning and building, too.
-                </p>
+          {blurb ? (
+            // Per-company blurb override. Replaces the canonical
+            // then/now two-column copy with a single tailored paragraph.
+            // Width matches a single "then" column (385px) so the
+            // copy stays comfortably readable rather than stretching
+            // across both columns. See CompanyConfig.blurb.
+            <FadeDown delay={120}>
+              <div className="text-confetti-black mt-[24px] w-[385px] text-[16px] leading-[24px]">
+                <p className="mb-0">{blurb}</p>
               </div>
-              <div className="w-[385px]">
-                <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
-                  now
-                </p>
-                <p className="mb-0">
-                  {"I’ve finished two batches at the Recurse Center,"}
-                  <br aria-hidden />
-                  {"built AI-native tooling, and I’m currently building"}
-                  <br aria-hidden />
-                  {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
-                </p>
-                <p className="mb-0">&nbsp;</p>
-                <p>
-                  {"I am looking to join a dynamic team that values"}
-                  <br aria-hidden />
-                  {"high-craft design and engineering."}
-                </p>
+            </FadeDown>
+          ) : (
+            <FadeDown delay={120}>
+              <div className="text-confetti-black mt-[24px] flex items-start gap-[16px] text-[16px] leading-[24px]">
+                <div className="w-[385px]">
+                  <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                    then
+                  </p>
+                  <p className="mb-0">
+                    {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
+                    <br aria-hidden />
+                    {"an enterprise digital health company (acquired "}
+                    <br aria-hidden />
+                    {"by Lightbeam), where I led Product and Brand."}
+                  </p>
+                  <p className="mb-0">&nbsp;</p>
+                  <p>
+                    In 2024, I decided to step away to be with my young family. I
+                    spent the time learning and building, too.
+                  </p>
+                </div>
+                <div className="w-[385px]">
+                  <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                    now
+                  </p>
+                  <p className="mb-0">
+                    {"I’ve finished two batches at the Recurse Center,"}
+                    <br aria-hidden />
+                    {"built AI-native tooling, and I’m currently building"}
+                    <br aria-hidden />
+                    {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
+                  </p>
+                  <p className="mb-0">&nbsp;</p>
+                  <p>
+                    {"I am looking to join a dynamic team that values"}
+                    <br aria-hidden />
+                    {"high-craft design and engineering."}
+                  </p>
+                </div>
               </div>
-            </div>
-          </FadeDown>
+            </FadeDown>
+          )}
         </animated.div>
       </section>
 
@@ -556,7 +602,7 @@ export default function LandingPage({
       ) : null}
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
-        <FeaturedWork onCardClick={onCardClick} />
+        <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />
       </div>
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">

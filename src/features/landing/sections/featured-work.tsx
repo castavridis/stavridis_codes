@@ -80,11 +80,24 @@ const PROJECTS: Project[] = [
   },
 ];
 
+// `slugs` (optional) — when provided, FeaturedWork renders only those
+// projects in the given order. Used by /for/:company pages to surface
+// the most-relevant work for that audience. Unknown slugs are skipped
+// silently so a stale config can't blow up the landing. When absent,
+// renders the canonical PROJECTS list.
 export function FeaturedWork({
   onCardClick,
+  slugs,
 }: {
   onCardClick?: (slug: string) => void;
+  slugs?: string[];
 }): React.ReactElement {
+  const projects = slugs
+    ? slugs
+        .map((s) => PROJECTS.find((p) => p.slug === s))
+        .filter((p): p is Project => Boolean(p))
+    : PROJECTS;
+
   return (
     <section className="w-[944px]">
       <div className="mb-[40px]">
@@ -93,7 +106,7 @@ export function FeaturedWork({
         </p>
       </div>
       <div className="grid grid-cols-2 gap-x-[16px] gap-y-[40px]">
-        {PROJECTS.map((project, i) => (
+        {projects.map((project, i) => (
           <FadeDown key={project.slug} delay={i * 80}>
             <ProjectOverview
               slug={project.slug}
