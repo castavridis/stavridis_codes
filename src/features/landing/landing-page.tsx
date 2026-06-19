@@ -1,10 +1,12 @@
 import "../../globals.css";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
+import Popover from "../../components/Popover.js";
 import FadeDown from "../../components/anim/FadeDown.js";
+import FadeUp from "../../components/anim/FadeUp.js";
 import { FeaturedWork } from "./sections/featured-work.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
@@ -50,6 +52,75 @@ type LandingPageProps = {
   creativeCards?: ProjectCard[];
   experimentCards?: ProjectCard[];
 };
+
+// Small page-local helper. Wraps an inline phrase (e.g. an italic span) so
+// hovering or focusing it reveals an adjacent Popover. The popover floats
+// just below+left of the phrase per the Figma hover states (nodes
+// 2232:32188 and 4003:21284). A short close-delay lets the cursor cross the
+// gap between the phrase and the popover without dismissing prematurely.
+type HoverPopoverProps = {
+  title: string;
+  content: ReactNode;
+  children: ReactNode;
+};
+
+function HoverPopover({
+  title,
+  content,
+  children,
+}: HoverPopoverProps): React.ReactElement {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | null>(null);
+
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current != null) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false);
+      closeTimer.current = null;
+    }, 120);
+  }, [cancelClose]);
+
+  const openNow = useCallback(() => {
+    cancelClose();
+    setOpen(true);
+  }, [cancelClose]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current != null) window.clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  return (
+    <span
+      className="relative inline-block"
+      onMouseEnter={openNow}
+      onMouseLeave={scheduleClose}
+      onFocus={openNow}
+      onBlur={scheduleClose}
+    >
+      {children}
+      {open ? (
+        <span
+          className="absolute top-full left-0 z-10 mt-[12px] block"
+          onMouseEnter={openNow}
+          onMouseLeave={scheduleClose}
+        >
+          <FadeUp from={6} duration={240}>
+            <Popover title={title}>{content}</Popover>
+          </FadeUp>
+        </span>
+      ) : null}
+    </span>
+  );
+}
 
 export default function LandingPage({
   onCardClick,
@@ -202,16 +273,26 @@ export default function LandingPage({
               <br aria-hidden />
               {"a "}
             </span>
-            <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
-              Design Engineer
-            </span>
+            <HoverPopover
+              title="Tools I like to build with"
+              content="React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP, react-three-fiber, Figma."
+            >
+              <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                Design Engineer
+              </span>
+            </HoverPopover>
             <span>
               {" with"}
               <br aria-hidden />
             </span>
-            <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
-              big golden retriever energy
-            </span>
+            <HoverPopover
+              title="My role model, Bailey"
+              content="A very good dog. Equal parts curious, enthusiastic, and warm — the energy I try to bring to the work."
+            >
+              <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                big golden retriever energy
+              </span>
+            </HoverPopover>
             <span>.</span>
           </p>
         </FadeDown>
