@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { useLocation, useRoute } from 'wouter';
 import { routes } from './routes.js';
 import { getProject } from './features/projects/projects.js';
@@ -7,7 +7,6 @@ import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
 import { getCompany, type CompanyConfig } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
-import { HERO_PROJECTS } from './features/landing/hero/hero-projects.data.js';
 
 const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
@@ -56,22 +55,6 @@ export function App() {
     setStoredCompanyState(null);
     if (matchForCompany) navigate(routes.home.href());
   }, [matchForCompany, navigate]);
-
-  // heroProjectIds order: [center/featured, left, right]
-  // HERO_PROJECTS slot order: [left(0), right(1), center(2)]
-  const heroProjects = useMemo(() => {
-    if (!company?.heroProjectIds?.length) return undefined;
-    const byId = Object.fromEntries(HERO_PROJECTS.map((p) => [p.id, p]));
-    const [centerId, leftId, rightId] = company.heroProjectIds;
-    const fill = (slotIdx: number, id: string | undefined) => {
-      const slot = HERO_PROJECTS[slotIdx];
-      if (!id) return slot;
-      const c = byId[id];
-      if (!c) return slot;
-      return { ...slot, id: c.id, title: c.title, image: c.image, pigment: c.pigment, cta: c.cta };
-    };
-    return [fill(0, leftId), fill(1, rightId), fill(2, centerId)];
-  }, [company?.heroProjectIds]);
 
   // The FeaturedWork cards pass v2 project slugs directly (`caresignal-
   // platform`, `fracta`, `sqshbook`, `caresignal-ai`), so we route on the
@@ -123,7 +106,6 @@ export function App() {
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
-          heroProjects={heroProjects}
         />
       </div>
 

@@ -34,15 +34,12 @@ import {
   type WeatherKey,
 } from "./lib/weather.js";
 import { usePaintStore } from "../../lib/paint-store.js";
-import type { HeroProject } from "./hero/hero-project-card.js";
-import type { ProjectCard } from "./sections/reveal-card.js";
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
 // freezes the Washes canvas when a project overlay covers the page.
-// `company`/`blurb` and the card overrides power the per-company landing
-// pages at /for/:company. `heroProjects`, `creativeCards`, `experimentCards`
-// are kept for the existing props contract but are no-ops in v2.
+// `company`/`blurb` and `featuredSlugs` power the per-company landing pages
+// at /for/:company.
 type LandingPageProps = {
   onCardClick?: (id: string) => void;
   onCardHover?: (id: string) => void;
@@ -55,9 +52,6 @@ type LandingPageProps = {
   // visitor — see CompanyConfig.featuredSlugs. Undefined renders the
   // canonical 4.
   featuredSlugs?: string[];
-  heroProjects?: HeroProject[];
-  creativeCards?: ProjectCard[];
-  experimentCards?: ProjectCard[];
 };
 
 // Small page-local helper. Wraps an inline phrase (e.g. an italic span) so
@@ -173,9 +167,6 @@ export default function LandingPage({
   blurb,
   onDismiss,
   featuredSlugs,
-  heroProjects: _heroProjects,
-  creativeCards: _creativeCards,
-  experimentCards: _experimentCards,
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
   // Weather / location state. Lifted from the legacy hero so the PresetWidget

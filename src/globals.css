@@ -1,8 +1,4 @@
 @import 'tailwindcss';
-@source inline('{bg,text,border}-paper-{black,blue,blue-mid,blue-dark,green,green-mid,pink,pink-mid,purple,purple-mid,purple-dark,white,yellow,yellow-mid,yellow-dark,gray}'
-);
-@source inline('{bg,border}-accent-{blue,green,orange,red,white}');
-@source inline('border-b-paper-{blue-mid,pink} drop-shadow-fieldset');
 
 /* PP Kyoto — Pangram Pangram Foundry. Headline + logotype face for the v2
    redesign. Only Medium and Medium Italic are used (Light + Extrabold Italic
@@ -25,31 +21,16 @@
 
 @theme {
   --color-cream: #fbf6ea;
-  --color-cream-50: #fffefc;
-  --color-blackberry: #28001e;
-  --color-synthetic-black: #100e08;
-  --color-coffee: #1b1207;
-  --color-coffee-deep: #0e0000;
-  --color-ink: #211e1f;
 
+  /* Legacy CareSignal palette — still referenced by the V1 project posts
+     (CareSignal Design System, CareSignal AI v1). Kept until those v1
+     content files are migrated to the v2 chrome. */
   --color-cs-black: #211E1F;
   --color-cs-white: #FFFBF0;
-  --color-cs-brand-text: #D08101;
-  --color-cs-primary: #1363BD;
-  --color-cs-success: #79B315;
   --color-cs-warning: #F2AA35;
-  --color-cs-danger: #F06A41;
-  --color-cs-gray: #706C69;
-
-  --color-washes-rose: #a50e53;
-  --color-washes-yellow: #e3af08;
-  --color-washes-blue: #108ba0;
 
   /* v2 redesign palette — names mirror the Figma variable groups
-     (CareSignal / Washes / Confetti / status gradients). Several values
-     duplicate legacy tokens (cs-black, cream, washes-yellow, washes-blue);
-     both names are valid during the migration. */
-  --color-caresignal-black: #211e1f;
+     (CareSignal / Washes / Confetti / status gradients). */
   --color-caresignal-white: #fffbf0;
   --color-caresignal-none: #706c69;
 
@@ -64,42 +45,10 @@
   --color-grad-success-start: #b2d07f40;
   --color-grad-none-start: #211e1f40;
 
-  --color-paper-blue: #cae7ed;
-  --color-paper-blue-mid: rgb(149, 207, 219);
-  --color-paper-blue-dark: rgb(84, 178, 197);
-
-  --color-paper-green: #a7d9b8;
-  --color-paper-green-mid: rgb(45, 164, 86);
-
-  --color-paper-pink: rgb(245, 201, 211);
-  --color-paper-pink-mid: rgb(235, 147, 167);
-
-  --color-paper-purple: #aeadd7;
-  --color-paper-purple-mid: rgb(147, 146, 202);
-  --color-paper-purple-dark: rgb(94, 92, 175);
-
-  --color-paper-yellow: #fcf5be;
-  --color-paper-yellow-mid: rgb(245, 223, 45);
-  --color-paper-yellow-dark: rgb(240, 205, 0);
-
-  --color-paper-white: #fffef8;
-  --color-paper-gray: #bfbfbf;
-  --color-paper-black: #404040;
-  --color-paper-dark-black: rgb(35, 35, 35);
-
-  --color-accent-blue: #0d6193;
-  --color-accent-green: #4b7358;
-  --color-accent-red: #da4942;
-  --color-accent-orange: #e9842f;
-  --color-accent-white: #e9e2c7;
-
   --font-display: 'Ultra', 'Young Serif', Georgia, serif;
   --font-body: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-serif: 'Young Serif', Georgia, serif;
   --font-kyoto: 'PP Kyoto', 'Young Serif', Georgia, serif;
-
-  --drop-shadow-fieldset: 2px 2px 0px black;
 }
 
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -142,8 +91,3 @@
     transform: translateY(3px);
   }
 }
-
-/* Page transition — radial clip-path mask. The project overlay is revealed
-   via an animated clip-path: circle() that grows from the cursor click point.
-   Closing reverses the mask, shrinking the circle back to nothing. The CSS
-   transition is driven from RadialTransition.tsx — no keyframes needed. */
