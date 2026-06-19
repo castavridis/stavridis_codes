@@ -78,6 +78,11 @@ function HoverPopover({
   );
   const wrapperRef = useRef<HTMLSpanElement | null>(null);
   const closeTimer = useRef<number | null>(null);
+  // When paintActive flips true the glass card fades out + the underlying
+  // italic phrases are no longer visible — disable hover/focus so the
+  // popover doesn't open over the wash, and let pointer events pass
+  // through to the canvas for painting.
+  const paintActive = usePaintStore((s) => s.paintActive);
 
   const cancelClose = useCallback(() => {
     if (closeTimer.current != null) {
@@ -98,6 +103,7 @@ function HoverPopover({
   // portal at document.body anchored to those coords. The 12px below-the-
   // phrase offset matches the previous inline `mt-[12px]`.
   const openNow = useCallback(() => {
+    if (paintActive) return;
     cancelClose();
     const el = wrapperRef.current;
     if (el) {
@@ -105,7 +111,7 @@ function HoverPopover({
       setCoords({ top: r.bottom + 12, left: r.left });
     }
     setOpen(true);
-  }, [cancelClose]);
+  }, [cancelClose, paintActive]);
 
   useEffect(() => {
     return () => {
@@ -113,15 +119,22 @@ function HoverPopover({
     };
   }, []);
 
+  // Auto-close if paint mode starts while the popover is open.
+  useEffect(() => {
+    if (paintActive) setOpen(false);
+  }, [paintActive]);
+
   return (
     // The wrapper stays inline (phrasing content) — only the popover is
     // portaled out to document.body so the hero <p> stays valid HTML. The
     // glass card body is `pointer-events: none`; `auto` here re-enables
-    // the phrase + popover so hover/focus + clicks work.
+    // the phrase + popover at rest. In paint mode the phrases are
+    // invisible, so we drop back to `none` to let clicks fall through
+    // to the wash.
     <span
       ref={wrapperRef}
       className="relative inline-block"
-      style={{ pointerEvents: "auto" }}
+      style={{ pointerEvents: paintActive ? "none" : "auto" }}
       onMouseEnter={openNow}
       onMouseLeave={scheduleClose}
       onFocus={openNow}
