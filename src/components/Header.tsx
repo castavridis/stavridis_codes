@@ -1,4 +1,5 @@
 import Button from './Button.js';
+import { usePaintStore, type BrushColor } from '../lib/paint-store.js';
 
 type HeaderProps = {
   onContactClick?: () => void;
@@ -9,37 +10,132 @@ type HeaderProps = {
   // 4008:30723, 4008:32853). When true:
   //   - Name text ("C Stavridis"), About/Experiments/Resume links fade to 0.
   //   - "Contact Me" stays solid in place.
-  //   - 4 Paintbrush Control swatches (pigment indicators) fade in to the
-  //     LEFT where the name text was.
-  // The annotation on Figma node 4006:30719 reads "Paint brushes animate in
-  // while name and links, 'About, Experiments, and Resume' disappear".
+  //   - 4 Paintbrush Controls fade in to the LEFT where the name text was:
+  //       1. Paint-mode toggle (brush icon at rest / X while painting)
+  //       2..4. Color swatches (rose, hansa yellow, cerulean blue) — selected
+  //         swatch shows a white brush icon overlay.
   paintActive?: boolean;
 };
 
-// Placeholder paintbrush icon — real asset lands in a later PR.
-function PaintbrushIcon() {
-  return <svg width="24" height="24" aria-hidden fill="currentColor" />;
+// 3 brush colors. Sourced from Figma `Landing Page – Paint 00/01/02` (the
+// `Name` row at top-left). Values match `--washes-*` design tokens.
+const ROSE: BrushColor = { r: 165, g: 14, b: 83 };       // #a50e53
+const HANSA_YELLOW: BrushColor = { r: 227, g: 175, b: 8 }; // #e3af08
+const CERULEAN_BLUE: BrushColor = { r: 16, g: 139, b: 160 }; // #108ba0
+
+const SWATCHES: ReadonlyArray<{ color: BrushColor; hex: string; label: string }> = [
+  { color: ROSE, hex: '#a50e53', label: 'Rose pigment' },
+  { color: HANSA_YELLOW, hex: '#e3af08', label: 'Hansa yellow pigment' },
+  { color: CERULEAN_BLUE, hex: '#108ba0', label: 'Cerulean blue pigment' },
+];
+
+function colorsEqual(a: BrushColor, b: BrushColor): boolean {
+  return a.r === b.r && a.g === b.g && a.b === b.b;
 }
 
-// Paint mode swatches — read-only visual indicators for now. The 4 controls
-// from the Figma frame, left-to-right: brush icon, rose pigment, hansa
-// yellow pigment, cerulean blue pigment. Each is a 24px circle. Wiring them
-// to setBrushColor is flagged as a follow-up.
-function BrushControl({
-  bg,
-  ariaLabel,
+// Inline paintbrush glyph — small palette-knife-style mark. Sized to fit
+// inside the 24px swatch. Stroke uses currentColor so it inherits white when
+// overlaid on a colored swatch and the brush-fill color on the toggle's
+// resting state.
+function BrushGlyph({ size = 14 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 14 14"
+      aria-hidden
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {/* Brush ferrule + handle running corner-to-corner. */}
+      <path d="M11.2 2.8 L8.2 5.8" />
+      <path d="M8.6 5.4 L10 6.8" />
+      {/* Brush head / paint blob — a soft teardrop pointing down-left. */}
+      <path d="M8.6 5.4 C6.4 7.6 5.4 8.6 4.1 9.9 C3.4 10.6 2.6 10.8 2.2 10.4 C1.8 10 2 9.2 2.7 8.5 C4 7.2 5 6.2 7.2 4 Z" />
+    </svg>
+  );
+}
+
+// Small X glyph used by the paint-mode toggle while painting.
+function CloseGlyph({ size = 12 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 12 12"
+      aria-hidden
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+    >
+      <path d="M3 3 L9 9" />
+      <path d="M9 3 L3 9" />
+    </svg>
+  );
+}
+
+// Paint-mode toggle (leftmost control). Resting: a circle filled with the
+// current brush color + a brush glyph in the same dark tone. While painting:
+// a darker circle with a white X. Click flips `paintActive` in the store.
+function PaintToggle({
+  paintActive,
+  brushColor,
+  onToggle,
 }: {
-  bg: string;
-  ariaLabel: string;
+  paintActive: boolean;
+  brushColor: BrushColor;
+  onToggle: () => void;
+}) {
+  const bg = paintActive
+    ? '#391f00'
+    : `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`;
+  const fg = '#ffffff';
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      data-paint-skip
+      aria-label={paintActive ? 'Stop painting' : 'Start painting'}
+      aria-pressed={paintActive}
+      className="inline-flex size-[24px] items-center justify-center rounded-[12px]"
+      style={{ backgroundColor: bg, color: fg }}
+    >
+      {paintActive ? <CloseGlyph /> : <BrushGlyph />}
+    </button>
+  );
+}
+
+// Color swatch. Selected (current brushColor matches): brush glyph in white
+// overlaid on the colored circle. Not selected: just the circle.
+function ColorSwatch({
+  color,
+  hex,
+  label,
+  selected,
+  onSelect,
+}: {
+  color: BrushColor;
+  hex: string;
+  label: string;
+  selected: boolean;
+  onSelect: (c: BrushColor) => void;
 }) {
   return (
-    <span
-      role="img"
-      aria-label={ariaLabel}
+    <button
+      type="button"
+      onClick={() => onSelect(color)}
       data-paint-skip
-      className="block size-[24px] rounded-[12px]"
-      style={{ backgroundColor: bg }}
-    />
+      aria-label={label}
+      aria-pressed={selected}
+      className="inline-flex size-[24px] items-center justify-center rounded-[12px]"
+      style={{ backgroundColor: hex, color: '#ffffff' }}
+    >
+      {selected ? <BrushGlyph /> : null}
+    </button>
   );
 }
 
@@ -54,8 +150,8 @@ function BrushControl({
 // caller can place the whole fragment inside a `relative` container.
 //
 // v2 paint mode: when `paintActive` is true, the name + nav links fade out
-// (opacity 1 → 0, ~240ms) and a row of paintbrush control swatches fades in
-// in their place. The fade duration matches the glass card animation in
+// (opacity 1 → 0, ~240ms) and a row of 4 paintbrush controls fades in in
+// their place. The fade duration matches the glass card animation in
 // landing-page.tsx so the whole header transitions in concert with the
 // "card slides out, paint surface takes over" moment.
 export default function Header({
@@ -65,12 +161,22 @@ export default function Header({
   onResumeClick,
   paintActive = false,
 }: HeaderProps) {
+  const brushColor = usePaintStore((s) => s.brushColor);
+  const setBrushColor = usePaintStore((s) => s.setBrushColor);
+  const setPaintActive = usePaintStore((s) => s.setPaintActive);
+
   const fadeOutStyle: React.CSSProperties = {
     opacity: paintActive ? 0 : 1,
     pointerEvents: paintActive ? 'none' : 'auto',
     transition: 'opacity 240ms ease-out',
   };
-  const fadeInStyle: React.CSSProperties = {
+  // Per the existing animation contract: the 4 brush controls fade IN when
+  // paintActive is true and OUT when it's false. They're not interactive at
+  // rest (pointer-events: none) — entry into paint mode is via clicking the
+  // wash canvas itself, which latches paintActive in paint-brush.tsx. Once
+  // painting, the toggle becomes the explicit "stop painting" affordance and
+  // the swatches are the brush-color picker.
+  const controlsStyle: React.CSSProperties = {
     opacity: paintActive ? 1 : 0,
     pointerEvents: paintActive ? 'auto' : 'none',
     transition: 'opacity 240ms ease-out',
@@ -78,33 +184,43 @@ export default function Header({
   return (
     <>
       <div className="relative inline-flex items-center">
-        {/* Resting: paintbrush placeholder + name. Fades out in paint mode. */}
+        {/* Resting: "C Stavridis" name with a small paintbrush glyph. Fades
+            out in paint mode where the controls below take its place. */}
         <div
           className="text-confetti-black inline-flex items-center gap-[8px]"
           style={fadeOutStyle}
+          aria-hidden={paintActive}
         >
-          <PaintbrushIcon />
+          <BrushGlyph />
           <span className="font-kyoto text-[20px] leading-[20px] font-medium italic">
             C Stavridis
           </span>
         </div>
-        {/* Paint mode: 4 brush control swatches. Absolutely positioned over
-            the name slot so the row stays anchored to the left edge. */}
+        {/* Paint controls: paint-mode toggle + 3 color swatches. Absolutely
+            positioned over the name slot so the row stays anchored to the
+            left edge. Fades in when paintActive flips true (matches the
+            existing 240ms opacity transition; pointer-events follow opacity
+            so the buttons aren't clickable until they're visible). */}
         <div
           aria-hidden={!paintActive}
           className="absolute top-1/2 left-0 inline-flex -translate-y-1/2 items-center gap-[4px]"
-          style={fadeInStyle}
+          style={controlsStyle}
         >
-          <BrushControl bg="var(--color-washes-rose, #a50e53)" ariaLabel="Rose pigment" />
-          <BrushControl bg="var(--color-confetti-black, #391f00)" ariaLabel="Brush" />
-          <BrushControl
-            bg="var(--color-washes-hansa-yellow, #e3af08)"
-            ariaLabel="Hansa yellow pigment"
+          <PaintToggle
+            paintActive={paintActive}
+            brushColor={brushColor}
+            onToggle={() => setPaintActive(!paintActive)}
           />
-          <BrushControl
-            bg="var(--color-washes-cerulean-blue, #108ba0)"
-            ariaLabel="Cerulean blue pigment"
-          />
+          {SWATCHES.map((s) => (
+            <ColorSwatch
+              key={s.hex}
+              color={s.color}
+              hex={s.hex}
+              label={s.label}
+              selected={colorsEqual(brushColor, s.color)}
+              onSelect={setBrushColor}
+            />
+          ))}
         </div>
       </div>
       <nav className="inline-flex items-center gap-[22px]">

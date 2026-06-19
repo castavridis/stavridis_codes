@@ -63,6 +63,7 @@ export function WashesCanvas({
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const resetVersion = usePaintStore((s) => s.resetVersion);
   const setWashesVisible = usePaintStore((s) => s.setWashesVisible);
+  const paintActive = usePaintStore((s) => s.paintActive);
 
   // Fade-in / fade-out spring for the canvas surface. Driven by the
   // `washesVisible` flag (used by both the initial mount fade-in and the
@@ -70,6 +71,15 @@ export function WashesCanvas({
   const fadeSpring = useSpring({
     opacity: washesVisible ? 1 : 0,
     config: { tension: 200, friction: 28 },
+  });
+
+  // Connecting Gradients fade. When paintActive flips true, the three paper-
+  // bloom / noise / bottom-fade overlays drop to 0 so the wash itself is
+  // unobstructed. Timing matches the 240–300ms feel used for the glass card
+  // and header swap (tension 220, friction 32 ≈ a cubic-out ~280ms).
+  const overlaysSpring = useSpring({
+    opacity: paintActive ? 0 : 1,
+    config: { tension: 220, friction: 32 },
   });
 
   // ------------------------------------------------------------------------
@@ -288,54 +298,64 @@ export function WashesCanvas({
       {/* Connecting Gradients — Figma node 2232:32030. Three overlay layers
           that sit on top of the WebGL host but inside the same clipping
           shell so they get rounded corners + overflow-hidden for free.
-          Layered bottom-up:
-            1. Noise — Figma node 2232:32031. Tiled noise PNG at 64px,
-               hard-light blend at 0.5 opacity — gives the wash a tactile
-               paper grain without flattening the pigment. */}
-      <div
+          The wrapping `animated.div` fades the whole stack out when
+          `paintActive` is true so the user paints onto an unobstructed
+          wash (Figma `Landing Page – Paint 00/01/02` hides the
+          Connecting Gradients group). Individual layers keep their own
+          opacity/blend modes — the parent multiplies. */}
+      <animated.div
         className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: "url('/images/noise.png')",
-          backgroundRepeat: "repeat",
-          backgroundSize: "64px",
-          opacity: 0.5,
-          mixBlendMode: "hard-light",
-        }}
+        style={overlaysSpring}
         aria-hidden="true"
-      />
+      >
+        {/* 1. Noise — Figma node 2232:32031. Tiled noise PNG at 64px,
+              hard-light blend at 0.5 opacity — gives the wash a tactile
+              paper grain without flattening the pigment. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage: "url('/images/noise.png')",
+            backgroundRepeat: "repeat",
+            backgroundSize: "64px",
+            opacity: 0.5,
+            mixBlendMode: "hard-light",
+          }}
+          aria-hidden="true"
+        />
 
-      {/* 2. Radial gradient — Figma node 2232:32032. Paper cream blooms
-            from the bottom-center (cx=568, cy=340 in the original
-            1136-wide design) and fades outward to transparent. Combined
-            with overlay #3 this is what melts the bottom of the wash
-            into the page-cream background. The Figma export uses an
-            inline SVG with a custom gradientTransform; we replicate via
-            CSS radial-gradient ellipse 50%×100% centered at 50% 100% —
-            visually equivalent, no SVG cost. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 50% 75% at 50% 100%, #fbf6ea 0%, rgba(251,246,234,0) 100%)",
-        }}
-        aria-hidden="true"
-      />
+        {/* 2. Radial gradient — Figma node 2232:32032. Paper cream blooms
+              from the bottom-center (cx=568, cy=340 in the original
+              1136-wide design) and fades outward to transparent. Combined
+              with overlay #3 this is what melts the bottom of the wash
+              into the page-cream background. The Figma export uses an
+              inline SVG with a custom gradientTransform; we replicate via
+              CSS radial-gradient ellipse 50%×100% centered at 50% 100% —
+              visually equivalent, no SVG cost. */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 75% at 50% 100%, #fbf6ea 0%, rgba(251,246,234,0) 100%)",
+          }}
+          aria-hidden="true"
+        />
 
-      {/* 3. Linear bottom fade — Figma node 2232:32033. Vertical fade from
-            transparent to paper-cream, anchored ~100px from the top with
-            ~291px height — together with #2 this melts the wash into the
-            cream page background so the bottom of the wash doesn't have a
-            hard edge. */}
-      <div
-        className="pointer-events-none absolute inset-x-0"
-        style={{
-          top: "100.82px",
-          height: "291.176px",
-          background:
-            "linear-gradient(to bottom, rgba(251,246,234,0) 0%, #fbf6ea 100%)",
-        }}
-        aria-hidden="true"
-      />
+        {/* 3. Linear bottom fade — Figma node 2232:32033. Vertical fade from
+              transparent to paper-cream, anchored ~100px from the top with
+              ~291px height — together with #2 this melts the wash into the
+              cream page background so the bottom of the wash doesn't have a
+              hard edge. */}
+        <div
+          className="pointer-events-none absolute inset-x-0"
+          style={{
+            top: "100.82px",
+            height: "291.176px",
+            background:
+              "linear-gradient(to bottom, rgba(251,246,234,0) 0%, #fbf6ea 100%)",
+          }}
+          aria-hidden="true"
+        />
+      </animated.div>
     </animated.div>
   );
 }

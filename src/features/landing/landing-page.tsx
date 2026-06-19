@@ -11,6 +11,7 @@ import FadeUp from "../../components/anim/FadeUp.js";
 import { FeaturedWork } from "./sections/featured-work.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
+import { WashesInfo } from "./sections/washes-info.js";
 import { PaintBrush } from "./sections/paint-brush.js";
 import { Testimonial } from "./sections/testimonial.js";
 import { PresetWidget } from "./hero/preset-widget.js";
@@ -289,11 +290,45 @@ export default function LandingPage({
     config: { tension: 220, friction: 32 },
   });
 
+  // Spring for the second PresetWidget instance that appears below the
+  // Washes shell while painting (Figma `Landing Page – Paint 01/02`).
+  // Fades in / shifts down by 8px as paintActive flips true; the resting
+  // in-flow instance below the Testimonial is unaffected.
+  const paintWidgetSpring = useSpring({
+    opacity: paintActive ? 1 : 0,
+    y: paintActive ? 0 : -6,
+    config: { tension: 220, friction: 32 },
+  });
+
   // Ref the PaintBrush uses to suppress the brush + "click to paint" ring
   // while the cursor is over the glass card body. Without this the ring
   // animation competes with the intro copy and pointer-events handoff was
   // ambiguous. See PaintBrush#excludeRef.
   const glassCardRef = useRef<HTMLDivElement | null>(null);
+
+  // The PresetWidget is rendered in two slots:
+  //   1. In-flow below the Testimonial (resting + paint state) — replaces
+  //      the fixed-footer placement from PR 4c-paint-2.
+  //   2. A second instance directly under the Washes shell that fades in
+  //      with `paintActive` so the user has the location/time/weather
+  //      controls within easy reach while painting (Figma `Landing Page –
+  //      Paint 01/02`). Two instances rather than a portal so each can be
+  //      driven by its own animated wrapper independently.
+  const presetWidget = (
+    <PresetWidget
+      location={location}
+      slot={slot}
+      time={time}
+      temp={temp}
+      weather={weather}
+      dayPhase={dayPhase}
+      forecast={forecast}
+      onLocation={cycleLocation}
+      onTime={cycleSlot}
+      onWeather={cycleWeather}
+      scrollTargetRef={washesRef}
+    />
+  );
 
   return (
     // -----------------------------------------------------------------------
@@ -345,6 +380,12 @@ export default function LandingPage({
               the resting glass card (per user feedback — the click-to-
               paint ring shouldn't compete with the intro card content). */}
           <PaintBrush targetRef={washesRef} excludeRef={glassCardRef} />
+
+          {/* Washes info — Figma node 4008:32877 (Paintbrush Control at
+              the bottom-left of the canvas region) + popover content
+              from node 4014:43015. Visible in both resting and paint
+              modes so the credits are always reachable. */}
+          <WashesInfo />
         </div>
 
         {/* Intro glass card — Figma node 4002:21178 / 4002:21130.
@@ -463,12 +504,23 @@ export default function LandingPage({
         </animated.div>
       </section>
 
-      {/* Spacer that reserves the in-flow gap the PresetWidget used to
-          occupy in the page flow. The widget itself is now fixed to the
-          viewport footer (see below), but the canvas + featured work
-          rhythm still wants ~40px of breathing room before the next
-          section. */}
-      <div className="h-[40px]" aria-hidden="true" />
+      {/* PresetWidget — paint-mode instance. Sits directly under the
+          Washes shell (Figma `Landing Page – Paint 01/02`) and fades in
+          when `paintActive` is true. The container reserves its 24px
+          height + 24px top-margin in both states so the rest of the page
+          doesn't reflow as the widget appears. `pointer-events: none`
+          when invisible so it doesn't intercept clicks at rest. */}
+      <animated.div
+        className="mt-[24px] flex h-[24px] w-full max-w-[1136px] justify-center"
+        style={{
+          opacity: paintWidgetSpring.opacity,
+          transform: paintWidgetSpring.y.to((y) => `translateY(${y}px)`),
+          pointerEvents: paintActive ? "auto" : "none",
+        }}
+        aria-hidden={!paintActive}
+      >
+        {presetWidget}
+      </animated.div>
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} />
@@ -476,6 +528,14 @@ export default function LandingPage({
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <Testimonial />
+      </div>
+
+      {/* PresetWidget — resting / in-flow instance. Sits 120px below the
+          Testimonial so it lives in the page rhythm (no longer fixed to
+          the viewport footer). Visible in both resting and paint modes so
+          the user can always tweak the visualization preset. */}
+      <div className="mt-[120px] flex w-full max-w-[1136px] justify-center">
+        {presetWidget}
       </div>
 
       {/* Colophon strip — dark band per Figma node 4013:42567. Breaks out
@@ -490,35 +550,6 @@ export default function LandingPage({
       </div>
 
       <HorseTab />
-
-      {/* PresetWidget — PR 4c-paint-2: pinned to the viewport footer so it
-          stays visible while the user paints or scrolls. The widget is
-          rendered once and is the same instance in resting and paint
-          modes (Figma `Landing Page – Paint 01` shows the widget anchored
-          to the bottom of the page in both states; we mirror that with a
-          fixed-position single instance). `pointer-events-none` on the
-          wrapper plus `pointer-events-auto` on the inner shell ensures
-          clicks elsewhere on the viewport (e.g. the paint canvas during
-          a reset scroll) aren't accidentally swallowed by the wrapper. */}
-      <div
-        className="pointer-events-none fixed bottom-[24px] left-0 right-0 z-40 flex justify-center px-[24px]"
-      >
-        <div className="pointer-events-auto">
-          <PresetWidget
-            location={location}
-            slot={slot}
-            time={time}
-            temp={temp}
-            weather={weather}
-            dayPhase={dayPhase}
-            forecast={forecast}
-            onLocation={cycleLocation}
-            onTime={cycleSlot}
-            onWeather={cycleWeather}
-            scrollTargetRef={washesRef}
-          />
-        </div>
-      </div>
     </div>
   );
 }
