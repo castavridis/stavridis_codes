@@ -21,11 +21,6 @@ const BlogPost = lazy(() =>
   import('./features/blog/index.js').then((m) => ({ default: m.BlogPost })),
 );
 
-const PROJECT_HREFS: Record<string, string> = {
-  'proj-careSignal-ds': routes.project.href({ slug: 'caresignal-design-system' }),
-  'proj-careSignal-ai': routes.project.href({ slug: 'caresignal-ai' }),
-  'proj-sol-lewitt': routes.project.href({ slug: 'sol-lewitt' }),
-};
 
 export function App() {
   const [, navigate] = useLocation();
@@ -78,20 +73,18 @@ export function App() {
     return [fill(0, leftId), fill(1, rightId), fill(2, centerId)];
   }, [company?.heroProjectIds]);
 
-  const handleCardHover = useCallback((id: string) => {
-    const href = PROJECT_HREFS[id];
-    const slug = href?.match(/\/project\/(.+)/)?.[1] ?? null;
-    if (!slug) return;
-    // Prefetch the ProjectPost chunk; once resolved, prime the MDX promise cache.
+  // The FeaturedWork cards pass v2 project slugs directly (`caresignal-
+  // platform`, `fracta`, `sqshbook`, `caresignal-ai`), so we route on the
+  // slug verbatim. No id → slug map needed in v2.
+  const handleCardHover = useCallback((slug: string) => {
     void import('./features/projects/project-post.js').then(({ prefetchProject }) => {
       prefetchProject(slug);
     });
   }, []);
 
   const handleCardClick = useCallback(
-    (id: string) => {
-      const href = PROJECT_HREFS[id];
-      if (href) navigate(href);
+    (slug: string) => {
+      navigate(routes.project.href({ slug }));
     },
     [navigate],
   );

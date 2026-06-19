@@ -48,7 +48,9 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
-    slug: 'caresignal',
+    // Matches the MDX file at content/projects/caresignal-platform.mdx so
+    // clicking the card routes to /project/caresignal-platform cleanly.
+    slug: 'caresignal-platform',
     headline: (
       <>
         Creating a design system to make
