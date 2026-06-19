@@ -1,6 +1,7 @@
 import "../../globals.css";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { animated, useSpring } from "@react-spring/web";
 
 import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
@@ -262,6 +263,27 @@ export default function LandingPage({
   // also scrolls to this element on a reset.
   const washesRef = useRef<HTMLDivElement | null>(null);
 
+  // Glass-card fade + shift on paint activation. Subscribes to
+  // `paintActive` in the store — flips true on the user's first paint
+  // stroke and stays true until a visualization reset.
+  //
+  // Figma reference: frames `Landing Page – Paint 00/01/02` (node ids
+  // 4003:23338, 4008:30723, 4008:32853) show the Intro card removed
+  // entirely so the wash takes the full shell. We mirror that with a
+  // soft fade (opacity 1 → 0) + downward translate (~64px) so the card
+  // slides out of the way rather than pop-disappearing. ~300ms with a
+  // cubic-out feel (tension 220, friction 32) lands the card before
+  // pointer-events are intercepted by the next stroke. After the card
+  // is faded out we also drop its pointer-events so clicks land on the
+  // wash beneath — without this you couldn't paint into the lower
+  // ~33% of the shell.
+  const paintActive = usePaintStore((s) => s.paintActive);
+  const glassCardSpring = useSpring({
+    opacity: paintActive ? 0 : 1,
+    y: paintActive ? 64 : 0,
+    config: { tension: 220, friction: 32 },
+  });
+
   return (
     // -----------------------------------------------------------------------
     // Page root — Figma node 4012:42490 / 4003:23311. The outer page has a
@@ -324,7 +346,7 @@ export default function LandingPage({
             fading to 50% opacity + sliding down to reveal the full wash
             for painting — that interaction is a future PR; this one
             establishes the canonical resting structure. */}
-        <div
+        <animated.div
           className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
           style={{
             top: "9.42%",
@@ -336,6 +358,11 @@ export default function LandingPage({
             borderWidth: "0.972px",
             background:
               "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.35) 60%, rgba(255,255,255,0) 100%)",
+            opacity: glassCardSpring.opacity,
+            transform: glassCardSpring.y.to((y) => `translateY(${y}px)`),
+            // Block pointer events through the card when faded out so
+            // paint clicks land on the wash beneath.
+            pointerEvents: paintActive ? "none" : "auto",
           }}
         >
           <FadeDown>
@@ -408,7 +435,7 @@ export default function LandingPage({
               </div>
             </div>
           </FadeDown>
-        </div>
+        </animated.div>
       </section>
 
       {/* PresetWidget — sits centered below the shell. Scroll target is

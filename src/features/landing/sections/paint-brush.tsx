@@ -38,6 +38,7 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const isPainting = usePaintStore((s) => s.isPainting);
   const setIsPainting = usePaintStore((s) => s.setIsPainting);
+  const setPaintActive = usePaintStore((s) => s.setPaintActive);
   const setBrushPosition = usePaintStore((s) => s.setBrushPosition);
   const brushColor = usePaintStore((s) => s.brushColor);
 
@@ -94,6 +95,10 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
         return;
       }
       setIsPainting(true);
+      // Latch paintActive on first stroke — the LandingPage subscribes
+      // to this to fade + shift the Intro glass card out of the way so
+      // the user can paint into the full wash area.
+      setPaintActive(true);
       spawnWash(x, y, brushColor);
     };
 
@@ -110,7 +115,7 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
       window.removeEventListener("pointerup", onPointerUp);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [targetRef, setBrushPosition, setIsPainting, brushColor]);
+  }, [targetRef, setBrushPosition, setIsPainting, setPaintActive, brushColor]);
 
   const showRing = washesVisible && !isPainting;
   const colorCss = `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`;
@@ -159,7 +164,19 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
             The ring sits just outside the 88px brush perimeter; viewBox
             and path radius are sized so the text orbits at ~52px from
             center (i.e. ~8px outside the 44px brush radius). Fill is a
-            static dark cream-on-paper to stay legible over any pigment. */}
+            static dark cream-on-paper to stay legible over any pigment.
+
+            v2 update (PR 4c-paint): we used to loop "CLICK TO PAINT ·"
+            four times around the ring, which got visually noisy and
+            sometimes truncated. Now a single instance flanked by
+            FLORAL HEART glyphs (U+2766 ❦) — picked for its organic,
+            painterly feel vs. the geometric asterisk candidates. The
+            phrase is `text-anchor="middle"` with `startOffset="25%"`
+            so it sits centered at the top of the ring at the moment
+            the rotation animation passes through 0°. The phrase reads
+            ~upright as it cycles past the top; otherwise the slow 16s
+            rotation keeps the ring feeling alive without forcing the
+            reader to crane their neck. */}
         <svg
           className="paint-brush-ring absolute"
           width={BRUSH_SIZE * 1.4}
@@ -173,6 +190,12 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
           }}
         >
           <defs>
+            {/* Path starts at 9 o'clock and sweeps clockwise — the
+                first half of the path is the TOP of the circle, the
+                second half is the bottom. Combined with text-anchor=
+                middle and startOffset="25%", the phrase center lands
+                at the 12 o'clock position, so the entire phrase reads
+                upright across the top arc with the ring at rest. */}
             <path
               id="paint-brush-ring-path"
               d="M 52, 52 m -42, 0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0"
@@ -181,16 +204,17 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
           </defs>
           <text
             fill="#391f00"
+            textAnchor="middle"
             style={{
               fontFamily:
                 "'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace",
-              fontSize: "9px",
-              letterSpacing: "0.12em",
-              fontWeight: 600,
+              fontSize: "8px",
+              letterSpacing: "0.14em",
+              fontWeight: 500,
             }}
           >
-            <textPath href="#paint-brush-ring-path" startOffset="0">
-              CLICK TO PAINT · CLICK TO PAINT · CLICK TO PAINT · CLICK TO PAINT ·
+            <textPath href="#paint-brush-ring-path" startOffset="25%">
+              ❦ Click to Paint ❦
             </textPath>
           </text>
         </svg>

@@ -24,6 +24,13 @@ const DEFAULT_BRUSH_COLOR: BrushColor = { r: 165, g: 14, b: 83 }; // washes-rose
 export type PaintState = {
   washesVisible: boolean;
   isPainting: boolean;
+  // Latches to true on the first paint stroke and stays true for the
+  // session. Drives the "expose washes" treatment from Figma frames
+  // `Landing Page – Paint 00/01/02` — the Intro glass card fades out
+  // and shifts down so the wash is fully visible for painting. Cleared
+  // by `resetWashes` and `triggerReset` so the card comes back after a
+  // visualization reset.
+  paintActive: boolean;
   brushPosition: BrushPoint | null;
   brushColor: BrushColor;
   currentLocationIndex: number;
@@ -32,6 +39,7 @@ export type PaintState = {
   resetVersion: number;
   setWashesVisible: (visible: boolean) => void;
   setIsPainting: (painting: boolean) => void;
+  setPaintActive: (active: boolean) => void;
   setBrushPosition: (point: BrushPoint | null) => void;
   setBrushColor: (color: BrushColor) => void;
   setCurrentLocationIndex: (idx: number) => void;
@@ -44,6 +52,7 @@ export type PaintState = {
 export const usePaintStore = create<PaintState>((set) => ({
   washesVisible: false,
   isPainting: false,
+  paintActive: false,
   brushPosition: null,
   brushColor: DEFAULT_BRUSH_COLOR,
   currentLocationIndex: 0,
@@ -52,6 +61,7 @@ export const usePaintStore = create<PaintState>((set) => ({
   resetVersion: 0,
   setWashesVisible: (washesVisible) => set({ washesVisible }),
   setIsPainting: (isPainting) => set({ isPainting }),
+  setPaintActive: (paintActive) => set({ paintActive }),
   setBrushPosition: (brushPosition) => set({ brushPosition }),
   setBrushColor: (brushColor) => set({ brushColor }),
   setCurrentLocationIndex: (currentLocationIndex) =>
@@ -59,6 +69,11 @@ export const usePaintStore = create<PaintState>((set) => ({
   setCurrentDayPhase: (currentDayPhase) => set({ currentDayPhase }),
   setCurrentWeather: (currentWeather) => set({ currentWeather }),
   triggerReset: () =>
-    set((s) => ({ resetVersion: s.resetVersion + 1, isPainting: false })),
-  resetWashes: () => set({ isPainting: false, brushPosition: null }),
+    set((s) => ({
+      resetVersion: s.resetVersion + 1,
+      isPainting: false,
+      paintActive: false,
+    })),
+  resetWashes: () =>
+    set({ isPainting: false, brushPosition: null, paintActive: false }),
 }));

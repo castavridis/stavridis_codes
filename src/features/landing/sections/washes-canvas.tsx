@@ -289,13 +289,20 @@ export function WashesCanvas({
           that sit on top of the WebGL host but inside the same clipping
           shell so they get rounded corners + overflow-hidden for free.
           Layered bottom-up:
-            1. Noise — white mix-blend-darken placeholder (no asset yet).
-               Per Figma node 2232:32031, this is supposed to be a noise
-               texture; until that lands, a flat white mix-blend-darken
-               div is acceptable (it visibly desaturates the wash, which
-               is the right direction). */}
+            1. Noise — Figma node 2232:32031. A tiled 128×128 noise PNG
+               applied with mix-blend-darken so the highlights of the
+               wash get a subtle grain. Opacity dialed to 0.35 — at 1.0
+               the noise reads as a flat grey wash; ~0.35 keeps the
+               pigment vivid while still imparting paper-grain texture
+               consistent with the rest of the site. */}
       <div
-        className="pointer-events-none absolute inset-0 bg-white mix-blend-darken"
+        className="pointer-events-none absolute inset-0 mix-blend-darken"
+        style={{
+          backgroundImage: "url('/images/noise.png')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "128px 128px",
+          opacity: 0.35,
+        }}
         aria-hidden="true"
       />
 
