@@ -99,9 +99,18 @@ export function PresetWidget({
   const textClass =
     "text-washes-paper mix-blend-difference font-mono text-[12px] leading-[24px]";
 
+  // Desktop layout (Figma node 4014:43167) is a single horizontal row:
+  //   [Location] is where I'm based. It's currently [Time], NN°F and [Weather].
+  // Mobile (< 768px) keeps the two-row stack because the full sentence
+  // overflows narrow screens. `whitespace-nowrap` on every chip + connector
+  // prevents browser word-wrap inside the row at desktop widths.
   return (
-    <div className="font-mono flex flex-col items-center gap-[6px] rounded-md text-[12px] leading-[24px]">
-      <div className="flex items-center gap-[6px]">
+    <div
+      className={`font-mono flex items-center rounded-md text-[12px] leading-[24px] ${
+        isMobile ? "flex-col gap-[6px]" : "flex-row flex-nowrap gap-[6px] whitespace-nowrap"
+      }`}
+    >
+      <div className="flex items-center gap-[6px] whitespace-nowrap">
         <PresetBug
           onClick={wrapHandler(onLocation)}
           label={`Change location (currently ${location.city})`}
@@ -112,7 +121,7 @@ export function PresetWidget({
       </div>
 
       {f ? (
-        <div className="flex items-center gap-[6px]">
+        <div className="flex items-center gap-[6px] whitespace-nowrap">
           <span className={textClass}>At</span>
           <PresetBug
             onClick={wrapHandler(onTime)}
@@ -125,7 +134,7 @@ export function PresetWidget({
           <span className={textClass}>.</span>
         </div>
       ) : (
-        <div className="flex items-center gap-[6px]">
+        <div className="flex items-center gap-[6px] whitespace-nowrap">
           <span className={textClass}>It’s currently</span>
           <PresetBug
             onClick={wrapHandler(onTime)}

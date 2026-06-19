@@ -100,8 +100,13 @@ function HoverPopover({
   }, []);
 
   return (
+    // pointerEvents: 'auto' overrides the parent glass card's
+    // `pointer-events: none`. The card-as-a-whole passes clicks through to
+    // the wash beneath so the paint brush can stamp anywhere; only the
+    // interactive phrases (this hover-popover wrapper) are re-enabled.
     <span
       className="relative inline-block"
+      style={{ pointerEvents: 'auto' }}
       onMouseEnter={openNow}
       onMouseLeave={scheduleClose}
       onFocus={openNow}
@@ -284,6 +289,12 @@ export default function LandingPage({
     config: { tension: 220, friction: 32 },
   });
 
+  // Ref the PaintBrush uses to suppress the brush + "click to paint" ring
+  // while the cursor is over the glass card body. Without this the ring
+  // animation competes with the intro copy and pointer-events handoff was
+  // ambiguous. See PaintBrush#excludeRef.
+  const glassCardRef = useRef<HTMLDivElement | null>(null);
+
   return (
     // -----------------------------------------------------------------------
     // Page root — Figma node 4012:42490 / 4003:23311. The outer page has a
@@ -320,14 +331,20 @@ export default function LandingPage({
               strip with justify-between puts them at the correct edges
               within the 16px-inset slot. z-20 keeps it above the wash +
               gradients, and the parent `overflow-hidden` clips it to the
-              rounded shell corners. */}
+              rounded shell corners.
+
+              `paintActive` swaps the name + nav links for the paintbrush
+              pigment swatches; Contact Me stays solid. */}
           <div className="absolute left-[16px] right-[16px] top-[16.17px] z-20 flex items-center justify-between">
-            <Header />
+            <Header paintActive={paintActive} />
           </div>
 
           {/* PaintBrush overlay — pointer events target the washesRef
-              (this very container). */}
-          <PaintBrush targetRef={washesRef} />
+              (this very container). The `glassCardRef` is forwarded so
+              the brush can hide its ring while the pointer hovers over
+              the resting glass card (per user feedback — the click-to-
+              paint ring shouldn't compete with the intro card content). */}
+          <PaintBrush targetRef={washesRef} excludeRef={glassCardRef} />
         </div>
 
         {/* Intro glass card — Figma node 4002:21178 / 4002:21130.
@@ -347,22 +364,30 @@ export default function LandingPage({
             for painting — that interaction is a future PR; this one
             establishes the canonical resting structure. */}
         <animated.div
+          ref={glassCardRef}
           className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
           style={{
             top: "9.42%",
             bottom: "0.2%",
             left: "1.41%",
             right: "1.41%",
-            backdropFilter: "blur(1.944px)",
-            WebkitBackdropFilter: "blur(1.944px)",
+            backdropFilter: "blur(1px)",
+            WebkitBackdropFilter: "blur(1px)",
             borderWidth: "0.972px",
             background:
               "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.35) 60%, rgba(255,255,255,0) 100%)",
             opacity: glassCardSpring.opacity,
             transform: glassCardSpring.y.to((y) => `translateY(${y}px)`),
-            // Block pointer events through the card when faded out so
-            // paint clicks land on the wash beneath.
-            pointerEvents: paintActive ? "none" : "auto",
+            // PR 4c-paint-2: the card is pointer-transparent at all times so
+            // pointer-down events fall through to the wash region beneath.
+            // The card previously toggled to `auto` until the first paint
+            // stroke, but `paintActive` only flips AFTER the first stroke
+            // lands — a chicken-and-egg deadlock that made it impossible to
+            // start painting because the card swallowed every click in its
+            // (~90%-of-canvas) footprint. The two HoverPopover children
+            // (Design Engineer / golden retriever energy) opt back in with
+            // `pointer-events: auto` locally so they still receive hover.
+            pointerEvents: "none",
           }}
         >
           <FadeDown>
@@ -438,23 +463,12 @@ export default function LandingPage({
         </animated.div>
       </section>
 
-      {/* PresetWidget — sits centered below the shell. Scroll target is
-          the washesRef so a reset scrolls back to the wash region. */}
-      <div className="mt-[40px] flex w-full max-w-[1136px] justify-center">
-        <PresetWidget
-          location={location}
-          slot={slot}
-          time={time}
-          temp={temp}
-          weather={weather}
-          dayPhase={dayPhase}
-          forecast={forecast}
-          onLocation={cycleLocation}
-          onTime={cycleSlot}
-          onWeather={cycleWeather}
-          scrollTargetRef={washesRef}
-        />
-      </div>
+      {/* Spacer that reserves the in-flow gap the PresetWidget used to
+          occupy in the page flow. The widget itself is now fixed to the
+          viewport footer (see below), but the canvas + featured work
+          rhythm still wants ~40px of breathing room before the next
+          section. */}
+      <div className="h-[40px]" aria-hidden="true" />
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} />
@@ -476,6 +490,35 @@ export default function LandingPage({
       </div>
 
       <HorseTab />
+
+      {/* PresetWidget — PR 4c-paint-2: pinned to the viewport footer so it
+          stays visible while the user paints or scrolls. The widget is
+          rendered once and is the same instance in resting and paint
+          modes (Figma `Landing Page – Paint 01` shows the widget anchored
+          to the bottom of the page in both states; we mirror that with a
+          fixed-position single instance). `pointer-events-none` on the
+          wrapper plus `pointer-events-auto` on the inner shell ensures
+          clicks elsewhere on the viewport (e.g. the paint canvas during
+          a reset scroll) aren't accidentally swallowed by the wrapper. */}
+      <div
+        className="pointer-events-none fixed bottom-[24px] left-0 right-0 z-40 flex justify-center px-[24px]"
+      >
+        <div className="pointer-events-auto">
+          <PresetWidget
+            location={location}
+            slot={slot}
+            time={time}
+            temp={temp}
+            weather={weather}
+            dayPhase={dayPhase}
+            forecast={forecast}
+            onLocation={cycleLocation}
+            onTime={cycleSlot}
+            onWeather={cycleWeather}
+            scrollTargetRef={washesRef}
+          />
+        </div>
+      </div>
     </div>
   );
 }

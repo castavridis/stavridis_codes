@@ -26,17 +26,28 @@ export type PaintBrushProps = {
   // The region the brush is constrained to — typically the Washes canvas
   // host. Pointer events outside this region hide the brush.
   targetRef: React.RefObject<HTMLDivElement | null>;
+  // Optional sub-region that should suppress the brush + "Click to Paint"
+  // ring while the pointer is over it. Used for the Intro glass card in
+  // the v2 landing page: the click-to-paint affordance shouldn't compete
+  // with the card's intro copy at rest, but once `paintActive` is true
+  // (card has faded out) the exclusion is bypassed and the brush is
+  // visible everywhere inside the canvas region.
+  excludeRef?: React.RefObject<HTMLElement | null>;
 };
 
 const BRUSH_SIZE = 88;
 
-export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
+export function PaintBrush({
+  targetRef,
+  excludeRef,
+}: PaintBrushProps): React.ReactElement {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const brushRef = useRef<HTMLDivElement | null>(null);
   const insideRef = useRef(false);
 
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const isPainting = usePaintStore((s) => s.isPainting);
+  const paintActive = usePaintStore((s) => s.paintActive);
   const setIsPainting = usePaintStore((s) => s.setIsPainting);
   const setPaintActive = usePaintStore((s) => s.setPaintActive);
   const setBrushPosition = usePaintStore((s) => s.setBrushPosition);
@@ -55,6 +66,22 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
     let rafId = 0;
     let pending: PointerEvent | null = null;
 
+    const isOverExcluded = (clientX: number, clientY: number): boolean => {
+      // The exclusion zone only applies BEFORE paintActive — once the
+      // user has committed to painting, the card has faded out and the
+      // brush should follow the cursor everywhere inside the canvas.
+      if (paintActive) return false;
+      const exEl = excludeRef?.current;
+      if (!exEl) return false;
+      const er = exEl.getBoundingClientRect();
+      return (
+        clientX >= er.left &&
+        clientX <= er.right &&
+        clientY >= er.top &&
+        clientY <= er.bottom
+      );
+    };
+
     const handle = () => {
       rafId = 0;
       if (!pending) return;
@@ -63,7 +90,9 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+      const insideTarget = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+      const overExcluded = isOverExcluded(e.clientX, e.clientY);
+      const inside = insideTarget && !overExcluded;
       insideRef.current = inside;
       const brush = brushRef.current;
       if (brush) {
@@ -84,8 +113,12 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
       const y = e.clientY - rect.top;
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
       // Don't paint when the click was on an interactive element — e.g. the
-      // Header nav buttons that share the canvas container in v2. Without
-      // this, every Contact / About / Resume click would spawn a wash.
+      // Header nav buttons that share the canvas container in v2, or the
+      // HoverPopover spans inside the glass card. Without this, every
+      // Contact / About / Resume click would spawn a wash. The card body
+      // itself is `pointer-events: none` so non-interactive clicks pass
+      // through to the wash beneath and DO spawn a stroke — that's how
+      // paintActive latches the first time.
       const targetEl = e.target as Element | null;
       if (
         targetEl &&
@@ -115,7 +148,15 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
       window.removeEventListener("pointerup", onPointerUp);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [targetRef, setBrushPosition, setIsPainting, setPaintActive, brushColor]);
+  }, [
+    targetRef,
+    excludeRef,
+    paintActive,
+    setBrushPosition,
+    setIsPainting,
+    setPaintActive,
+    brushColor,
+  ]);
 
   const showRing = washesVisible && !isPainting;
   const colorCss = `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`;
@@ -214,7 +255,7 @@ export function PaintBrush({ targetRef }: PaintBrushProps): React.ReactElement {
             }}
           >
             <textPath href="#paint-brush-ring-path" startOffset="25%">
-              ❦ Click to Paint ❦
+              ❦ CLICK TO PAINT ❦
             </textPath>
           </text>
         </svg>
