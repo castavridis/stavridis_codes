@@ -9,6 +9,11 @@ export type ProjectFrontmatter = {
   gradient?: ProjectGradientType;
   background?: string;
   color?: string;
+  // v2-only fields. Their presence is the discriminator that tells
+  // project-post.tsx to render with the v2 MDXLayout chrome instead of the
+  // legacy gradient-header chrome.
+  headline?: string;
+  introduction?: string;
 };
 
 export type Project = ProjectFrontmatter & {
