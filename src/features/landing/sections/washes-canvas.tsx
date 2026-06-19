@@ -73,13 +73,17 @@ export function WashesCanvas({
     config: { tension: 200, friction: 28 },
   });
 
-  // Connecting Gradients fade. When paintActive flips true, the three paper-
-  // bloom / noise / bottom-fade overlays drop to 0 so the wash itself is
-  // unobstructed. Timing matches the 240–300ms feel used for the glass card
-  // and header swap (tension 220, friction 32 ≈ a cubic-out ~280ms).
+  // Connecting Gradients fade. When paintActive flips true, the paper-
+  // bloom + bottom-fade overlays drop to 0 so the wash itself is
+  // unobstructed. The noise layer is intentionally NOT animated — paper
+  // grain reads as a baseline texture in both modes (PR 4c-paint-4 split).
+  //
+  // Faster spring (tension 280, friction 28) and a heavier resting
+  // opacity (0.95) so the fade is unmistakable on touch / on first
+  // paint stroke.
   const overlaysSpring = useSpring({
-    opacity: paintActive ? 0 : 1,
-    config: { tension: 220, friction: 32 },
+    opacity: paintActive ? 0 : 0.95,
+    config: { tension: 280, friction: 28 },
   });
 
   // ------------------------------------------------------------------------
@@ -295,34 +299,35 @@ export function WashesCanvas({
         style={{ touchAction: "none" }}
       />
 
-      {/* Connecting Gradients — Figma node 2232:32030. Three overlay layers
-          that sit on top of the WebGL host but inside the same clipping
-          shell so they get rounded corners + overflow-hidden for free.
-          The wrapping `animated.div` fades the whole stack out when
-          `paintActive` is true so the user paints onto an unobstructed
-          wash (Figma `Landing Page – Paint 00/01/02` hides the
-          Connecting Gradients group). Individual layers keep their own
-          opacity/blend modes — the parent multiplies. */}
+      {/* Connecting Gradients — Figma node 2232:32030. Three overlay
+          layers that sit on top of the WebGL host but inside the same
+          clipping shell so they get rounded corners + overflow-hidden
+          for free. PR 4c-paint-4: noise is split out and stays visible
+          in both paint and rest modes — the two cream-blend gradients
+          fade out under `paintActive` so the user paints onto an
+          unobstructed wash. */}
+
+      {/* 1. Noise — Figma node 2232:32031. Tiled noise PNG at 64px,
+            hard-light blend at 0.5 opacity — gives the wash a tactile
+            paper grain without flattening the pigment. Always visible. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: "url('/images/noise.png')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "64px",
+          opacity: 0.5,
+          mixBlendMode: "hard-light",
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Cream-blend gradients — fade out together on paintActive. */}
       <animated.div
         className="pointer-events-none absolute inset-0"
         style={overlaysSpring}
         aria-hidden="true"
       >
-        {/* 1. Noise — Figma node 2232:32031. Tiled noise PNG at 64px,
-              hard-light blend at 0.5 opacity — gives the wash a tactile
-              paper grain without flattening the pigment. */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: "url('/images/noise.png')",
-            backgroundRepeat: "repeat",
-            backgroundSize: "64px",
-            opacity: 0.5,
-            mixBlendMode: "hard-light",
-          }}
-          aria-hidden="true"
-        />
-
         {/* 2. Radial gradient — Figma node 2232:32032. Paper cream blooms
               from the bottom-center (cx=568, cy=340 in the original
               1136-wide design) and fades outward to transparent. Combined

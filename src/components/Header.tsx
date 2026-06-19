@@ -170,13 +170,11 @@ export default function Header({
     pointerEvents: paintActive ? 'none' : 'auto',
     transition: 'opacity 240ms ease-out',
   };
-  // Per the existing animation contract: the 4 brush controls fade IN when
-  // paintActive is true and OUT when it's false. They're not interactive at
-  // rest (pointer-events: none) — entry into paint mode is via clicking the
-  // wash canvas itself, which latches paintActive in paint-brush.tsx. Once
-  // painting, the toggle becomes the explicit "stop painting" affordance and
-  // the swatches are the brush-color picker.
-  const controlsStyle: React.CSSProperties = {
+  // Color swatches fade IN with paintActive. They're not interactive at
+  // rest (pointer-events: none); only the paint-mode toggle (Control 1)
+  // is always visible + clickable so the user can ENTER paint mode from
+  // the header. PR 4c-paint-4.
+  const swatchesStyle: React.CSSProperties = {
     opacity: paintActive ? 1 : 0,
     pointerEvents: paintActive ? 'auto' : 'none',
     transition: 'opacity 240ms ease-out',
@@ -184,43 +182,47 @@ export default function Header({
   return (
     <>
       <div className="relative inline-flex items-center">
-        {/* Resting: "C Stavridis" name with a small paintbrush glyph. Fades
-            out in paint mode where the controls below take its place. */}
+        {/* Resting: "C Stavridis" name with a small paintbrush glyph. The
+            name fades out in paint mode; the brush-toggle button below
+            stays put and morphs (color circle ↔ X). */}
         <div
           className="text-confetti-black inline-flex items-center gap-[8px]"
           style={fadeOutStyle}
           aria-hidden={paintActive}
         >
-          <BrushGlyph />
+          {/* Spacer matching the PaintToggle slot so the C Stavridis label
+              doesn't visually collide with the toggle once it overlays. */}
+          <span className="inline-block size-[24px]" aria-hidden />
           <span className="font-kyoto text-[20px] leading-[20px] font-medium italic">
             C Stavridis
           </span>
         </div>
-        {/* Paint controls: paint-mode toggle + 3 color swatches. Absolutely
-            positioned over the name slot so the row stays anchored to the
-            left edge. Fades in when paintActive flips true (matches the
-            existing 240ms opacity transition; pointer-events follow opacity
-            so the buttons aren't clickable until they're visible). */}
-        <div
-          aria-hidden={!paintActive}
-          className="absolute top-1/2 left-0 inline-flex -translate-y-1/2 items-center gap-[4px]"
-          style={controlsStyle}
-        >
+        {/* Paint controls row. The leftmost slot — the PaintToggle — is
+            always visible + clickable: it's the entry point into paint
+            mode. The three color swatches fade in once `paintActive` is
+            true (controlsStyle wraps just them). */}
+        <div className="absolute top-1/2 left-0 inline-flex -translate-y-1/2 items-center gap-[4px]">
           <PaintToggle
             paintActive={paintActive}
             brushColor={brushColor}
             onToggle={() => setPaintActive(!paintActive)}
           />
-          {SWATCHES.map((s) => (
-            <ColorSwatch
-              key={s.hex}
-              color={s.color}
-              hex={s.hex}
-              label={s.label}
-              selected={colorsEqual(brushColor, s.color)}
-              onSelect={setBrushColor}
-            />
-          ))}
+          <div
+            aria-hidden={!paintActive}
+            className="inline-flex items-center gap-[4px]"
+            style={swatchesStyle}
+          >
+            {SWATCHES.map((s) => (
+              <ColorSwatch
+                key={s.hex}
+                color={s.color}
+                hex={s.hex}
+                label={s.label}
+                selected={colorsEqual(brushColor, s.color)}
+                onSelect={setBrushColor}
+              />
+            ))}
+          </div>
         </div>
       </div>
       <nav className="inline-flex items-center gap-[22px]">

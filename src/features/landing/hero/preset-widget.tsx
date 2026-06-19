@@ -87,6 +87,10 @@ export function PresetWidget({
         cb();
       }, 220);
     } else {
+      // No scroll target — we're already at the canvas (e.g. the
+      // paint-mode instance sitting directly under the wash). Still
+      // reset the visualization; just skip the scroll. PR 4c-paint-4.
+      triggerReset();
       cb();
     }
   };

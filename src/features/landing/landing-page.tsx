@@ -292,11 +292,12 @@ export default function LandingPage({
 
   // Spring for the second PresetWidget instance that appears below the
   // Washes shell while painting (Figma `Landing Page – Paint 01/02`).
-  // Fades in / shifts down by 8px as paintActive flips true; the resting
-  // in-flow instance below the Testimonial is unaffected.
+  // Fades in as paintActive flips true; the resting in-flow instance
+  // below the Testimonial is unaffected. No translate — the resting
+  // position is exactly 24px below the wash canvas at all times so the
+  // widget appears in place rather than sliding.
   const paintWidgetSpring = useSpring({
     opacity: paintActive ? 1 : 0,
-    y: paintActive ? 0 : -6,
     config: { tension: 220, friction: 32 },
   });
 
@@ -307,28 +308,28 @@ export default function LandingPage({
   const glassCardRef = useRef<HTMLDivElement | null>(null);
 
   // The PresetWidget is rendered in two slots:
-  //   1. In-flow below the Testimonial (resting + paint state) — replaces
-  //      the fixed-footer placement from PR 4c-paint-2.
+  //   1. In-flow below the Testimonial (resting + paint state) — passes
+  //      `scrollTargetRef={washesRef}` so a click scrolls back up to the
+  //      canvas + resets the visualization.
   //   2. A second instance directly under the Washes shell that fades in
   //      with `paintActive` so the user has the location/time/weather
   //      controls within easy reach while painting (Figma `Landing Page –
-  //      Paint 01/02`). Two instances rather than a portal so each can be
-  //      driven by its own animated wrapper independently.
-  const presetWidget = (
-    <PresetWidget
-      location={location}
-      slot={slot}
-      time={time}
-      temp={temp}
-      weather={weather}
-      dayPhase={dayPhase}
-      forecast={forecast}
-      onLocation={cycleLocation}
-      onTime={cycleSlot}
-      onWeather={cycleWeather}
-      scrollTargetRef={washesRef}
-    />
-  );
+  //      Paint 01/02`). NO `scrollTargetRef` is passed here — we're
+  //      already at the canvas, so a click should reset the visualization
+  //      without scrolling. Two instances rather than a portal so each
+  //      can be driven by its own animated wrapper independently.
+  const presetWidgetCommon = {
+    location,
+    slot,
+    time,
+    temp,
+    weather,
+    dayPhase,
+    forecast,
+    onLocation: cycleLocation,
+    onTime: cycleSlot,
+    onWeather: cycleWeather,
+  } as const;
 
   return (
     // -----------------------------------------------------------------------
@@ -354,7 +355,12 @@ export default function LandingPage({
         <div
           ref={washesRef}
           className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px]"
-          style={{ bottom: "33.07%" }}
+          // OS crosshair cursor — PR 4c-paint-4. Replaces the custom
+          // crosshair SVG previously rendered inside the PaintBrush. The
+          // soft 10%-fill brush indicator (paint-brush.tsx) still tracks
+          // the cursor for color preview; the OS crosshair gives the
+          // exact pixel anchor.
+          style={{ bottom: "33.07%", cursor: "crosshair" }}
         >
           {/* No `scrollRef` — the outer wrapper IS the scroll target.
               PresetWidget + PaintBrush both reference `washesRef` (the
@@ -504,22 +510,23 @@ export default function LandingPage({
         </animated.div>
       </section>
 
-      {/* PresetWidget — paint-mode instance. Sits directly under the
-          Washes shell (Figma `Landing Page – Paint 01/02`) and fades in
+      {/* PresetWidget — paint-mode instance. Sits exactly 24px below the
+          wash canvas (Figma `Landing Page – Paint 01/02`) and fades in
           when `paintActive` is true. The container reserves its 24px
-          height + 24px top-margin in both states so the rest of the page
-          doesn't reflow as the widget appears. `pointer-events: none`
-          when invisible so it doesn't intercept clicks at rest. */}
+          height + 24px top-margin in both states so the rest of the
+          page doesn't reflow as the widget appears. `pointer-events:
+          none` when invisible so it doesn't intercept clicks at rest.
+          No `scrollTargetRef` — clicking a bug while in paint mode
+          should only reset the visualization, not scroll. */}
       <animated.div
         className="mt-[24px] flex h-[24px] w-full max-w-[1136px] justify-center"
         style={{
           opacity: paintWidgetSpring.opacity,
-          transform: paintWidgetSpring.y.to((y) => `translateY(${y}px)`),
           pointerEvents: paintActive ? "auto" : "none",
         }}
         aria-hidden={!paintActive}
       >
-        {presetWidget}
+        <PresetWidget {...presetWidgetCommon} />
       </animated.div>
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
@@ -532,10 +539,12 @@ export default function LandingPage({
 
       {/* PresetWidget — resting / in-flow instance. Sits 120px below the
           Testimonial so it lives in the page rhythm (no longer fixed to
-          the viewport footer). Visible in both resting and paint modes so
-          the user can always tweak the visualization preset. */}
+          the viewport footer). Visible in both resting and paint modes
+          so the user can always tweak the visualization preset.
+          `scrollTargetRef` is passed here only — clicking from this
+          instance scrolls back up to the canvas + resets. */}
       <div className="mt-[120px] flex w-full max-w-[1136px] justify-center">
-        {presetWidget}
+        <PresetWidget {...presetWidgetCommon} scrollTargetRef={washesRef} />
       </div>
 
       {/* Colophon strip — dark band per Figma node 4013:42567. Breaks out

@@ -1,13 +1,36 @@
 // ---------------------------------------------------------------------------
-// Paint brush — the 88×88 cursor overlay that hovers over the Washes
-// canvas. Spawns a `Wash` entity into the Koota world on each click; the
-// WashesCanvas subscribes to those entities and pipes them into the sim.
+// Paint brush — soft-tinted 88px disc that follows the cursor over the
+// Washes canvas. Spawns a `Wash` entity into the Koota world on each click;
+// the WashesCanvas subscribes to those entities and pipes them into the sim.
 //
 // Annotation (Figma node 4003:30680): "'Click to Paint' shows up each time
 // the washes panel is re-activated. Disappears while the user is painting.
 // Text rotates around the brush while visible." → the SVG <textPath> ring
 // fades in when washesVisible && !isPainting, and rotates continuously via
 // CSS keyframe.
+//
+// PR 4c-paint-4 changes (paint pipeline root cause):
+//   - Pointer listener now binds to `window` (capture phase) with a manual
+//     bounds check against `targetRef`. The previous `target.addEventListener`
+//     relied on pointerdown events on the WebGL <canvas> bubbling to the
+//     wrapping div — bubbling DID work in dev, but in production builds the
+//     React Compiler memoized the effect callback so closure-captured
+//     `brushColor` could stale and (in some browsers with implicit pointer
+//     capture on canvas) the bubble target swallowed propagation. Listening
+//     on window with capture eliminates both classes of bug.
+//   - `paintActive` + `brushColor` are no longer effect deps — they're read
+//     fresh from `usePaintStore.getState()` inside the handler so the
+//     listener never has to be torn down + re-attached mid-stroke (which
+//     was racing with the synchronous `setPaintActive(true) → spawnWash`
+//     in the same handler).
+//
+// PR 4c-paint-4 visual changes:
+//   - Brush stroke + custom crosshair SVG removed; the indicator is now a
+//     soft 10%-opacity fill of the current brush color with
+//     `mix-blend-mode: plus-darker`.
+//   - The Washes region uses the OS `crosshair` cursor instead of a
+//     custom rendered crosshair.
+//   - The rotating "CLICK TO PAINT" ring is unchanged.
 // ---------------------------------------------------------------------------
 
 import { useEffect, useRef } from "react";
@@ -43,25 +66,28 @@ export function PaintBrush({
 }: PaintBrushProps): React.ReactElement {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const brushRef = useRef<HTMLDivElement | null>(null);
+  const brushFillRef = useRef<HTMLDivElement | null>(null);
   const insideRef = useRef(false);
 
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const isPainting = usePaintStore((s) => s.isPainting);
-  const paintActive = usePaintStore((s) => s.paintActive);
-  const setIsPainting = usePaintStore((s) => s.setIsPainting);
-  const setPaintActive = usePaintStore((s) => s.setPaintActive);
-  const setBrushPosition = usePaintStore((s) => s.setBrushPosition);
   const brushColor = usePaintStore((s) => s.brushColor);
 
   // ------------------------------------------------------------------------
-  // Pointer follow + click handling. Bound to window so the cursor can
+  // Pointer follow + click handling. Bound to `window` so the cursor can
   // continue tracking even when the pointer momentarily leaves the canvas
-  // (we hide the brush at that point but don't lose state).
+  // AND so that no intermediate element in the DOM tree can swallow the
+  // pointerdown via implicit capture. The handler does its own bounds
+  // check against `targetRef`.
+  //
+  // Crucially the effect has STABLE refs as deps — no `paintActive` /
+  // `brushColor` — so the listener attaches once on mount and stays
+  // attached across paint-state changes. Stateful values are read fresh
+  // from `usePaintStore.getState()` inside the handler.
   // ------------------------------------------------------------------------
   useEffect(() => {
-    const target = targetRef.current;
     const overlay = overlayRef.current;
-    if (!target || !overlay) return;
+    if (!overlay) return;
 
     let rafId = 0;
     let pending: PointerEvent | null = null;
@@ -70,6 +96,7 @@ export function PaintBrush({
       // The exclusion zone only applies BEFORE paintActive — once the
       // user has committed to painting, the card has faded out and the
       // brush should follow the cursor everywhere inside the canvas.
+      const { paintActive } = usePaintStore.getState();
       if (paintActive) return false;
       const exEl = excludeRef?.current;
       if (!exEl) return false;
@@ -87,10 +114,13 @@ export function PaintBrush({
       if (!pending) return;
       const e = pending;
       pending = null;
+      const target = targetRef.current;
+      if (!target) return;
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const insideTarget = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+      const insideTarget =
+        x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
       const overExcluded = isOverExcluded(e.clientX, e.clientY);
       const inside = insideTarget && !overExcluded;
       insideRef.current = inside;
@@ -99,7 +129,7 @@ export function PaintBrush({
         brush.style.transform = `translate(${x - BRUSH_SIZE / 2}px, ${y - BRUSH_SIZE / 2}px)`;
         brush.style.opacity = inside ? "1" : "0";
       }
-      setBrushPosition(inside ? { x, y } : null);
+      usePaintStore.getState().setBrushPosition(inside ? { x, y } : null);
     };
     const onMove = (e: PointerEvent) => {
       pending = e;
@@ -107,10 +137,12 @@ export function PaintBrush({
     };
 
     const onPointerDown = (e: PointerEvent) => {
-      // Only react to clicks INSIDE the canvas region.
+      const target = targetRef.current;
+      if (!target) return;
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      // Only react to clicks INSIDE the canvas region.
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
       // Don't paint when the click was on an interactive element — e.g. the
       // Header nav buttons that share the canvas container in v2, or the
@@ -127,39 +159,42 @@ export function PaintBrush({
       ) {
         return;
       }
-      setIsPainting(true);
+      const store = usePaintStore.getState();
+      store.setIsPainting(true);
       // Latch paintActive on first stroke — the LandingPage subscribes
       // to this to fade + shift the Intro glass card out of the way so
       // the user can paint into the full wash area.
-      setPaintActive(true);
-      spawnWash(x, y, brushColor);
+      store.setPaintActive(true);
+      spawnWash(x, y, store.brushColor);
     };
 
     const onPointerUp = () => {
-      if (insideRef.current) setIsPainting(false);
+      if (insideRef.current) usePaintStore.getState().setIsPainting(false);
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
-    target.addEventListener("pointerdown", onPointerDown);
+    // Capture phase + window-level: no intermediate element in the DOM
+    // tree can swallow the event before this handler runs.
+    window.addEventListener("pointerdown", onPointerDown, true);
     window.addEventListener("pointerup", onPointerUp);
     return () => {
       window.removeEventListener("pointermove", onMove);
-      target.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("pointerup", onPointerUp);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [
-    targetRef,
-    excludeRef,
-    paintActive,
-    setBrushPosition,
-    setIsPainting,
-    setPaintActive,
-    brushColor,
-  ]);
+  }, [targetRef, excludeRef]);
+
+  // Keep the soft fill in sync with the active brushColor. Driving this via
+  // inline style + a ref avoids re-binding the pointer effect just to read a
+  // new color.
+  useEffect(() => {
+    const el = brushFillRef.current;
+    if (!el) return;
+    el.style.backgroundColor = `rgba(${brushColor.r}, ${brushColor.g}, ${brushColor.b}, 0.1)`;
+  }, [brushColor]);
 
   const showRing = washesVisible && !isPainting;
-  const colorCss = `rgb(${brushColor.r}, ${brushColor.g}, ${brushColor.b})`;
 
   return (
     <div
@@ -177,28 +212,19 @@ export function PaintBrush({
           willChange: "transform, opacity",
         }}
       >
-        {/* Brush ring — 88px circle with a soft tinted fill so the user
-            can see the active radius. */}
+        {/* Soft tinted fill — 10% opacity of the active brush color with
+            `plus-darker` blend so it reads as a gentle darkening of the
+            paper instead of a flat overlay. No stroke, no border — the
+            cursor itself is the OS crosshair (set on the parent target
+            in landing-page.tsx). */}
         <div
-          className="absolute inset-0 rounded-full border-2"
+          ref={brushFillRef}
+          className="absolute inset-0 rounded-full"
           style={{
-            backgroundColor: `${colorCss}33`,
-            borderColor: `${colorCss}99`,
-            boxShadow: `0 0 18px ${colorCss}66`,
+            backgroundColor: `rgba(${brushColor.r}, ${brushColor.g}, ${brushColor.b}, 0.1)`,
+            mixBlendMode: "plus-darker",
           }}
         />
-
-        {/* Centered crosshair — small white dot inside a thin black ring,
-            matching Figma node 4015:48995. */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <div
-            className="h-[10px] w-[10px] rounded-full"
-            style={{
-              backgroundColor: "white",
-              border: "1px solid rgba(0, 0, 0, 0.65)",
-            }}
-          />
-        </div>
 
         {/* Click-to-paint ring — SVG textPath wrapped around a circle.
             Rotates continuously while shown. Hidden while painting.
