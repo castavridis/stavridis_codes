@@ -2,13 +2,12 @@ import "../../globals.css";
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { animated, useSpring } from "@react-spring/web";
+import { animated, easings, useSpring, useTransition } from "@react-spring/web";
 
 import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
 import FadeDown from "../../components/anim/FadeDown.js";
-import FadeUp from "../../components/anim/FadeUp.js";
 import { FeaturedWork } from "./sections/featured-work.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
@@ -65,15 +64,65 @@ type HoverPopoverProps = {
   children: ReactNode;
 };
 
+// Small companion to HoverPopover. Drives the portal mount/unmount via
+// useTransition so the popover fades + slides in AND OUT — instant unmount
+// is too abrupt for a hover affordance.
+function PopoverPortal({
+  open,
+  coords,
+  title,
+  content,
+}: {
+  open: boolean;
+  coords: { bottom: number; left: number } | null;
+  title: string;
+  content: ReactNode;
+}): React.ReactElement {
+  const transitions = useTransition(open && coords ? coords : null, {
+    from: { opacity: 0, y: 6 },
+    enter: { opacity: 1, y: 0 },
+    leave: { opacity: 0, y: 6 },
+    config: { duration: 240, easing: easings.easeOutCubic },
+  });
+  return (
+    <>
+      {transitions((style, c) =>
+        c
+          ? createPortal(
+              // `translateX(-50%)` centers on the cursor. `pointer-events:
+              // none` so the cursor moving over the popover itself doesn't
+              // pull focus away from the phrase (popover is hint-only).
+              <animated.div
+                className="fixed z-50 pointer-events-none"
+                style={{
+                  bottom: c.bottom,
+                  left: c.left,
+                  opacity: style.opacity,
+                  transform: style.y.to(
+                    (v) => `translateX(-50%) translateY(${v}px)`,
+                  ),
+                }}
+              >
+                <Popover title={title}>{content}</Popover>
+              </animated.div>,
+              document.body,
+            )
+          : null,
+      )}
+    </>
+  );
+}
+
 function HoverPopover({
   title,
   content,
   children,
 }: HoverPopoverProps): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(
-    null,
-  );
+  const [coords, setCoords] = useState<{
+    bottom: number;
+    left: number;
+  } | null>(null);
   const wrapperRef = useRef<HTMLSpanElement | null>(null);
   const closeTimer = useRef<number | null>(null);
   // When paintActive flips true the glass card fades out + the underlying
@@ -97,16 +146,38 @@ function HoverPopover({
     }, 120);
   }, [cancelClose]);
 
-  // Measure the wrapper's viewport rect on open; the popover renders into a
-  // portal at document.body anchored to those coords. The 12px below-the-
-  // phrase offset matches the previous inline `mt-[12px]`.
-  const openNow = useCallback(() => {
+  // Position the popover 24px above the cursor; coords update on each
+  // pointermove inside the wrapper so it tracks the cursor while open.
+  // The portal renders into document.body with `bottom`-anchored fixed
+  // positioning so it sits above the pointer rather than dropping below.
+  const updateCoords = useCallback((clientX: number, clientY: number) => {
+    setCoords({
+      bottom: window.innerHeight - clientY + 24,
+      left: clientX,
+    });
+  }, []);
+
+  const openAt = useCallback(
+    (clientX: number, clientY: number) => {
+      if (paintActive) return;
+      cancelClose();
+      updateCoords(clientX, clientY);
+      setOpen(true);
+    },
+    [cancelClose, paintActive, updateCoords],
+  );
+
+  // Bare onFocus (no pointer event) — fall back to the wrapper's rect.
+  const openFromFocus = useCallback(() => {
     if (paintActive) return;
     cancelClose();
     const el = wrapperRef.current;
     if (el) {
       const r = el.getBoundingClientRect();
-      setCoords({ top: r.bottom + 12, left: r.left });
+      setCoords({
+        bottom: window.innerHeight - r.top + 24,
+        left: r.left + r.width / 2,
+      });
     }
     setOpen(true);
   }, [cancelClose, paintActive]);
@@ -133,27 +204,21 @@ function HoverPopover({
       ref={wrapperRef}
       className="relative inline-block"
       style={{ pointerEvents: paintActive ? "none" : "auto" }}
-      onMouseEnter={openNow}
+      onMouseEnter={(e) => openAt(e.clientX, e.clientY)}
+      onMouseMove={(e) => {
+        if (open) updateCoords(e.clientX, e.clientY);
+      }}
       onMouseLeave={scheduleClose}
-      onFocus={openNow}
+      onFocus={openFromFocus}
       onBlur={scheduleClose}
     >
       {children}
-      {open && coords
-        ? createPortal(
-            <div
-              className="fixed z-50"
-              style={{ top: coords.top, left: coords.left }}
-              onMouseEnter={openNow}
-              onMouseLeave={scheduleClose}
-            >
-              <FadeUp from={6} duration={240}>
-                <Popover title={title}>{content}</Popover>
-              </FadeUp>
-            </div>,
-            document.body,
-          )
-        : null}
+      <PopoverPortal
+        open={open}
+        coords={coords}
+        title={title}
+        content={content}
+      />
     </span>
   );
 }
@@ -323,8 +388,14 @@ export default function LandingPage({
   // below the Testimonial is unaffected. No translate — the resting
   // position is exactly 24px below the wash canvas at all times so the
   // widget appears in place rather than sliding.
+  // `maxHeight` animates alongside opacity so the layout below (Featured
+  // Work) doesn't jump when paintActive flips. 60px is a generous upper
+  // bound on the desktop widget's natural height (~36px chip + padding).
+  // Combined with `overflow-hidden` on the wrapper, the height grows
+  // smoothly with the spring instead of popping in.
   const paintWidgetSpring = useSpring({
     opacity: paintActive ? 1 : 0,
+    maxHeight: paintActive ? 60 : 0,
     config: { tension: 220, friction: 32 },
   });
 
@@ -372,7 +443,7 @@ export default function LandingPage({
           90.58%). The whole shell is 1136×584.169 with 12px rounded top
           corners; everything inside is absolutely positioned.
           ------------------------------------------------------------------- */}
-      <section className="relative w-full max-w-[1136px]" style={{ height: "584.169px" }}>
+      <section className="relative w-full max-w-[1136px]" style={{ height: "calc(584.169px - 24px)" }}>
         {/* Washes Canvas region — Figma node 4002:21177. Takes the top
             66.93% of the shell (inset bottom = 33.07%). Owns the wash
             WebGL host, the Connecting Gradients overlays, the Header
@@ -381,13 +452,13 @@ export default function LandingPage({
             wash painting can't bleed outside. */}
         <div
           ref={washesRef}
-          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px]"
+          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px] select-none"
           // OS crosshair cursor — PR 4c-paint-4. Replaces the custom
           // crosshair SVG previously rendered inside the PaintBrush. The
           // soft 10%-fill brush indicator (paint-brush.tsx) still tracks
           // the cursor for color preview; the OS crosshair gives the
           // exact pixel anchor.
-          style={{ bottom: "33.07%", cursor: "crosshair" }}
+          style={{ height: "530px", cursor: "crosshair" }}
         >
           {/* No `scrollRef` — the outer wrapper IS the scroll target.
               PresetWidget + PaintBrush both reference `washesRef` (the
@@ -578,19 +649,24 @@ export default function LandingPage({
         </animated.div>
       </section>
 
-      {/* PresetWidget — paint-mode instance. Sits exactly 24px below the
-          wash canvas (Figma `Landing Page – Paint 01/02`). Only rendered
-          while painting; conditional render avoids reserving an invisible
-          24px slot in the resting layout. No `scrollTargetRef` — clicking
-          a bug while in paint mode should only reset the visualization. */}
-      {paintActive ? (
-        <animated.div
-          className="mt-[24px] flex w-full max-w-[1136px] justify-center"
-          style={{ opacity: paintWidgetSpring.opacity }}
-        >
-          <PresetWidget {...presetWidgetCommon} />
-        </animated.div>
-      ) : null}
+      {/* PresetWidget — paint-mode instance. Sits below the wash with
+          -24px margin so it overlaps the wash bottom (Figma `Landing Page
+          – Paint 01/02`). Always rendered (vs. conditional) with animated
+          max-height + opacity so paint-mode entry doesn't jump Featured
+          Work below. `overflow-hidden` clips the widget while collapsed.
+          No `scrollTargetRef` — clicking a bug in paint mode should only
+          reset the visualization. */}
+      <animated.div
+        className="-mt-[24px] flex w-full max-w-[1136px] justify-center overflow-hidden"
+        style={{
+          opacity: paintWidgetSpring.opacity,
+          maxHeight: paintWidgetSpring.maxHeight,
+          pointerEvents: paintActive ? "auto" : "none",
+        }}
+        aria-hidden={!paintActive}
+      >
+        <PresetWidget {...presetWidgetCommon} />
+      </animated.div>
 
       <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />

@@ -68,11 +68,13 @@ export const usePaintStore = create<PaintState>((set) => ({
     set({ currentLocationIndex }),
   setCurrentDayPhase: (currentDayPhase) => set({ currentDayPhase }),
   setCurrentWeather: (currentWeather) => set({ currentWeather }),
+  // Preserve paintActive across a reset — the user clicked a preset
+  // selector to change the visualization, not to leave paint mode. Only
+  // clear the transient `isPainting` (mid-stroke) flag.
   triggerReset: () =>
     set((s) => ({
       resetVersion: s.resetVersion + 1,
       isPainting: false,
-      paintActive: false,
     })),
   resetWashes: () =>
     set({ isPainting: false, brushPosition: null, paintActive: false }),

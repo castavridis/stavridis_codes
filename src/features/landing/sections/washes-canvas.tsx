@@ -162,6 +162,13 @@ export function WashesCanvas({
         // render a custom cursor anymore; the soft fill disc just tracks
         // the cursor for color preview.
         canvasEl.style.cursor = "crosshair";
+        // Bottom corner radii live on the canvas itself, not the wrapping
+        // div. The wrapper's `overflow-hidden` + bottom radius was clipping
+        // the linear paper-fade gradient with visible artifacts; clipping
+        // on the canvas element instead keeps the gradient flush to the
+        // wrapper edges while still rounding the wash's painted output.
+        canvasEl.style.borderBottomLeftRadius = "12px";
+        canvasEl.style.borderBottomRightRadius = "12px";
         // iOS Safari hands the gesture to the scroll container before
         // touch-action:none takes effect on the canvas; a non-passive
         // touchstart calling preventDefault() pre-empts that. Matches
@@ -310,6 +317,12 @@ export function WashesCanvas({
           backgroundSize: "64px",
           opacity: 0.5,
           mixBlendMode: "hard-light",
+          // Match the canvas element's bottom radii so the noise tiles
+          // clip to the rounded wash output. The wrapping div is square-
+          // bottomed (to keep the gradient artifact-free), but the noise
+          // sits ON the wash, so it needs to round with it.
+          borderBottomLeftRadius: "12px",
+          borderBottomRightRadius: "12px",
         }}
         aria-hidden="true"
       />
@@ -345,10 +358,16 @@ export function WashesCanvas({
         <div
           className="pointer-events-none absolute inset-x-0"
           style={{
-            top: "100.82px",
-            height: "291.176px",
+            // Extended to ~430px so the transparent top edge of the
+            // gradient sits ~100px from the top of the wash region. The
+            // previous 291px height made the edge land at y≈239 within
+            // the 530px wash, which read as a visible "line" where the
+            // mask transition began. Longer gradient = gentler ramp =
+            // no perceptible start edge.
+            bottom: 0,
+            height: "430px",
             background:
-              "linear-gradient(to bottom, rgba(251,246,234,0) 0%, #fbf6ea 100%)",
+              "linear-gradient(to bottom, rgba(251,246,234,0) 0%, #fbf6ea 75%)",
           }}
           aria-hidden="true"
         />

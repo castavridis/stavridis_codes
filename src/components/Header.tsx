@@ -193,7 +193,12 @@ export default function Header({
           {/* Spacer matching the PaintToggle slot so the C Stavridis label
               doesn't visually collide with the toggle once it overlays. */}
           <span className="inline-block size-[24px]" aria-hidden />
-          <span className="font-kyoto text-[20px] leading-[20px] font-medium italic">
+          <span
+            className="font-kyoto text-[20px] leading-[20px] font-medium italic"
+            // Cream halo so the dark text reads on dynamic wash colors
+            // (esp. night-phase navy washes where #391f00 would disappear).
+            style={{ textShadow: "0 0 8px rgba(251, 246, 234, 0.7)" }}
+          >
             C Stavridis
           </span>
         </div>

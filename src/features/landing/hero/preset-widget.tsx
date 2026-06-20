@@ -75,10 +75,14 @@ export function PresetWidget({
 
   const wrapHandler = (cb: () => void) => () => {
     if (scrollTargetRef?.current) {
-      scrollTargetRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      // Scroll the WINDOW, not via scrollIntoView. The landing page root
+      // has `overflow-hidden` (used by the Colophon breakout); some
+      // browsers treat that as a scroll container and set ITS scrollTop
+      // in response to scrollIntoView, which shifts content within the
+      // clip and "destroys" the top padding / reveals empty bands at
+      // the bottom. The wash canvas is at the top of the page, so a
+      // window scrollTo(0) lands you there cleanly.
+      window.scrollTo({ top: 0, behavior: "smooth" });
       // Wait for the smooth-scroll to start before kicking off the reset
       // animation so the user sees the canvas wipe AT the canvas, not as
       // they're still scrolling past the testimonial.
@@ -98,10 +102,13 @@ export function PresetWidget({
   // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
   const f = slot > 0 ? forecast[slot - 1] : null;
 
-  // Connecting text styling — mix-blend-difference against confetti-black bg
-  // gives the inverted-cream effect from the new Figma.
+  // Connecting text styling — solid confetti-black on cream paper. The
+  // earlier mix-blend-difference approach broke when the widget's
+  // animated.div wrapper hit opacity < 1 mid-transition: opacity creates
+  // a stacking context that isolates blend-mode, so the text would
+  // briefly render as raw washes-paper (cream-on-cream → invisible).
   const textClass =
-    "text-washes-paper mix-blend-difference font-mono text-[12px] leading-[24px]";
+    "text-confetti-black font-mono text-[12px] leading-[24px]";
 
   // Desktop layout (Figma node 4014:43167) is a single horizontal row:
   //   [Location] is where I'm based. It's currently [Time], NN°F and [Weather].
@@ -134,7 +141,12 @@ export function PresetWidget({
             {isMobile ? `${f.time}` : `${f.time} (${f.label.toLowerCase()})`}
           </PresetBug>
           <span className={textClass}>it will be {f.temp}°F and</span>
-          <DisplayBug>{weatherLabel(f.weather, f.phase)}</DisplayBug>
+          <PresetBug
+            onClick={wrapHandler(onWeather)}
+            label={`Change weather (currently ${weatherLabel(f.weather, f.phase)})`}
+          >
+            {weatherLabel(f.weather, f.phase)}
+          </PresetBug>
           <span className={textClass}>.</span>
         </div>
       ) : (

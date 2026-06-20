@@ -248,6 +248,12 @@ export function PaintBrush({
           <g className="paint-brush-ring-spin">
             <text
               fill="#391f00"
+              // Cream stroke under the dark fill via `paint-order: stroke fill`.
+              // Native SVG outline — crisper than text-shadow blur — keeps
+              // the ring legible on saturated dark washes (night phase) where
+              // a static dark fill would disappear.
+              stroke="rgba(251, 246, 234, 0.85)"
+              strokeWidth="2"
               textAnchor="middle"
               style={{
                 fontFamily:
@@ -255,6 +261,7 @@ export function PaintBrush({
                 fontSize: "8px",
                 letterSpacing: "0.14em",
                 fontWeight: 500,
+                paintOrder: "stroke fill",
               }}
             >
               <textPath href="#paint-brush-ring-path" startOffset="25%">
