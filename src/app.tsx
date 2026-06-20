@@ -7,6 +7,22 @@ import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
 import { getCompany, type CompanyConfig } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
+import { usePaintStore } from './lib/paint-store.js';
+
+// Height of the landing's wash-shell section (logo + nav + Contact Me +
+// washes canvas). Matches the inline `height: 660px` in landing-page.tsx
+// (the `<section>` that wraps the wash + glass card). The project
+// SheetOverlay starts BELOW this band so the wash shell remains visible
+// at the top of the viewport while a case study is open — see Path A
+// in the project-overlay arch (single source of truth for the wash
+// shell; the SheetOverlay leaves the area above it untouched).
+const LANDING_WASH_SHELL_HEIGHT = 660;
+// Click-project chain step 1 duration: window scrolls to top + the
+// intro glass card fades down to opacity 0. We wait for that to settle
+// before kicking off the SheetOverlay slide-up (step 2). Matches the
+// glass-card spring (~280-300ms to land) so step 2 starts as step 1
+// finishes — no overlap, no gap.
+const PROJECT_CHAIN_STEP1_MS = 300;
 
 const ProjectPost = lazy(() =>
   import('./features/projects/project-post.js').then((m) => ({ default: m.ProjectPost })),
@@ -65,15 +81,47 @@ export function App() {
     });
   }, []);
 
+  const setProjectOpenInStore = usePaintStore((s) => s.setProjectOpen);
+
+  // Click-project transition chain (see tmp/click-project-transition/):
+  //   Step 1 — scroll window to top + glass card fades to opacity 0.
+  //            Driven by setting `projectOpen` in the paint store BEFORE
+  //            navigating; landing-page reads the flag and runs the same
+  //            fade/translate spring it uses for paint mode (the
+  //            visual is shared; paint mode itself is NOT activated).
+  //   Step 2 — once step 1 has had time to settle (300ms), navigate to
+  //            the project route. wouter route match flips on, the
+  //            SheetOverlay opens, and react-spring slides it up.
+  //
+  // We pre-arm the store flag before the actual route change so the
+  // fade starts immediately on click — without waiting for the
+  // ProjectPost lazy chunk to load.
   const handleCardClick = useCallback(
     (slug: string) => {
-      navigate(routes.project.href({ slug }));
+      setProjectOpenInStore(true);
+      // Scroll the window, not via scrollIntoView (same reasoning as
+      // PresetWidget): the landing root has overflow-hidden, so a
+      // scrollIntoView would shift content within the clip instead of
+      // moving the page viewport.
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.setTimeout(() => {
+        navigate(routes.project.href({ slug }));
+      }, PROJECT_CHAIN_STEP1_MS);
     },
-    [navigate],
+    [navigate, setProjectOpenInStore],
   );
 
   const projectSlug = matchProject ? projectParams?.slug ?? null : null;
   const projectOpen = projectSlug !== null;
+
+  // Mirror projectOpen into the paint store so downstream consumers
+  // (PaintBrush, glass card, Header PaintToggle) gate themselves
+  // uniformly. The `handleCardClick` path pre-arms this BEFORE the
+  // route flips so step 1 of the chain starts immediately; this effect
+  // covers the reverse direction (close, back-button, direct URL).
+  useEffect(() => {
+    setProjectOpenInStore(projectOpen);
+  }, [projectOpen, setProjectOpenInStore]);
 
   const handleCloseProject = useCallback(() => {
     navigate(routes.home.href());
@@ -109,10 +157,27 @@ export function App() {
         />
       </div>
 
-      <SheetOverlay open={projectOpen} onClose={handleCloseProject}>
+      {/* Project sheet — Path A: opens BELOW the landing wash shell so
+          the cream-rounded-wash header (logo + nav + Contact Me) stays
+          visible and interactive at the top of the viewport while a
+          case study is open. Only the v2 case study chrome (MDXLayout)
+          assumes the visible-landing-header context; the v1 chrome
+          carries its own gradient header and is fine sitting under
+          the same offset (it just gets clipped at the top edge by the
+          remaining viewport — both shapes scroll cleanly within the
+          inner scroll container). */}
+      <SheetOverlay
+        open={projectOpen}
+        onClose={handleCloseProject}
+        topOffset={LANDING_WASH_SHELL_HEIGHT}
+      >
         {projectSlug ? <ProjectSheetContent slug={projectSlug} onBack={handleCloseProject} /> : null}
       </SheetOverlay>
 
+      {/* Blog sheet — full-viewport (no topOffset). The blog index/post
+          covers the full landing including the wash shell, per the spec
+          non-goal "don't change SheetOverlay semantics for the BLOG
+          overlay". */}
       <SheetOverlay open={blogOpen} onClose={handleCloseBlog}>
         <BlogSheetContent
           postSlug={blogPostSlug}

@@ -72,31 +72,28 @@ export function PresetWidget({
     window.matchMedia("(max-width: 767px)").matches,
   );
   const triggerReset = usePaintStore((s) => s.triggerReset);
+  const paintActive = usePaintStore((s) => s.paintActive);
+  const setPaintActive = usePaintStore((s) => s.setPaintActive);
 
   const wrapHandler = (cb: () => void) => () => {
-    if (scrollTargetRef?.current) {
-      // Scroll the WINDOW, not via scrollIntoView. The landing page root
-      // has `overflow-hidden` (used by the Colophon breakout); some
-      // browsers treat that as a scroll container and set ITS scrollTop
-      // in response to scrollIntoView, which shifts content within the
-      // clip and "destroys" the top padding / reveals empty bands at
-      // the bottom. The wash canvas is at the top of the page, so a
-      // window scrollTo(0) lands you there cleanly.
+    // Bottom (in-flow) instance + not yet painting → scroll up, open
+    // paint mode, then reset the visualization. Once paint mode is open
+    // the paint-mode preset widget (above the wash) takes over as the
+    // primary, and the bottom one fades back (landing-page handles the
+    // opacity transition tied to paintActive).
+    if (scrollTargetRef?.current && !paintActive) {
       window.scrollTo({ top: 0, behavior: "smooth" });
-      // Wait for the smooth-scroll to start before kicking off the reset
-      // animation so the user sees the canvas wipe AT the canvas, not as
-      // they're still scrolling past the testimonial.
       window.setTimeout(() => {
+        setPaintActive(true);
         triggerReset();
         cb();
       }, 220);
-    } else {
-      // No scroll target — we're already at the canvas (e.g. the
-      // paint-mode instance sitting directly under the wash). Still
-      // reset the visualization; just skip the scroll. PR 4c-paint-4.
-      triggerReset();
-      cb();
+      return;
     }
+    // Either already painting, or no scroll target (paint-mode instance) —
+    // just reset the visualization without scrolling.
+    triggerReset();
+    cb();
   };
 
   // slot 0 = "now"; 1..3 = the sunrise / mid-day / sunset forecast rows.
@@ -122,6 +119,7 @@ export function PresetWidget({
       }`}
     >
       <div className="flex items-center gap-[6px] whitespace-nowrap">
+        <span className={textClass}>Washes based on: </span>
         <PresetBug
           onClick={wrapHandler(onLocation)}
           label={`Change location (currently ${location.city})`}

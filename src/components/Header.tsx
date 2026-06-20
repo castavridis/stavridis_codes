@@ -164,6 +164,12 @@ export default function Header({
   const brushColor = usePaintStore((s) => s.brushColor);
   const setBrushColor = usePaintStore((s) => s.setBrushColor);
   const setPaintActive = usePaintStore((s) => s.setPaintActive);
+  // Hide the PaintToggle (and the swatches it gates) while a project
+  // overlay is open — no entering paint mode while a case study is up.
+  // The store's own setPaintActive guard is the final backstop; this
+  // also removes the visual affordance so the header reads cleanly as
+  // "name + nav + Contact Me" through the wash shell strip.
+  const projectOpen = usePaintStore((s) => s.projectOpen);
 
   const fadeOutStyle: React.CSSProperties = {
     opacity: paintActive ? 0 : 1,
@@ -205,8 +211,19 @@ export default function Header({
         {/* Paint controls row. The leftmost slot — the PaintToggle — is
             always visible + clickable: it's the entry point into paint
             mode. The three color swatches fade in once `paintActive` is
-            true (controlsStyle wraps just them). */}
-        <div className="absolute top-1/2 left-0 inline-flex -translate-y-1/2 items-center gap-[4px]">
+            true (controlsStyle wraps just them). The whole row fades
+            out (opacity 0 + pointer-events: none) when a project
+            overlay is open so the header strip behind the case study
+            reads as plain name + nav without the paint affordance. */}
+        <div
+          className="absolute top-1/2 left-0 inline-flex -translate-y-1/2 items-center gap-[4px]"
+          style={{
+            opacity: projectOpen ? 0 : 1,
+            pointerEvents: projectOpen ? 'none' : 'auto',
+            transition: 'opacity 240ms ease-out',
+          }}
+          aria-hidden={projectOpen}
+        >
           <PaintToggle
             paintActive={paintActive}
             brushColor={brushColor}

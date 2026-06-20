@@ -151,8 +151,13 @@ function HoverPopover({
   // When paintActive flips true the glass card fades out + the underlying
   // italic phrases are no longer visible — disable hover/focus so the
   // popover doesn't open over the wash, and let pointer events pass
-  // through to the canvas for painting.
+  // through to the canvas for painting. Same gate applies while a
+  // project overlay is open: the card has faded, the phrases are
+  // invisible (and translated), so hovering over their would-be
+  // positions shouldn't surface popovers.
   const paintActive = usePaintStore((s) => s.paintActive);
+  const projectOpen = usePaintStore((s) => s.projectOpen);
+  const hoverSuppressed = paintActive || projectOpen;
 
   const cancelClose = useCallback(() => {
     if (closeTimer.current != null) {
@@ -182,17 +187,17 @@ function HoverPopover({
 
   const openAt = useCallback(
     (clientX: number, clientY: number) => {
-      if (paintActive) return;
+      if (hoverSuppressed) return;
       cancelClose();
       updateCoords(clientX, clientY);
       setOpen(true);
     },
-    [cancelClose, paintActive, updateCoords],
+    [cancelClose, hoverSuppressed, updateCoords],
   );
 
   // Bare onFocus (no pointer event) — fall back to the wrapper's rect.
   const openFromFocus = useCallback(() => {
-    if (paintActive) return;
+    if (hoverSuppressed) return;
     cancelClose();
     const el = wrapperRef.current;
     if (el) {
@@ -203,7 +208,7 @@ function HoverPopover({
       });
     }
     setOpen(true);
-  }, [cancelClose, paintActive]);
+  }, [cancelClose, hoverSuppressed]);
 
   useEffect(() => {
     return () => {
@@ -211,22 +216,23 @@ function HoverPopover({
     };
   }, []);
 
-  // Auto-close if paint mode starts while the popover is open.
+  // Auto-close if paint mode starts OR a project overlay opens while
+  // the popover is open.
   useEffect(() => {
-    if (paintActive) setOpen(false);
-  }, [paintActive]);
+    if (hoverSuppressed) setOpen(false);
+  }, [hoverSuppressed]);
 
   return (
     // The wrapper stays inline (phrasing content) — only the popover is
     // portaled out to document.body so the hero <p> stays valid HTML. The
     // glass card body is `pointer-events: none`; `auto` here re-enables
-    // the phrase + popover at rest. In paint mode the phrases are
-    // invisible, so we drop back to `none` to let clicks fall through
-    // to the wash.
+    // the phrase + popover at rest. In paint mode or while the project
+    // overlay is open the phrases are invisible, so we drop back to
+    // `none` to let clicks fall through to the wash / overlay below.
     <span
       ref={wrapperRef}
       className="relative inline-block"
-      style={{ pointerEvents: paintActive ? "none" : "auto" }}
+      style={{ pointerEvents: hoverSuppressed ? "none" : "auto" }}
       onMouseEnter={(e) => openAt(e.clientX, e.clientY)}
       onMouseMove={(e) => {
         if (open) updateCoords(e.clientX, e.clientY);
@@ -396,9 +402,17 @@ export default function LandingPage({
   // wash beneath — without this you couldn't paint into the lower
   // ~33% of the shell.
   const paintActive = usePaintStore((s) => s.paintActive);
+  // Project-overlay state — the click-project chain pre-arms this in the
+  // store before route navigation so the glass card starts fading
+  // immediately on click. The same fade animation as paint mode is
+  // reused — visually identical, but paintActive itself does NOT flip
+  // (no swatch overlay in Header, no Paint controls). See app.tsx
+  // #handleCardClick and the paint-store `projectOpen` docs.
+  const projectOpen = usePaintStore((s) => s.projectOpen);
+  const cardHidden = paintActive || projectOpen;
   const glassCardSpring = useSpring({
-    opacity: paintActive ? 0 : 1,
-    y: paintActive ? 64 : 0,
+    opacity: cardHidden ? 0 : 1,
+    y: cardHidden ? 64 : 0,
     config: { tension: 220, friction: 32 },
   });
 
@@ -689,7 +703,7 @@ export default function LandingPage({
         <PresetWidget {...presetWidgetCommon} />
       </animated.div>
 
-      <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
+      <div className="mt-[60px] flex w-full max-w-[944px] justify-center">
         <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />
       </div>
 
@@ -700,10 +714,15 @@ export default function LandingPage({
       {/* PresetWidget — resting / in-flow instance. Sits 120px below the
           Testimonial so it lives in the page rhythm (no longer fixed to
           the viewport footer). Visible in both resting and paint modes
-          so the user can always tweak the visualization preset.
-          `scrollTargetRef` is passed here only — clicking from this
-          instance scrolls back up to the canvas + resets. */}
-      <div className="mt-[120px] flex w-full max-w-[1136px] justify-center">
+          so the user can always tweak the visualization preset, but
+          fades back when paintActive (the paint-mode instance above the
+          wash becomes the primary). `scrollTargetRef` is passed here
+          only — clicking from this instance scrolls back up, opens paint
+          mode, and resets the visualization. */}
+      <div
+        className="mt-[120px] flex w-full max-w-[1136px] justify-center transition-opacity duration-300 ease-out"
+        style={{ opacity: paintActive ? 0 : 1 }}
+      >
         <PresetWidget {...presetWidgetCommon} scrollTargetRef={washesRef} />
       </div>
 

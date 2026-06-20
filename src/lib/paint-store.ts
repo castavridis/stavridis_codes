@@ -31,6 +31,25 @@ export type PaintState = {
   // by `resetWashes` and `triggerReset` so the card comes back after a
   // visualization reset.
   paintActive: boolean;
+  // True while a project-detail overlay is open (case-study sheet
+  // covering most of the viewport, leaving the landing wash shell
+  // visible at the top — Path A in the project-overlay arch notes).
+  //
+  // Gates a few things across the landing:
+  //   1. The intro glass card fades + slides out (same animation as
+  //      paint mode) so the wash shell behind the overlay reads as a
+  //      clean header strip with logo + nav + Contact Me.
+  //   2. The PaintBrush hides its 88px brush + click-to-paint ring and
+  //      its pointer-down latch is a no-op — so the wash strip visible
+  //      above the project overlay can't be painted while the overlay
+  //      is up.
+  //   3. The Header's PaintToggle hides for the same reason (no entry
+  //      into paint mode while a project is up).
+  //
+  // `setPaintActive` is a no-op while `projectOpen` is true; we hard-
+  // guard at the source so any caller (PaintBrush, Header toggle) is
+  // gated without each having to remember the rule.
+  projectOpen: boolean;
   brushPosition: BrushPoint | null;
   brushColor: BrushColor;
   currentLocationIndex: number;
@@ -40,6 +59,7 @@ export type PaintState = {
   setWashesVisible: (visible: boolean) => void;
   setIsPainting: (painting: boolean) => void;
   setPaintActive: (active: boolean) => void;
+  setProjectOpen: (open: boolean) => void;
   setBrushPosition: (point: BrushPoint | null) => void;
   setBrushColor: (color: BrushColor) => void;
   setCurrentLocationIndex: (idx: number) => void;
@@ -53,6 +73,7 @@ export const usePaintStore = create<PaintState>((set) => ({
   washesVisible: false,
   isPainting: false,
   paintActive: false,
+  projectOpen: false,
   brushPosition: null,
   brushColor: DEFAULT_BRUSH_COLOR,
   currentLocationIndex: 0,
@@ -61,7 +82,22 @@ export const usePaintStore = create<PaintState>((set) => ({
   resetVersion: 0,
   setWashesVisible: (washesVisible) => set({ washesVisible }),
   setIsPainting: (isPainting) => set({ isPainting }),
-  setPaintActive: (paintActive) => set({ paintActive }),
+  // Single source of truth for "paint mode is locked out". When a
+  // project overlay is open we drop paintActive flips on the floor;
+  // callers don't need to remember the rule.
+  setPaintActive: (paintActive) =>
+    set((s) => (s.projectOpen ? {} : { paintActive })),
+  setProjectOpen: (projectOpen) =>
+    set((s) =>
+      // Force-clear paint mode whenever a project opens so the wash
+      // shell at top of the overlay reads clean (no brush, no swatch
+      // overlay). When the overlay closes, paint stays off until the
+      // user opts back in — that matches the spec "paint mode is
+      // disabled while project is open".
+      projectOpen && s.paintActive
+        ? { projectOpen, paintActive: false, isPainting: false }
+        : { projectOpen },
+    ),
   setBrushPosition: (brushPosition) => set({ brushPosition }),
   setBrushColor: (brushColor) => set({ brushColor }),
   setCurrentLocationIndex: (currentLocationIndex) =>
