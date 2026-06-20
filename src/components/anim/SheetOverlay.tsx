@@ -70,8 +70,8 @@ export default function SheetOverlay({
               right: 0,
               bottom: 0,
               zIndex: 50,
-              backgroundColor: style.backdrop.to((v) => `rgba(0, 0, 0, ${v * 0.4})`),
             }}
+            className="max-w-[1110px] m-auto overflow-hidden rounded-xl"
           >
             <animated.div
               style={{

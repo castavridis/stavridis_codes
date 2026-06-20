@@ -1,3 +1,5 @@
+import { PaintbrushVertical, X } from 'lucide-react';
+
 import Button from './Button.js';
 import { usePaintStore, type BrushColor } from '../lib/paint-store.js';
 
@@ -33,50 +35,9 @@ function colorsEqual(a: BrushColor, b: BrushColor): boolean {
   return a.r === b.r && a.g === b.g && a.b === b.b;
 }
 
-// Inline paintbrush glyph — small palette-knife-style mark. Sized to fit
-// inside the 24px swatch. Stroke uses currentColor so it inherits white when
-// overlaid on a colored swatch and the brush-fill color on the toggle's
-// resting state.
-function BrushGlyph({ size = 14 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 14 14"
-      aria-hidden
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      {/* Brush ferrule + handle running corner-to-corner. */}
-      <path d="M11.2 2.8 L8.2 5.8" />
-      <path d="M8.6 5.4 L10 6.8" />
-      {/* Brush head / paint blob — a soft teardrop pointing down-left. */}
-      <path d="M8.6 5.4 C6.4 7.6 5.4 8.6 4.1 9.9 C3.4 10.6 2.6 10.8 2.2 10.4 C1.8 10 2 9.2 2.7 8.5 C4 7.2 5 6.2 7.2 4 Z" />
-    </svg>
-  );
-}
-
-// Small X glyph used by the paint-mode toggle while painting.
-function CloseGlyph({ size = 12 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 12 12"
-      aria-hidden
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-    >
-      <path d="M3 3 L9 9" />
-      <path d="M9 3 L3 9" />
-    </svg>
-  );
-}
+// Lucide icons for the paint-mode toggle + swatches. `Paintbrush` is the
+// brush mark; `X` is the close glyph used while in paint mode. Both
+// inherit color via currentColor so they switch with the button text.
 
 // Paint-mode toggle (leftmost control). Resting: a circle filled with the
 // current brush color + a brush glyph in the same dark tone. While painting:
@@ -104,7 +65,7 @@ function PaintToggle({
       className="inline-flex size-[24px] items-center justify-center rounded-[12px]"
       style={{ backgroundColor: bg, color: fg }}
     >
-      {paintActive ? <CloseGlyph /> : <BrushGlyph />}
+      {paintActive ? <X size={12} strokeWidth={1.6} /> : <PaintbrushVertical size={14} strokeWidth={1.4} />}
     </button>
   );
 }
@@ -134,7 +95,7 @@ function ColorSwatch({
       className="inline-flex size-[24px] items-center justify-center rounded-[12px]"
       style={{ backgroundColor: hex, color: '#ffffff' }}
     >
-      {selected ? <BrushGlyph /> : null}
+      {selected ? <PaintbrushVertical size={14} strokeWidth={1.4} /> : null}
     </button>
   );
 }

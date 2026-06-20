@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { X } from 'lucide-react';
 
 type PopoverProps = {
   title: string;
@@ -24,9 +25,7 @@ export default function Popover({ title, children, icon, onClose }: PopoverProps
             aria-label="Close"
             className="size-[24px] shrink-0 inline-flex items-center justify-center"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden>
-              <path d="M6 6 L18 18 M18 6 L6 18" stroke="currentColor" strokeWidth="1.5" fill="none" />
-            </svg>
+            <X size={20} strokeWidth={1.5} aria-hidden />
           </button>
         ) : null}
       </div>

@@ -8,6 +8,7 @@ import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
 import FadeDown from "../../components/anim/FadeDown.js";
+import DomMarker from "../../components/DomMarker.js";
 import { FeaturedWork } from "./sections/featured-work.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
@@ -477,7 +478,8 @@ export default function LandingPage({
           90.58%). The whole shell is 1136×584.169 with 12px rounded top
           corners; everything inside is absolutely positioned.
           ------------------------------------------------------------------- */}
-      <section className="relative w-full max-w-[1136px]" style={{ height: "660px" }}>
+      {/* wash-shell:start marker injected below — section opens here */}
+      <section data-marker="wash-shell" className="relative w-full max-w-[1136px]" style={{ height: "660px" }}>
         {/* Washes Canvas region — Figma node 4002:21177. Takes the top
             66.93% of the shell (inset bottom = 33.07%). Owns the wash
             WebGL host, the Connecting Gradients overlays, the Header
@@ -691,53 +693,65 @@ export default function LandingPage({
           Work below. `overflow-hidden` clips the widget while collapsed.
           No `scrollTargetRef` — clicking a bug in paint mode should only
           reset the visualization. */}
-      <animated.div
-        className="mt-[24px] flex w-full max-w-[1136px] justify-center"
-        style={{
-          opacity: paintWidgetSpring.opacity,
-          maxHeight: paintWidgetSpring.maxHeight,
-          pointerEvents: paintActive ? "auto" : "none",
-        }}
-        aria-hidden={!paintActive}
-      >
-        <PresetWidget {...presetWidgetCommon} />
-      </animated.div>
+      <DomMarker name="paint-mode-preset-widget">
+        <animated.div
+          className="mt-[24px] flex w-full max-w-[1136px] justify-center"
+          style={{
+            opacity: paintWidgetSpring.opacity,
+            maxHeight: paintWidgetSpring.maxHeight,
+            pointerEvents: paintActive ? "auto" : "none",
+          }}
+          aria-hidden={!paintActive}
+        >
+          <PresetWidget {...presetWidgetCommon} />
+        </animated.div>
+      </DomMarker>
 
-      <div className="mt-[60px] flex w-full max-w-[944px] justify-center">
-        <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />
-      </div>
-
-      <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
-        <Testimonial />
-      </div>
-
-      {/* PresetWidget — resting / in-flow instance. Sits 120px below the
-          Testimonial so it lives in the page rhythm (no longer fixed to
-          the viewport footer). Visible in both resting and paint modes
-          so the user can always tweak the visualization preset, but
-          fades back when paintActive (the paint-mode instance above the
-          wash becomes the primary). `scrollTargetRef` is passed here
-          only — clicking from this instance scrolls back up, opens paint
-          mode, and resets the visualization. */}
-      <div
-        className="mt-[120px] flex w-full max-w-[1136px] justify-center transition-opacity duration-300 ease-out"
-        style={{ opacity: paintActive ? 0 : 1 }}
-      >
-        <PresetWidget {...presetWidgetCommon} scrollTargetRef={washesRef} />
-      </div>
-
-      {/* Colophon strip — dark band per Figma node 4013:42567. Breaks out
-          of the 72px side gutter and the 80px bottom pad so the dark fill
-          spans the page-card edges. Width is parent + 144px to cancel
-          the px-[72px] on both sides; the parent `overflow-hidden`
-          guards against any sub-pixel overflow. */}
-      <div className="bg-confetti-black -mx-[72px] -mb-[80px] mt-[120px] w-[calc(100%+144px)]">
-        <div className="mx-auto flex w-full max-w-[944px] justify-center">
-          <Colophon />
+      <DomMarker name="featured-work">
+        <div className="mt-[60px] flex w-full max-w-[944px] justify-center">
+          <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />
         </div>
-      </div>
+      </DomMarker>
 
-      <HorseTab />
+      <DomMarker name="testimonial">
+        <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
+          <Testimonial />
+        </div>
+      </DomMarker>
+
+      <DomMarker name="resting-preset-widget">
+        {/* PresetWidget — resting / in-flow instance. Sits 120px below the
+            Testimonial so it lives in the page rhythm (no longer fixed to
+            the viewport footer). Visible in both resting and paint modes
+            so the user can always tweak the visualization preset, but
+            fades back when paintActive (the paint-mode instance above the
+            wash becomes the primary). `scrollTargetRef` is passed here
+            only — clicking from this instance scrolls back up, opens paint
+            mode, and resets the visualization. */}
+        <div
+          className="mt-[120px] flex w-full max-w-[1136px] justify-center transition-opacity duration-300 ease-out"
+          style={{ opacity: paintActive ? 0 : 1 }}
+        >
+          <PresetWidget {...presetWidgetCommon} scrollTargetRef={washesRef} />
+        </div>
+      </DomMarker>
+
+      <DomMarker name="colophon">
+        {/* Colophon strip — dark band per Figma node 4013:42567. Breaks out
+            of the 72px side gutter and the 80px bottom pad so the dark fill
+            spans the page-card edges. Width is parent + 144px to cancel
+            the px-[72px] on both sides; the parent `overflow-hidden`
+            guards against any sub-pixel overflow. */}
+        <div className="bg-confetti-black -mx-[72px] -mb-[80px] mt-[120px] w-[calc(100%+144px)]">
+          <div className="mx-auto flex w-full max-w-[944px] justify-center">
+            <Colophon />
+          </div>
+        </div>
+      </DomMarker>
+
+      <DomMarker name="horse-tab">
+        <HorseTab />
+      </DomMarker>
     </div>
   );
 }

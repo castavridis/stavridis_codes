@@ -191,8 +191,8 @@ function ChromeRow({
         backgroundColor: '#fbf6ea',
       }}
     >
-      <div className="relative mx-auto w-full max-w-[1280px] px-[72px]">
-        <div className="mx-auto w-full max-w-[1104px] px-[80px]">
+      <div className="relative mx-auto w-full max-w-[1110px] px-[72px]">
+        <div className="mx-auto w-full max-w-[1104px]">
           {/* The two-mode chrome row. Two children share the left slot
               via absolute overlap: the tags paragraph and the
               truncated title sit in the same grid cell, each
@@ -280,7 +280,7 @@ export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) 
             `hideTopNavigation` keeps the component as the
             FrontMatter source-of-truth without a second Close
             button). */}
-        <div className="relative mx-auto w-full max-w-[1104px] px-[80px]">
+        <div className="relative mx-auto w-full max-w-[1104px]">
           <div className="pt-[24px]">
             <FrontMatter
               headline={front.headline}
