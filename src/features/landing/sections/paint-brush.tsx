@@ -183,7 +183,7 @@ export function PaintBrush({
           willChange: "transform, opacity",
         }}
       >
-        {/* Soft tinted fill — 10% opacity of the active brush color with
+        {/* Soft tinted fill — 25% opacity of the active brush color with
             `plus-darker` blend so it reads as a gentle darkening of the
             paper instead of a flat overlay. No stroke, no border — the
             cursor itself is the OS crosshair (set on the parent target
@@ -192,7 +192,7 @@ export function PaintBrush({
           ref={brushFillRef}
           className="absolute inset-0 rounded-full"
           style={{
-            backgroundColor: `rgba(${brushColor.r}, ${brushColor.g}, ${brushColor.b}, 0.1)`,
+            backgroundColor: `rgba(${brushColor.r}, ${brushColor.g}, ${brushColor.b}, 0.25)`,
             mixBlendMode: "plus-darker",
           }}
         />
@@ -248,12 +248,6 @@ export function PaintBrush({
           <g className="paint-brush-ring-spin">
             <text
               fill="#391f00"
-              // Cream stroke under the dark fill via `paint-order: stroke fill`.
-              // Native SVG outline — crisper than text-shadow blur — keeps
-              // the ring legible on saturated dark washes (night phase) where
-              // a static dark fill would disappear.
-              stroke="rgba(251, 246, 234, 0.85)"
-              strokeWidth="2"
               textAnchor="middle"
               style={{
                 fontFamily:
@@ -265,7 +259,7 @@ export function PaintBrush({
               }}
             >
               <textPath href="#paint-brush-ring-path" startOffset="25%">
-                ❦ CLICK TO PAINT ❦
+                ₊˚⊹ CLICK TO PAINT ⊹˚₊
               </textPath>
             </text>
           </g>

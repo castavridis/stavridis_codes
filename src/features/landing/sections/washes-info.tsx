@@ -9,9 +9,9 @@
 // ---------------------------------------------------------------------------
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { animated, easings, useTransition } from "@react-spring/web";
 
 import Popover from "../../../components/Popover.js";
-import FadeUp from "../../../components/anim/FadeUp.js";
 import { usePaintStore } from "../../../lib/paint-store.js";
 
 export function WashesInfo(): React.ReactElement {
@@ -41,6 +41,15 @@ export function WashesInfo(): React.ReactElement {
 
   const toggle = useCallback(() => setOpen((v) => !v), []);
   const close = useCallback(() => setOpen(false), []);
+
+  // useTransition for proper fade-out on close (instant unmount was too
+  // abrupt). Keyed on `open` so it animates enter AND leave.
+  const popoverTransitions = useTransition(open, {
+    from: { opacity: 0, y: 6 },
+    enter: { opacity: 1, y: 0 },
+    leave: { opacity: 0, y: 6 },
+    config: { duration: 240, easing: easings.easeOutCubic },
+  });
 
   return (
     // `data-paint-skip` keeps paint-brush from spawning a wash when the
@@ -80,9 +89,15 @@ export function WashesInfo(): React.ReactElement {
         </svg>
       </button>
 
-      {open ? (
-        <div className="absolute bottom-[32px] left-0">
-          <FadeUp from={6} duration={240}>
+      {popoverTransitions((style, isOpen) =>
+        isOpen ? (
+          <animated.div
+            className="absolute bottom-[32px] left-0"
+            style={{
+              opacity: style.opacity,
+              transform: style.y.to((v) => `translateY(${v}px)`),
+            }}
+          >
             <Popover title="Powered by Washes.js" onClose={close}>
               <p className="mb-0 leading-[20px]">
                 Washes.js is an in-browser watercolor library based primarily
@@ -97,9 +112,9 @@ export function WashesInfo(): React.ReactElement {
                 during my time at the Recurse Center.
               </p>
             </Popover>
-          </FadeUp>
-        </div>
-      ) : null}
+          </animated.div>
+        ) : null,
+      )}
     </div>
   );
 }

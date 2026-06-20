@@ -72,11 +72,12 @@ export function WashesCanvas({
   // unobstructed. The noise layer is intentionally NOT animated — paper
   // grain reads as a baseline texture in both modes (PR 4c-paint-4 split).
   //
-  // Faster spring (tension 280, friction 28) and a heavier resting
-  // opacity (0.95) so the fade is unmistakable on touch / on first
-  // paint stroke.
+  // Fast spring (tension 280, friction 28) for the paint-mode fade.
+  // Resting opacity is exactly 1.0 — at 0.95 the linear gradient never
+  // fully reaches solid cream at the wash bottom, leaving a faint
+  // visible line against the 100%-cream page background.
   const overlaysSpring = useSpring({
-    opacity: paintActive ? 0 : 0.95,
+    opacity: paintActive ? 0 : 1,
     config: { tension: 280, friction: 28 },
   });
 

@@ -59,26 +59,50 @@ type LandingPageProps = {
 // 2232:32188 and 4003:21284). A short close-delay lets the cursor cross the
 // gap between the phrase and the popover without dismissing prematurely.
 type HoverPopoverProps = {
-  title: string;
-  content: ReactNode;
+  // The popover JSX to render in the portal. Each phrase can supply its
+  // own custom popover layout (e.g. the Bailey popover renders a photo,
+  // the Design Engineer popover uses the standard text Popover chrome).
+  popover: ReactNode;
   children: ReactNode;
 };
 
+// Bailey popover — Figma node 4003:21309. Differs from the standard
+// Popover chrome: narrower (228px), 12px padding, no body text, just a
+// title + a photo of Bailey. Used by the "big golden retriever energy"
+// hover affordance in the hero copy.
+function BaileyPopover(): React.ReactElement {
+  return (
+    <div className="flex w-[228px] flex-col items-start gap-[10px] rounded-[8px] bg-white p-[12px]">
+      <p className="font-kyoto text-[24px] leading-[32px] font-medium italic text-black">
+        My role model,
+        <br aria-hidden />
+        Bailey
+      </p>
+      <div className="aspect-[500/438] w-full overflow-hidden rounded-[2.128px]">
+        <img
+          src="/images/bailey.png"
+          alt="Bailey, a golden retriever"
+          className="size-full object-cover"
+        />
+      </div>
+    </div>
+  );
+}
+
 // Small companion to HoverPopover. Drives the portal mount/unmount via
-// useTransition so the popover fades + slides in AND OUT — instant unmount
-// is too abrupt for a hover affordance.
+// useTransition (keyed on `open`, NOT on `coords`) so the popover fades
+// + slides in and out smoothly, AND so cursor-tracked coords updates
+// don't re-fire the spring on every pointermove.
 function PopoverPortal({
   open,
   coords,
-  title,
-  content,
+  children,
 }: {
   open: boolean;
   coords: { bottom: number; left: number } | null;
-  title: string;
-  content: ReactNode;
+  children: ReactNode;
 }): React.ReactElement {
-  const transitions = useTransition(open && coords ? coords : null, {
+  const transitions = useTransition(open, {
     from: { opacity: 0, y: 6 },
     enter: { opacity: 1, y: 0 },
     leave: { opacity: 0, y: 6 },
@@ -86,8 +110,8 @@ function PopoverPortal({
   });
   return (
     <>
-      {transitions((style, c) =>
-        c
+      {transitions((style, isOpen) =>
+        isOpen && coords
           ? createPortal(
               // `translateX(-50%)` centers on the cursor. `pointer-events:
               // none` so the cursor moving over the popover itself doesn't
@@ -95,15 +119,15 @@ function PopoverPortal({
               <animated.div
                 className="fixed z-50 pointer-events-none"
                 style={{
-                  bottom: c.bottom,
-                  left: c.left,
+                  bottom: coords.bottom,
+                  left: coords.left,
                   opacity: style.opacity,
                   transform: style.y.to(
                     (v) => `translateX(-50%) translateY(${v}px)`,
                   ),
                 }}
               >
-                <Popover title={title}>{content}</Popover>
+                {children}
               </animated.div>,
               document.body,
             )
@@ -114,8 +138,7 @@ function PopoverPortal({
 }
 
 function HoverPopover({
-  title,
-  content,
+  popover,
   children,
 }: HoverPopoverProps): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -213,12 +236,9 @@ function HoverPopover({
       onBlur={scheduleClose}
     >
       {children}
-      <PopoverPortal
-        open={open}
-        coords={coords}
-        title={title}
-        content={content}
-      />
+      <PopoverPortal open={open} coords={coords}>
+        {popover}
+      </PopoverPortal>
     </span>
   );
 }
@@ -443,7 +463,7 @@ export default function LandingPage({
           90.58%). The whole shell is 1136×584.169 with 12px rounded top
           corners; everything inside is absolutely positioned.
           ------------------------------------------------------------------- */}
-      <section className="relative w-full max-w-[1136px]" style={{ height: "calc(584.169px - 24px)" }}>
+      <section className="relative w-full max-w-[1136px]" style={{ height: "660px" }}>
         {/* Washes Canvas region — Figma node 4002:21177. Takes the top
             66.93% of the shell (inset bottom = 33.07%). Owns the wash
             WebGL host, the Connecting Gradients overlays, the Header
@@ -458,7 +478,7 @@ export default function LandingPage({
           // soft 10%-fill brush indicator (paint-brush.tsx) still tracks
           // the cursor for color preview; the OS crosshair gives the
           // exact pixel anchor.
-          style={{ height: "530px", cursor: "crosshair" }}
+          style={{ bottom: 0, cursor: "crosshair" }}
         >
           {/* No `scrollRef` — the outer wrapper IS the scroll target.
               PresetWidget + PaintBrush both reference `washesRef` (the
@@ -571,8 +591,12 @@ export default function LandingPage({
                 {"a "}
               </span>
               <HoverPopover
-                title="Tools I like to build with"
-                content="React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP, react-three-fiber, Figma."
+                popover={
+                  <Popover title="Tools I like to build with">
+                    React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP,
+                    react-three-fiber, Figma.
+                  </Popover>
+                }
               >
                 <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
                   Design Engineer
@@ -582,10 +606,7 @@ export default function LandingPage({
                 {" with"}
                 <br aria-hidden />
               </span>
-              <HoverPopover
-                title="My role model, Bailey"
-                content="A very good dog. Equal parts curious, enthusiastic, and warm — the energy I try to bring to the work."
-              >
+              <HoverPopover popover={<BaileyPopover />}>
                 <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
                   big golden retriever energy
                 </span>
@@ -650,14 +671,14 @@ export default function LandingPage({
       </section>
 
       {/* PresetWidget — paint-mode instance. Sits below the wash with
-          -24px margin so it overlaps the wash bottom (Figma `Landing Page
+          24px margin top so it overlaps the wash bottom (Figma `Landing Page
           – Paint 01/02`). Always rendered (vs. conditional) with animated
           max-height + opacity so paint-mode entry doesn't jump Featured
           Work below. `overflow-hidden` clips the widget while collapsed.
           No `scrollTargetRef` — clicking a bug in paint mode should only
           reset the visualization. */}
       <animated.div
-        className="-mt-[24px] flex w-full max-w-[1136px] justify-center overflow-hidden"
+        className="mt-[24px] flex w-full max-w-[1136px] justify-center"
         style={{
           opacity: paintWidgetSpring.opacity,
           maxHeight: paintWidgetSpring.maxHeight,
