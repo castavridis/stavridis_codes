@@ -66,6 +66,14 @@ export default function SheetOverlay({
         isOpen ? (
           <animated.div
             onMouseDown={handleBackdrop}
+            // `data-paint-skip` so clicks inside the sheet (project or
+            // blog content) don't trigger the landing's window-level
+            // pointerdown paint-activate handler — the wash region's
+            // bounding rect spatially overlaps the sheet even when the
+            // sheet visually covers it. PaintBrush walks up from the
+            // click target via `closest('[data-paint-skip]')` and
+            // bails when this attribute is found.
+            data-paint-skip
             style={{
               position: 'fixed',
               top: topOffset,

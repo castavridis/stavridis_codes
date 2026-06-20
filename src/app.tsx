@@ -199,7 +199,7 @@ export function App() {
       <SheetOverlay
         open={sheetOpen}
         onClose={handleCloseProject}
-        topOffset={135}
+        topOffset={134}
       >
         {renderedProjectSlug ? <ProjectSheetContent slug={renderedProjectSlug} onBack={handleCloseProject} /> : null}
       </SheetOverlay>

@@ -188,7 +188,7 @@ function ChromeRow({
         // counts as a positioned context, so the absolute gradient
         // mask below positions against this element without an
         // explicit `relative`.
-        backgroundColor: '#fbf6ea',
+        backgroundColor: 'transparent',
       }}
     >
       <div className="relative mx-auto w-full max-w-[1110px] px-[72px]">
@@ -243,7 +243,7 @@ function ChromeRow({
         className="pointer-events-none absolute left-0 right-0 top-full h-[24px]"
         style={{
           background:
-            'linear-gradient(to bottom, #fbf6ea 0%, rgba(251, 246, 234, 0) 100%)',
+            'linear-gradient(to bottom, #FFFFFF 0%, rgba(255, 255, 255, 0) 100%)',
         }}
         aria-hidden
       />
@@ -265,7 +265,7 @@ export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) 
     // case study chrome sits on. Restored after the brief experiment
     // with a transparent backdrop made the body text unreadable over
     // the wash strip showing through.
-    <div ref={anchorRef} className="min-h-full w-full bg-washes-paper">
+    <div ref={anchorRef} className="min-h-full w-full bg-white">
       <ChromeRow
         tags={front.tags}
         headline={front.headline}
