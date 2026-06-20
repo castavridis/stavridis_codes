@@ -27,6 +27,9 @@ export default function SheetOverlay({
   const transitions = useTransition(open, {
     from: { backdrop: 0, y: 100 },
     enter: { backdrop: 1, y: 0 },
+    // On leave, content slides DOWN (y → 100%) only. Opacity stays at 1
+    // throughout the slide so the sheet is fully visible as it moves —
+    // per user direction "just animate it down".
     leave: { backdrop: 0, y: 100 },
     config: { duration: 600, easing: easings.easeOutCubic },
   });

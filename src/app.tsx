@@ -82,6 +82,7 @@ export function App() {
   }, []);
 
   const setProjectOpenInStore = usePaintStore((s) => s.setProjectOpen);
+  const setPaintActiveInStore = usePaintStore((s) => s.setPaintActive);
 
   // Click-project transition chain (see tmp/click-project-transition/):
   //   Step 1 — scroll window to top + glass card fades to opacity 0.
@@ -95,10 +96,14 @@ export function App() {
   //
   // We pre-arm the store flag before the actual route change so the
   // fade starts immediately on click — without waiting for the
-  // ProjectPost lazy chunk to load.
+  // ProjectPost lazy chunk to load. If the user was painting when
+  // they clicked the card, we also close paint mode so the project
+  // sheet can slide up without contending with the paint-sheet-down
+  // animation gate (sheetOpen = projectOpen && !paintActive).
   const handleCardClick = useCallback(
     (slug: string) => {
       setProjectOpenInStore(true);
+      setPaintActiveInStore(false);
       // Scroll the window, not via scrollIntoView (same reasoning as
       // PresetWidget): the landing root has overflow-hidden, so a
       // scrollIntoView would shift content within the clip instead of
@@ -108,11 +113,36 @@ export function App() {
         navigate(routes.project.href({ slug }));
       }, PROJECT_CHAIN_STEP1_MS);
     },
-    [navigate, setProjectOpenInStore],
+    [navigate, setProjectOpenInStore, setPaintActiveInStore],
   );
 
   const projectSlug = matchProject ? projectParams?.slug ?? null : null;
   const projectOpen = projectSlug !== null;
+  const paintActive = usePaintStore((s) => s.paintActive);
+  // The project sheet is visually open ONLY when there's a project
+  // route AND paint mode is off. Entering paint mode while a project
+  // is open slides the sheet down (useTransition's leave animation)
+  // to expose the wash for painting; closing paint mode (X) slides
+  // the sheet back up. The actual route + renderedProjectSlug bridge
+  // keep the content mounted across both transitions.
+  const sheetOpen = projectOpen && !paintActive;
+
+  // Keep the most recent non-null slug rendered while the SheetOverlay
+  // is animating its close (slide down + fade out). Without this, the
+  // moment the route flips back to `/`, `projectSlug` is null and the
+  // sheet's children are unmounted instantly — so the leave animation
+  // would slide an empty box down. We bridge `projectSlug` with a
+  // delayed-null pattern: keep the prior slug rendered for the duration
+  // of the sheet's close animation (600ms + small buffer), then drop it.
+  const [renderedProjectSlug, setRenderedProjectSlug] = useState(projectSlug);
+  useEffect(() => {
+    if (projectSlug) {
+      setRenderedProjectSlug(projectSlug);
+      return;
+    }
+    const t = window.setTimeout(() => setRenderedProjectSlug(null), 700);
+    return () => window.clearTimeout(t);
+  }, [projectSlug]);
 
   // Mirror projectOpen into the paint store so downstream consumers
   // (PaintBrush, glass card, Header PaintToggle) gate themselves
@@ -167,11 +197,11 @@ export function App() {
           remaining viewport — both shapes scroll cleanly within the
           inner scroll container). */}
       <SheetOverlay
-        open={projectOpen}
+        open={sheetOpen}
         onClose={handleCloseProject}
         topOffset={135}
       >
-        {projectSlug ? <ProjectSheetContent slug={projectSlug} onBack={handleCloseProject} /> : null}
+        {renderedProjectSlug ? <ProjectSheetContent slug={renderedProjectSlug} onBack={handleCloseProject} /> : null}
       </SheetOverlay>
 
       {/* Blog sheet — full-viewport (no topOffset). The blog index/post

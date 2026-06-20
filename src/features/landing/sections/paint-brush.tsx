@@ -48,12 +48,6 @@ export function PaintBrush({
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const isPainting = usePaintStore((s) => s.isPainting);
   const brushColor = usePaintStore((s) => s.brushColor);
-  // Hide the brush + click-to-paint ring AND no-op the pointerdown
-  // latch while a project overlay is open. With Path A the landing's
-  // wash shell stays visible at the top of the viewport, so without
-  // this gate the user could see (and trigger) paint mode on the
-  // wash strip ABOVE the open project sheet.
-  const projectOpen = usePaintStore((s) => s.projectOpen);
 
   // ------------------------------------------------------------------------
   // Pointer follow + click handling. Bound to `window` so the cursor can
@@ -124,14 +118,6 @@ export function PaintBrush({
     // so the glass card fades + slides out of the way and the Header
     // swaps in the paint controls. No paintAt / spawn pipeline anymore.
     const onPointerDown = (e: PointerEvent) => {
-      // Gate at the source — while a project overlay is open the
-      // landing wash shell still receives pointer events (it's not
-      // covered), so without this guard a user could enter paint mode
-      // by clicking through the visible header strip. The store would
-      // also drop the flip via its own guard, but skipping here also
-      // avoids the `isPainting` ↔ `paintActive` race + the pointer
-      // capture / cursor side-effects.
-      if (usePaintStore.getState().projectOpen) return;
       const target = targetRef.current;
       if (!target) return;
       const rect = target.getBoundingClientRect();
@@ -179,18 +165,12 @@ export function PaintBrush({
     el.style.backgroundColor = `rgba(${brushColor.r}, ${brushColor.g}, ${brushColor.b}, 0.1)`;
   }, [brushColor]);
 
-  const showRing = washesVisible && !isPainting && !projectOpen;
+  const showRing = washesVisible && !isPainting;
 
   return (
     <div
       ref={overlayRef}
       className="pointer-events-none absolute inset-0 z-30"
-      // Hard-hide the entire brush overlay (brush disc + click-to-paint
-      // ring) while a project overlay is open. We don't unmount —
-      // keeping the listener attached means the brush snaps back into
-      // place the instant the overlay closes, no re-bind, no first-
-      // pointermove gap.
-      style={{ opacity: projectOpen ? 0 : 1 }}
       aria-hidden="true"
     >
       <div

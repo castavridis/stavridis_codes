@@ -114,18 +114,18 @@ function PopoverPortal({
       {transitions((style, isOpen) =>
         isOpen && coords
           ? createPortal(
-              // `translateX(-50%)` centers on the cursor. `pointer-events:
-              // none` so the cursor moving over the popover itself doesn't
-              // pull focus away from the phrase (popover is hint-only).
+              // Anchored at the bottom-left corner (coords from
+              // updateCoords place that corner 8px above + 8px left of
+              // the cursor). `pointer-events: none` so the cursor
+              // moving over the popover itself doesn't pull focus away
+              // from the phrase (popover is hint-only).
               <animated.div
                 className="fixed z-50 pointer-events-none"
                 style={{
                   bottom: coords.bottom,
                   left: coords.left,
                   opacity: style.opacity,
-                  transform: style.y.to(
-                    (v) => `translateX(-50%) translateY(${v}px)`,
-                  ),
+                  transform: style.y.to((v) => `translateY(${v}px)`),
                 }}
               >
                 {children}
@@ -175,14 +175,15 @@ function HoverPopover({
     }, 120);
   }, [cancelClose]);
 
-  // Position the popover 24px above the cursor; coords update on each
-  // pointermove inside the wrapper so it tracks the cursor while open.
-  // The portal renders into document.body with `bottom`-anchored fixed
-  // positioning so it sits above the pointer rather than dropping below.
+  // Position the popover so its bottom-LEFT corner sits 8px above and
+  // 8px to the left of the cursor — popover extends up + right from
+  // there. Coords update on every pointermove while open so the
+  // popover tracks the cursor smoothly (no `translateX(-50%)` — we
+  // anchor at the corner directly).
   const updateCoords = useCallback((clientX: number, clientY: number) => {
     setCoords({
-      bottom: window.innerHeight - clientY + 24,
-      left: clientX,
+      bottom: window.innerHeight - clientY + 8,
+      left: clientX - 8,
     });
   }, []);
 
@@ -203,9 +204,12 @@ function HoverPopover({
     const el = wrapperRef.current;
     if (el) {
       const r = el.getBoundingClientRect();
+      // Same anchor as cursor-positioned mode: bottom-left corner 8px
+      // above + 8px left of the wrapper's top-left. (We don't have a
+      // cursor position from a focus event so we use the wrapper rect.)
       setCoords({
-        bottom: window.innerHeight - r.top + 24,
-        left: r.left + r.width / 2,
+        bottom: window.innerHeight - r.top + 8,
+        left: r.left - 8,
       });
     }
     setOpen(true);
@@ -403,17 +407,39 @@ export default function LandingPage({
   // wash beneath — without this you couldn't paint into the lower
   // ~33% of the shell.
   const paintActive = usePaintStore((s) => s.paintActive);
+  const projectOpen = usePaintStore((s) => s.projectOpen);
   // Project-overlay state — the click-project chain pre-arms this in the
   // store before route navigation so the glass card starts fading
-  // immediately on click. The same fade animation as paint mode is
-  // reused — visually identical, but paintActive itself does NOT flip
-  // (no swatch overlay in Header, no Paint controls). See app.tsx
-  // #handleCardClick and the paint-store `projectOpen` docs.
-  const projectOpen = usePaintStore((s) => s.projectOpen);
-  const cardHidden = paintActive || projectOpen;
+  // Glass card fade/translate animates on paintActive — clicking a
+  // project card no longer fades or slides the intro. The project sheet
+  // slides up over the intro and covers it on its own; the intro stays
+  // in place underneath, undisturbed.
+  //
+  // ONE exception: closing paint mode while a project is open. In
+  // paint+project state, the project sheet is "off-screen" (slid down)
+  // and the wash is exposed. When the user clicks X to close paint,
+  // the sheet slides back UP over the intro. If the card un-fades
+  // immediately, the user sees it un-fade through the rising sheet's
+  // not-yet-covered area. So we delay the un-fade by ~650ms (sheet
+  // animation = 600ms + small buffer) to wait until the sheet has
+  // fully arrived. The card un-fade then happens beneath the sheet's
+  // cover — invisible to the user, no visual conflict.
+  const prevPaintActiveRef = useRef(paintActive);
+  const [delayedShowCard, setDelayedShowCard] = useState(true);
+  useEffect(() => {
+    const wasInPaint = prevPaintActiveRef.current;
+    prevPaintActiveRef.current = paintActive;
+    if (!paintActive && projectOpen && wasInPaint) {
+      setDelayedShowCard(false);
+      const t = window.setTimeout(() => setDelayedShowCard(true), 650);
+      return () => window.clearTimeout(t);
+    }
+    setDelayedShowCard(true);
+  }, [paintActive, projectOpen]);
+
   const glassCardSpring = useSpring({
-    opacity: cardHidden ? 0 : 1,
-    y: cardHidden ? 64 : 0,
+    opacity: paintActive || !delayedShowCard ? 0 : 1,
+    y: paintActive ? 64 : 0,
     config: { tension: 220, friction: 32 },
   });
 

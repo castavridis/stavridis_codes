@@ -281,7 +281,7 @@ export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) 
             FrontMatter source-of-truth without a second Close
             button). */}
         <div className="relative mx-auto w-full max-w-[1104px]">
-          <div className="pt-[24px]">
+          <div className="pt-[84px]">
             <FrontMatter
               headline={front.headline}
               introduction={front.introduction}

@@ -82,22 +82,14 @@ export const usePaintStore = create<PaintState>((set) => ({
   resetVersion: 0,
   setWashesVisible: (washesVisible) => set({ washesVisible }),
   setIsPainting: (isPainting) => set({ isPainting }),
-  // Single source of truth for "paint mode is locked out". When a
-  // project overlay is open we drop paintActive flips on the floor;
-  // callers don't need to remember the rule.
-  setPaintActive: (paintActive) =>
-    set((s) => (s.projectOpen ? {} : { paintActive })),
-  setProjectOpen: (projectOpen) =>
-    set((s) =>
-      // Force-clear paint mode whenever a project opens so the wash
-      // shell at top of the overlay reads clean (no brush, no swatch
-      // overlay). When the overlay closes, paint stays off until the
-      // user opts back in — that matches the spec "paint mode is
-      // disabled while project is open".
-      projectOpen && s.paintActive
-        ? { projectOpen, paintActive: false, isPainting: false }
-        : { projectOpen },
-    ),
+  // Paint is allowed even while a project overlay is open: clicking
+  // the PaintToggle slides the project sheet down (`open` in app.tsx
+  // is gated on `!paintActive`) to expose the wash for painting. When
+  // the user closes paint, the sheet slides back up to its original
+  // position. The store doesn't gate paint state changes at all — the
+  // sheet visibility handles itself via `projectOpen && !paintActive`.
+  setPaintActive: (paintActive) => set({ paintActive }),
+  setProjectOpen: (projectOpen) => set({ projectOpen }),
   setBrushPosition: (brushPosition) => set({ brushPosition }),
   setBrushColor: (brushColor) => set({ brushColor }),
   setCurrentLocationIndex: (currentLocationIndex) =>
