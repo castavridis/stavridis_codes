@@ -54,24 +54,49 @@ export const mdxComponents = {
   OutcomeStat,
 };
 
+// Layout values are taken from the CareSignal Platform Project Detail frame
+// in Figma (file `fWYYke3w9yQdqU0j5HD4Yh`, node `2232:32241`):
+//
+//   CareSignal Platform   — 1280 × 5833.6
+//     Washes Canvas       — x=72,  y=72,  1136 × 391       (overhangs the
+//                                                          Project Detail
+//                                                          card by 16px each
+//                                                          side, mirroring
+//                                                          the landing hero)
+//     Project Detail      — x=88,  y=128, 1104 × 5065.6
+//       Front Matter      — x=80,  y=72  (relative), 944 × 408
+//       Callout (next)    — x=80,  y=552 (relative)       => 72px gap below
+//                                                          Front Matter
+//     Footer              — x=248, y=5457.6, 784 × 376    => ~264px bottom
+//                                                          between Project
+//                                                          Detail and Footer
+//
+// Page-edge horizontal padding works out to (1280 − 1136) / 2 = 72px around
+// the washes; the 1104 Project Detail card is centered inside with 16px of
+// washes overhang on each side. Inside Project Detail, the 944 content column
+// sits with an 80px gutter.
 export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) {
   return (
     <div className="min-h-full w-full bg-washes-paper">
-      <div className="relative mx-auto max-w-[1280px] px-[88px]">
-        <div className="relative">
-          <WashesCanvas className="absolute left-0 right-0 top-0 mx-auto h-[391px] w-[1104px] rounded-tl-[12px] rounded-tr-[12px] bg-gradient-to-b from-[#fbf6ea] to-transparent" />
-          <div className="relative pt-[128px] pb-[64px]">
-            <div className="mx-auto w-[944px]">
-              <FrontMatter
-                headline={front.headline}
-                introduction={front.introduction}
-                tags={front.tags}
-                onClose={onClose}
-              />
-            </div>
-          </div>
+      <div className="relative mx-auto w-full max-w-[1280px] px-[72px]">
+        {/* Washes header band: full 1136 width, overhanging the Project
+            Detail card by 16px on each side. */}
+        <div className="relative pt-[72px]">
+          <WashesCanvas className="h-[391px] w-[1136px] rounded-tl-[12px] rounded-tr-[12px] bg-gradient-to-b from-[#fbf6ea] to-transparent" />
         </div>
-        <div className="relative mx-auto w-[944px] pb-[128px]">{children}</div>
+        {/* Project Detail card content: 1104 wide, 16px narrower than the
+            washes on each side. FrontMatter sits 72px below the washes. */}
+        <div className="relative mx-auto w-full max-w-[1104px] px-[80px]">
+          <div className="pt-[72px]">
+            <FrontMatter
+              headline={front.headline}
+              introduction={front.introduction}
+              tags={front.tags}
+              onClose={onClose}
+            />
+          </div>
+          <div className="pt-[72px] pb-[264px]">{children}</div>
+        </div>
       </div>
     </div>
   );

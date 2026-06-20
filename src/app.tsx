@@ -125,19 +125,28 @@ export function App() {
   );
 }
 
-// Wraps ProjectPost with a Suspense boundary and the cream-paper backdrop the
-// sheet slides up over. Background color matches the project so there's no
-// flash on lazy load.
+// Wraps ProjectPost with a Suspense boundary. The backdrop branches on the
+// project shape:
+//
+// - v1 posts (legacy chrome — gradient header + prose column) assume a full
+//   cream surface as their chrome, so we paint the cream backdrop here so
+//   there's no flash on lazy load.
+// - v2 posts (frontmatter has `headline` + `introduction`, rendered through
+//   MDXLayout) own their own in-page cream-paper background. The sheet
+//   backdrop here is left transparent so the landing wash beneath the sheet
+//   stays visible as the project slides up.
 function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => void }) {
   const project = getProject(slug);
-  const background = project?.background ?? '#fbf6ea';
+  // Mirrors `isV2Project` in project-post.tsx.
+  const isV2 = Boolean(project?.headline && project?.introduction);
+  const backgroundColor = isV2 ? 'transparent' : (project?.background ?? '#fbf6ea');
   return (
     <div
       style={{
         position: 'absolute',
         inset: 0,
         overflow: 'auto',
-        backgroundColor: background,
+        backgroundColor,
       }}
     >
       <Suspense fallback={<RoutePending />}>
