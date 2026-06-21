@@ -3,6 +3,7 @@ import {
 	MDXColumn,
 } from '../../src/components/mdx/Layout';
 import Callout from '../../src/features/projects/components/Callout';
+import Section from '../../src/features/projects/components/Section';
 
 export function Intro () {
 	return (
@@ -56,3 +57,60 @@ export function Situation () {
 		</div>
 	)
 }
+
+export function Solution () {}
+
+// ---------------------------------------------------------------------------
+// Design Intro — Figma section `Section: Design Intro` (node 2232:32309).
+// Layout: 349w title block (left) + 560w illustration slot (right) inside
+// the 944w content column. The illustration itself ships as an exported
+// Figma asset; this renders a placeholder at the right size with the
+// section's tinted paper background until the asset lands.
+// ---------------------------------------------------------------------------
+export function DesignIntro() {
+	return (
+		<Section>
+			<div className="flex w-full items-start gap-[35px]">
+				<div className="flex w-[349px] shrink-0 flex-col gap-[24px] pt-[104px]">
+					<h2 className="type-headline-small m-0 text-confetti-black">
+						We designed a low-burden way to offer clinicians a snapshot of their patient panel
+					</h2>
+					<p className="type-copy m-0 text-confetti-black/80">
+						Working with clinicians and buyers we designed a system aligned with value-based care and to signal urgent and emergent needs at-a-glance.
+					</p>
+				</div>
+
+				<IllustrationPlaceholder
+					name="Triage Statuses Illustration"
+					width={560}
+					height={424}
+					background="#f0eeeb"
+				/>
+			</div>
+		</Section>
+	);
+}
+
+function IllustrationPlaceholder({
+	name,
+	width,
+	height,
+	background,
+}: {
+	name: string;
+	width: number;
+	height: number;
+	background: string;
+}) {
+	return (
+		<div
+			className="flex shrink-0 items-center justify-center overflow-hidden rounded-[12px] border border-dashed border-confetti-black/25"
+			style={{ width, height, background }}
+		>
+			<span className="type-tag uppercase tracking-[0.08em] text-confetti-black/60">
+				Illustration · {name}
+			</span>
+		</div>
+	);
+}
+
