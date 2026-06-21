@@ -14,6 +14,7 @@ export const TEXT_VARIANTS = [
   "headline-italic",
   "headline-small",
   "headline-small-italic",
+  "headline-meta",
   "logotype",
   "nav",
   "tag",

@@ -66,7 +66,7 @@
    appears in JSX.
    ------------------------------------------------------------------------- */
 
-@source inline('type-{headline,headline-italic,headline-small,headline-small-italic,logotype,nav,tag,copy-large,copy,eyebrow,callout-title,callout-body,callout-meta,outcome}');
+@source inline('type-{headline,headline-italic,headline-small,headline-small-italic,headline-meta,logotype,nav,tag,copy-large,copy,eyebrow,callout-title,callout-body,callout-meta,outcome}');
 
 @utility type-headline {
   font-family: var(--font-kyoto);
@@ -93,6 +93,12 @@
   font-weight: 500;
   font-size: 24px;
   line-height: 32px;
+}
+@utility type-headline-meta {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
 }
 @utility type-logotype {
   font-family: var(--font-kyoto);

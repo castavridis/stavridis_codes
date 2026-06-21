@@ -213,7 +213,7 @@ function ChromeRow({
                   paragraph. Single-line, ellipsis on overflow, color
                   #391F00 per frame 08. */}
               <p
-                className="font-kyoto absolute inset-0 m-0 truncate text-[14px] leading-[20px] font-medium"
+                className="type-headline-meta absolute inset-0 m-0 truncate"
                 style={{
                   color: '#391F00',
                   opacity: titleOpacity,
