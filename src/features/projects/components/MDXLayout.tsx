@@ -181,14 +181,13 @@ function ChromeRow({
     // body content; the gradient mask below extends downward from the
     // bottom edge of this row across the full overlay width.
     <div
-      className="sticky top-0 z-10"
+      className="sticky top-0 z-10 bg-white"
       style={{
         // Cream backdrop so content that scrolls UNDER the row reads
-        // cleanly. Matches the page bg-washes-paper. `position: sticky`
+        // cleanly. `position: sticky`
         // counts as a positioned context, so the absolute gradient
         // mask below positions against this element without an
         // explicit `relative`.
-        backgroundColor: 'transparent',
       }}
     >
       <div className="relative mx-auto w-full max-w-[1110px] px-[72px]">

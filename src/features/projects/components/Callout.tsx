@@ -1,7 +1,7 @@
 type CalloutProps = {
   title?: string;
-  content: string;
-  attribution?: string;
+  content: React.ReactNode;
+  attribution?: React.ReactNode;
 };
 
 export default function Callout({ title, content, attribution }: CalloutProps) {
@@ -17,7 +17,7 @@ export default function Callout({ title, content, attribution }: CalloutProps) {
           {content}
         </p>
         {attribution ? (
-          <p className="font-mono m-0 w-full text-[14px] font-bold leading-[28px]">
+          <p className="font-mono m-0 w-full text-[14px] leading-[28px]">
             {attribution}
           </p>
         ) : null}
