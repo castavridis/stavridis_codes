@@ -1,6 +1,7 @@
 import { Children, isValidElement, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { animated, useSpring } from '@react-spring/web';
 import Text from '../../../components/Text.js';
 
 type SlideProps = {
@@ -29,6 +30,14 @@ export default function Slides({ children }: SlidesProps) {
   const prev = () => setIndex((i) => (i - 1 + slides.length) % slides.length);
   const next = () => setIndex((i) => (i + 1) % slides.length);
 
+  // Carousel track translates horizontally to expose the active slide. Each
+  // slide is laid out side-by-side inside the track at the viewport's width,
+  // so translating by `-index * 100%` snaps it into view.
+  const trackSpring = useSpring({
+    x: -index * 100,
+    config: { tension: 220, friction: 28 },
+  });
+
   if (!active) return null;
 
   return (
@@ -40,7 +49,18 @@ export default function Slides({ children }: SlidesProps) {
             <span className="size-[13px] rounded-full bg-[#febc2e]" />
             <span className="size-[13px] rounded-full bg-[#28c840]" />
           </div>
-          <div>{active.props.children}</div>
+          <div className="overflow-hidden">
+            <animated.div
+              className="flex"
+              style={{ transform: trackSpring.x.to((x) => `translate3d(${x}%, 0, 0)`) }}
+            >
+              {slides.map((slide, i) => (
+                <div key={i} className="w-full shrink-0">
+                  {slide.props.children}
+                </div>
+              ))}
+            </animated.div>
+          </div>
         </div>
 
         {hasMultiple ? (
