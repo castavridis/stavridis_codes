@@ -5,6 +5,7 @@ import {
 import Callout from '../../src/features/projects/components/Callout';
 import OutcomeStat from '../../src/features/projects/components/OutcomeStat';
 import Section from '../../src/features/projects/components/Section';
+import Slides, { Slide } from '../../src/features/projects/components/Slides';
 import WorkflowToggle from '../../src/features/projects/components/WorkflowToggle';
 
 export function Intro () {
@@ -50,8 +51,9 @@ export function DesignIntro() {
 					</p>
 				</div>
 
-				<IllustrationPlaceholder
-					name="Triage Statuses Illustration"
+				<Illustration
+					src="/images/projects/caresignal-platform/Triage%20Statuses%20Illustration.png"
+					alt="Three triage status pills — High-risk, Medium-risk, Low-risk — connected by alert bell badges along a vertical reference grid."
 					width={560}
 					height={424}
 					background="#f0eeeb"
@@ -90,6 +92,35 @@ function IllustrationPlaceholder({
 	);
 }
 
+// Renders an exported Figma illustration inside the same sized + tinted
+// slot the placeholder uses. Use `object-contain` so the image is bounded
+// by the slot regardless of its native aspect; the slot's `background`
+// shows around any letterboxed area, which matches the Figma frame.
+function Illustration({
+	src,
+	alt,
+	width,
+	height,
+	background,
+	className,
+}: {
+	src: string;
+	alt: string;
+	width: number | string;
+	height: number;
+	background: string;
+	className?: string;
+}) {
+	return (
+		<div
+			className={`shrink-0 overflow-hidden rounded-[12px] ${className ?? ''}`}
+			style={{ width, height, background }}
+		>
+			<img src={src} alt={alt} className="block size-full object-contain" />
+		</div>
+	);
+}
+
 // ---------------------------------------------------------------------------
 // Monitors — Figma section `Section: Monitors` (node 2232:32291).
 // Layout: title + blurb stacked at top, 944×409 monitors illustration slot
@@ -110,8 +141,9 @@ export function Monitors() {
 					</p>
 				</div>
 
-				<IllustrationPlaceholder
-					name="Sample Monitors"
+				<Illustration
+					src="/images/projects/caresignal-platform/Monitors.png"
+					alt="Two Dell monitors side-by-side. The left monitor shows Epic and a spreadsheet; the right shows Microsoft Outlook and Teams."
 					width="100%"
 					height={409}
 					background="#fbf6ea"
@@ -136,22 +168,70 @@ export function KeyObjects() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
-				<IllustrationPlaceholder
-					name="Alerts Illustration"
+				<Illustration
+					src="/images/projects/caresignal-platform/Alert.png"
+					alt="A diagonal stack of patient alert flags, each showing time-since, patient name, vital sign, and resolve / snooze controls."
 					width="100%"
 					height={504}
 					background="#191716"
-					dark
 				/>
-				<IllustrationPlaceholder
-					name="Patients Illustration"
+				<Illustration
+					src="/images/projects/caresignal-platform/Patients.png"
+					alt="A list of patient rows over a dark background — Patient Banner cards stacked with optional Program Banner sub-rows for high-priority patients."
 					width="100%"
 					height={484}
 					background="#191716"
-					dark
 				/>
 			</div>
 		</Section>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Screenshots — Figma section `Section: Screenshots` (node 2232:32360).
+// A Slides carousel showing dashboard captures. Each Slide's children are
+// wrapped in a fixed-aspect viewport so cycling between slides of different
+// natural image dimensions doesn't cause the carousel to jump in height.
+// Hub and Spoke is a placeholder slide — real screenshots will land later.
+// ---------------------------------------------------------------------------
+export function Screenshots() {
+	return (
+		<Section>
+			<Slides>
+				<Slide
+					caption={
+						<>
+							<span className="font-semibold">Patient summaries</span> give providers a more holistic perspective about their patients than an Alert can provide, and support them in prioritizing outreach.
+						</>
+					}
+				>
+					<SlideImage
+						src="/images/projects/caresignal-platform/Task-Based%20Dashboard.png"
+						alt="The task-based dashboard listing patient alerts and summaries with high-risk / medium-risk / low-risk badges and snooze / resolve actions."
+					/>
+				</Slide>
+				<Slide
+					caption={
+						<>
+							<span className="font-semibold">Hub and Spoke</span> — placeholder slide, real capture coming later.
+						</>
+					}
+				>
+					<SlideImage
+						src="/images/projects/caresignal-platform/Hub%20and%20Spoke.png"
+						alt="A care-team diagram showing one assistant routing patients to multiple nurses in a hub-and-spoke configuration."
+					/>
+				</Slide>
+			</Slides>
+		</Section>
+	);
+}
+
+function SlideImage({ src, alt }: { src: string; alt: string }) {
+	return (
+		<div className="aspect-[770/463] w-full bg-white">
+			<img src={src} alt={alt} className="block size-full object-contain" />
+		</div>
 	);
 }
 
