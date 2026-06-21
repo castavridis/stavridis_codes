@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import Button from '../../components/Button.js';
 import { routes } from '../../routes.js';
-import { formatPostDate, posts, readingTimeForPost, type Post } from './posts.js';
+import { formatPostDate, isoPostDate, posts, readingTimeForPost, type Post } from './posts.js';
 
 // Blog index — list of posts on /blog. Visual language matches the landing
 // page's Featured Work grid: cream-paper background, Funnel Sans 24/32 for
@@ -58,6 +58,7 @@ export function BlogIndex() {
 function PostListItem({ post, showDivider }: { post: Post; showDivider: boolean }) {
   const dek = post.dek ?? post.summary;
   const readingTime = readingTimeForPost(post);
+  const isDraft = post.status !== 'published';
 
   return (
     <li
@@ -65,10 +66,15 @@ function PostListItem({ post, showDivider }: { post: Post; showDivider: boolean 
     >
       <Link
         href={routes.blogPost.href({ slug: post.slug })}
-        className="group flex w-full flex-col gap-[12px] py-[32px]"
+        className={`group flex w-full flex-col gap-[12px] py-[32px] ${isDraft ? 'opacity-75' : ''}`}
       >
+        {isDraft ? (
+          <span className="type-tag self-start rounded-full border border-confetti-black/40 px-[10px] py-[1px] uppercase tracking-[0.08em] text-confetti-black/80">
+            Draft
+          </span>
+        ) : null}
         <p className="font-mono text-[12px] leading-[20px] text-confetti-black opacity-50">
-          <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+          <time dateTime={isoPostDate(post.date)}>{formatPostDate(post.date)}</time>
           <span className="px-[8px]">·</span>
           <span>{readingTime}</span>
           {post.tags ? (

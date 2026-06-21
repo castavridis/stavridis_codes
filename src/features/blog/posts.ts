@@ -2,7 +2,10 @@ import type { MDXContent } from 'mdx/types';
 
 export type PostFrontmatter = {
   title: string;
-  date: string;
+  // YAML parses zero-padded ISO dates (`2026-05-12`) as Date objects under
+  // the default schema, while non-padded dates (`2026-6-21`) stay strings.
+  // Accept both shapes; `parseDate` below normalizes them.
+  date: string | Date;
   summary: string;
   // Optional v2 fields. `dek` is a longer subtitle shown beneath the title in
   // the post layout; falls back to `summary` when absent so legacy posts still
@@ -11,9 +14,10 @@ export type PostFrontmatter = {
   // Engineering").
   dek?: string;
   tags?: string;
-  // `status: 'draft'` hides the post in production; missing/`'published'`
-  // ships it. Drafts remain visible in dev so they can be previewed at the
-  // local URL.
+  // Production visibility is opt-in: only posts with `status: 'published'`
+  // ship. Anything else (missing field, `'draft'`, or any unrecognized
+  // value) is hidden in prod. Dev still surfaces everything so WIPs can be
+  // previewed at the local URL.
   status?: 'draft' | 'published';
 };
 
@@ -55,17 +59,38 @@ export const posts: Post[] = Object.entries(postFrontmatterModules)
       return loadComponent();
     },
   }))
-  .filter((post) => import.meta.env.DEV || post.status !== 'draft')
-  .sort((first, second) => Date.parse(second.date) - Date.parse(first.date));
+  .filter((post) => import.meta.env.DEV || post.status === 'published')
+  .sort((first, second) => parseDate(second.date).getTime() - parseDate(first.date).getTime());
 
 export function getPost(slug: string) {
   return posts.find((post) => post.slug === slug);
 }
 
-export function formatPostDate(date: string) {
-  return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-  }).format(new Date(`${date}T00:00:00`));
+// Normalize a frontmatter date into a Date object. Accepts Date instances
+// (YAML's default-schema timestamp), zero-padded ISO strings (`2026-05-12`),
+// and loose `YYYY-M-D` strings — Safari rejects the loose form via the
+// Date string constructor, so we parse the parts manually as a safety net.
+function parseDate(date: string | Date): Date {
+  if (date instanceof Date) return date;
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date);
+  if (match) {
+    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  }
+  return new Date(date);
+}
+
+export function formatPostDate(date: string | Date): string {
+  const d = parseDate(date);
+  if (Number.isNaN(d.getTime())) return typeof date === 'string' ? date : '';
+  return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(d);
+}
+
+// ISO-8601 string suitable for a `<time dateTime="…">` attribute. Falls back
+// to the original string when the date can't be parsed.
+export function isoPostDate(date: string | Date): string {
+  const d = parseDate(date);
+  if (Number.isNaN(d.getTime())) return typeof date === 'string' ? date : '';
+  return d.toISOString().slice(0, 10);
 }
 
 // Estimate reading time from the raw MDX body. Strips frontmatter, code

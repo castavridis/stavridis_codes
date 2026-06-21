@@ -232,11 +232,13 @@ export function App() {
         {renderedProjectSlug ? <ProjectSheetContent slug={renderedProjectSlug} onBack={handleCloseProject} /> : null}
       </SheetOverlay>
 
-      {/* Blog sheet — full-viewport (no topOffset). The blog index/post
-          covers the full landing including the wash shell, per the spec
-          non-goal "don't change SheetOverlay semantics for the BLOG
-          overlay". */}
-      <SheetOverlay open={blogOpen} onClose={handleCloseBlog}>
+      {/* Blog sheet — Path A, same as the project sheet: opens BELOW the
+          landing wash shell so the wash header stays visible at the top of
+          the viewport while a post or the index is open. BlogIndex and
+          BlogLayout both paint their own washes-paper backgrounds, so the
+          sheet backdrop stays transparent and the landing wash bleeds
+          through during the slide-up animation. */}
+      <SheetOverlay open={blogOpen} onClose={handleCloseBlog} topOffset={70}>
         <BlogSheetContent
           postSlug={blogPostSlug}
           onBackToIndex={handleCloseBlogPost}
@@ -279,10 +281,12 @@ function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => voi
   );
 }
 
-// Mirrors ProjectSheetContent but for the blog: cream-paper backdrop, lazy
-// boundary around BlogIndex/BlogPost. `postSlug === null` renders the index
-// (/blog); a slug renders the single post (/blog/:slug). The sheet is opened
-// by the parent for either route, so this just branches on payload.
+// Mirrors ProjectSheetContent (v2) for the blog: transparent sheet backdrop
+// so the landing wash shows through the slide-up. BlogIndex and BlogLayout
+// own their own washes-paper backgrounds, so we don't need to paint one
+// here. `postSlug === null` renders the index (/blog); a slug renders the
+// single post (/blog/:slug). The sheet is opened by the parent for either
+// route, so this just branches on payload.
 function BlogSheetContent({
   postSlug,
   onBackToIndex,
@@ -296,7 +300,7 @@ function BlogSheetContent({
         position: 'absolute',
         inset: 0,
         overflow: 'auto',
-        backgroundColor: '#fbf6ea',
+        backgroundColor: 'transparent',
       }}
     >
       <Suspense fallback={<RoutePending />}>
