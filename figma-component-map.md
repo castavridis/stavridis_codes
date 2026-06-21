@@ -17,6 +17,7 @@ main table once a React equivalent ships.
 | Outcome stat    | `OutcomeStat`     | `src/features/projects/components/OutcomeStat.tsx`    | `stat`, `caption`                            |
 | Front Matter    | `BlogFrontMatter` | `src/features/blog/components/BlogFrontMatter.tsx`    | `title`, `dek`, `date`, `readingTime`, `tags`, `onBack` |
 | (any text node) | `<Text>`          | `src/components/Text.tsx`                             | `variant` — one of the `type-*` utilities in `globals.css` |
+| Slide           | `<Slides>` + `<Slide>` | `src/features/projects/components/Slides.tsx`    | `<Slide caption={...}>{content}</Slide>` inside `<Slides>`; carousel with prev/next |
 
 ## Unmapped
 
@@ -34,7 +35,6 @@ When implementing a case study that uses them, decide per-instance:
 | Patient Banner    | Inside Patient Object                         | Sub-component of Patient Object.                                   |
 | Program Banner    | Inside Patient Object slot                    | Sub-component of Patient Object.                                   |
 | Side Navigation   | Screenshots (dashboard mockup)                | Single icon row, repeated. Likely too small to extract.            |
-| Slide             | Screenshots                                   | Carousel container — strong candidate for extraction.              |
 | Best in KLAS logo | Outcomes                                      | Award badge. Probably 1–2 usages; bespoke is fine.                 |
 
 ## Process notes for Claude
