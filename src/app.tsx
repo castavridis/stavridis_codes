@@ -36,6 +36,16 @@ const BlogPost = lazy(() =>
   import('./features/blog/index.js').then((m) => ({ default: m.BlogPost })),
 );
 
+// Sandbox routes — dev-only. `import.meta.env.DEV` is statically replaced by
+// Vite (true in dev, false in prod), so the dynamic imports below dead-
+// code-eliminate from the production bundle.
+const SlidesSandbox = import.meta.env.DEV
+  ? lazy(() => import('./sandbox/slides-sandbox.js'))
+  : undefined;
+const WorkflowSandbox = import.meta.env.DEV
+  ? lazy(() => import('./sandbox/workflow-sandbox.js'))
+  : undefined;
+
 
 export function App() {
   const [, navigate] = useLocation();
@@ -43,6 +53,8 @@ export function App() {
   const [matchProject, projectParams] = useRoute(routes.project.path);
   const [matchBlogPost, blogPostParams] = useRoute(routes.blogPost.path);
   const [matchBlogIndex] = useRoute(routes.blogIndex.path);
+  const [matchSandboxSlides] = useRoute('/sandbox/slides');
+  const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
 
   // Route-matched config (visitor is on /for/:company right now).
   const routeCompany: CompanyConfig | null = matchForCompany && params?.company
@@ -170,6 +182,22 @@ export function App() {
   const handleCloseBlogPost = useCallback(() => {
     navigate(routes.blogIndex.href());
   }, [navigate]);
+
+  if (import.meta.env.DEV && matchSandboxSlides && SlidesSandbox) {
+    return (
+      <Suspense fallback={<RoutePending />}>
+        <SlidesSandbox />
+      </Suspense>
+    );
+  }
+
+  if (import.meta.env.DEV && matchSandboxWorkflow && WorkflowSandbox) {
+    return (
+      <Suspense fallback={<RoutePending />}>
+        <WorkflowSandbox />
+      </Suspense>
+    );
+  }
 
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
