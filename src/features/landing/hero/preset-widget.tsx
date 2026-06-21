@@ -34,7 +34,7 @@ function DisplayBug({
   children: React.ReactNode;
 }): React.ReactElement {
   return (
-    <span className="bg-confetti-black text-caresignal-white inline-flex items-center rounded-[4px] px-[8px]">
+    <span className="ml-[6px] bg-caresignal-white text-confetti-black inline-flex">
       {children}
     </span>
   );
@@ -118,8 +118,8 @@ export function PresetWidget({
         isMobile ? "flex-col gap-[6px]" : "flex-row flex-nowrap gap-[6px] whitespace-nowrap"
       }`}
     >
-      <div className="flex items-center gap-[6px] whitespace-nowrap">
-        <span className={textClass}>Washes based on: </span>
+      <div className="flex items-center gap-[0px] whitespace-nowrap">
+        <span className={textClass}>Visualization above based on </span>
         <PresetBug
           onClick={wrapHandler(onLocation)}
           label={`Change location (currently ${location.city})`}
@@ -130,7 +130,7 @@ export function PresetWidget({
       </div>
 
       {f ? (
-        <div className="flex items-center gap-[6px] whitespace-nowrap">
+        <div className="flex items-center whitespace-nowrap">
           <span className={textClass}>At</span>
           <PresetBug
             onClick={wrapHandler(onTime)}
@@ -148,7 +148,7 @@ export function PresetWidget({
           <span className={textClass}>.</span>
         </div>
       ) : (
-        <div className="flex items-center gap-[6px] whitespace-nowrap">
+        <div className="flex items-center whitespace-nowrap">
           <span className={textClass}>It’s currently</span>
           <PresetBug
             onClick={wrapHandler(onTime)}
@@ -184,7 +184,7 @@ function PresetBug({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="bg-confetti-black text-caresignal-white font-mono inline-flex items-center rounded-[4px] px-[8px] text-[12px] leading-[24px] transition-transform hover:-translate-y-[1px]"
+      className="ml-[6px] bg-confetti-black text-caresignal-white font-mono inline-flex items-center rounded-[4px] px-[8px] text-[12px] leading-[24px] transition-transform hover:-translate-y-[2px]"
     >
       {children}
     </button>

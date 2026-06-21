@@ -82,7 +82,7 @@ export default function SheetOverlay({
               bottom: 0,
               zIndex: 50,
             }}
-            className="max-w-[1110px] m-auto overflow-hidden rounded-xl"
+            className="max-w-[1104px] m-auto overflow-hidden rounded-xl"
           >
             <animated.div
               style={{

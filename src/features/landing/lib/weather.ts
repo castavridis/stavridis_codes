@@ -26,7 +26,7 @@ export type LocationInfo = {
 export const LOCATIONS: LocationInfo[] = [
   {
     city: "Saint Louis, MO",
-    phrase: "is where I’m based.",
+    phrase: ", where I’m based.",
     lat: 38.627,
     lon: -90.199,
     fallbackTemp: 72,
@@ -35,7 +35,7 @@ export const LOCATIONS: LocationInfo[] = [
   },
   {
     city: "Prescott, AZ",
-    phrase: "is where I grew up.",
+    phrase: ", where I grew up.",
     lat: 34.54,
     lon: -112.468,
     fallbackTemp: 64,
@@ -44,7 +44,7 @@ export const LOCATIONS: LocationInfo[] = [
   },
   {
     city: "Osaka, Japan",
-    phrase: "is where my heart is.",
+    phrase: ", where my heart is.",
     lat: 34.694,
     lon: 135.502,
     fallbackTemp: 70,
@@ -53,7 +53,7 @@ export const LOCATIONS: LocationInfo[] = [
   },
   {
     city: "Taipei, Taiwan",
-    phrase: "is where see myself retiring.",
+    phrase: ", where I see myself retiring.",
     lat: 25.033,
     lon: 121.565,
     fallbackTemp: 81,
