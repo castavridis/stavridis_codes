@@ -11,6 +11,10 @@ export type PostFrontmatter = {
   // Engineering").
   dek?: string;
   tags?: string;
+  // `status: 'draft'` hides the post in production; missing/`'published'`
+  // ships it. Drafts remain visible in dev so they can be previewed at the
+  // local URL.
+  status?: 'draft' | 'published';
 };
 
 export type Post = PostFrontmatter & {
@@ -51,6 +55,7 @@ export const posts: Post[] = Object.entries(postFrontmatterModules)
       return loadComponent();
     },
   }))
+  .filter((post) => import.meta.env.DEV || post.status !== 'draft')
   .sort((first, second) => Date.parse(second.date) - Date.parse(first.date));
 
 export function getPost(slug: string) {
