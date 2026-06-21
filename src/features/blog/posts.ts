@@ -71,7 +71,12 @@ const WORDS_PER_MINUTE = 220;
 
 function rawBodyForSlug(slug: string): string | undefined {
   const entry = Object.entries(postRawModules).find(([path]) => slugFromPath(path) === slug);
-  return entry?.[1];
+  const value = entry?.[1];
+  // `?raw` should return a string, but the MDX plugin (`@mdx-js/rollup`)
+  // intercepts `.mdx` imports regardless of the query suffix, so we can
+  // get an MDX module object instead. Guard the type so the calling code
+  // doesn't blow up — falls back to "1 min read" via the caller.
+  return typeof value === 'string' ? value : undefined;
 }
 
 export function readingTimeForPost(post: Post): string {

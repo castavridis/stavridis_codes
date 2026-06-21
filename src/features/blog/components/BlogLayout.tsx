@@ -32,54 +32,46 @@ type BlogLayoutProps = {
 // Authors can still opt into <Callout> and <OutcomeStat> by spelling them in
 // MDX — the overrides re-expose those tags here so no per-file import is
 // needed.
+// Body typography uses the site-wide type-* utilities — blog accepted a
+// refresh from its previous custom scale (40/48 h1, 32/40 h2, 18/30 p,
+// etc.) onto the canonical variant set. Margins + non-typography
+// styling (lists, borders, color) stay inline.
 export const blogMdxComponents = {
   h1: (props: ComponentProps<'h1'>) => (
-    <h1
-      {...props}
-      className="font-kyoto mt-[64px] mb-[24px] text-[40px] font-medium leading-[48px] text-confetti-black"
-    />
+    <h1 {...props} className="type-headline mt-[64px] mb-[24px] text-confetti-black" />
   ),
   h2: (props: ComponentProps<'h2'>) => (
-    <h2
-      {...props}
-      className="font-kyoto mt-[48px] mb-[16px] text-[32px] font-medium leading-[40px] text-confetti-black"
-    />
+    <h2 {...props} className="type-headline-small mt-[48px] mb-[16px] text-confetti-black" />
   ),
   h3: (props: ComponentProps<'h3'>) => (
-    <h3
-      {...props}
-      className="font-kyoto mt-[32px] mb-[12px] text-[24px] font-medium leading-[32px] text-confetti-black"
-    />
+    <h3 {...props} className="type-headline-small-italic mt-[32px] mb-[12px] text-confetti-black" />
   ),
   p: (props: ComponentProps<'p'>) => (
-    <p
-      {...props}
-      className="font-body my-[16px] text-[18px] font-normal leading-[30px] text-confetti-black"
-    />
+    <p {...props} className="type-copy-large my-[16px] text-confetti-black" />
   ),
   a: (props: ComponentProps<'a'>) => (
     <a
       {...props}
-      className="font-body text-confetti-black underline decoration-dotted decoration-from-font [text-underline-position:from-font]"
+      className="text-confetti-black underline decoration-dotted decoration-from-font [text-underline-position:from-font]"
     />
   ),
   ul: (props: ComponentProps<'ul'>) => (
     <ul
       {...props}
-      className="font-body my-[16px] list-disc pl-[24px] text-[18px] font-normal leading-[30px] text-confetti-black marker:text-confetti-black/40"
+      className="type-copy-large my-[16px] list-disc pl-[24px] text-confetti-black marker:text-confetti-black/40"
     />
   ),
   ol: (props: ComponentProps<'ol'>) => (
     <ol
       {...props}
-      className="font-body my-[16px] list-decimal pl-[24px] text-[18px] font-normal leading-[30px] text-confetti-black marker:text-confetti-black/40"
+      className="type-copy-large my-[16px] list-decimal pl-[24px] text-confetti-black marker:text-confetti-black/40"
     />
   ),
   li: (props: ComponentProps<'li'>) => <li {...props} className="my-[6px]" />,
   blockquote: (props: ComponentProps<'blockquote'>) => (
     <blockquote
       {...props}
-      className="font-kyoto my-[32px] border-l-2 border-confetti-black/30 pl-[24px] text-[22px] font-medium italic leading-[32px] text-confetti-black"
+      className="type-headline-small-italic my-[32px] border-l-2 border-confetti-black/30 pl-[24px] text-confetti-black"
     />
   ),
   code: (props: ComponentProps<'code'>) => (
