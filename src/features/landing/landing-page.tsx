@@ -620,8 +620,9 @@ export default function LandingPage({
                   Figma input. `pointer-events: auto` so the dismiss link
                   is clickable through the otherwise-transparent glass
                   card. */}
-              <p
-                className="font-kyoto text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px] text-[16px] leading-[24px] font-medium italic"
+              <Text
+                variant="eyebrow"
+                className="text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px]"
                 style={{ pointerEvents: "auto" }}
               >
                 <span>Hi {company}!</span>
@@ -634,7 +635,7 @@ export default function LandingPage({
                     dismiss
                   </button>
                 ) : null}
-              </p>
+              </Text>
             </FadeDown>
           ) : null}
           <FadeDown>
@@ -684,8 +685,10 @@ export default function LandingPage({
             // copy stays comfortably readable rather than stretching
             // across both columns. See CompanyConfig.blurb.
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] w-[385px] text-[16px] leading-[24px]">
-                <p className="mb-0">{blurb}</p>
+              <div className="text-confetti-black mt-[24px] w-[385px]">
+                <Text variant="copy" className="mb-0">
+                  {blurb}
+                </Text>
               </div>
             </FadeDown>
           ) : (
