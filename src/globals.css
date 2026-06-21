@@ -1,22 +1,22 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* PP Kyoto — Pangram Pangram Foundry. Headline + logotype face for the v2
    redesign. Only Medium and Medium Italic are used (Light + Extrabold Italic
    were dropped to reduce licensing cost). Files belong in /public/fonts/;
    until they land, browsers fall back to Young Serif / Georgia. */
 @font-face {
-  font-family: 'PP Kyoto';
+  font-family: "PP Kyoto";
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/PPKyoto-Medium.woff2') format('woff2');
+  src: url("/fonts/PPKyoto-Medium.woff2") format("woff2");
 }
 @font-face {
-  font-family: 'PP Kyoto';
+  font-family: "PP Kyoto";
   font-style: italic;
   font-weight: 500;
   font-display: swap;
-  src: url('/fonts/PPKyoto-MediumItalic.woff2') format('woff2');
+  src: url("/fonts/PPKyoto-MediumItalic.woff2") format("woff2");
 }
 
 @theme {
@@ -25,9 +25,9 @@
   /* Legacy CareSignal palette — still referenced by the V1 project posts
      (CareSignal Design System, CareSignal AI v1). Kept until those v1
      content files are migrated to the v2 chrome. */
-  --color-cs-black: #211E1F;
-  --color-cs-white: #FFFBF0;
-  --color-cs-warning: #F2AA35;
+  --color-cs-black: #211e1f;
+  --color-cs-white: #fffbf0;
+  --color-cs-warning: #f2aa35;
 
   /* v2 redesign palette — names mirror the Figma variable groups
      (CareSignal / Washes / Confetti / status gradients). */
@@ -45,10 +45,10 @@
   --color-grad-success-start: #b2d07f40;
   --color-grad-none-start: #211e1f40;
 
-  --font-display: 'Ultra', 'Young Serif', Georgia, serif;
-  --font-body: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-kyoto: 'PP Kyoto', 'Young Serif', Georgia, serif;
+  --font-display: "Ultra", "Young Serif", Georgia, serif;
+  --font-body: "Funnel Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-kyoto: "PP Kyoto", "Young Serif", Georgia, serif;
 }
 
 /* -------------------------------------------------------------------------
@@ -121,7 +121,7 @@
 }
 @utility type-copy-large {
   font-family: var(--font-body);
-  font-weight: 400;
+  font-weight: 300;
   font-size: 24px;
   line-height: 32px;
 }
@@ -165,8 +165,13 @@
   line-height: 64px;
 }
 
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
 @keyframes fade-up {
   from {
@@ -195,7 +200,6 @@
 /* Hero "Project 01" card — annotation: "Gently move this card up and down."
    The rotation lives on an outer wrapper; this only drives the vertical bob. */
 @keyframes card-bob {
-
   0%,
   100% {
     transform: translateY(-3px);
