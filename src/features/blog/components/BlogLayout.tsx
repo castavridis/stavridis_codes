@@ -47,7 +47,7 @@ export const blogMdxComponents = {
     <h3 {...props} className="type-headline-small-italic mt-[32px] mb-[12px] text-confetti-black" />
   ),
   p: (props: ComponentProps<'p'>) => (
-    <p {...props} className="type-copy-large my-[16px] text-confetti-black" />
+    <p {...props} className="type-copy my-[16px] text-confetti-black" />
   ),
   a: (props: ComponentProps<'a'>) => (
     <a
@@ -58,13 +58,13 @@ export const blogMdxComponents = {
   ul: (props: ComponentProps<'ul'>) => (
     <ul
       {...props}
-      className="type-copy-large my-[16px] list-disc pl-[24px] text-confetti-black marker:text-confetti-black/40"
+      className="type-copy my-[16px] list-disc pl-[24px] text-confetti-black marker:text-confetti-black/40"
     />
   ),
   ol: (props: ComponentProps<'ol'>) => (
     <ol
       {...props}
-      className="type-copy-large my-[16px] list-decimal pl-[24px] text-confetti-black marker:text-confetti-black/40"
+      className="type-copy my-[16px] list-decimal pl-[24px] text-confetti-black marker:text-confetti-black/40"
     />
   ),
   li: (props: ComponentProps<'li'>) => <li {...props} className="my-[6px]" />,

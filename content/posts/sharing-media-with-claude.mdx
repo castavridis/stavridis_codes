@@ -1,0 +1,46 @@
+---
+title: Sharing screenshots and recordings with my devcontainer
+date: 2026-06-21
+time: 00:10
+summary: A code snippet I'd like to remember for future interactions
+---
+
+Background: I've just started my job search with my first online portfolio. I've gotten a lot of feedback via formal design reviews, informational interviews, and through real loops. Version 1, though unique and visually interesting, did not perform well and between my portfolio and initial interviews I am not moving on to deeper discussions. My v1 portfolio and case studies (or lack thereof) were a risk.
+
+In order to quickly iterate, I've been improving my Figma \<\> Claude Code handoff via Figma MCP. I'm also starting to use Claude in YOLO mode (i.e. claude --dangerously-skip-permissions). In order to do that relatively safely, I've been using a modified version of the official [.devcontainer](https://github.com/anthropics/claude-code/tree/main/.devcontainer) settings from Anthropic. I believe the key customization I have is prepending the Figma domains necessary to access their MCP:
+
+``` bash
+  # Resolve and add other allowed domains
+  for domain in \
+      "figma.com" \
+      "www.figma.com" \
+      "mcp.figma.com" \
+      "api.figma.com" \
+      
+  # Verify Figma API access; this is important for authenticating to use the MCP server
+  if ! curl --connect-timeout 5 https://api.figma.com/ >/dev/null 2>&1; then
+      echo "ERROR: Firewall verification failed - unable to reach https://api.figma.com"
+      exit 1
+  else
+      echo "Firewall verification passed - able to reach https://api.figma.com/ as expected"
+  fi    
+```
+
+Note: The gotcha for me was adding the `api.figma.com` domain so that the authentication loop could complete.
+
+Anyway. Since my devcontainer is sandboxed, it was a bit tricky for me to share media with Claude. So here's what I'm currently doing because I don't want to restart my current devcontainer to install ffmpeg:
+
+1. Created a new directory in my project's root folder, ./tmp/
+2. Pop screenshots and screen recordings into ./tmp/
+3. Since ffmpeg is not installed in the current devcontainer, I generate screenshots from the recordings
+
+``` zsh
+  ffmpeg -i ./tmp/{FILENAME}.mov -vf fps=2 ./tmp/{EASY_TO_TYPE_FILENAME}-%03d.png 
+```
+
+- `-i`: input
+- `-vf`: alias for -filter:v (video)
+- `fps=2`: 2 screenshots per second
+- `%03d`: three decimal integers prepended by 0 if spaces exist (explanation [via](https://stackoverflow.com/a/23719045))
+
+When I need to have Claude reference the images or screen grabs, I simply reference the ./tmp/EASY_TO_TYPE_FILENAME pngs. 
