@@ -45,6 +45,9 @@ const SlidesSandbox = import.meta.env.DEV
 const WorkflowSandbox = import.meta.env.DEV
   ? lazy(() => import('./sandbox/workflow-sandbox.js'))
   : undefined;
+const SectionSandbox = import.meta.env.DEV
+  ? lazy(() => import('./sandbox/section-sandbox.js'))
+  : undefined;
 
 
 export function App() {
@@ -55,6 +58,7 @@ export function App() {
   const [matchBlogIndex] = useRoute(routes.blogIndex.path);
   const [matchSandboxSlides] = useRoute('/sandbox/slides');
   const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
+  const [matchSandboxSection] = useRoute('/sandbox/section');
 
   // Route-matched config (visitor is on /for/:company right now).
   const routeCompany: CompanyConfig | null = matchForCompany && params?.company
@@ -195,6 +199,14 @@ export function App() {
     return (
       <Suspense fallback={<RoutePending />}>
         <WorkflowSandbox />
+      </Suspense>
+    );
+  }
+
+  if (import.meta.env.DEV && matchSandboxSection && SectionSandbox) {
+    return (
+      <Suspense fallback={<RoutePending />}>
+        <SectionSandbox />
       </Suspense>
     );
   }
