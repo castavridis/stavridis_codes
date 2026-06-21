@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    @font-face{font-family:'Graphik';src:url('./fonts/Graphik-Regular-Web.woff2') format('woff2');font-weight:400;font-display:swap}
+    @font-face{font-family:'Graphik';src:url('./fonts/Graphik-Semibold-Web.woff2') format('woff2');font-weight:600;font-display:swap}
+    @font-face{font-family:'Canela Text';src:url('./fonts/CanelaText-Bold-Web.woff2') format('woff2');font-weight:600;font-display:swap}
+    @font-face{font-family:'Atlas Typewriter';src:url('./fonts/AtlasTypewriter-Regular-Web.woff2') format('woff2');font-weight:400;font-display:swap}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%}
+    @keyframes dashmove{to{stroke-dashoffset:-16}}
+  </style>
+</helmet>
+<div ref="{{ rootRef }}" style="--bg:#FAF6EE;--panel:#FFFFFF;--fg:#211E1F;--fg-dim:#6E6A66;--hair:rgba(33,30,31,0.10);--unknown:#CDC6BA;--link:rgba(33,30,31,0.16);--nurse:#211E1F;--nurse-fg:#FAF6EE;--nurse-ring:rgba(33,30,31,0.32);--accent:#D08101;--chip:#F2ECE1; position:relative; display:flex; flex-direction:column; height:100vh; min-height:520px; width:100%; overflow:hidden; background:var(--bg); color:var(--fg); font-family:'Graphik',system-ui,sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <!-- CONTROLS -->
+  <header style="display:flex; align-items:flex-start; justify-content:flex-end; gap:24px; padding:22px 40px 12px; position:relative; z-index:3;">
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:12px;">
+      <!-- Model segmented -->
+      <div style="display:inline-flex; padding:4px; background:var(--chip); border:1px solid var(--hair); border-radius:999px;">
+        <button onClick="{{ selWithout }}" ref="{{ withoutTabRef }}" style="appearance:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px; background:transparent; color:var(--fg-dim); transition:background .2s,color .2s; white-space:nowrap;">Without</button>
+        <button onClick="{{ selWith }}" ref="{{ withTabRef }}" style="appearance:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px; background:transparent; color:var(--fg-dim); transition:background .2s,color .2s; white-space:nowrap;">With</button>
+        <button onClick="{{ selAcute }}" ref="{{ acuteTabRef }}" style="appearance:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px; background:transparent; color:var(--fg-dim); transition:background .2s,color .2s; white-space:nowrap;">24/7 Acute</button>
+        <button onClick="{{ selHub }}" ref="{{ hubTabRef }}" style="appearance:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:999px; background:transparent; color:var(--fg-dim); transition:background .2s,color .2s; white-space:nowrap;">Hub &amp; Spoke</button>
+      </div>
+      <!-- Theme toggle -->
+      <div style="display:inline-flex; padding:3px; background:var(--chip); border:1px solid var(--hair); border-radius:999px; gap:2px;">
+        <button onClick="{{ setLight }}" ref="{{ lightTabRef }}" title="Light" style="appearance:none;border:none;cursor:pointer;width:30px;height:26px;border-radius:999px;background:var(--panel);color:var(--fg);display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>
+        </button>
+        <button onClick="{{ setDark }}" ref="{{ darkTabRef }}" title="Dark" style="appearance:none;border:none;cursor:pointer;width:30px;height:26px;border-radius:999px;background:transparent;color:var(--fg-dim);display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 14.5A8.2 8.2 0 0 1 9.5 4 8.3 8.3 0 1 0 20 14.5z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- STAGE -->
+  <div style="position:relative; flex:1; min-height:0; margin:0 8px;">
+    <svg ref="{{ svgRef }}" viewBox="-700 -400 1400 800" preserveAspectRatio="xMidYMid meet" style="position:absolute; inset:0; width:100%; height:100%; display:block;"></svg>
+  </div>
+
+  <!-- CONTROLS: step / replay -->
+  <footer style="display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 40px 22px; position:relative; z-index:3;">
+    <button onClick="{{ step }}" title="Step" style="appearance:none; cursor:pointer; font-family:inherit; padding:11px; border-radius:999px; border:1px solid var(--fg); background:transparent; color:var(--fg); display:flex; align-items:center; justify-content:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l9 8-9 8M16 4v16"/></svg>
+    </button>
+    <button onClick="{{ replay }}" title="Replay" style="appearance:none; cursor:pointer; font-family:inherit; padding:11px; border-radius:999px; border:none; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3M3 19v-4h4"/></svg>
+    </button>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;model&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;without&quot;,&quot;with&quot;,&quot;acute&quot;,&quot;hub&quot;],&quot;default&quot;:&quot;without&quot;,&quot;tsType&quot;:&quot;'without' | 'with' | 'acute' | 'hub'&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'light' | 'dark'&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#D08101&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;autoplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = {
+    model: 'without', phase: 0, theme: 'light', caption: '',
+    monitored: 150, reachedToday: 0, managedToday: 0, highCount: 0,
+    alertsToday: 0, escalatedToday: 0, resolvedToday: 0, resolved: 0, critical: 0, dayCount: 1,
+  };
+
+  _r = {};
+  C = { monitored: '#F2AA35', alert: '#3D7EA6', urgent: '#F06A41', managed: '#79B315' };
+  THEMES = {
+    light: { '--bg':'#FAF6EE','--panel':'#FFFFFF','--fg':'#211E1F','--fg-dim':'#6E6A66','--hair':'rgba(33,30,31,0.10)','--unknown':'#CDC6BA','--link':'rgba(33,30,31,0.20)','--nurse':'#211E1F','--nurse-fg':'#FAF6EE','--nurse-ring':'rgba(33,30,31,0.32)','--chip':'#F2ECE1' },
+    dark:  { '--bg':'#191716','--panel':'#262220','--fg':'#FAF6EE','--fg-dim':'#A8A29B','--hair':'rgba(250,246,238,0.12)','--unknown':'#4C4641','--link':'rgba(250,246,238,0.22)','--nurse':'#FAF6EE','--nurse-fg':'#191716','--nurse-ring':'rgba(250,246,238,0.4)','--chip':'#201D1B' },
+  };
+  LAYOUT = {
+    without: { nurse: { x:0, y:0, size:34, role:'Nurse' }, pool: { cx:0, cy:0, r:300, rIn:120, n:150, S:5.2 } },
+    with:    { nurse: { x:0, y:0, size:34, role:'Nurse' }, pool: { cx:0, cy:0, r:300, rIn:120, n:1500, S:3.0 } },
+    acute: {
+      ma: { x:-430, y:0, size:32, role:'Med. Assistant' },
+      nurse: { x:120, y:0, size:27, role:'Nurse' },
+      md: { x:500, y:0, size:27, role:'Physician' },
+      pool: { cx:-430, cy:0, r:250, rIn:70, n:3250, S:2.6 },
+    },
+    hub: {
+      ma: { x:-440, y:0, size:32, role:'Med. Assistant' },
+      nurses: [ { x:380, y:-235, size:25, role:'Nurse' }, { x:498, y:0, size:25, role:'Nurse' }, { x:380, y:235, size:25, role:'Nurse' } ],
+      pool: { cx:-440, cy:0, r:250, rIn:70, n:500, S:3.7 },
+    },
+  };
+  CAPTIONS = {
+    without: [
+      'A nurse care manager looks after 150 patients \u2014 by phone.',
+      'All day she dials out, one patient at a time.',
+      'Most calls go unanswered \u2014 marked dark, but unreached.',
+      'She gets through to about 12 \u2014 only those can be assessed.',
+    ],
+    with: [
+      'With CareSignal, the same nurse monitors 1,500 patients.',
+      'Every patient is assessed automatically \u2014 every day.',
+      'The highest-risk patients rise to the top.',
+      'She spends her outreach where it matters \u2014 the critical few.',
+    ],
+    acute: [
+      'One medical assistant monitors 3,250 patients \u2014 around the clock.',
+      'Around the clock, about 1.5% report a concerning symptom.',
+      'Alerts stream to a nurse, who clears most on the spot.',
+      'A few escalate to the physician \u2014 and the queues stay near-empty.',
+    ],
+    hub: [
+      'Three nurses each actively manage nine critical patients.',
+      'The assistant spots a new critical \u2014 and routes it to a nurse.',
+      'A nurse resolves a patient \u2014 they flow back to the assistant.',
+      'Recovered patients ease back into routine monitoring \u2014 the cycle runs on.',
+    ],
+  };
+
+  // ---------- lifecycle ----------
+  componentDidMount() {
+    this.accent = this.props.accent || '#D08101';
+    this.autoplay = this.props.autoplay !== false;
+    this._timers = []; this._raf = null; this.pool = []; this.nodes = []; this._orbits = [];
+    this.reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.svg = this._r.svgRef;
+    this._r.rootRef.style.setProperty('--accent', this.accent);
+    this.applyTheme(this.props.theme === 'dark' ? 'dark' : 'light');
+    const valid = ['without', 'with', 'acute', 'hub'];
+    this.select(valid.indexOf(this.props.model) >= 0 ? this.props.model : 'without', { autoplay: this.autoplay });
+  }
+  componentWillUnmount() { this.cancelTimers(); this.stopSpin(); }
+  componentDidUpdate(prev) {
+    const p = this.props || {}, pp = prev || {};
+    if (p.accent !== pp.accent) { this.accent = p.accent || '#D08101'; this._r.rootRef.style.setProperty('--accent', this.accent); this.syncTabs(); }
+    if (p.theme !== pp.theme) this.applyTheme(p.theme === 'dark' ? 'dark' : 'light');
+    if (p.autoplay !== pp.autoplay) this.autoplay = p.autoplay !== false;
+    if (p.model !== pp.model && p.model && p.model !== this.state.model) this.select(p.model, { autoplay: this.autoplay });
+  }
+
+  // ---------- helpers ----------
+  NS() { return 'http://www.w3.org/2000/svg'; }
+  fmt(n) { return n.toLocaleString('en-US'); }
+  cancelTimers() { (this._timers||[]).forEach(clearTimeout); this._timers = []; if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; } if (this._hubLoop) { clearInterval(this._hubLoop); this._hubLoop = null; } }
+  later(fn, ms) { if (!fn) return; const id = setTimeout(fn, ms); this._timers.push(id); return id; }
+
+  applyTheme(theme) {
+    const vars = this.THEMES[theme], root = this._r.rootRef;
+    Object.keys(vars).forEach(k => root.style.setProperty(k, vars[k]));
+    this.setState({ theme });
+    this.syncTabs(theme);
+    if (this.poolBg) this.poolBg.setAttribute('stroke', vars['--hair']);
+  }
+  syncTabs(theme) {
+    const accent = this.accent || '#D08101', m = this.state.model;
+    const set = (ref, active, isAccent) => {
+      const el = this._r[ref]; if (!el) return;
+      if (isAccent) { el.style.background = active ? accent : 'transparent'; el.style.color = active ? '#fff' : 'var(--fg-dim)'; }
+      else { el.style.background = active ? 'var(--panel)' : 'transparent'; el.style.color = active ? 'var(--fg)' : 'var(--fg-dim)'; }
+    };
+    set('withoutTabRef', m === 'without', true);
+    set('withTabRef', m === 'with', true);
+    set('acuteTabRef', m === 'acute', true);
+    set('hubTabRef', m === 'hub', true);
+    set('lightTabRef', (theme||this.state.theme) === 'light', false);
+    set('darkTabRef', (theme||this.state.theme) === 'dark', false);
+  }
+
+  // ---------- primitives ----------
+  setTf(d) { d.el.style.transform = 'translate(' + d.x.toFixed(1) + 'px,' + d.y.toFixed(1) + 'px) rotate(calc(45deg - var(--spin, 0deg))) scale(' + (d.s || 1) + ')'; }
+
+  // gentle rotation: every orbit group spins around its own care-team node; diamonds counter-rotate via --spin
+  startSpin() {
+    if (this.reduce) return;
+    if (this._spin) cancelAnimationFrame(this._spin);
+    if (this._spinAngle == null) this._spinAngle = 0;
+    this._spinPaused = false;
+    const tick = () => {
+      if (!this._spinPaused && this._orbits && this._orbits.length) {
+        this._spinAngle += 0.03;
+        const a = this._spinAngle.toFixed(2);
+        this._orbits.forEach(o => { o.g.setAttribute('transform', 'rotate(' + a + ' ' + o.cx + ' ' + o.cy + ')'); o.g.style.setProperty('--spin', a + 'deg'); });
+      }
+      this._spin = requestAnimationFrame(tick);
+    };
+    this._spin = requestAnimationFrame(tick);
+  }
+  stopSpin() { if (this._spin) { cancelAnimationFrame(this._spin); this._spin = null; } this._orbits = []; this._spinAngle = 0; this._fieldOrbit = null; }
+  addOrbit(cx, cy) {
+    const g = document.createElementNS(this.NS(), 'g');
+    if (this.transitG) this.dotsG.insertBefore(g, this.transitG); else this.dotsG.appendChild(g);
+    const o = { g, cx, cy }; (this._orbits = this._orbits || []).push(o); return o;
+  }
+  rotatePt(x, y, deg, cx, cy) { const a = deg * Math.PI / 180, dx = x - cx, dy = y - cy, c = Math.cos(a), s = Math.sin(a); return { x: cx + dx * c - dy * s, y: cy + dx * s + dy * c }; }
+  // pull a dot out of its orbit into the static transit layer at its current visual (absolute) position
+  detach(d) {
+    const o = d.orbit, ang = this._spinAngle || 0;
+    const abs = o ? this.rotatePt(d.x, d.y, ang, o.cx, o.cy) : { x: d.x, y: d.y };
+    this.transitG.appendChild(d.el); d.orbit = null;
+    d.el.style.transition = 'none'; d.x = abs.x; d.y = abs.y; this.setTf(d); void d.el.getBoundingClientRect();
+  }
+  // drop a transit dot into an orbit, continuous at its current visual position (caller then moveDots it to a slot)
+  attach(d, o) {
+    const ang = this._spinAngle || 0, loc = this.rotatePt(d.x, d.y, -ang, o.cx, o.cy);
+    o.g.appendChild(d.el); d.orbit = o;
+    d.el.style.transition = 'none'; d.x = loc.x; d.y = loc.y; this.setTf(d); void d.el.getBoundingClientRect();
+  }
+
+  ringLayout(n, r0, dr, minArc, jitter) {
+    const pts = []; let ring = 0, placed = 0;
+    while (placed < n) {
+      const r = r0 + ring * dr;
+      let count = Math.max(3, Math.floor(2 * Math.PI * r / minArc));
+      count = Math.min(count, n - placed);
+      const step = (Math.PI * 2) / count;       // angular gap between neighbours in THIS ring
+      const off = Math.random() * Math.PI * 2;
+      for (let i = 0; i < count; i++) {
+        // jitter is bounded to a fraction of the gap so neighbours never collide
+        const a = off + i * step + (Math.random() - 0.5) * step * (jitter || 0) * 0.32;
+        const rr = r + (Math.random() - 0.5) * dr * 0.2;
+        pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr, r: rr });
+      }
+      placed += count; ring++;
+    }
+    return pts;
+  }
+  drawGuides(radii) {
+    const NS = this.NS(), hair = this.THEMES[this.state.theme]['--hair'];
+    radii.forEach(r => { const c = document.createElementNS(NS, 'circle'); c.setAttribute('cx', 0); c.setAttribute('cy', 0); c.setAttribute('r', r); c.setAttribute('fill', 'none'); c.setAttribute('stroke', hair); c.setAttribute('stroke-width', 1); this.poolG.appendChild(c); });
+  }
+  // outreach line from the nurse (centre) to a patient, inside the rotating field so it stays attached
+  makeOutreach(d, opts) {
+    opts = opts || {};
+    const ln = document.createElementNS(this.NS(), 'line');
+    ln.setAttribute('x1', 0); ln.setAttribute('y1', 0);
+    ln.setAttribute('x2', d.x.toFixed(1)); ln.setAttribute('y2', d.y.toFixed(1));
+    ln.setAttribute('stroke', opts.color || 'var(--fg-dim)');
+    ln.setAttribute('stroke-width', opts.solid ? 1.7 : 1.1);
+    ln.setAttribute('stroke-linecap', 'round');
+    if (!opts.solid) { ln.setAttribute('stroke-dasharray', '2 7'); ln.style.animation = 'dashmove 1s linear infinite'; }
+    ln.style.opacity = '0'; ln.style.transition = 'opacity .4s ease';
+    const og = this._fieldOrbit ? this._fieldOrbit.g : this.dotsG;
+    og.insertBefore(ln, og.firstChild);
+    void ln.getBoundingClientRect();
+    ln.style.opacity = opts.solid ? '0.85' : '0.6';
+    d._line = ln;
+    return ln;
+  }
+  fadeLine(d) { if (!d._line) return; const ln = d._line; ln.style.opacity = '0'; this.later(() => ln.parentNode && ln.parentNode.removeChild(ln), 450); d._line = null; }
+  pickSpread(arr, n) { if (arr.length <= n) return arr.slice(); const out = [], s = arr.length / n; for (let i = 0; i < n; i++) out.push(arr[Math.floor(i * s)]); return out; }
+  makeDiamond(x, y, S, fill) {
+    const el = document.createElementNS(this.NS(), 'rect');
+    el.setAttribute('x', (-S).toFixed(2)); el.setAttribute('y', (-S).toFixed(2));
+    el.setAttribute('width', (2*S).toFixed(2)); el.setAttribute('height', (2*S).toFixed(2));
+    el.setAttribute('rx', (S*0.3).toFixed(2)); el.setAttribute('ry', (S*0.3).toFixed(2));
+    el.setAttribute('fill', fill);
+    el.style.transformBox = 'fill-box'; el.style.transformOrigin = 'center';
+    el.style.transition = 'transform .25s ease, opacity .4s ease, fill .3s ease';
+    const d = { el, x, y, s: 1, S: S, status: 'monitored', orbit: null };
+    this.setTf(d); return d;
+  }
+  paintUnknown(d) { d.el.setAttribute('fill', 'none'); d.el.style.fill = 'none'; d.el.style.stroke = 'var(--unknown)'; d.el.style.strokeWidth = Math.max(0.9, (d.S || 3) * 0.36).toFixed(2); }
+  paintFill(d, color) { d.el.style.stroke = 'none'; if (color.indexOf('var(') === 0) { d.el.removeAttribute('fill'); d.el.style.fill = color; } else { d.el.style.fill = ''; d.el.setAttribute('fill', color); } }
+  // a placed-but-unresolved call: filled white with a faint outline (distinct from the hollow unknowns)
+  paintWhite(d) { d.el.removeAttribute('fill'); d.el.style.fill = '#FFFFFF'; d.el.style.stroke = 'var(--unknown)'; d.el.style.strokeWidth = Math.max(0.8, (d.S || 3) * 0.3).toFixed(2); }
+  pop(d, scale) {
+    d.el.style.transition = 'transform .18s ease, opacity .4s ease, fill .3s ease';
+    d.s = scale || 1.7; this.setTf(d);
+    this.later(() => { d.s = 1; this.setTf(d); }, 210);
+  }
+  moveDot(d, tx, ty, dur) {
+    d.x = tx; d.y = ty; d.s = 1;
+    d.el.style.transition = 'transform ' + dur + 'ms cubic-bezier(.4,0,.2,1), fill .4s ease';
+    this.setTf(d);
+  }
+  // walk a dot through a list of waypoints, segment by segment (rides the channels)
+  travelVia(d, pts, seg, done) {
+    let acc = 0;
+    pts.forEach(p => { this.later(() => this.moveDot(d, p.x, p.y, seg), acc); acc += seg; });
+    if (done) this.later(done, acc + 20);
+  }
+
+  makeNode(cfg, opts) {
+    opts = opts || {};
+    const NS = this.NS(), S = cfg.size;
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', 'translate(' + cfg.x + ',' + cfg.y + ')');
+    g.style.transition = 'opacity .45s ease';
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', -S); rect.setAttribute('y', -S);
+    rect.setAttribute('width', 2*S); rect.setAttribute('height', 2*S);
+    rect.setAttribute('rx', S*0.32); rect.setAttribute('ry', S*0.32);
+    rect.setAttribute('fill', 'var(--nurse)');
+    rect.style.transformBox = 'fill-box'; rect.style.transformOrigin = 'center';
+    rect.style.transform = 'rotate(45deg)';
+    g.appendChild(rect);
+    const ABBR = { 'Med. Assistant': 'MA', 'Nurse': 'RN', 'Physician': 'MD' };
+    const lbl = document.createElementNS(NS, 'text');
+    lbl.setAttribute('x', 0); lbl.setAttribute('y', 0);
+    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('dominant-baseline', 'central');
+    lbl.setAttribute('fill', 'var(--nurse-fg)');
+    lbl.setAttribute('font-family', "'Graphik',system-ui,sans-serif");
+    lbl.setAttribute('font-weight', '600');
+    lbl.setAttribute('font-size', (S * 0.74).toFixed(1));
+    lbl.setAttribute('letter-spacing', '0.5');
+    lbl.textContent = ABBR[cfg.role] || cfg.role;
+    g.appendChild(lbl);
+    this.nodesG.appendChild(g);
+    const node = {
+      g, rect, x: cfg.x, y: cfg.y, size: S,
+      setCount: () => {},
+      pop: () => { rect.style.transition = 'transform .2s ease'; rect.style.transform = 'rotate(45deg) scale(1.22)'; this.later(() => { rect.style.transform = 'rotate(45deg) scale(1)'; }, 220); },
+    };
+    this.nodes.push(node);
+    return node;
+  }
+
+  makeChannel(x1, y1, x2, y2) {
+    const ln = document.createElementNS(this.NS(), 'line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', 'var(--link)'); ln.setAttribute('stroke-width', 1.6);
+    ln.setAttribute('stroke-linecap', 'round');
+    this.channelsG.appendChild(ln);
+    return ln;
+  }
+  pulseChannel(x1, y1, x2, y2, color) {
+    const ln = document.createElementNS(this.NS(), 'line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+    ln.setAttribute('stroke', color); ln.setAttribute('stroke-width', 1.8);
+    ln.setAttribute('stroke-linecap', 'round');
+    ln.setAttribute('stroke-dasharray', '2 9');
+    ln.style.opacity = '0.85'; ln.style.transition = 'opacity .4s ease';
+    ln.style.animation = 'dashmove 1s linear infinite';
+    this.channelsG.appendChild(ln);
+    this.later(() => { ln.style.opacity = '0'; this.later(() => ln.parentNode && ln.parentNode.removeChild(ln), 450); }, 1500);
+    return ln;
+  }
+
+  clusterAround(cx, cy, count, r0, step, arc) {
+    const pts = []; let placed = 0, ri = 0;
+    while (placed < count) {
+      const r = r0 + ri * step;
+      let cap = Math.max(4, Math.floor(2 * Math.PI * r / (arc || 22)));
+      cap = Math.min(cap, count - placed);
+      const off = Math.random() * Math.PI * 2;
+      for (let i = 0; i < cap; i++) { const a = off + (i / cap) * Math.PI * 2; pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r }); }
+      placed += cap; ri++;
+    }
+    return pts;
+  }
+  poolPoint(P) {
+    const rIn = P.rIn || 0;
+    const rr = Math.sqrt(rIn * rIn + Math.random() * (P.r * P.r - rIn * rIn));
+    const a = Math.random() * Math.PI * 2;
+    return { x: P.cx + rr * Math.cos(a), y: P.cy + rr * Math.sin(a) };
+  }
+  takePoolSlot(L) { const f = this._poolFree; if (f && f.length) return f.splice(Math.floor(Math.random() * f.length), 1)[0]; return this.poolPoint(L.pool); }
+
+  // ---------- stage ----------
+  resetStage() {
+    const NS = this.NS();
+    while (this.svg.firstChild) this.svg.removeChild(this.svg.firstChild);
+    this.poolG = document.createElementNS(NS, 'g');
+    this.channelsG = document.createElementNS(NS, 'g');
+    this.dotsG = document.createElementNS(NS, 'g');
+    this.nodesG = document.createElementNS(NS, 'g');
+    this.svg.appendChild(this.poolG);
+    this.svg.appendChild(this.channelsG);
+    this.svg.appendChild(this.dotsG);
+    this.svg.appendChild(this.nodesG);
+    this._orbits = [];
+    this.transitG = document.createElementNS(NS, 'g');
+    this.dotsG.appendChild(this.transitG);
+    this.nodes = [];
+  }
+  buildPool(P) {
+    const NS = this.NS();
+    const bg = document.createElementNS(NS, 'circle');
+    bg.setAttribute('cx', P.cx); bg.setAttribute('cy', P.cy); bg.setAttribute('r', P.r + 22);
+    bg.setAttribute('fill', 'var(--chip)'); bg.style.opacity = '0.5';
+    bg.setAttribute('stroke', this.THEMES[this.state.theme]['--hair']); bg.setAttribute('stroke-width', 1);
+    this.poolG.appendChild(bg); this.poolBg = bg;
+    const orbit = this._poolOrbit = this.addOrbit(P.cx, P.cy);
+    this._poolFree = [];   // lattice slots vacated by departing patients, reused on return (no overlap)
+    const rIn = P.rIn || 40;
+    const sp = Math.max(2.8 * P.S, Math.sqrt(Math.PI * (P.r * P.r - rIn * rIn) / P.n));   // even, non-overlapping spacing
+    const pts = this.ringLayout(P.n, rIn + sp * 0.5, sp, sp, 0.3);
+    const frag = document.createDocumentFragment();
+    const arr = [];
+    for (let i = 0; i < P.n; i++) {
+      const pt = pts[i];
+      const d = this.makeDiamond(P.cx + pt.x, P.cy + pt.y, P.S, this.C.monitored);
+      d.r = pt.r; d.el.style.transition = 'none'; d.orbit = orbit;
+      frag.appendChild(d.el); arr.push(d);
+    }
+    orbit.g.appendChild(frag);
+    return arr;
+  }
+  fadeInStage() {
+    [this.poolG, this.channelsG, this.dotsG].forEach(g => { g.style.transition = 'none'; g.style.opacity = '0'; });
+    this.nodes.forEach(n => { n.g.style.transition = 'none'; n.g.style.opacity = '0'; });
+    void this.svg.getBoundingClientRect();          // commit the 0 state, then animate to 1 synchronously (no rAF dependency)
+    this.poolG.style.transition = 'opacity .6s ease'; this.poolG.style.opacity = '1';
+    this.dotsG.style.transition = 'opacity .7s ease'; this.dotsG.style.opacity = '1';
+    this.channelsG.style.transition = 'opacity .6s ease .2s'; this.channelsG.style.opacity = '1';
+    this.nodes.forEach((n, i) => { n.g.style.transition = 'opacity .5s ease ' + (0.15 + i * 0.08) + 's'; n.g.style.opacity = '1'; });
+  }
+
+  // ---------- build ----------
+  buildWithout() {
+    this.resetStage();
+    const L = this.LAYOUT.without;
+    this.nurseNode = this.makeNode(L.nurse, { countColor: this.accent });
+    const orbit = this._fieldOrbit = this.addOrbit(0, 0);
+    const pts = this.ringLayout(150, 92, 40, 42, 0.35);
+    this.pool = pts.map(pt => {
+      const d = this.makeDiamond(pt.x, pt.y, L.pool.S, this.C.monitored); d.r = pt.r;
+      d.status = 'unknown'; this.paintUnknown(d); d.el.style.transition = 'none';
+      orbit.g.appendChild(d.el); d.orbit = orbit; return d;
+    });
+    this._attemptIdx = null;
+    this.startSpin();
+    this.fadeInStage();
+  }
+  buildWith() {
+    this.resetStage();
+    const L = this.LAYOUT.with;
+    this.nurseNode = this.makeNode(L.nurse, { countColor: this.C.urgent });
+    const orbit = this._fieldOrbit = this.addOrbit(0, 0);
+    const pts = this.ringLayout(1500, 130, 13, 13, 0.25);
+    this.pool = pts.map(pt => {
+      const d = this.makeDiamond(pt.x, pt.y, L.pool.S, this.C.monitored); d.r = pt.r;
+      const rr = Math.random(); d.assigned = rr < 0.00714 ? 'high' : rr < 0.25 ? 'medium' : 'low';
+      d.status = 'unknown'; this.paintUnknown(d); d.el.style.transition = 'none';
+      orbit.g.appendChild(d.el); d.orbit = orbit; return d;
+    });
+    this._withReds = this.pool.filter(d => d.assigned === 'high');
+    this._gathered = false;
+    this.startSpin();
+    this.fadeInStage();
+  }
+  buildAcute() {
+    this.resetStage();
+    const L = this.LAYOUT.acute;
+    this.maNode = this.makeNode(L.ma);
+    this.nurseNode = this.makeNode(L.nurse, { countColor: this.C.alert });
+    this.mdNode = this.makeNode(L.md, { countColor: this.C.urgent });
+    this.makeChannel(L.ma.x, L.ma.y, L.nurse.x, L.nurse.y);
+    this.makeChannel(L.nurse.x, L.nurse.y, L.md.x, L.md.y);
+    this.pool = this.buildPool(L.pool);
+    this.nurseOrbit = this.addOrbit(L.nurse.x, L.nurse.y);
+    this.mdOrbit = this.addOrbit(L.md.x, L.md.y);
+    this.nurseQueue = []; this.mdQueue = [];
+    this.startSpin();
+    this.fadeInStage();
+  }
+  buildHub() {
+    this.resetStage();
+    const L = this.LAYOUT.hub;
+    this.maNode = this.makeNode(L.ma);
+    this.nurseNodes = L.nurses.map(n => this.makeNode(n, { countColor: this.C.urgent }));
+    L.nurses.forEach(n => this.makeChannel(L.ma.x, L.ma.y, n.x, n.y));
+    this.pool = this.buildPool(L.pool);
+    this.nurseOrbits = L.nurses.map(n => this.addOrbit(n.x, n.y));
+    this.nurseReds = [[], [], []];
+    L.nurses.forEach((n, ni) => {
+      const slots = this.clusterAround(n.x, n.y, 9, 2.1 * n.size, 20, 26);
+      for (let k = 0; k < 9; k++) {
+        const d = this.makeDiamond(slots[k].x, slots[k].y, L.pool.S, this.C.urgent);
+        d.status = 'urgent'; d.nurse = ni; d.orbit = this.nurseOrbits[ni];
+        this.nurseOrbits[ni].g.appendChild(d.el);
+        this.nurseReds[ni].push(d);
+      }
+      this.nurseNodes[ni].setCount(9);
+    });
+    this.startSpin();
+    this.fadeInStage();
+  }
+  statusColor(st) { return st === 'high' ? this.C.urgent : st === 'medium' ? this.C.monitored : this.C.managed; }
+
+  // ---------- flow ----------
+  select(model, opts) {
+    opts = opts || {};
+    this.cancelTimers();
+    this.stopSpin();
+    if (model === 'without') this.buildWithout();
+    else if (model === 'with') this.buildWith();
+    else if (model === 'hub') this.buildHub();
+    else this.buildAcute();
+    const L = this.LAYOUT[model];
+    this.setState({
+      model, phase: 0, caption: this.CAPTIONS[model][0],
+      monitored: L.pool.n,
+      reachedToday: 0, noAnswer: 0, unknownCount: model === 'without' ? 150 : 0, assessedCount: 0, highCount: 0,
+      alertsToday: 0, escalatedToday: 0, resolvedToday: 0, resolved: 0, dayCount: 1,
+      critical: model === 'hub' ? this.nurseReds.reduce((a, b) => a + b.length, 0) : 0,
+    }, () => this.syncTabs());
+    if (opts.autoplay) this.later(() => this.play(), 750);
+  }
+  play() {
+    this.cancelTimers();
+    let acc = 350;
+    [1, 2, 3].forEach((p, i) => { this.later(() => this.runPhase(p), acc); acc += [2000, 2200, 2200][i]; });
+  }
+  step() { this.cancelTimers(); const p = this.state.phase; if (p < 3) this.runPhase(p + 1); }
+  replay() { this.select(this.state.model, { autoplay: true }); }
+  selWithout() { this.select('without', { autoplay: this.autoplay }); }
+  selWith() { this.select('with', { autoplay: this.autoplay }); }
+  selAcute() { this.select('acute', { autoplay: this.autoplay }); }
+  selHub() { this.select('hub', { autoplay: this.autoplay }); }
+  setLight() { this.applyTheme('light'); }
+  setDark() { this.applyTheme('dark'); }
+  setCaption(p) { this.setState({ phase: p, caption: this.CAPTIONS[this.state.model][p] }); }
+  runPhase(p) {
+    const m = this.state.model;
+    if (m === 'without') this.runWithout(p);
+    else if (m === 'with') this.runWith(p);
+    else if (m === 'acute') this.runAcute(p);
+    else this.runHub(p);
+  }
+
+  // ---------- WITHOUT CareSignal (one nurse, phone outreach; patients stay in their rings) ----------
+  runWithout(p) {
+    this.setCaption(p);
+    const pool = this.pool;
+    if (p === 1) {
+      const idx = pool.map((_, i) => i).sort(() => Math.random() - 0.5);
+      this._attemptIdx = idx.slice(0, 48);
+      this._reachedIdx = this._attemptIdx.slice(0, 12);
+      this._noansIdx = this._attemptIdx.slice(12, 48);
+      // the act of reaching out fills the patient white — a call placed, outcome not yet known
+      this._attemptIdx.forEach((i, k) => this.later(() => { const d = pool[i]; this.makeOutreach(d, { color: 'var(--fg-dim)' }); d.el.style.transition = 'fill .3s ease, stroke .3s ease'; this.paintWhite(d); }, (k / 48) * 1100));
+      this.later(() => this.nurseNode.pop(), 0);
+      this.setState({ unknownCount: 102 });
+    } else if (p === 2) {
+      if (!this._attemptIdx) return;
+      // unanswered calls: patient turns dark (effort spent), the dialing line fades
+      this._noansIdx.forEach((i, k) => this.later(() => {
+        const d = pool[i]; d.status = 'noans';   // call yielded nothing — stays white for now, the line just fades
+        if (d._line) this.fadeLine(d);
+      }, (k / this._noansIdx.length) * 800));
+      // answered calls: the line goes solid grey — status not known yet
+      this._reachedIdx.forEach(i => { const d = pool[i]; if (d._line) { d._line.setAttribute('stroke', 'var(--fg-dim)'); d._line.setAttribute('stroke-width', 1.5); d._line.removeAttribute('stroke-dasharray'); d._line.style.animation = ''; d._line.style.opacity = '0.7'; } });
+      this.setState({ noAnswer: 36 });
+    } else if (p === 3) {
+      // the dozen she reached can finally be assessed; each line then turns the patient's status colour
+      this._reachedIdx.forEach((i, k) => this.later(() => {
+        const d = pool[i]; const r = Math.random(); const st = r < 0.16 ? 'high' : r < 0.45 ? 'medium' : 'low';
+        d.status = st; d.el.style.transition = 'fill .35s ease, transform .2s ease'; this.paintFill(d, this.statusColor(st)); this.pop(d, 1.8);
+        if (d._line) { d._line.setAttribute('stroke', this.statusColor(st)); d._line.style.opacity = '0.85'; }
+      }, k * 110));
+      // outreach is finished: never-reached fade to 50%, and the white no-answers dim to grey alongside them
+      this.later(() => { pool.forEach(d => {
+        if (d.status === 'unknown') { d.el.style.transition = 'opacity .6s ease'; d.el.style.opacity = '0.5'; }
+        else if (d.status === 'noans') { d.el.style.transition = 'fill .6s ease, stroke .6s ease'; this.paintFill(d, 'var(--unknown)'); }
+      }); }, 12 * 110 + 500);
+      this.setState({ reachedToday: 12 });
+    }
+  }
+
+  // ---------- WITH CareSignal (one nurse; everyone assessed, focus on the red few) ----------
+  runWith(p) {
+    this.setCaption(p);
+    const pool = this.pool;
+    if (p === 1) {
+      // assessment wave, outward by radius (patients stay in place, just gain colour)
+      const order = pool.slice().sort((a, b) => a.r - b.r);
+      const n = order.length, chunks = 44, per = Math.ceil(n / chunks);
+      for (let c = 0; c < chunks; c++) {
+        this.later(() => {
+          const end = Math.min(n, (c + 1) * per);
+          for (let i = c * per; i < end; i++) { const d = order[i]; d.status = d.assigned; this.paintFill(d, this.statusColor(d.assigned)); }
+          this.setState({ assessedCount: end, highCount: this._withReds.length });
+        }, (c / chunks) * 1600);
+      }
+    } else if (p === 2) {
+      // dim the rest; gather the high-risk into a tight halo around the nurse
+      pool.forEach(d => { if (d.assigned !== 'high') d.el.style.opacity = 0.32; });
+      this.gatherReds();
+      this._withReds.forEach((d, k) => this.later(() => { this.moveDot(d, d._slot.x, d._slot.y, 850); this.pop(d, 1.4); }, (k / Math.max(1, this._withReds.length)) * 600));
+      this._gathered = true;
+    } else if (p === 3) {
+      pool.forEach(d => { d.el.style.opacity = d.assigned === 'high' ? 1 : 0.32; });
+      if (!this._gathered) { this.gatherReds(); this._withReds.forEach(d => this.moveDot(d, d._slot.x, d._slot.y, 600)); this._gathered = true; }
+      const reached = this.pickSpread(this._withReds, Math.min(16, Math.max(1, this._withReds.length - 3)));   // one nurse reaches at most 16 a day
+      reached.forEach((d, k) => this.later(() => {
+        this.makeOutreach(d, { color: 'var(--fg-dim)', solid: true });   // grey while reaching out
+        this.pop(d, 1.5);
+        this.later(() => { d.status = 'low'; d.el.style.transition = 'fill .4s ease, transform .2s ease'; this.paintFill(d, this.C.managed); if (d._line) d._line.setAttribute('stroke', this.C.managed); this.pop(d, 1.6); this.setState({ reachedToday: k + 1, highCount: this._withReds.length - (k + 1) }); }, 350);
+      }, 400 + k * 110));
+    }
+  }
+  gatherReds() {
+    const slots = this.clusterAround(0, 0, this._withReds.length, 2.1 * this.LAYOUT.with.nurse.size, 19, 16);
+    this._withReds.forEach((d, k) => { d._slot = slots[k] || { x: d.x, y: d.y }; });
+  }
+
+  // ---------- 24/7 ACUTE (steady-state throughput) ----------
+  runAcute(p) {
+    this.setCaption(p);
+    if (p === 1) this.acuteEmit({ force: 'resolve', emphasis: true });
+    else if (p === 2) this.acuteEmit({ force: 'escalate', emphasis: true });
+    else if (p === 3) this.startAcuteLoop();
+  }
+  // hard minimum distance from a care-team node: dots NEVER sit closer than this to the icon
+  haloInner(node, extra) { return Math.max(extra || 0, 2.6 * (node.size || 25)); }
+  // deterministic ring positions around a node (spin-frame / orbit-local coords).
+  // every slot is at radius >= inner, so the halo can never close in on the node.
+  haloSlots(node, count, inner, step, arc) {
+    const pts = []; let placed = 0, ri = 0;
+    while (placed < count) {
+      const r = inner + ri * (step || 20);
+      let cap = Math.max(4, Math.floor(2 * Math.PI * r / (arc || 22)));
+      cap = Math.min(cap, count - placed);
+      const phase = ri * 0.6;   // stagger rings so they interleave instead of lining up radially
+      for (let i = 0; i < cap; i++) { const a = phase + (i / cap) * Math.PI * 2; pts.push({ x: node.x + Math.cos(a) * r, y: node.y + Math.sin(a) * r, r: r, ang: a }); }
+      placed += cap; ri++;
+    }
+    return pts;
+  }
+  // match each dot to the nearest free slot BY ANGLE, so it nudges into place along the ring
+  // rather than cutting a straight chord across the node centre (the "collapse" the eye sees)
+  assignHalo(members, slots, cx, cy) {
+    const free = slots.slice(), out = [];
+    members.forEach(d => {
+      const ang = Math.atan2(d.y - cy, d.x - cx);
+      let bi = 0, bd = Infinity;
+      for (let i = 0; i < free.length; i++) { let da = Math.abs(free[i].ang - ang); if (da > Math.PI) da = 2 * Math.PI - da; if (da < bd) { bd = da; bi = i; } }
+      out.push([d, free.splice(bi, 1)[0]]);
+    });
+    return out;
+  }
+  // settle every attached member of `arr` onto a halo slot via its shortest angular move
+  layoutHalo(arr, node, orbit, step, arc, dur, extraInner) {
+    const inner = this.haloInner(node, extraInner);
+    const members = arr.filter(dd => dd.orbit === orbit);
+    if (!members.length) return;
+    const slots = this.haloSlots(node, members.length, inner, step, arc);
+    this.assignHalo(members, slots, node.x, node.y).forEach(([d, s]) => { if (s) this.moveDot(d, s.x, s.y, dur || 480); });
+  }
+  repackQueue(arr, node, r0) {
+    const orbit = (arr.find(d => d.orbit) || {}).orbit;
+    this.layoutHalo(arr, node, orbit, 15, 19, 480, r0);   // keep patients clear of the node icon
+    node.setCount(arr.length);
+  }
+  // fly a dot through `pre` waypoints, land it on the ring on the side it arrives from
+  // (never across the node), then fold it into the halo with everyone else
+  sendToCluster(d, arr, node, orbit, pre, t1, t2, step, arc) {
+    const inner = this.haloInner(node);
+    // settle the dots already in this orbit; in-transit siblings keep their own journeys
+    this.layoutHalo(arr.filter(dd => dd !== d), node, orbit, step, arc, 520);
+    // staging point: OUTSIDE the ring, in the direction of the final waypoint — the last leg
+    // approaches from beyond the halo, so the dot never parks on the node/spoke; layoutHalo then
+    // pulls it inward to its slot (a short radial move that can't cross the centre)
+    const last = pre.length ? pre[pre.length - 1] : { x: d.x, y: d.y };
+    let ang = Math.atan2(last.y - node.y, last.x - node.x);
+    if (!isFinite(ang) || (last.x === node.x && last.y === node.y)) ang = Math.random() * Math.PI * 2;
+    const land = { x: node.x + Math.cos(ang) * inner * 1.5, y: node.y + Math.sin(ang) * inner * 1.5 };
+    const landAbs = this.rotatePt(land.x, land.y, this._spinAngle || 0, node.x, node.y);
+    this.detach(d);
+    let acc = 0;
+    pre.forEach(p => { const pp = p; this.later(() => this.moveDot(d, pp.x, pp.y, t1), acc); acc += t1; });
+    this.later(() => this.moveDot(d, landAbs.x, landAbs.y, t2), acc); acc += t2;
+    this.later(() => { this.attach(d, orbit); node.pop(); }, acc);
+    // once the newcomer has landed, re-even the whole halo from real membership (self-heals any stragglers)
+    this.later(() => this.layoutHalo(arr, node, orbit, step, arc, 420), acc + 60);
+  }
+  // an alert bubbles up from the pool, travels to the MA, then rides the channel to the nurse
+  acuteEmit(opts) {
+    opts = opts || {};
+    if (!this.pool.length) return;
+    if ((this.state.alertsToday || 0) >= 16) this.setState({ alertsToday: 0, escalatedToday: 0, resolvedToday: 0, dayCount: (this.state.dayCount || 1) + 1 });
+    const L = this.LAYOUT.acute;
+    const d = this.pool.splice(Math.floor(Math.random() * this.pool.length), 1)[0];
+    d.status = 'alert'; d.el.setAttribute('fill', this.C.alert);
+    if (opts.emphasis) this.pop(d, 2.0);
+    this.nurseQueue.push(d);
+    this.setState(s => ({ alertsToday: (s.alertsToday || 0) + 1 }));
+    this.pulseChannel(L.ma.x, L.ma.y, L.nurse.x, L.nurse.y, this.C.alert);
+    const t1 = opts.emphasis ? 850 : 600, t2 = 600;
+    this._poolFree.push({ x: d.x, y: d.y });
+    this.sendToCluster(d, this.nurseQueue, this.nurseNode, this.nurseOrbit, [{ x: L.ma.x, y: L.ma.y }], t1, t2, 15, 19);
+    const hold = t1 + t2 + (opts.emphasis ? 2200 : (2200 + Math.random() * 1100));
+    this.later(() => this.acuteTriage(d, opts.force), hold);
+  }
+  acuteTriage(d, force) {
+    const L = this.LAYOUT.acute;
+    const i = this.nurseQueue.indexOf(d); if (i >= 0) this.nurseQueue.splice(i, 1);
+    this.repackQueue(this.nurseQueue, this.nurseNode, 40);
+    const escalate = force === 'escalate' || (force !== 'resolve' && Math.random() < 0.15);
+    if (escalate) {
+      d.status = 'urgent'; d.el.setAttribute('fill', this.C.urgent); this.pop(d, 1.7);
+      this.pulseChannel(L.nurse.x, L.nurse.y, L.md.x, L.md.y, this.C.urgent);
+      this.mdQueue.push(d);
+      this.sendToCluster(d, this.mdQueue, this.mdNode, this.mdOrbit, [], 0, 620, 15, 19);
+      this.setState(s => ({ escalatedToday: (s.escalatedToday || 0) + 1 }));
+      this.later(() => this.mdDisposition(d), 2600 + Math.random() * 900);
+    } else {
+      this.returnToPool(d, false);
+      this.setState(s => ({ resolvedToday: (s.resolvedToday || 0) + 1 }));
+    }
+  }
+  mdDisposition(d) {
+    const i = this.mdQueue.indexOf(d); if (i >= 0) this.mdQueue.splice(i, 1);
+    this.repackQueue(this.mdQueue, this.mdNode, 34);
+    this.returnToPool(d, true);
+  }
+  // cleared patient rides the channels back through the humans, then re-yellows in the pool
+  returnToPool(d, fromMd) {
+    const L = this.LAYOUT.acute;
+    d.status = 'managed'; d.el.setAttribute('fill', this.C.managed);
+    this.detach(d);
+    const slot = this.takePoolSlot(L);
+    const sAbs = this.rotatePt(slot.x, slot.y, this._spinAngle || 0, L.pool.cx, L.pool.cy);
+    const pts = fromMd ? [{ x: L.nurse.x, y: L.nurse.y }, { x: L.ma.x, y: L.ma.y }, sAbs] : [{ x: L.ma.x, y: L.ma.y }, sAbs];
+    this.travelVia(d, pts, 650, () => { this.attach(d, this._poolOrbit); d.el.style.transition = 'none'; d.x = slot.x; d.y = slot.y; this.setTf(d); void d.el.getBoundingClientRect(); d.el.style.transition = 'fill 2.2s ease'; d.el.setAttribute('fill', this.C.monitored); d.status = 'monitored'; this.pool.push(d); });
+  }
+  startAcuteLoop() { if (this._hubLoop) clearInterval(this._hubLoop); this._hubLoop = setInterval(() => { if (this.state.model === 'acute') this.acuteEmit({}); }, 1300); }
+
+  // ---------- HUB & SPOKE (living circulation) ----------
+  runHub(p) {
+    this.setCaption(p);
+    if (p === 1) this.addCritical(true);
+    else if (p === 2) this.resolveCritical(true);
+    else if (p === 3) this.startHubLoop();
+  }
+  fewestNurse() { let mi = 0; for (let i = 1; i < 3; i++) if (this.nurseReds[i].length < this.nurseReds[mi].length) mi = i; return mi; }
+  mostNurse() { let mi = 0; for (let i = 1; i < 3; i++) if (this.nurseReds[i].length > this.nurseReds[mi].length) mi = i; return mi; }
+  updateCriticalStat() { this.setState({ critical: this.nurseReds.reduce((a, b) => a + b.length, 0) }); }
+  repackNurse(ni) {
+    this.layoutHalo(this.nurseReds[ni], this.nurseNodes[ni], this.nurseOrbits[ni], 20, 26, 650);
+    this.nurseNodes[ni].setCount(this.nurseReds[ni].length);
+  }
+  // new critical travels to the MA, then rides the spoke out to the lightest-loaded nurse
+  addCritical(emphasis) {
+    if (!this.pool.length) return;
+    const L = this.LAYOUT.hub;
+    const d = this.pool.splice(Math.floor(Math.random() * this.pool.length), 1)[0];
+    const ni = this.fewestNurse();
+    d.status = 'urgent'; d.nurse = ni; d.el.setAttribute('fill', this.C.urgent);
+    if (emphasis) this.pop(d, 2.2);
+    this.pulseChannel(L.ma.x, L.ma.y, this.nurseNodes[ni].x, this.nurseNodes[ni].y, this.C.urgent);
+    this.nurseReds[ni].push(d);
+    const t1 = emphasis ? 800 : 600, t2 = 620;
+    this._poolFree.push({ x: d.x, y: d.y });
+    this.sendToCluster(d, this.nurseReds[ni], this.nurseNodes[ni], this.nurseOrbits[ni], [{ x: L.ma.x, y: L.ma.y }], t1, t2, 20, 26);
+    this.updateCriticalStat();
+  }
+  resolveCritical(emphasis) {
+    const L = this.LAYOUT.hub;
+    const ni = this.mostNurse(), arr = this.nurseReds[ni];
+    if (!arr.length) return;
+    const d = arr.splice(Math.floor(Math.random() * arr.length), 1)[0];
+    d.status = 'managed'; d.nurse = null; d.el.setAttribute('fill', this.C.managed);
+    if (emphasis) this.pop(d, 1.9);
+    this.pulseChannel(this.nurseNodes[ni].x, this.nurseNodes[ni].y, L.ma.x, L.ma.y, this.C.managed);
+    this.repackNurse(ni);
+    this.detach(d);
+    const slot = this.takePoolSlot(L);
+    const sAbs = this.rotatePt(slot.x, slot.y, this._spinAngle || 0, L.pool.cx, L.pool.cy);
+    this.travelVia(d, [{ x: this.nurseNodes[ni].x, y: this.nurseNodes[ni].y }, { x: L.ma.x, y: L.ma.y }, sAbs], 650, () => { this.attach(d, this._poolOrbit); d.el.style.transition = 'none'; d.x = slot.x; d.y = slot.y; this.setTf(d); void d.el.getBoundingClientRect(); d.el.style.transition = 'fill 2.4s ease'; d.el.setAttribute('fill', this.C.monitored); d.status = 'monitored'; this.pool.push(d); });
+    this.setState(s => ({ resolved: (s.resolved || 0) + 1 }));
+    this.updateCriticalStat();
+  }
+  hubTick() {
+    const total = this.nurseReds.reduce((a, b) => a + b.length, 0);
+    let add;
+    if (total <= 24) add = true; else if (total >= 30) add = false; else add = Math.random() < 0.5;
+    if (add) this.addCritical(false); else this.resolveCritical(false);
+  }
+  startHubLoop() { if (this._hubLoop) clearInterval(this._hubLoop); this._hubLoop = setInterval(() => { if (this.state.model === 'hub') this.hubTick(); }, 1600); }
+
+  // ---------- render ----------
+  renderVals() {
+    const s = this.state, m = s.model, C = this.C;
+    const vars = this.THEMES[s.theme] || this.THEMES.light;
+    const accent = this.accent || '#D08101';
+    const blocks = [], legend = [];
+    if (m === 'without') {
+      blocks.push({ v: (s.reachedToday || 0) + ' / 150', l: 'Reached today', color: accent });
+      blocks.push({ v: String(s.noAnswer || 0), l: 'No answer', color: vars['--fg-dim'] });
+      blocks.push({ v: String(s.unknownCount || 0), l: 'Uncontacted', color: vars['--fg-dim'] });
+      blocks.push({ v: '1', l: 'Nurse', color: vars['--fg'] });
+      legend.push({ c: 'transparent', l: 'Unknown', radius: '2px', extra: 'border:1.5px solid var(--unknown);transform:rotate(45deg);' });
+      legend.push({ c: 'var(--unknown)', l: 'No answer', radius: '2px', extra: 'transform:rotate(45deg);' });
+      legend.push({ c: C.urgent, l: 'High', radius: '999px', extra: '' });
+      legend.push({ c: C.monitored, l: 'Medium', radius: '999px', extra: '' });
+      legend.push({ c: C.managed, l: 'Low', radius: '999px', extra: '' });
+    } else if (m === 'with') {
+      blocks.push({ v: this.fmt(s.assessedCount || 0) + ' / 1,500', l: 'Assessed today', color: accent });
+      blocks.push({ v: String(s.highCount || 0), l: 'High-risk', color: C.urgent });
+      blocks.push({ v: String(s.reachedToday || 0), l: 'Reached \u2192 managed', color: C.managed });
+      blocks.push({ v: '1', l: 'Nurse', color: vars['--fg'] });
+      legend.push({ c: C.urgent, l: 'High', radius: '999px', extra: '' });
+      legend.push({ c: C.monitored, l: 'Medium', radius: '999px', extra: '' });
+      legend.push({ c: C.managed, l: 'Low', radius: '999px', extra: '' });
+    } else if (m === 'acute') {
+      blocks.push({ v: this.fmt(s.monitored), l: 'Patients monitored', color: C.monitored });
+      blocks.push({ v: (s.alertsToday || 0) + ' / 16', l: 'Alerts today', color: C.alert });
+      blocks.push({ v: String(s.escalatedToday || 0), l: 'Escalated \u2192 MD', color: C.urgent });
+      blocks.push({ v: String(s.resolvedToday || 0), l: 'Nurse-resolved', color: C.managed });
+      blocks.push({ v: '1 / 1 / 1', l: 'MA / RN / MD', color: vars['--fg'] });
+      legend.push({ c: C.monitored, l: 'Monitored', radius: '999px', extra: '' });
+      legend.push({ c: C.alert, l: 'Alert', radius: '999px', extra: '' });
+      legend.push({ c: C.urgent, l: 'Urgent', radius: '999px', extra: '' });
+      legend.push({ c: C.managed, l: 'Resolved', radius: '999px', extra: '' });
+    } else {
+      blocks.push({ v: this.fmt(s.monitored), l: 'Patients monitored', color: C.monitored });
+      blocks.push({ v: String(s.critical), l: 'Critical (managed)', color: C.urgent });
+      if ((s.resolved || 0) > 0) blocks.push({ v: String(s.resolved), l: 'Resolved today', color: C.managed });
+      blocks.push({ v: '3', l: 'Nurses on team', color: accent });
+      legend.push({ c: C.monitored, l: 'Monitored', radius: '999px', extra: '' });
+      legend.push({ c: C.urgent, l: 'Critical', radius: '999px', extra: '' });
+      legend.push({ c: C.managed, l: 'Resolved', radius: '999px', extra: '' });
+    }
+    legend.push({ c: 'var(--nurse)', l: 'Care team', radius: '2px', extra: 'transform:rotate(45deg);' });
+    const steps = [0,1,2,3].map(i => ({ bg: i <= s.phase ? accent : vars['--hair'] }));
+    const E = { without: 'Without CareSignal', with: 'With CareSignal', acute: '24/7 Acute Care Model', hub: 'Hub-and-Spoke Model' };
+    const BN = { without: '150', with: '1,500', acute: '3,250', hub: '500' };
+    const BL = { without: 'patients on the panel \u2014 reached by phone', with: 'patients monitored automatically', acute: 'patients monitored 24/7 by one assistant', hub: 'patients monitored by one assistant' };
+    return {
+      rootRef: el => { if (el) this._r.rootRef = el; },
+      svgRef: el => { if (el) this._r.svgRef = el; },
+      withoutTabRef: el => { if (el) this._r.withoutTabRef = el; },
+      withTabRef: el => { if (el) this._r.withTabRef = el; },
+      acuteTabRef: el => { if (el) this._r.acuteTabRef = el; },
+      hubTabRef: el => { if (el) this._r.hubTabRef = el; },
+      lightTabRef: el => { if (el) this._r.lightTabRef = el; },
+      darkTabRef: el => { if (el) this._r.darkTabRef = el; },
+      eyebrow: E[m], bigNumber: BN[m], bigLabel: BL[m],
+      caption: s.caption, statBlocks: blocks, legend, steps,
+      selWithout: () => this.selWithout(),
+      selWith: () => this.selWith(),
+      selAcute: () => this.selAcute(),
+      selHub: () => this.selHub(),
+      setLight: () => this.setLight(),
+      setDark: () => this.setDark(),
+      step: () => this.step(),
+      replay: () => this.replay(),
+    };
+  }
+}
+</script>
+</body>
+</html>

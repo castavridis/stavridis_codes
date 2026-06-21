@@ -18,6 +18,7 @@ main table once a React equivalent ships.
 | Front Matter    | `BlogFrontMatter` | `src/features/blog/components/BlogFrontMatter.tsx`    | `title`, `dek`, `date`, `readingTime`, `tags`, `onBack` |
 | (any text node) | `<Text>`          | `src/components/Text.tsx`                             | `variant` — one of the `type-*` utilities in `globals.css` |
 | Slide           | `<Slides>` + `<Slide>` | `src/features/projects/components/Slides.tsx`    | `<Slide caption={...}>{content}</Slide>` inside `<Slides>`; carousel with prev/next |
+| Workflow Toggles | `<WorkflowToggle>` | `src/features/projects/components/WorkflowToggle.tsx` | `src` (iframe URL); wraps a Claude Design `.dc.html` artifact bundled under `/public/case-studies/{slug}/workflow/` |
 
 ## Unmapped
 
