@@ -9,6 +9,7 @@ import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
 import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
+import Text from "../../components/Text.js";
 import { FeaturedWork } from "./sections/featured-work.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
@@ -440,6 +441,17 @@ export default function LandingPage({
   const glassCardSpring = useSpring({
     opacity: paintActive || !delayedShowCard ? 0 : 1,
     y: paintActive ? 64 : 0,
+    // Any card state change is instant while a project is open. Two
+    // cases:
+    //   • Paint toggled ON in project — card snaps to (opacity 0, y 64)
+    //     instantly; the sheet is also sliding down to expose the wash,
+    //     so a simultaneous smooth fade would read as a wobble.
+    //   • Paint toggled OFF in project — the delayed un-fade timer
+    //     (650ms, just past the sheet's 600ms slide-up) flips
+    //     delayedShowCard back to true. With immediate=true the card
+    //     snaps to (opacity 1, y 0) instead of smooth-animating, behind
+    //     the now-fully-arrived sheet.
+    immediate: projectOpen,
     config: { tension: 220, friction: 32 },
   });
 
@@ -496,7 +508,7 @@ export default function LandingPage({
     // 72px gutter on top + sides and 80px on bottom; everything is
     // centered. Background is washes-paper (#fbf6ea), text confetti-black.
     // -----------------------------------------------------------------------
-    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-[72px] pt-[72px] pb-[80px]">
+    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-[72px] pt-[8px] pb-[80px]">
       {/* -------------------------------------------------------------------
           Washes Shell — Figma node 4012:42332 "Header". The single rounded
           container that holds the Header (logo + nav), the Washes Canvas
@@ -626,7 +638,7 @@ export default function LandingPage({
             </FadeDown>
           ) : null}
           <FadeDown>
-            <p className="font-kyoto text-confetti-black w-[784px] text-[48px] leading-[60px] font-medium">
+            <Text variant="headline" className="text-confetti-black w-[784px]">
               <span>
                 {"Hey! I’m C Stavridis, "}
                 <br aria-hidden />
@@ -640,21 +652,29 @@ export default function LandingPage({
                   </Popover>
                 }
               >
-                <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                <Text
+                  variant="headline-italic"
+                  as="span"
+                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted"
+                >
                   Design Engineer
-                </span>
+                </Text>
               </HoverPopover>
               <span>
                 {" with"}
                 <br aria-hidden />
               </span>
               <HoverPopover popover={<BaileyPopover />}>
-                <span className="font-kyoto decoration-from-font [text-underline-position:from-font] font-medium italic underline decoration-dotted">
+                <Text
+                  variant="headline-italic"
+                  as="span"
+                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted"
+                >
                   big golden retriever energy
-                </span>
+                </Text>
               </HoverPopover>
               <span>.</span>
-            </p>
+            </Text>
           </FadeDown>
 
           {blurb ? (
@@ -670,41 +690,41 @@ export default function LandingPage({
             </FadeDown>
           ) : (
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] flex items-start gap-[16px] text-[16px] leading-[24px]">
+              <div className="text-confetti-black mt-[24px] flex items-start gap-[16px]">
                 <div className="w-[385px]">
-                  <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                  <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     then
-                  </p>
-                  <p className="mb-0">
+                  </Text>
+                  <Text variant="copy" className="mb-0">
                     {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
                     <br aria-hidden />
                     {"an enterprise digital health company (acquired "}
                     <br aria-hidden />
                     {"by Lightbeam), where I led Product and Brand."}
-                  </p>
-                  <p className="mb-0">&nbsp;</p>
-                  <p>
+                  </Text>
+                  <Text variant="copy" className="mb-0">&nbsp;</Text>
+                  <Text variant="copy">
                     In 2024, I decided to step away to be with my young family. I
                     spent the time learning and building, too.
-                  </p>
+                  </Text>
                 </div>
                 <div className="w-[385px]">
-                  <p className="font-kyoto text-confetti-black/50 mb-0 text-[16px] leading-[24px] font-medium italic">
+                  <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     now
-                  </p>
-                  <p className="mb-0">
+                  </Text>
+                  <Text variant="copy" className="mb-0">
                     {"I’ve finished two batches at the Recurse Center,"}
                     <br aria-hidden />
                     {"built AI-native tooling, and I’m currently building"}
                     <br aria-hidden />
                     {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
-                  </p>
-                  <p className="mb-0">&nbsp;</p>
-                  <p>
+                  </Text>
+                  <Text variant="copy" className="mb-0">&nbsp;</Text>
+                  <Text variant="copy">
                     {"I am looking to join a dynamic team that values"}
                     <br aria-hidden />
                     {"high-craft design and engineering."}
-                  </p>
+                  </Text>
                 </div>
               </div>
             </FadeDown>

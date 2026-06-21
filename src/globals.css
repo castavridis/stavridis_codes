@@ -51,6 +51,114 @@
   --font-kyoto: 'PP Kyoto', 'Young Serif', Georgia, serif;
 }
 
+/* -------------------------------------------------------------------------
+   Text styles — one utility per Figma typography token. Bundles family +
+   style + weight + size + line-height into a single class so consumers
+   write `type-headline` instead of `font-kyoto text-[48px] leading-[60px]
+   font-medium`. Color is intentionally NOT included (composed per surface
+   via `text-confetti-black` etc).
+
+   Companion: `<Text variant="...">` component at src/components/Text.tsx.
+
+   The class names are composed dynamically (`type-${variant}`) so
+   Tailwind's JIT can't see them in source — `@source inline(...)` below
+   forces all 14 to be emitted regardless of whether the literal string
+   appears in JSX.
+   ------------------------------------------------------------------------- */
+
+@source inline('type-{headline,headline-italic,headline-small,headline-small-italic,logotype,nav,tag,copy-large,copy,eyebrow,callout-title,callout-body,callout-meta,outcome}');
+
+@utility type-headline {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 60px;
+}
+@utility type-headline-italic {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 60px;
+}
+@utility type-headline-small {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-headline-small-italic {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-logotype {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+}
+@utility type-nav {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+}
+@utility type-tag {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+}
+@utility type-copy-large {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility type-eyebrow {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility type-callout-title {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+}
+@utility type-callout-body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 40px;
+}
+@utility type-callout-meta {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 28px;
+}
+@utility type-outcome {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 64px;
+  line-height: 64px;
+}
+
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
