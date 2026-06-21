@@ -1,6 +1,7 @@
 import { PaintbrushVertical, X } from 'lucide-react';
 
 import Button from './Button.js';
+import Text from './Text.js';
 import { usePaintStore, type BrushColor } from '../lib/paint-store.js';
 
 type HeaderProps = {
@@ -154,14 +155,15 @@ export default function Header({
           {/* Spacer matching the PaintToggle slot so the C Stavridis label
               doesn't visually collide with the toggle once it overlays. */}
           <span className="inline-block size-[24px]" aria-hidden />
-          <span
-            className="font-kyoto text-[20px] leading-[20px] font-medium italic"
+          <Text
+            variant="logotype"
+            as="span"
             // Cream halo so the dark text reads on dynamic wash colors
             // (esp. night-phase navy washes where #391f00 would disappear).
             style={{ textShadow: "0 0 8px rgba(251, 246, 234, 0.7)" }}
           >
             C Stavridis
-          </span>
+          </Text>
         </div>
         {/* Paint controls row. The leftmost slot — the PaintToggle — is
             always visible + clickable: it's the entry point into paint
@@ -201,7 +203,7 @@ export default function Header({
           href="#about"
           onClick={onAboutClick}
           style={fadeOutStyle}
-          className="font-mono text-[12px] leading-[12px] font-medium text-black underline decoration-solid [text-underline-position:from-font]"
+          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
         >
           About
         </a>
@@ -209,7 +211,7 @@ export default function Header({
           href="#experiments"
           onClick={onExperimentsClick}
           style={fadeOutStyle}
-          className="font-mono text-[12px] leading-[12px] font-medium text-black underline decoration-solid [text-underline-position:from-font]"
+          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
         >
           Experiments
         </a>
@@ -217,7 +219,7 @@ export default function Header({
           href="#resume"
           onClick={onResumeClick}
           style={fadeOutStyle}
-          className="font-mono text-[12px] leading-[12px] font-medium text-black underline decoration-solid [text-underline-position:from-font]"
+          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
         >
           Resume
         </a>

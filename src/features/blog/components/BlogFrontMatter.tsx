@@ -1,3 +1,4 @@
+import Text from '../../../components/Text.js';
 import BlogTopNavigation from './BlogTopNavigation.js';
 
 type BlogFrontMatterProps = {
@@ -28,16 +29,16 @@ export default function BlogFrontMatter({
     <div className="flex w-[944px] flex-col items-start gap-[84px]">
       <BlogTopNavigation tags={tags} onBack={onBack} />
       <div className="flex w-full flex-col items-start gap-[24px] text-confetti-black">
-        <p className="font-mono m-0 text-[12px] leading-[20px] text-confetti-black opacity-50">
+        <Text variant="tag" className="m-0 text-confetti-black opacity-50">
           <time dateTime={date}>{date}</time>
           <span className="px-[8px]">·</span>
           <span>{readingTime}</span>
-        </p>
+        </Text>
         <div className="flex w-full flex-col items-start gap-[16px]">
-          <h1 className="font-kyoto m-0 w-full text-[48px] font-medium leading-[60px]">{title}</h1>
-          <p className="font-body m-0 max-w-[704px] text-[24px] font-normal leading-[32px]">
+          <Text variant="headline" as="h1" className="m-0 w-full">{title}</Text>
+          <Text variant="copy-large" className="m-0 max-w-[704px]">
             {dek}
-          </p>
+          </Text>
         </div>
       </div>
     </div>

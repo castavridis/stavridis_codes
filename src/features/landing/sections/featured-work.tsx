@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import FadeDown from '../../../components/anim/FadeDown.js';
+import Text from '../../../components/Text.js';
 
 type ProjectOverviewProps = {
   slug: string;
@@ -32,8 +33,8 @@ function ProjectOverview({
         <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
       </button>
       <div className="flex flex-col gap-[8px]">
-        <p className="font-body w-full text-[24px] leading-[32px] text-[#251900]">{headline}</p>
-        <p className="text-caresignal-none font-mono text-[12px] leading-[20px]">{tags}</p>
+        <Text variant="copy-large" className="w-full text-[#251900]">{headline}</Text>
+        <Text variant="tag" className="text-caresignal-none">{tags}</Text>
       </div>
     </div>
   );
@@ -103,9 +104,9 @@ export function FeaturedWork({
   return (
     <section className="w-[944px]">
       <div className="mb-[40px]">
-        <p className="font-kyoto text-[24px] leading-[28px] font-medium text-[#251900]">
+        <Text variant="headline-small" className="text-[#251900]">
           Featured Work
-        </p>
+        </Text>
       </div>
       <div className="grid grid-cols-2 gap-x-[16px] gap-y-[40px]">
         {projects.map((project, i) => (

@@ -75,11 +75,11 @@ type HoverPopoverProps = {
 function BaileyPopover(): React.ReactElement {
   return (
     <div className="flex w-[228px] flex-col items-start gap-[10px] rounded-[8px] bg-white p-[12px]">
-      <p className="font-kyoto text-[24px] leading-[32px] font-medium italic text-black">
+      <Text variant="headline-small-italic" className="text-black">
         My role model,
         <br aria-hidden />
         Bailey
-      </p>
+      </Text>
       <div className="aspect-[500/438] w-full overflow-hidden rounded-[2.128px]">
         <img
           src="/images/bailey.png"

@@ -6,6 +6,8 @@
 import { useState } from "react";
 import { animated, useSpring } from "@react-spring/web";
 
+import Text from "../../../components/Text.js";
+
 export function HorseTab(): React.ReactElement {
   const [hovered, setHovered] = useState(false);
   const tabStyle = useSpring({
@@ -47,22 +49,22 @@ export function HorseTab(): React.ReactElement {
 
       {/* Title — PP Kyoto Medium Italic 24/32 confetti-black, slight tilt. */}
       <div className="-rotate-[0.51deg]">
-        <p className="font-kyoto text-confetti-black w-[161px] text-[24px] leading-[32px] font-medium italic">
+        <Text variant="headline-small-italic" className="text-confetti-black w-[161px]">
           My Favorite BTS Snap
-        </p>
+        </Text>
       </div>
 
       {/* Quote — Spline Sans Mono 12/20 confetti-black, matching the
           Figma line breaks. */}
       <div className="-rotate-[0.51deg] w-full">
-        <p className="font-mono text-confetti-black w-full text-[12px] leading-[20px] whitespace-pre-wrap">
+        <Text variant="tag" className="text-confetti-black w-full whitespace-pre-wrap">
           {`"Let a horse whisper`}
           <br aria-hidden />
           {`in your ear and breathe on your heart.`}
           <br aria-hidden />
           {`You will never regret it."`}
           <br aria-hidden />— Author Unknown
-        </p>
+        </Text>
       </div>
     </animated.div>
   );

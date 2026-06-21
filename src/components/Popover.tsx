@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
+import Text from './Text.js';
+
 type PopoverProps = {
   title: string;
   children: ReactNode;
@@ -14,9 +16,9 @@ export default function Popover({ title, children, icon, onClose }: PopoverProps
       <div className="flex items-center gap-[12px] w-full">
         <div className="flex flex-1 min-w-0 items-center gap-[8px]">
           {icon ? <div className="size-[12px] shrink-0">{icon}</div> : null}
-          <p className="flex-1 min-w-0 font-kyoto italic font-medium text-[24px] leading-[32px] text-black break-words">
+          <Text variant="headline-small-italic" className="flex-1 min-w-0 text-black break-words">
             {title}
-          </p>
+          </Text>
         </div>
         {onClose ? (
           <button
@@ -29,7 +31,7 @@ export default function Popover({ title, children, icon, onClose }: PopoverProps
           </button>
         ) : null}
       </div>
-      <div className="w-full font-mono font-normal text-[12px] leading-[20px] text-black break-words">{children}</div>
+      <div className="w-full type-tag text-black break-words">{children}</div>
     </div>
   );
 }

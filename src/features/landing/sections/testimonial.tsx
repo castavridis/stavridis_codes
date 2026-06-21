@@ -8,6 +8,8 @@
 // reads as quietly decorated rather than as a second active surface.
 // ---------------------------------------------------------------------------
 
+import Text from "../../../components/Text.js";
+
 export function Testimonial(): React.ReactElement {
   return (
     <section className="relative w-[944px] overflow-clip rounded-[12px]">
@@ -35,23 +37,24 @@ export function Testimonial(): React.ReactElement {
       />
 
       <div className="relative flex h-[312px] flex-col gap-[24px] px-[80px] pt-[72px]">
-        <p className="font-kyoto text-[24px] leading-[28px] font-medium italic text-[#251900]">
+        <Text variant="headline-small-italic" className="text-[#251900]">
           My Favorite Testimonial
-        </p>
+        </Text>
 
-        <p
-          className="font-body text-[24px] leading-[28px] font-normal text-[#391f00]"
+        <Text
+          variant="copy-large"
+          className="text-[#391f00]"
           style={{ maxWidth: 720 }}
         >
           “I love working with you, C. You have an infectious energy and passion
           for what you do and you know how to push people in the right
           directions or advise them to get the best out of them.”
-        </p>
+        </Text>
 
-        <p className="font-mono text-[12px] leading-[20px] text-[#391f00]">
+        <Text variant="tag" className="text-[#391f00]">
           <span className="font-bold">Georgiana Ramona Turcsanyi</span>
           <span> · Senior Software Engineer, Quartr</span>
-        </p>
+        </Text>
       </div>
     </section>
   );

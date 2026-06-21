@@ -1,3 +1,5 @@
+import Text from '../../../components/Text.js';
+
 type CalloutProps = {
   title?: string;
   content: React.ReactNode;
@@ -9,17 +11,17 @@ export default function Callout({ title, content, attribution }: CalloutProps) {
     <div className="flex w-[944px] flex-col items-center justify-center overflow-clip rounded-[8px] bg-[#f0eeeb] px-[80px] py-[60px]">
       <div className="flex w-full flex-col items-start gap-[24px] text-black">
         {title ? (
-          <p className="font-kyoto m-0 w-full text-[24px] font-medium italic leading-none">
+          <Text variant="callout-title" className="m-0 w-full">
             {title}
-          </p>
+          </Text>
         ) : null}
-        <p className="font-body m-0 w-full text-[36px] font-light leading-[40px]">
+        <Text variant="callout-body" className="m-0 w-full">
           {content}
-        </p>
+        </Text>
         {attribution ? (
-          <p className="font-mono m-0 w-full text-[14px] leading-[28px]">
+          <Text variant="callout-meta" className="m-0 w-full">
             {attribution}
-          </p>
+          </Text>
         ) : null}
       </div>
     </div>

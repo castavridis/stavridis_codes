@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
 import Button from '../../../components/Button.js';
+import Text from '../../../components/Text.js';
 import { routes } from '../../../routes.js';
 
 type BlogTopNavigationProps = {
@@ -17,9 +18,9 @@ type BlogTopNavigationProps = {
 export default function BlogTopNavigation({ tags, onBack }: BlogTopNavigationProps) {
   return (
     <div className="flex w-[944px] items-center gap-[24px] overflow-clip">
-      <p className="font-mono flex-1 min-w-0 text-[12px] leading-[20px] text-confetti-black opacity-50">
+      <Text variant="tag" className="flex-1 min-w-0 text-confetti-black opacity-50">
         {tags ?? ''}
-      </p>
+      </Text>
       {onBack ? (
         <Button variant="outline" label="Back to posts" onClick={onBack} />
       ) : (

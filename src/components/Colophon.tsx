@@ -1,3 +1,5 @@
+import Text from './Text.js';
+
 type ColophonProps = {
   colophon?: string[];
   acknowledgements?: string[];
@@ -22,16 +24,16 @@ export default function Colophon({
   return (
     <div className="flex gap-[16px] items-start text-white">
       <div className="flex flex-col gap-[24px] items-start py-[120px] w-[384px] shrink-0">
-        <p className="font-kyoto font-medium text-[24px] leading-[32px] w-full">Colophon</p>
-        <div className="font-mono font-normal text-[12px] leading-[20px] w-full">
+        <Text variant="headline-small" className="w-full">Colophon</Text>
+        <div className="type-tag w-full">
           {colophon.map((line, i) => (
             <p key={i}>{line}</p>
           ))}
         </div>
       </div>
       <div className="flex flex-col gap-[24px] items-start py-[120px] w-[384px] shrink-0">
-        <p className="font-kyoto font-medium text-[24px] leading-[32px] w-full">Acknowledgements</p>
-        <div className="font-mono font-normal text-[12px] leading-[20px] w-full">
+        <Text variant="headline-small" className="w-full">Acknowledgements</Text>
+        <div className="type-tag w-full">
           {acknowledgements.map((line, i) => (
             <p key={i}>{line}</p>
           ))}

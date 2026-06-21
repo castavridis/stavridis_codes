@@ -104,8 +104,7 @@ export function PresetWidget({
   // animated.div wrapper hit opacity < 1 mid-transition: opacity creates
   // a stacking context that isolates blend-mode, so the text would
   // briefly render as raw washes-paper (cream-on-cream → invisible).
-  const textClass =
-    "text-confetti-black font-mono text-[12px] leading-[24px]";
+  const textClass = "text-confetti-black type-tag";
 
   // Desktop layout (Figma node 4014:43167) is a single horizontal row:
   //   [Location] is where I'm based. It's currently [Time], NN°F and [Weather].
@@ -114,7 +113,7 @@ export function PresetWidget({
   // prevents browser word-wrap inside the row at desktop widths.
   return (
     <div
-      className={`font-mono flex items-center rounded-md text-[12px] leading-[24px] ${
+      className={`flex items-center rounded-md type-tag ${
         isMobile ? "flex-col gap-[6px]" : "flex-row flex-nowrap gap-[6px] whitespace-nowrap"
       }`}
     >
@@ -184,7 +183,7 @@ function PresetBug({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="ml-[6px] bg-confetti-black text-caresignal-white font-mono inline-flex items-center rounded-[4px] px-[8px] text-[12px] leading-[24px] transition-transform hover:-translate-y-[2px]"
+      className="ml-[6px] bg-confetti-black text-caresignal-white type-tag inline-flex items-center rounded-[4px] px-[8px] transition-transform hover:-translate-y-[2px]"
     >
       {children}
     </button>

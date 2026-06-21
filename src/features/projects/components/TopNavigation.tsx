@@ -1,4 +1,5 @@
 import Button from '../../../components/Button.js';
+import Text from '../../../components/Text.js';
 
 type TopNavigationProps = {
   tags?: string;
@@ -13,9 +14,9 @@ type TopNavigationProps = {
 export default function TopNavigation({ tags, onClose }: TopNavigationProps) {
   return (
     <div className="flex w-[944px] items-center gap-[24px] overflow-clip">
-      <p className="font-mono flex-1 min-w-0 text-[12px] leading-[20px] text-confetti-black opacity-50">
+      <Text variant="tag" className="flex-1 min-w-0 text-confetti-black opacity-50">
         {tags ?? ''}
-      </p>
+      </Text>
       <Button variant="outline" label="Close" onClick={onClose} />
     </div>
   );

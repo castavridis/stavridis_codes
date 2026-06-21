@@ -24,31 +24,31 @@ export const mdxComponents = {
   h1: (props: ComponentProps<'h1'>) => (
     <h1
       {...props}
-      className="font-kyoto mt-[64px] mb-[24px] text-[40px] font-medium leading-[48px] text-confetti-black"
+      className="type-headline-small mt-[64px] mb-[24px] text-confetti-black"
     />
   ),
   h2: (props: ComponentProps<'h2'>) => (
     <h2
       {...props}
-      className="font-kyoto mt-[48px] mb-[16px] text-[32px] font-medium leading-[40px] text-confetti-black"
+      className="type-headline-small mt-[48px] mb-[16px] text-confetti-black"
     />
   ),
   p: (props: ComponentProps<'p'>) => (
     <p
       {...props}
-      className="font-body my-[16px] text-[20px] font-normal leading-[32px] text-confetti-black"
+      className="type-copy-large my-[16px] text-confetti-black"
     />
   ),
   a: (props: ComponentProps<'a'>) => (
     <a
       {...props}
-      className="font-body text-confetti-black underline decoration-dotted decoration-from-font [text-underline-position:from-font]"
+      className="text-confetti-black underline decoration-dotted decoration-from-font [text-underline-position:from-font]"
     />
   ),
   blockquote: (props: ComponentProps<'blockquote'>) => (
     <blockquote
       {...props}
-      className="font-kyoto my-[32px] border-l-2 border-confetti-black/30 pl-[24px] text-[24px] font-medium italic leading-[32px] text-confetti-black"
+      className="type-headline-small-italic my-[32px] border-l-2 border-confetti-black/30 pl-[24px] text-confetti-black"
     />
   ),
   Callout,
@@ -200,7 +200,7 @@ function ChromeRow({
           <div className="flex w-[944px] items-center gap-[24px] overflow-clip py-[32px]">
             <div className="relative min-w-0 flex-1">
               <p
-                className="font-mono text-[12px] leading-[20px] text-confetti-black"
+                className="type-tag text-confetti-black"
                 style={{
                   opacity: tagsOpacity * 0.5,
                   transition: 'opacity 80ms linear',
