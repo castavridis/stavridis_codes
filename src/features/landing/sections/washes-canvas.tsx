@@ -135,7 +135,7 @@ export function WashesCanvas({
 
       wash.gouacheMode("auto");
       wash.paperWetness("damp");
-      wash.paintLoad(0.25);
+      wash.paintLoad(0.15);
       wash.waterLoad(8.0);
       wash.evaporation(2.5);
       // 160 matches the legacy hero (BRUSH_DEFAULT). Smaller values feel
@@ -143,7 +143,7 @@ export function WashesCanvas({
       wash.brushSize(160);
       wash.edgeMode("gravity");
       wash.gravityDirection("down");
-      wash.gravityStrength(0.1);
+      wash.gravityStrength(0.075);
       wash.fadeHalfLife(10000);
       wash.fadePainting(0.05);
       // Smooth strokes on touch devices where pointermove is sparse.
