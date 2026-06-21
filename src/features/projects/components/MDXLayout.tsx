@@ -4,6 +4,7 @@ import Button from '../../../components/Button.js';
 import Callout from './Callout.js';
 import FrontMatter from './FrontMatter.js';
 import OutcomeStat from './OutcomeStat.js';
+import Section from './Section.js';
 
 type Front = {
   headline: string;
@@ -53,6 +54,7 @@ export const mdxComponents = {
   ),
   Callout,
   OutcomeStat,
+  Section,
 };
 
 // Layout values are taken from the CareSignal Platform Project Detail frame
