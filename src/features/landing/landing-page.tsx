@@ -710,7 +710,7 @@ export default function LandingPage({
             establishes the canonical resting structure. */}
         <animated.div
           ref={glassCardRef}
-          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[160px] pt-[132px]"
+          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[16px] pt-[24px] md:px-[160px] md:pt-[132px]"
           style={{
             top: "9.42%",
             bottom: "0.2%",
@@ -787,7 +787,7 @@ export default function LandingPage({
                 <Text
                   variant="headline-italic"
                   as="span"
-                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted"
+                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
                 >
                   {roleLabel}
                 </Text>
@@ -800,7 +800,7 @@ export default function LandingPage({
                 <Text
                   variant="headline-italic"
                   as="span"
-                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted"
+                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
                 >
                   big golden retriever energy
                 </Text>
@@ -824,7 +824,7 @@ export default function LandingPage({
             </FadeDown>
           ) : (
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] flex items-start gap-[16px]">
+              <div className="text-confetti-black mt-[24px] flex flex-col items-start gap-[16px] md:flex-row">
                 <div className="w-full max-w-[385px]">
                   <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     then
