@@ -59,6 +59,19 @@ export function WashesCanvas({
   const setWashesVisible = usePaintStore((s) => s.setWashesVisible);
   const paintActive = usePaintStore((s) => s.paintActive);
 
+  // Mirror current dayPhase / weather into refs so the reset effect's
+  // setTimeout reads the latest values (not closure values from when the
+  // reset was triggered). Without this, cycling a location starts the
+  // 350ms wipe with the OLD weather, the async OpenMeteo fetch finishes
+  // and updates `weather` state, the apply effect repaints the canvas with
+  // the new weather, then the timeout fires and overwrites it with the
+  // stale closure weather — so the visualization snaps back to the
+  // previous location's weather.
+  const dayPhaseRef = useRef(dayPhase);
+  const weatherRef = useRef(weather);
+  dayPhaseRef.current = dayPhase;
+  weatherRef.current = weather;
+
   // Fade-in / fade-out spring for the canvas surface. Driven by the
   // `washesVisible` flag (used by both the initial mount fade-in and the
   // mid-cycle wipe during a preset reset).
@@ -266,12 +279,16 @@ export function WashesCanvas({
         /* ignore */
       }
       wash.fadeHalfLife(10000);
-      // Re-apply visualization for the (possibly new) day phase / weather.
-      const paper = DAY_PHASE_PAPER[dayPhase];
+      // Re-apply visualization. Read dayPhase + weather from refs so the
+      // async OpenMeteo fetch that resolved during the 350ms wait wins
+      // over the closure snapshot from when the reset was triggered.
+      const currentDayPhase = dayPhaseRef.current;
+      const currentWeather = weatherRef.current;
+      const paper = DAY_PHASE_PAPER[currentDayPhase];
       const rgb = hexToRgb(paper);
       wash.paperColor(rgb.r / 255, rgb.g / 255, rgb.b / 255);
-      wash.setBackground(DAY_PHASE_BACKGROUND[dayPhase]);
-      wash.setAnimation(WEATHER_PRESETS[weather].animation);
+      wash.setBackground(DAY_PHASE_BACKGROUND[currentDayPhase]);
+      wash.setAnimation(WEATHER_PRESETS[currentWeather].animation);
       const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
       if (canvasEl) canvasEl.style.backgroundColor = paper;
       setWashesVisible(true);
