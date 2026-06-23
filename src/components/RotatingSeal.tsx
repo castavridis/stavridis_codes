@@ -7,8 +7,12 @@ import { useId } from 'react';
 const FONT_SIZE = 9;
 const LETTER_SPACING = 1.6;
 const CHAR_ADVANCE = FONT_SIZE * 0.6 + LETTER_SPACING;
-// Separator placed between repetitions only — never leading or trailing.
-const SEPARATOR = ' · ';
+// Middot glyph placed between repetitions. The surrounding spacing is
+// computed per-seal in buildCurvedText so the names + middots spread
+// evenly around the full circle.
+const MIDDOT = '·';
+// Minimum character slots between a name and the next middot (" · ").
+const MIN_GAP = 3;
 
 type RotatingSealProps = {
   // Curved perimeter text. Repeats automatically — see buildCurvedText.
@@ -34,22 +38,44 @@ type RotatingSealProps = {
 const DEFAULT_FOREGROUND = '#391f00'; // confetti-black
 const DEFAULT_BACKGROUND = '#e3af08'; // washes-hansa-yellow
 
-// Compute how many whole repetitions of `companyName` fit on the
-// circumference, separated by SEPARATOR between each repetition (no
-// leading or trailing separator). Names are NEVER cut mid-word — we
-// take the floor of the repetition count so partial names don't render.
+// Build the curved perimeter text.
+//
+//   - 1 copy fits  → just the name, no middots.
+//   - N copies fit → N names + N middots (one trailing each copy, so the
+//     seam where the text wraps back to the start also gets a middot),
+//     with the leftover character slots distributed evenly across all N
+//     gaps so the names + middots spread evenly around the full circle.
+//
+// Names are NEVER cut mid-word — we take the floor of the copy count so
+// partial names don't render. NOTE: the multi-space padding only renders
+// if the <text> sets xml:space="preserve" (SVG collapses runs of
+// whitespace otherwise).
 function buildCurvedText(companyName: string, radius: number): string {
   const circumference = 2 * Math.PI * radius;
   const maxChars = Math.floor(circumference / CHAR_ADVANCE);
   const nameLen = companyName.length;
-  const sepLen = SEPARATOR.length;
-  // N copies of name + (N-1) separators ≤ maxChars
-  // ⇒ N ≤ (maxChars + sepLen) / (nameLen + sepLen)
-  const repetitions = Math.max(
-    1,
-    Math.floor((maxChars + sepLen) / (nameLen + sepLen)),
-  );
-  return Array.from({ length: repetitions }, () => companyName).join(SEPARATOR);
+
+  // Most copies that fit with at least MIN_GAP slots after each (every
+  // copy gets a trailing gap since the text wraps a full circle).
+  const copies = Math.max(1, Math.floor(maxChars / (nameLen + MIN_GAP)));
+
+  // A single copy reads as a plain name — no middots, no forced spread.
+  if (copies === 1) return companyName;
+
+  // Distribute the leftover slots evenly across the `copies` gaps. base is
+  // ≥ MIN_GAP by construction; the first `extra` gaps get one more slot.
+  const gapSlots = maxChars - copies * nameLen;
+  const base = Math.floor(gapSlots / copies);
+  const extra = gapSlots % copies;
+
+  let out = '';
+  for (let i = 0; i < copies; i++) {
+    const width = base + (i < extra ? 1 : 0);
+    const left = Math.floor((width - 1) / 2);
+    const right = width - 1 - left;
+    out += companyName + ' '.repeat(left) + MIDDOT + ' '.repeat(right);
+  }
+  return out;
 }
 
 export default function RotatingSeal({
@@ -104,6 +130,9 @@ export default function RotatingSeal({
           fontFamily="var(--font-mono)"
           fontSize={FONT_SIZE}
           letterSpacing={LETTER_SPACING}
+          // preserve so the multi-space gap padding from buildCurvedText
+          // isn't collapsed (SVG collapses whitespace runs by default).
+          xmlSpace="preserve"
           style={{ textTransform: 'uppercase' }}
         >
           <textPath href={`#${pathId}`}>{curved}</textPath>
