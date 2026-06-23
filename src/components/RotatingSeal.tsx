@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 // Mono char advance heuristic. SVG <text> doesn't trivially give us the
 // rendered string length at the time we build the markup, so we
@@ -97,8 +97,25 @@ export default function RotatingSeal({
   const radius = size / 2 - 12;
   const curved = buildCurvedText(companyName, radius);
 
+  // Pause the spin while the seal is scrolled out of view so it costs
+  // nothing offscreen. Defaults to running so it animates even if
+  // IntersectionObserver is unavailable.
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [onscreen, setOnscreen] = useState(true);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setOnscreen(entry.isIntersecting),
+      { rootMargin: '64px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div
+      ref={wrapperRef}
       className={`relative inline-block rounded-full shadow-md ${className ?? ''}`}
       style={{
         width: size,
@@ -113,8 +130,14 @@ export default function RotatingSeal({
     >
       <svg
         viewBox={`0 0 ${size} ${size}`}
-        className="absolute inset-0 size-full motion-safe:[animation:seal-spin_var(--seal-duration)_linear_infinite]"
-        style={{ '--seal-duration': `${durationSeconds}s` } as React.CSSProperties}
+        // will-change promotes the SVG to its own GPU layer so the rotation
+        // composites (text rasterized once) instead of repainting the vector
+        // text on the main thread every frame. play-state pauses it offscreen.
+        className="absolute inset-0 size-full motion-safe:will-change-transform motion-safe:[animation:seal-spin_var(--seal-duration)_linear_infinite]"
+        style={{
+          '--seal-duration': `${durationSeconds}s`,
+          animationPlayState: onscreen ? 'running' : 'paused',
+        } as React.CSSProperties}
         aria-hidden
       >
         <defs>
