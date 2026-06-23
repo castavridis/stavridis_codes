@@ -18,7 +18,7 @@
 // consolidate this with hero.tsx.
 // ---------------------------------------------------------------------------
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { animated, useSpring } from "@react-spring/web";
 
 import { Washes } from "../../../../lib/washes/washes.js";
@@ -44,15 +44,24 @@ export type WashesCanvasProps = {
   scrollRef?: React.RefObject<HTMLDivElement | null>;
   dayPhase: DayPhase;
   weather: WeatherKey;
+  // Pause the simulation when the wash is covered by an overlay (project /
+  // blog sheet). Combined with offscreen + tab-hidden detection below so
+  // the GPU/CPU sim never runs when it can't be seen.
+  paused?: boolean;
 };
 
 export function WashesCanvas({
   scrollRef,
   dayPhase,
   weather,
+  paused = false,
 }: WashesCanvasProps): React.ReactElement {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const washRef = useRef<WashesInstance | null>(null);
+  // Flips true once the Washes instance exists, so the pause controller
+  // can apply the correct initial run/pause state even when the canvas is
+  // created asynchronously (ResizeObserver path).
+  const [washReady, setWashReady] = useState(false);
 
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const resetVersion = usePaintStore((s) => s.resetVersion);
@@ -211,6 +220,9 @@ export function WashesCanvas({
         w.pigment(nearestPigment(c.r, c.g, c.b) as PigmentOption);
       });
 
+      // Signal the pause controller that the instance now exists.
+      setWashReady(true);
+
       // Fade in once the canvas has rendered its first frame.
       requestAnimationFrame(() => {
         setWashesVisible(true);
@@ -247,6 +259,59 @@ export function WashesCanvas({
     // effect below handles updates without a full reinit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ------------------------------------------------------------------------
+  // Pause controller. The watercolor sim is the page's heaviest ongoing
+  // cost, so freeze it whenever it can't be seen:
+  //   - `paused` prop  — a project/blog overlay is covering the wash
+  //   - offscreen      — the shell has scrolled out of view (IntersectionObserver)
+  //   - tab hidden     — the document is backgrounded (visibilitychange)
+  // wash.pause()/resume() are idempotent; the sim loop skips its work while
+  // paused. `washReady` re-runs this once the instance exists so the initial
+  // state is correct even when the canvas is created asynchronously.
+  // ------------------------------------------------------------------------
+  useEffect(() => {
+    let offscreen = false;
+    let hidden = typeof document !== "undefined" && document.hidden;
+
+    const apply = () => {
+      const wash = washRef.current;
+      if (!wash) return;
+      const shouldPause = paused || offscreen || hidden;
+      try {
+        if (shouldPause) wash.pause();
+        else wash.resume();
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const host = hostRef.current;
+    let io: IntersectionObserver | null = null;
+    if (host && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          offscreen = !entry.isIntersecting;
+          apply();
+        },
+        { rootMargin: "64px" },
+      );
+      io.observe(host);
+    }
+
+    const onVisibility = () => {
+      hidden = document.hidden;
+      apply();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    apply();
+
+    return () => {
+      io?.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [paused, washReady]);
 
   // ------------------------------------------------------------------------
   // Gate the canvas element's pointer events + touch-action on paintActive.

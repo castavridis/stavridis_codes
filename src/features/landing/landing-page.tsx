@@ -311,7 +311,7 @@ function HoverPopover({
 export default function LandingPage({
   onCardClick,
   onCardHover: _onCardHover,
-  paused: _paused = false,
+  paused = false,
   transitioning: _transitioning = false,
   company,
   blurb,
@@ -693,7 +693,7 @@ export default function LandingPage({
           {/* No `scrollRef` — the outer wrapper IS the scroll target.
               PresetWidget + PaintBrush both reference `washesRef` (the
               outer div), so the WashesCanvas can stay agnostic. */}
-          <WashesCanvas dayPhase={dayPhase} weather={weather} />
+          <WashesCanvas dayPhase={dayPhase} weather={weather} paused={paused} />
 
           {/* Tap catcher — the overlay the washesRef comment refers to.
               Previously documented ("enforced by the tap catcher overlay

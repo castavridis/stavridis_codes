@@ -288,7 +288,7 @@ export function App() {
       {/* Landing page — always mounted beneath the project sheet overlay. */}
       <div className="w-full">
         <LandingPage
-          paused={projectOpen}
+          paused={projectOpen || blogOpen}
           transitioning={projectOpen}
           onCardHover={handleCardHover}
           onCardClick={handleCardClick}
