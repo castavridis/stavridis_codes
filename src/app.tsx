@@ -382,6 +382,10 @@ function ProjectSheetContent({
   const backgroundColor = isV2 ? 'transparent' : (project?.background ?? '#fbf6ea');
   return (
     <div
+      // no-scrollbar: the sheet scrolls but hides the bar, which otherwise
+      // sat at the rounded right edge overlapping content (the top-right
+      // Close button) and the 8px mobile clearance.
+      className="no-scrollbar"
       style={{
         position: 'absolute',
         inset: 0,
@@ -411,6 +415,7 @@ function BlogSheetContent({
 }) {
   return (
     <div
+      className="no-scrollbar"
       style={{
         position: 'absolute',
         inset: 0,
