@@ -53,6 +53,9 @@ type LandingPageProps = {
   // visitor — see CompanyConfig.featuredSlugs. Undefined renders the
   // canonical 4.
   featuredSlugs?: string[];
+  // Subset of slugs that get a rotating "Featured Project" seal over
+  // their thumbnail. See CompanyConfig.featuredProjects.
+  featuredProjectSlugs?: string[];
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
@@ -268,6 +271,7 @@ export default function LandingPage({
   blurb,
   onDismiss,
   featuredSlugs,
+  featuredProjectSlugs,
   roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
@@ -854,7 +858,12 @@ export default function LandingPage({
 
       <DomMarker name="featured-work">
         <div className="mt-[60px] flex w-full max-w-[944px] justify-center">
-          <FeaturedWork onCardClick={onCardClick} slugs={featuredSlugs} />
+          <FeaturedWork
+            onCardClick={onCardClick}
+            slugs={featuredSlugs}
+            featuredProjectSlugs={featuredProjectSlugs}
+            stampCompanyName={company}
+          />
         </div>
       </DomMarker>
 

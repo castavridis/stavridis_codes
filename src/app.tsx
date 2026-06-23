@@ -58,6 +58,9 @@ const WorkflowSandbox = import.meta.env.DEV
 const SectionSandbox = import.meta.env.DEV
   ? lazy(() => import('./sandbox/section-sandbox.js'))
   : undefined;
+const SealSandbox = import.meta.env.DEV
+  ? lazy(() => import('./sandbox/seal-sandbox.js'))
+  : undefined;
 
 
 export function App() {
@@ -69,6 +72,7 @@ export function App() {
   const [matchSandboxSlides] = useRoute('/sandbox/slides');
   const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
   const [matchSandboxSection] = useRoute('/sandbox/section');
+  const [matchSandboxSeal] = useRoute('/sandbox/seal');
   const [matchRoleDe] = useRoute(routes.roleDe.path);
   const [matchRolePd] = useRoute(routes.rolePd.path);
   const [matchRoleClear] = useRoute(routes.roleClear.path);
@@ -268,6 +272,14 @@ export function App() {
     );
   }
 
+  if (import.meta.env.DEV && matchSandboxSeal && SealSandbox) {
+    return (
+      <Suspense fallback={<RoutePending />}>
+        <SealSandbox />
+      </Suspense>
+    );
+  }
+
   return (
     <main className="font-light color-[#251900] overflow-x-hidden">
       {/* Landing page — always mounted beneath the project sheet overlay. */}
@@ -281,6 +293,7 @@ export function App() {
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
+          featuredProjectSlugs={company?.featuredProjects}
           roleLabel={roleLabel}
         />
       </div>

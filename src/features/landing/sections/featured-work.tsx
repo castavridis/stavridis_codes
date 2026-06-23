@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------------
 
 import FadeDown from '../../../components/anim/FadeDown.js';
+import RotatingSeal from '../../../components/RotatingSeal.js';
 import Text from '../../../components/Text.js';
 
 type ProjectOverviewProps = {
@@ -19,6 +20,10 @@ type ProjectOverviewProps = {
   // placeholder used as a layout aid before assets land.
   image?: string;
   imageAlt?: string;
+  // When set, renders a rotating "Featured Project" seal over the
+  // top-right of the thumbnail with the company name curved on the
+  // perimeter. Driven by CompanyConfig.featuredProjects.
+  stampCompanyName?: string;
 };
 
 function ProjectOverview({
@@ -29,6 +34,7 @@ function ProjectOverview({
   thumbnailClassName,
   image,
   imageAlt,
+  stampCompanyName,
 }: ProjectOverviewProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-[16px]">
@@ -46,6 +52,21 @@ function ProjectOverview({
         ) : (
           <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
         )}
+        {stampCompanyName ? (
+          <span
+            className="pointer-events-none"
+            style={{
+              right: 'auto',
+              left: '-24px',
+              isolation: 'isolate',
+              zIndex: 10,
+              position: 'fixed',
+              top: '24px',
+            }}
+          >
+            <RotatingSeal companyName={stampCompanyName} size={104} />
+          </span>
+        ) : null}
       </button>
       <div className="flex flex-col gap-[8px]">
         <Text variant="copy-large" className="w-full text-[#251900]">{headline}</Text>
@@ -113,18 +134,29 @@ const PROJECTS: Project[] = [
 // the most-relevant work for that audience. Unknown slugs are skipped
 // silently so a stale config can't blow up the landing. When absent,
 // renders the canonical PROJECTS list.
+//
+// `featuredProjectSlugs` + `stampCompanyName` — when both are set, any
+// project whose slug is in `featuredProjectSlugs` renders a rotating
+// "Featured Project" seal over its thumbnail with the company name
+// curved around it. See CompanyConfig.featuredProjects.
 export function FeaturedWork({
   onCardClick,
   slugs,
+  featuredProjectSlugs,
+  stampCompanyName,
 }: {
   onCardClick?: (slug: string) => void;
   slugs?: string[];
+  featuredProjectSlugs?: string[];
+  stampCompanyName?: string;
 }): React.ReactElement {
   const projects = slugs
     ? slugs
         .map((s) => PROJECTS.find((p) => p.slug === s))
         .filter((p): p is Project => Boolean(p))
     : PROJECTS;
+
+  const stampSlugs = new Set(featuredProjectSlugs ?? []);
 
   return (
     <section className="w-[944px]">
@@ -143,6 +175,11 @@ export function FeaturedWork({
               thumbnailClassName={project.thumbnailClassName}
               image={project.image}
               imageAlt={project.imageAlt}
+              stampCompanyName={
+                stampCompanyName && stampSlugs.has(project.slug)
+                  ? stampCompanyName
+                  : undefined
+              }
               onClick={onCardClick}
             />
           </FadeDown>

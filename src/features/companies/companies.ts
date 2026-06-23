@@ -5,6 +5,13 @@ import type { Role } from '../role/role-context.js';
 // (`caresignal-platform`, `fracta`, `sqshbook`, `caresignal-ai`). When
 // absent, FeaturedWork renders its canonical 4 in canonical order.
 //
+// `featuredProjects` — slugs that get a rotating "Featured Project"
+// seal stamp over the thumbnail. Supports multiple entries
+// (every matching card gets its own stamp). Use to highlight the work
+// most relevant to this company. Slugs that aren't also in
+// `featuredSlugs` (or in the canonical 4 when `featuredSlugs` is
+// absent) silently no-op.
+//
 // `role` — optional role override applied while this company's context
 // is active. `'de'` → "Design Engineer", `'pd'` → "Product Designer".
 // Takes precedence over the visitor's stored role but is subordinate to
@@ -15,6 +22,7 @@ export type CompanyConfig = {
   name: string;
   blurb?: string;
   featuredSlugs?: string[];
+  featuredProjects?: string[];
   role?: Role;
 };
 
@@ -22,6 +30,7 @@ export const companies: Record<string, CompanyConfig> = {
   civai: {
     name: 'CivAI',
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta'],
+    featuredProjects: ['fracta'],
     role: 'pd',
   },
   ramp: {
@@ -76,7 +85,8 @@ export const companies: Record<string, CompanyConfig> = {
   },
   counsel: {
     name: 'Counsel Health',
-    featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta', 'sqshbook'],
+    featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
+    featuredProjects: ['caresignal-platform', 'fracta'],
     role: 'pd',
   },
   flatiron: {
