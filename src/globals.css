@@ -212,11 +212,11 @@
 
 /* Per-company greeting chip "wag" — a one-shot decaying tail-wag played
    once after load. Pivots from the left (transform-origin set on the
-   element) and starts + ends at the chip's resting rotate(-2deg) so it
+   element) and starts + ends at the chip's resting rotate(0deg) so it
    settles cleanly without a jump. */
 @keyframes chip-wag {
   0% {
-    transform: rotate(-2deg);
+    transform: rotate(0deg);
   }
   12% {
     transform: rotate(-11deg);
@@ -234,6 +234,6 @@
     transform: rotate(-4deg);
   }
   100% {
-    transform: rotate(-2deg);
+    transform: rotate(0deg);
   }
 }

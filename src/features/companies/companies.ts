@@ -137,7 +137,7 @@ export const companies: Record<string, CompanyConfig> = {
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'sqshbook', 'fracta'],
     role: 'pd',
   },
-  counsel: {
+  counsel_health: {
     name: 'Counsel Health',
     featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
     featuredProjects: ['caresignal-platform', 'fracta'],
@@ -147,8 +147,8 @@ export const companies: Record<string, CompanyConfig> = {
       dark: 'rgb(36, 56, 102)',
     },
     salutation_colors: {
-      foreground_color: 'rgb(255, 255, 255)',
-      background_color: 'rgb(36, 56, 102)',
+      background_color: 'rgb(215, 221, 197)',
+      foreground_color: 'rgb(36, 56, 102)',
     },
     seal: {
       foreground_color: 'rgb(36, 56, 102)',

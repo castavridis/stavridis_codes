@@ -841,7 +841,7 @@ export default function LandingPage({
                     default `Hey! {name}`. */}
                 {(() => {
                   const salutationText =
-                    companySalutation ?? `Hey! ${company}`;
+                    companySalutation ?? `Hey, ${company}!`;
                   const chipBg =
                     companySalutationColors?.background_color ??
                     SEAL_DEFAULT_BACKGROUND;
@@ -850,7 +850,7 @@ export default function LandingPage({
                     SEAL_DEFAULT_FOREGROUND;
                   return (
                     <span
-                      className={`${wagging ? "motion-safe:[animation:chip-wag_800ms_ease-in-out]" : ""}`}
+                      className={`shadow-sm ${wagging ? "motion-safe:[animation:chip-wag_800ms_ease-in-out]" : ""}`}
                       // Wag on hover too; cleared on animationEnd so the next
                       // hover (or the load trigger) can replay it.
                       onMouseEnter={() => setWagging(true)}
@@ -863,12 +863,10 @@ export default function LandingPage({
                         fontFamily: "sans-serif",
                         fontStyle: "normal",
                         position: "relative",
-                        left: "-16px",
-                        transform: "rotate(-2deg)",
+                        left: "-12px",
                         // Pivot from the left so the wag swings the chip's
-                        // free end like a tail. The keyframe starts + ends at
-                        // rotate(-2deg) so it settles back to this resting tilt.
-                        transformOrigin: "left center",
+                        // free end like a tail.
+                        transformOrigin: "right center",
                       }}
                     >
                       {salutationText}
