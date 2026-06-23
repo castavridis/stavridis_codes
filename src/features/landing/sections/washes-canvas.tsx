@@ -240,13 +240,21 @@ export function WashesCanvas({
   }, []);
 
   // ------------------------------------------------------------------------
-  // Gate the canvas element's pointer events on paintActive. The Washes
-  // lib attaches its built-in pointer handlers (pointer: true) to its own
-  // <canvas>; setting pointer-events: none on that canvas blocks the lib
-  // from receiving taps without affecting any sibling elements (the
-  // Header's PaintToggle, the WashesInfo, etc., which sit at z-20+ above
-  // the canvas in the wash shell). Only the PaintToggle button next to
-  // "C Stavridis" can enter paint mode now.
+  // Gate the canvas element's pointer events + touch-action on paintActive.
+  //
+  //   - pointer-events: when false, the Washes lib can't receive taps so
+  //     paint mode can't be entered by tapping the canvas. Only the
+  //     PaintToggle button next to "C Stavridis" opens paint mode.
+  //   - touch-action: the lib sets touch-action:none on its canvas so a
+  //     paint stroke isn't interrupted by the browser starting a scroll.
+  //     But when paint mode is OFF that same touch-action:none swallows
+  //     vertical scroll gestures on mobile, making the whole wash area
+  //     a dead zone. Flipping touch-action back to "auto" when paintActive
+  //     is false restores normal scroll-through on mobile.
+  //
+  // We also drive the same toggles on the hostRef wrapper, since its own
+  // touch-action:none would otherwise block scroll even with the canvas
+  // released.
   // ------------------------------------------------------------------------
   useEffect(() => {
     const wash = washRef.current;
@@ -254,6 +262,11 @@ export function WashesCanvas({
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
     if (canvasEl) {
       canvasEl.style.pointerEvents = paintActive ? 'auto' : 'none';
+      canvasEl.style.touchAction = paintActive ? 'none' : 'auto';
+    }
+    const host = hostRef.current;
+    if (host) {
+      host.style.touchAction = paintActive ? 'none' : 'auto';
     }
   }, [paintActive]);
 
@@ -331,7 +344,11 @@ export function WashesCanvas({
       <div
         ref={hostRef}
         className="absolute inset-0"
-        style={{ touchAction: "none" }}
+        // touch-action is driven by paintActive — none while painting
+        // (don't let the browser steal the gesture for a scroll), auto
+        // while resting (so the wash area scrolls naturally on mobile).
+        // The gate effect above keeps this in sync after mount.
+        style={{ touchAction: paintActive ? "none" : "auto" }}
       />
 
       {/* Connecting Gradients — Figma node 2232:32030. Three overlay
