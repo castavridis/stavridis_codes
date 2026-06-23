@@ -312,7 +312,17 @@ export function App() {
         onClose={handleCloseProject}
         topOffset={70}
       >
-        {renderedProjectSlug ? <ProjectSheetContent slug={renderedProjectSlug} onBack={handleCloseProject} /> : null}
+        {renderedProjectSlug ? (
+          <ProjectSheetContent
+            slug={renderedProjectSlug}
+            onBack={handleCloseProject}
+            stampCompanyName={
+              company?.featuredProjects?.includes(renderedProjectSlug)
+                ? company.name
+                : undefined
+            }
+          />
+        ) : null}
       </SheetOverlay>
 
       {/* Blog sheet — Path A, same as the project sheet: opens BELOW the
@@ -343,7 +353,15 @@ export function App() {
 //   MDXLayout) own their own in-page cream-paper background. The sheet
 //   backdrop here is left transparent so the landing wash beneath the sheet
 //   stays visible as the project slides up.
-function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => void }) {
+function ProjectSheetContent({
+  slug,
+  onBack,
+  stampCompanyName,
+}: {
+  slug: string;
+  onBack: () => void;
+  stampCompanyName?: string;
+}) {
   const project = getProject(slug);
   // Mirrors `isV2Project` in project-post.tsx.
   const isV2 = Boolean(project?.headline && project?.introduction);
@@ -358,7 +376,7 @@ function ProjectSheetContent({ slug, onBack }: { slug: string; onBack: () => voi
       }}
     >
       <Suspense fallback={<RoutePending />}>
-        <ProjectPost slug={slug} onBack={onBack} />
+        <ProjectPost slug={slug} onBack={onBack} stampCompanyName={stampCompanyName} />
       </Suspense>
     </div>
   );

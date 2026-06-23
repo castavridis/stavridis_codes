@@ -4,6 +4,7 @@ import Button from '../../../components/Button.js';
 import Callout from './Callout.js';
 import FrontMatter from './FrontMatter.js';
 import OutcomeStat from './OutcomeStat.js';
+import RotatingSeal from '../../../components/RotatingSeal.js';
 import Section from './Section.js';
 
 type Front = {
@@ -16,6 +17,10 @@ type MDXLayoutProps = {
   front: Front;
   onClose?: () => void;
   children: ReactNode;
+  // When set, renders a rotating "Featured Project" seal above the
+  // FrontMatter, slightly overlapping the headline. Driven by the
+  // active /for/:company context — see ProjectSheetContent in app.tsx.
+  stampCompanyName?: string;
 };
 
 // MDX overrides — exposed via the `components` prop on the rendered MDX
@@ -252,7 +257,7 @@ function ChromeRow({
   );
 }
 
-export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) {
+export default function MDXLayout({ front, onClose, children, stampCompanyName }: MDXLayoutProps) {
   // Anchor used by ChromeRow to find the nearest scrollable ancestor
   // at mount. The project SheetOverlay's `ProjectSheetContent` wraps
   // content with `position: absolute; inset: 0; overflow: auto` (in
@@ -282,7 +287,16 @@ export default function MDXLayout({ front, onClose, children }: MDXLayoutProps) 
             FrontMatter source-of-truth without a second Close
             button). */}
         <div className="relative mx-auto w-full max-w-[1104px]">
-          <div className="pt-[84px]">
+          <div className="relative pt-[84px]">
+            {stampCompanyName ? (
+              // Featured-project stamp. Sits above the headline with a
+              // small negative bottom margin so the seal's lower edge
+              // overlaps the top of the title block — "stamped onto" the
+              // case study. Left-aligned with the content column.
+              <div className="relative z-10 ml-[-48px] mb-[-16px] flex justify-start">
+                <RotatingSeal companyName={stampCompanyName} size={120} />
+              </div>
+            ) : null}
             <FrontMatter
               headline={front.headline}
               introduction={front.introduction}

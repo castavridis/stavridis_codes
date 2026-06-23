@@ -42,7 +42,15 @@ function isV2Project(project: Project): boolean {
   return Boolean(project.headline && project.introduction);
 }
 
-export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
+export function ProjectPost({
+  slug,
+  onBack,
+  stampCompanyName,
+}: {
+  slug: string;
+  onBack?: () => void;
+  stampCompanyName?: string;
+}) {
   const project = getProject(slug);
 
   if (!project) {
@@ -50,20 +58,28 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
   }
 
   if (isV2Project(project)) {
-    return <V2ProjectPost project={project} onBack={onBack} />;
+    return <V2ProjectPost project={project} onBack={onBack} stampCompanyName={stampCompanyName} />;
   }
 
   return <V1ProjectPost project={project} onBack={onBack} />;
 }
 
-function V2ProjectPost({ project, onBack }: { project: Project; onBack?: () => void }) {
+function V2ProjectPost({
+  project,
+  onBack,
+  stampCompanyName,
+}: {
+  project: Project;
+  onBack?: () => void;
+  stampCompanyName?: string;
+}) {
   const front = {
     headline: project.headline ?? project.summary,
     introduction: project.introduction ?? '',
     tags: project.tags.join(' · '),
   };
   return (
-    <MDXLayout front={front} onClose={onBack}>
+    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName}>
       <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
         <ProjectContent project={project} components={v2MdxComponents} />
       </Suspense>
