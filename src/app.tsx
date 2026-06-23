@@ -296,6 +296,7 @@ export function App() {
           featuredProjectSlugs={company?.featuredProjects}
           companySeal={company?.seal}
           companyColors={company?.colors}
+          companySalutation={company?.salutation}
           roleLabel={roleLabel}
         />
       </div>

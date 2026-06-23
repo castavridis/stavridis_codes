@@ -38,6 +38,10 @@ export type SealColors = {
 
 export type CompanyConfig = {
   name: string;
+  // `salutation` — greeting shown in the per-company chip on the landing
+  // page. When unset it defaults to `Hey! {name}` (the "hey.c" voice).
+  // Set it to override per company, e.g. "Hey there, team Ramp".
+  salutation?: string;
   blurb?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
@@ -62,6 +66,7 @@ export const companies: Record<string, CompanyConfig> = {
   ramp: {
     name: 'Ramp',
     colors: { brand: '#E4F222', light: '#FFFFFF', dark: '#1F1F1F' },
+    featuredProjects: ['caresignal-platform'],
     role: 'de',
   },
   stripe: {
@@ -123,6 +128,15 @@ export const companies: Record<string, CompanyConfig> = {
     name: 'Counsel Health',
     featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
     featuredProjects: ['caresignal-platform', 'fracta'],
+    colors: {
+      brand: '#243866',
+      light: 'rgb(215, 221, 197)',
+      dark: 'rgb(36, 56, 102)',
+    },
+    seal: {
+      foreground_color: 'rgb(36, 56, 102)',
+      background_color: 'rgb(176, 213, 18)',
+    },
     role: 'pd',
   },
   flatiron: {
@@ -165,6 +179,21 @@ export const companies: Record<string, CompanyConfig> = {
   },
 
   // elicit: { name: 'Elicit', role: 'de' }, // posting was closed last we checked — re-add if it reopens
+  
+	ambrook: {
+		name: 'ambrook',
+		featuredSlugs: ['fracta', 'sqsh', 'caresignal-platform','caresignal-ai'],
+		featuredProjects: ['fracta'],
+		colors: {
+			brand: 'rgb(67, 79, 64)',
+			light: 'rgb(252, 250, 241)',
+			dark: 'rgb(33, 27, 21)',
+		},
+		seal: {
+			foreground_color: 'rgb(37, 42, 35)',
+			background_color: 'rgb(232, 182, 114)',
+		},
+	}  
 };
 
 export function getCompany(slug: string): CompanyConfig | null {

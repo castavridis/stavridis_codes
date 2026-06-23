@@ -61,8 +61,11 @@ type LandingPageProps = {
   // Undefined → RotatingSeal falls back to its defaults (Hansa Yellow).
   companySeal?: SealColors;
   // Brand palette for this company. See CompanyConfig.colors. Used to
-  // brand the "Hi {company}!" greeting chip; undefined → plain greeting.
+  // brand the greeting chip; undefined → plain greeting.
   companyColors?: CompanyColors;
+  // Per-company greeting override (CompanyConfig.salutation). When unset
+  // the chip defaults to `Hey! {company}`.
+  companySalutation?: string;
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
@@ -281,6 +284,7 @@ export default function LandingPage({
   featuredProjectSlugs,
   companySeal,
   companyColors,
+  companySalutation,
   roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
@@ -759,7 +763,8 @@ export default function LandingPage({
               >
                 {/* Branded greeting chip — brand bg + dark text from the
                     company's palette (CompanyConfig.colors). Falls back to a
-                    plain greeting when the company has no `colors` set. */}
+                    plain greeting when the company has no `colors` set. The
+                    salutation is CompanyConfig.salutation or `Hey! {name}`. */}
                 {companyColors ? (
                   <span
                     style={{
@@ -771,10 +776,10 @@ export default function LandingPage({
                       fontStyle: "normal",
                     }}
                   >
-                    Hi {company}!
+                    {companySalutation ?? `Hey! ${company}`}
                   </span>
                 ) : (
-                  <span>Hi {company}!</span>
+                  <span>{companySalutation ?? `Hey! ${company}`}</span>
                 )}
                 {onDismiss ? (
                   <button
