@@ -663,7 +663,10 @@ export default function LandingPage({
           corners; everything inside is absolutely positioned.
           ------------------------------------------------------------------- */}
       {/* wash-shell:start marker injected below — section opens here */}
-      <section data-marker="wash-shell" className="relative w-full max-w-[1136px]" style={{ height: "660px" }}>
+      {/* Height: fixed 660px overlay on desktop; on mobile the section grows
+          to fit the in-flow glass card (see below) so the intro copy is
+          never clipped. */}
+      <section data-marker="wash-shell" className="relative w-full max-w-[1136px] h-auto md:h-[660px]">
         {/* Washes Canvas region — Figma node 4002:21177. Takes the top
             66.93% of the shell (inset bottom = 33.07%). Owns the wash
             WebGL host, the Connecting Gradients overlays, the Header
@@ -751,12 +754,12 @@ export default function LandingPage({
             establishes the canonical resting structure. */}
         <animated.div
           ref={glassCardRef}
-          className="absolute z-10 flex flex-col items-start overflow-clip rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[16px] pt-[24px] md:px-[160px] md:pt-[132px]"
+          // On mobile the card is in-flow (relative, no clip) so the section
+          // grows to fit it and the "now" copy isn't cut off. At md+ it
+          // returns to the fixed overlay: absolute with percentage insets +
+          // overflow-clip. Mobile pt clears the absolute in-shell Header.
+          className="relative z-10 flex flex-col items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[16px] pt-[64px] pb-[24px] md:absolute md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%] md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
           style={{
-            top: "9.42%",
-            bottom: "0.2%",
-            left: "1.41%",
-            right: "1.41%",
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",
             borderWidth: "0.972px",
