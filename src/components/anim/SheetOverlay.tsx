@@ -170,8 +170,8 @@ export default function SheetOverlay({
             style={{
               position: 'fixed',
               top: topOffset,
-              left: 0,
-              right: 0,
+              left: 0, // 80
+              right: 0, // 80
               bottom: 0,
               zIndex: 50,
             }}

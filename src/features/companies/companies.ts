@@ -146,6 +146,10 @@ export const companies: Record<string, CompanyConfig> = {
       light: 'rgb(215, 221, 197)',
       dark: 'rgb(36, 56, 102)',
     },
+    salutation_colors: {
+      foreground_color: 'rgb(255, 255, 255)',
+      background_color: 'rgb(36, 56, 102)',
+    },
     seal: {
       foreground_color: 'rgb(36, 56, 102)',
       background_color: 'rgb(176, 213, 18)',
