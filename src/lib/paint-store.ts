@@ -50,7 +50,6 @@ export type PaintState = {
   // guard at the source so any caller (PaintBrush, Header toggle) is
   // gated without each having to remember the rule.
   projectOpen: boolean;
-  brushPosition: BrushPoint | null;
   brushColor: BrushColor;
   currentLocationIndex: number;
   currentDayPhase: DayPhase | null;
@@ -60,7 +59,6 @@ export type PaintState = {
   setIsPainting: (painting: boolean) => void;
   setPaintActive: (active: boolean) => void;
   setProjectOpen: (open: boolean) => void;
-  setBrushPosition: (point: BrushPoint | null) => void;
   setBrushColor: (color: BrushColor) => void;
   setCurrentLocationIndex: (idx: number) => void;
   setCurrentDayPhase: (phase: DayPhase | null) => void;
@@ -74,7 +72,6 @@ export const usePaintStore = create<PaintState>((set) => ({
   isPainting: false,
   paintActive: false,
   projectOpen: false,
-  brushPosition: null,
   brushColor: DEFAULT_BRUSH_COLOR,
   currentLocationIndex: 0,
   currentDayPhase: null,
@@ -90,7 +87,6 @@ export const usePaintStore = create<PaintState>((set) => ({
   // sheet visibility handles itself via `projectOpen && !paintActive`.
   setPaintActive: (paintActive) => set({ paintActive }),
   setProjectOpen: (projectOpen) => set({ projectOpen }),
-  setBrushPosition: (brushPosition) => set({ brushPosition }),
   setBrushColor: (brushColor) => set({ brushColor }),
   setCurrentLocationIndex: (currentLocationIndex) =>
     set({ currentLocationIndex }),
@@ -104,6 +100,5 @@ export const usePaintStore = create<PaintState>((set) => ({
       resetVersion: s.resetVersion + 1,
       isPainting: false,
     })),
-  resetWashes: () =>
-    set({ isPainting: false, brushPosition: null, paintActive: false }),
+  resetWashes: () => set({ isPainting: false, paintActive: false }),
 }));

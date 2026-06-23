@@ -105,9 +105,11 @@ export function PaintBrush({
         brush.style.transform = `translate(${x - BRUSH_SIZE / 2}px, ${y - BRUSH_SIZE / 2}px)`;
         brush.style.opacity = inside ? "1" : "0";
       }
-      usePaintStore.getState().setBrushPosition(inside ? { x, y } : null);
     };
     const onMove = (e: PointerEvent) => {
+      // Skip the per-move rect math while a project/blog overlay covers the
+      // wash — the brush indicator is hidden behind it anyway.
+      if (usePaintStore.getState().projectOpen) return;
       pending = e;
       if (!rafId) rafId = window.requestAnimationFrame(handle);
     };
