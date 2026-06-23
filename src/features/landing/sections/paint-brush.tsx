@@ -112,24 +112,23 @@ export function PaintBrush({
       if (!rafId) rafId = window.requestAnimationFrame(handle);
     };
 
-    // Paint mode is now ONLY entered via the Header's PaintToggle button
-    // (the brush icon next to "C Stavridis"). Tapping anywhere on the
-    // wash canvas — including the intro card area — must NOT auto-latch
-    // paintActive. This handler is now a stroke-state tracker that only
-    // runs once paintActive is already true; it sets isPainting for the
-    // ring fade-out behavior. The Washes lib's own pointer handler does
-    // the actual brush stroke once the canvas accepts pointer events
-    // (gated on paintActive at the host-element level in landing-page).
+    // Pointerdown does double duty:
+    //   - paint OFF: if the "Click to Paint" indicator is showing (cursor
+    //     inside the paintable region, not over the excluded card), clicking
+    //     ENTERS paint mode — wherever the indicator appears, the click works.
+    //     (The Header's PaintToggle is the other entry point.) The brush over
+    //     the intro card is suppressed, so clicks there don't latch paint.
+    //   - paint ON: tracks isPainting for the ring fade-out; the Washes lib's
+    //     own pointer handler does the actual brush stroke.
     const onPointerDown = (e: PointerEvent) => {
       const store = usePaintStore.getState();
-      if (!store.paintActive) return;
       const target = targetRef.current;
       if (!target) return;
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-      // Don't track strokes for clicks on interactive elements (nav,
+      // Don't latch/track for clicks on interactive elements (nav,
       // HoverPopover spans, swatches).
       const targetEl = e.target as Element | null;
       if (
@@ -137,6 +136,12 @@ export function PaintBrush({
         (targetEl.closest("a, button, [role='button']") ||
           targetEl.closest("[data-paint-skip]"))
       ) {
+        return;
+      }
+      if (!store.paintActive) {
+        // Only enter when the indicator is actually up (inside + not over
+        // the card). insideRef is kept current by the move handler.
+        if (insideRef.current) store.setPaintActive(true);
         return;
       }
       store.setIsPainting(true);
