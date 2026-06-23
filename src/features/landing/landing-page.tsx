@@ -627,11 +627,11 @@ export default function LandingPage({
         <div
           ref={washesRef}
           className="absolute left-0 right-0 top-0 overflow-hidden select-none md:rounded-tl-[12px] md:rounded-tr-[12px]"
-          // OS crosshair cursor only when paint mode is active. The
-          // pointer-events gate is enforced by the "tap catcher" overlay
-          // below (z-15), not on this wrapper — putting it on the wrapper
-          // would block the Header's PaintToggle even with
-          // pointer-events-auto on the Header.
+          // OS crosshair cursor only when paint mode is active. Paint-mode
+          // entry is handled by the tap-catcher overlay below (z-[5]), not
+          // on this wrapper — putting an entry handler on the wrapper would
+          // block the Header's PaintToggle even with pointer-events-auto on
+          // the Header.
           style={{
             bottom: 0,
             cursor: paintActive ? "crosshair" : "default",
@@ -641,6 +641,24 @@ export default function LandingPage({
               PresetWidget + PaintBrush both reference `washesRef` (the
               outer div), so the WashesCanvas can stay agnostic. */}
           <WashesCanvas dayPhase={dayPhase} weather={weather} />
+
+          {/* Tap catcher — the overlay the washesRef comment refers to.
+              Previously documented ("enforced by the tap catcher overlay
+              below (z-15)") but never actually mounted, so on desktop the
+              only way into paint mode was the small brush toggle. At rest
+              this is a full-region click target that enters paint mode;
+              it sits at z-[5] — above the wash + gradients (all
+              pointer-events-none) but BELOW the glass card (z-10), so
+              clicking the card's footprint does NOT enter paint ("anywhere
+              the wash isn't covered"), while the card's interactive
+              children (HoverPopovers, dismiss) keep working. Disabled in
+              paint mode so strokes pass straight to the canvas. */}
+          <div
+            onClick={() => setPaintActiveInStore(true)}
+            className="absolute inset-0 z-[5] cursor-pointer"
+            style={{ pointerEvents: paintActive ? "none" : "auto" }}
+            aria-hidden="true"
+          />
 
           {/* Header — Name (left) and Links (right) at top:16.17px per
               Figma. Header.tsx renders a fragment (Name, Links); a flex
@@ -700,16 +718,18 @@ export default function LandingPage({
               "linear-gradient(to bottom, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.35) 60%, rgba(255,255,255,0) 100%)",
             opacity: glassCardSpring.opacity,
             transform: glassCardSpring.y.to((y) => `translateY(${y}px)`),
-            // PR 4c-paint-2: the card is pointer-transparent at all times so
-            // pointer-down events fall through to the wash region beneath.
-            // The card previously toggled to `auto` until the first paint
-            // stroke, but `paintActive` only flips AFTER the first stroke
-            // lands — a chicken-and-egg deadlock that made it impossible to
-            // start painting because the card swallowed every click in its
-            // (~90%-of-canvas) footprint. The two HoverPopover children
-            // (Design Engineer / golden retriever energy) opt back in with
-            // `pointer-events: auto` locally so they still receive hover.
-            pointerEvents: "none",
+            // At rest the card BLOCKS the tap catcher beneath it so clicking
+            // the card's footprint does not enter paint mode — the user only
+            // enters by clicking the exposed wash ("anywhere the wash isn't
+            // covered") or the brush toggle. In paint mode the card has faded
+            // out and goes pointer-transparent so strokes pass straight to
+            // the canvas. (The old chicken-and-egg deadlock — where paint
+            // could ONLY start by clicking through the card — is gone now
+            // that entry is handled by the catcher + toggle, not by tapping
+            // through the card.) The two HoverPopover children (Design
+            // Engineer / golden retriever energy) and the dismiss link set
+            // `pointer-events: auto` locally so they stay interactive.
+            pointerEvents: paintActive ? "none" : "auto",
           }}
         >
           {company ? (
