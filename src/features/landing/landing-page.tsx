@@ -795,7 +795,7 @@ export default function LandingPage({
           // grows to fit it and the "now" copy isn't cut off. At md+ it
           // returns to the fixed overlay: absolute with percentage insets +
           // overflow-clip. Mobile pt clears the absolute in-shell Header.
-          className="relative z-10 flex flex-col items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[16px] pt-[64px] pb-[24px] md:absolute md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%] md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
+          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] md:px-[16px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] left-[8px] md:left-[1.41%] right-[8px] md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
           style={{
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",
@@ -888,7 +888,7 @@ export default function LandingPage({
           <FadeDown>
             <Text
               variant="headline"
-              className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
+              className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px] text-center md:text-left"
             >
               <span>
                 {/* Drop the "Hey!" lead-in on company endpoints — the

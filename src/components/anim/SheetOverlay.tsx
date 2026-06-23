@@ -167,15 +167,17 @@ export default function SheetOverlay({
             // click target via `closest('[data-paint-skip]')` and
             // bails when this attribute is found.
             data-paint-skip
+            // left/right are set via Tailwind (not inline) so the responsive
+            // mobile inset actually applies — an inline left/right would
+            // override the class. 8px clearance each side on mobile; flush at
+            // md+ where max-w-[1104px] + m-auto already insets the sheet.
             style={{
               position: 'fixed',
               top: topOffset,
-              left: 0, // 80
-              right: 0, // 80
               bottom: 0,
               zIndex: 50,
             }}
-            className="max-w-[1104px] m-auto overflow-hidden"
+            className="left-2 right-2 md:left-0 md:right-0 max-w-[1104px] m-auto overflow-hidden"
           >
             <animated.div
               className="bg-white rounded-xl overflow-hidden"
