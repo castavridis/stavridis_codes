@@ -871,7 +871,9 @@ export default function LandingPage({
                 </Text>
               </HoverPopover>
               <span>
-                {" with"}
+                {/* Trailing space matters on mobile, where the <br> is
+                    hidden — without it "with" runs into "big…". */}
+                {" with "}
                 <br aria-hidden className="hidden md:inline" />
               </span>
               <HoverPopover popover={<BaileyPopover />}>
