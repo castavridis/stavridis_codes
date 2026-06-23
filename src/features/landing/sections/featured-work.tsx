@@ -57,7 +57,7 @@ function ProjectOverview({
             className="pointer-events-none"
             style={{
               right: 'auto',
-              left: '-24px',
+              left: '-16px',
               isolation: 'isolate',
               zIndex: 10,
               position: 'fixed',

@@ -59,7 +59,7 @@ export default function RotatingSeal({
 
   return (
     <div
-      className={`bg-washes-hansa-yellow text-confetti-black relative inline-block rounded-full ${className ?? ''}`}
+      className={`bg-washes-hansa-yellow text-confetti-black relative inline-block rounded-full shadow-md ${className ?? ''}`}
       style={{ width: size, height: size }}
       aria-label={`${centerText}: ${companyName}`}
       role="img"
