@@ -279,6 +279,21 @@ function HoverPopover({
     if (hoverSuppressed) setOpen(false);
   }, [hoverSuppressed]);
 
+  // Close on scroll while open. The popover is anchored to a fixed viewport
+  // position, so once the page scrolls (notably a touch-scroll on mobile,
+  // which `touchmove` catches as the gesture begins) it would otherwise
+  // hang detached from its phrase. Close immediately instead.
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("scroll", close, { passive: true });
+    window.addEventListener("touchmove", close, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", close);
+      window.removeEventListener("touchmove", close);
+    };
+  }, [open]);
+
   return (
     // The wrapper stays inline (phrasing content) — only the popover is
     // portaled out to document.body so the hero <p> stays valid HTML. The
@@ -471,18 +486,21 @@ export default function LandingPage({
   const paintActive = usePaintStore((s) => s.paintActive);
   const projectOpen = usePaintStore((s) => s.projectOpen);
 
-  // One-shot "wag" of the per-company greeting chip once the page has
-  // loaded (the wash flips washesVisible true after its first frame). A
-  // short beat after that, latch `eyebrowWag` so the chip plays its
-  // tail-wag keyframe a single time. Stays latched, so a later preset
-  // reset (which toggles washesVisible) doesn't re-trigger it.
+  // "Wag" the per-company greeting chip. `wagging` is transient: set true
+  // to play the tail-wag keyframe, cleared on animationEnd so it can replay.
+  // Triggered once after load (the wash flips washesVisible true after its
+  // first frame, + a short beat) and again on each hover (onMouseEnter on
+  // the chip). A ref guards the load trigger so a later preset reset (which
+  // toggles washesVisible) doesn't re-fire it.
   const washesVisible = usePaintStore((s) => s.washesVisible);
-  const [eyebrowWag, setEyebrowWag] = useState(false);
+  const [wagging, setWagging] = useState(false);
+  const loadWagFired = useRef(false);
   useEffect(() => {
-    if (!washesVisible || eyebrowWag) return;
-    const t = window.setTimeout(() => setEyebrowWag(true), 300);
+    if (!washesVisible || loadWagFired.current) return;
+    loadWagFired.current = true;
+    const t = window.setTimeout(() => setWagging(true), 300);
     return () => window.clearTimeout(t);
-  }, [washesVisible, eyebrowWag]);
+  }, [washesVisible]);
 
   // Window scrollY for driving the sticky-header fade. The in-shell
   // Header scrolls out of view around scrollY ~80px, so we fade the
@@ -832,7 +850,11 @@ export default function LandingPage({
                     SEAL_DEFAULT_FOREGROUND;
                   return (
                     <span
-                      className={`shadow-md ${eyebrowWag ? "motion-safe:[animation:chip-wag_800ms_ease-in-out]" : ""}`}
+                      className={`${wagging ? "motion-safe:[animation:chip-wag_800ms_ease-in-out]" : ""}`}
+                      // Wag on hover too; cleared on animationEnd so the next
+                      // hover (or the load trigger) can replay it.
+                      onMouseEnter={() => setWagging(true)}
+                      onAnimationEnd={() => setWagging(false)}
                       style={{
                         backgroundColor: chipBg,
                         color: chipFg,
