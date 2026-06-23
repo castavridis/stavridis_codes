@@ -26,6 +26,16 @@ export const ROLE_TITLE: Record<Role, string> = {
 export const DEFAULT_ROLE_LABEL = 'Designer and Engineer';
 export const DEFAULT_ROLE_TITLE = 'Product Designer & Design Engineer';
 
+// Role-specific résumé PDFs (served from /public/resume). The Resume nav
+// link opens the one matching the visitor's active role; with no role
+// override it opens the combined "Designer and Engineer" résumé.
+export const ROLE_RESUME: Record<Role, string> = {
+  de: '/resume/C-Stavridis-Resume-Design-Engineer.pdf',
+  pd: '/resume/C-Stavridis-Resume-Product-Designer.pdf',
+};
+export const DEFAULT_ROLE_RESUME =
+  '/resume/C-Stavridis-Resume-Designer-and-Engineer.pdf';
+
 type StoredContext = { role: Role; storedAt: number };
 
 function isRole(value: unknown): value is Role {

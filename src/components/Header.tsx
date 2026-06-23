@@ -9,6 +9,9 @@ type HeaderProps = {
   onAboutClick?: () => void;
   onExperimentsClick?: () => void;
   onResumeClick?: () => void;
+  // Role-specific résumé PDF (see role-context.ROLE_RESUME). When set, the
+  // Resume nav link is shown and opens this PDF in a new tab.
+  resumeHref?: string;
   // v2 paint mode (Figma `Landing Page – Paint 00/01/02`, nodes 4003:23338,
   // 4008:30723, 4008:32853). When true:
   //   - Name text ("C Stavridis"), About/Experiments/Resume links fade to 0.
@@ -124,6 +127,7 @@ export default function Header({
   onAboutClick,
   onExperimentsClick,
   onResumeClick,
+  resumeHref,
   paintActive = false,
 }: HeaderProps) {
   const brushColor = usePaintStore((s) => s.brushColor);
@@ -203,32 +207,24 @@ export default function Header({
         </div>
       </div>
       <nav className="inline-flex items-center gap-[22px]">
-        {/*
-        <a
-          href="#about"
-          onClick={onAboutClick}
-          style={fadeOutStyle}
-          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
-        >
-          About
-        </a>
-        <a
-          href="#experiments"
-          onClick={onExperimentsClick}
-          style={fadeOutStyle}
-          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
-        >
-          Experiments
-        </a>
-        <a
-          href="#resume"
-          onClick={onResumeClick}
-          style={fadeOutStyle}
-          className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
-        >
-          Resume
-        </a>
+        {/* About / Experiments are not surfaced yet:
+        <a href="#about" onClick={onAboutClick} style={fadeOutStyle} className="type-nav text-black underline decoration-solid [text-underline-position:from-font]">About</a>
+        <a href="#experiments" onClick={onExperimentsClick} style={fadeOutStyle} className="type-nav text-black underline decoration-solid [text-underline-position:from-font]">Experiments</a>
         */}
+        {resumeHref ? (
+          // Opens the role-specific résumé PDF (default / pd / de) in a new
+          // tab. onResumeClick stays available for optional analytics.
+          <a
+            href={resumeHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onResumeClick}
+            style={fadeOutStyle}
+            className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
+          >
+            Resume
+          </a>
+        ) : null}
         <a href="mailto:hey.c@stavridis.codes?subject=Hey C!" className="bg-confetti-black font-mono rounded-sm text-washes-paper px-[9px] py-[5px] text-xs">Contact Me</a>
       </nav>
     </>

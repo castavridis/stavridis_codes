@@ -13,8 +13,10 @@ import {
   clearStoredRole,
   ROLE_LABEL,
   ROLE_TITLE,
+  ROLE_RESUME,
   DEFAULT_ROLE_LABEL,
   DEFAULT_ROLE_TITLE,
+  DEFAULT_ROLE_RESUME,
   type Role,
 } from './features/role/role-context.js';
 import { usePaintStore } from './lib/paint-store.js';
@@ -144,6 +146,7 @@ export function App() {
       : (company?.role ?? storedRoleState);
   const roleLabel = role ? ROLE_LABEL[role] : DEFAULT_ROLE_LABEL;
   const documentTitleSuffix = role ? ROLE_TITLE[role] : DEFAULT_ROLE_TITLE;
+  const resumeHref = role ? ROLE_RESUME[role] : DEFAULT_ROLE_RESUME;
 
   useEffect(() => {
     document.title = `C Stavridis — ${documentTitleSuffix}`;
@@ -298,6 +301,7 @@ export function App() {
           companySalutation={company?.salutation}
           companySalutationColors={company?.salutation_colors}
           roleLabel={roleLabel}
+          resumeHref={resumeHref}
         />
       </div>
 

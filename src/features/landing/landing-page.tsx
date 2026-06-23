@@ -75,6 +75,9 @@ type LandingPageProps = {
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
   roleLabel?: string;
+  // Role-specific résumé PDF the Header's Resume link opens. Resolved in
+  // app.tsx from the active role (see role-context.ROLE_RESUME).
+  resumeHref?: string;
 };
 
 // Small page-local helper. Wraps an inline phrase (e.g. an italic span) so
@@ -319,6 +322,7 @@ export default function LandingPage({
   companySalutation,
   companySalutationColors,
   roleLabel = 'Designer and Engineer',
+  resumeHref,
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
   // Weather / location state. Lifted from the legacy hero so the PresetWidget
@@ -642,7 +646,7 @@ export default function LandingPage({
       >
         <div className="bg-washes-paper relative">
           <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between px-[16px] py-[16px] md:px-0">
-            <Header paintActive={paintActive} />
+            <Header paintActive={paintActive} resumeHref={resumeHref} />
           </div>
           <div
             className="pointer-events-none absolute left-0 right-0 top-full h-[8px]"
@@ -719,7 +723,7 @@ export default function LandingPage({
               `paintActive` swaps the name + nav links for the paintbrush
               pigment swatches; Contact Me stays solid. */}
           <div className="absolute left-[16px] right-[16px] top-[16.17px] z-20 flex items-center justify-between">
-            <Header paintActive={paintActive} />
+            <Header paintActive={paintActive} resumeHref={resumeHref} />
           </div>
 
           {/* PaintBrush overlay — pointer events target the washesRef
