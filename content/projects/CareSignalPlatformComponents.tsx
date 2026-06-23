@@ -146,7 +146,7 @@ export function Monitors() {
 					alt="Two Dell monitors side-by-side. The left monitor shows Epic and a spreadsheet; the right shows Microsoft Outlook and Teams."
 					width="100%"
 					height={409}
-					background="#fbf6ea"
+					background="transparent"
 				/>
 
 				<p className="type-callout-meta m-0 text-confetti-black/70">
@@ -253,8 +253,9 @@ export function Outcomes() {
 				<div className="grid w-full grid-cols-3 gap-[16px]">
 					<OutcomeStat stat="≥ 10x" caption="Growth in patients per clinical user" />
 					<OutcomeStat stat="144%" caption="Net recurring revenue year over year" />
-					<IllustrationPlaceholder
-						name="Best in KLAS 2024 + 2025"
+					<Illustration
+						src="/images/projects/caresignal-platform/KLAS.png"
+						alt="Best in KLAS 2024 and Best in KLAS 2025"
 						width="100%"
 						height={176}
 						background="#f0eeeb"
@@ -262,8 +263,8 @@ export function Outcomes() {
 				</div>
 			</div>
 
-			<div className="mt-[40px] flex w-full flex-col gap-[24px]">
-				<p className="type-headline-small-italic m-0 text-confetti-black">
+			<div className="mt-[40px] flex w-full flex-col gap-[16px] p-[16px] bg-[#f0eeeb] rounded-lg">
+				<p className="type-headline-small-italic my-[12px] text-confetti-black">
 					One platform, many workflows
 				</p>
 
@@ -272,9 +273,6 @@ export function Outcomes() {
 					title="CareSignal care-models visualization"
 				/>
 
-				<p className="type-callout-meta m-0 text-confetti-black/70">
-					Without CareSignal &middot; With CareSignal &middot; Standard Model &middot; Hub and Spoke &middot; 24/7 Acute Model
-				</p>
 			</div>
 		</Section>
 	);
