@@ -295,7 +295,6 @@ export function App() {
           featuredSlugs={company?.featuredSlugs}
           featuredProjectSlugs={company?.featuredProjects}
           companySeal={company?.seal}
-          companyColors={company?.colors}
           companySalutation={company?.salutation}
           companySalutationColors={company?.salutation_colors}
           roleLabel={roleLabel}

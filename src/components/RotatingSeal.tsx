@@ -34,9 +34,10 @@ type RotatingSealProps = {
 };
 
 // Defaults match the original Tailwind classes: confetti-black text on a
-// Hansa Yellow disc (see src/globals.css).
-const DEFAULT_FOREGROUND = '#391f00'; // confetti-black
-const DEFAULT_BACKGROUND = '#e3af08'; // washes-hansa-yellow
+// Hansa Yellow disc (see src/globals.css). Exported so other surfaces
+// (e.g. the landing greeting chip) can default to the same colors.
+export const SEAL_DEFAULT_FOREGROUND = '#391f00'; // confetti-black
+export const SEAL_DEFAULT_BACKGROUND = '#e3af08'; // washes-hansa-yellow
 
 // Build the curved perimeter text.
 //
@@ -83,8 +84,8 @@ export default function RotatingSeal({
   centerText = 'Featured Project',
   size = 120,
   durationSeconds = 30,
-  foregroundColor = DEFAULT_FOREGROUND,
-  backgroundColor = DEFAULT_BACKGROUND,
+  foregroundColor = SEAL_DEFAULT_FOREGROUND,
+  backgroundColor = SEAL_DEFAULT_BACKGROUND,
   className,
 }: RotatingSealProps) {
   // useId returns a string like `:r0:` — strip the colons so the

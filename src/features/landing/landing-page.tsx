@@ -35,7 +35,11 @@ import {
   type WeatherKey,
 } from "./lib/weather.js";
 import { usePaintStore } from "../../lib/paint-store.js";
-import type { CompanyColors, SalutationColors, SealColors } from "../companies/companies.js";
+import {
+  SEAL_DEFAULT_BACKGROUND,
+  SEAL_DEFAULT_FOREGROUND,
+} from "../../components/RotatingSeal.js";
+import type { SalutationColors, SealColors } from "../companies/companies.js";
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -60,14 +64,12 @@ type LandingPageProps = {
   // Seal text/disc colors for this company. See CompanyConfig.seal.
   // Undefined → RotatingSeal falls back to its defaults (Hansa Yellow).
   companySeal?: SealColors;
-  // Brand palette for this company. See CompanyConfig.colors. Used to
-  // brand the greeting chip; undefined → plain greeting.
-  companyColors?: CompanyColors;
   // Per-company greeting override (CompanyConfig.salutation). When unset
   // the chip defaults to `Hey! {company}`.
   companySalutation?: string;
-  // Greeting chip color override (CompanyConfig.salutation_colors).
-  // Falls back to the brand palette (brand bg + dark text) when unset.
+  // Greeting chip color override (CompanyConfig.salutation_colors). When
+  // unset the chip uses the same defaults as the seal (Hansa Yellow bg +
+  // confetti-black text).
   companySalutationColors?: SalutationColors;
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
@@ -286,7 +288,6 @@ export default function LandingPage({
   featuredSlugs,
   featuredProjectSlugs,
   companySeal,
-  companyColors,
   companySalutation,
   companySalutationColors,
   roleLabel = 'Designer and Engineer',
@@ -765,42 +766,44 @@ export default function LandingPage({
                 className="text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px]"
                 style={{ pointerEvents: "auto" }}
               >
-                {/* Branded greeting chip. Colors resolve from
-                    salutation_colors first, then the brand palette
-                    (brand bg + dark text); with neither set it renders as
-                    plain text. Salutation text is CompanyConfig.salutation
-                    or the default `Hey! {name}`. */}
+                {/* Greeting chip. Colors come from salutation_colors, and
+                    otherwise default to the SAME colors as the seal (Hansa
+                    Yellow bg + confetti-black text — see RotatingSeal).
+                    Salutation text is CompanyConfig.salutation or the
+                    default `Hey! {name}`. */}
                 {(() => {
                   const salutationText =
                     companySalutation ?? `Hey! ${company}`;
                   const chipBg =
                     companySalutationColors?.background_color ??
-                    companyColors?.brand;
+                    SEAL_DEFAULT_BACKGROUND;
                   const chipFg =
                     companySalutationColors?.foreground_color ??
-                    companyColors?.dark;
-                  return chipBg ? (
+                    SEAL_DEFAULT_FOREGROUND;
+                  return (
                     <span
+                      className="shadow-md"
                       style={{
                         backgroundColor: chipBg,
                         color: chipFg,
-                        padding: "4px 12px",
-                        borderRadius: "4px",
+                        padding: "4px 16px 3px",
+                        borderRadius: "20px",
                         fontFamily: "sans-serif",
                         fontStyle: "normal",
+                        position: "relative",
+                        left: "-16px",
+                        transform: "rotate(-2deg)",
                       }}
                     >
                       {salutationText}
                     </span>
-                  ) : (
-                    <span>{salutationText}</span>
                   );
                 })()}
                 {onDismiss ? (
                   <button
                     type="button"
                     onClick={onDismiss}
-                    className="font-body decoration-from-font [text-underline-position:from-font] text-confetti-black/50 hover:text-confetti-black cursor-pointer text-[12px] not-italic underline decoration-dotted"
+                    className="font-body decoration-from-font [text-underline-position:from-font] text-confetti-black/50 hover:text-confetti-black cursor-pointer text-[12px] not-italic underline decoration-dotted relative left-[-12px]"
                   >
                     dismiss
                   </button>
