@@ -35,7 +35,7 @@ import {
   type WeatherKey,
 } from "./lib/weather.js";
 import { usePaintStore } from "../../lib/paint-store.js";
-import type { SealColors } from "../companies/companies.js";
+import type { CompanyColors, SealColors } from "../companies/companies.js";
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -60,6 +60,9 @@ type LandingPageProps = {
   // Seal text/disc colors for this company. See CompanyConfig.seal.
   // Undefined → RotatingSeal falls back to its defaults (Hansa Yellow).
   companySeal?: SealColors;
+  // Brand palette for this company. See CompanyConfig.colors. Used to
+  // brand the "Hi {company}!" greeting chip; undefined → plain greeting.
+  companyColors?: CompanyColors;
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
@@ -277,6 +280,7 @@ export default function LandingPage({
   featuredSlugs,
   featuredProjectSlugs,
   companySeal,
+  companyColors,
   roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
@@ -753,7 +757,25 @@ export default function LandingPage({
                 className="text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px]"
                 style={{ pointerEvents: "auto" }}
               >
-                <span>Hi {company}!</span>
+                {/* Branded greeting chip — brand bg + dark text from the
+                    company's palette (CompanyConfig.colors). Falls back to a
+                    plain greeting when the company has no `colors` set. */}
+                {companyColors ? (
+                  <span
+                    style={{
+                      backgroundColor: companyColors.brand,
+                      color: companyColors.dark,
+                      padding: "4px 12px",
+                      borderRadius: "4px",
+                      fontFamily: "sans-serif",
+                      fontStyle: "normal",
+                    }}
+                  >
+                    Hi {company}!
+                  </span>
+                ) : (
+                  <span>Hi {company}!</span>
+                )}
                 {onDismiss ? (
                   <button
                     type="button"
@@ -772,7 +794,9 @@ export default function LandingPage({
               className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
             >
               <span>
-                {"Hey! I’m C Stavridis, "}
+                {/* Drop the "Hey!" lead-in on company endpoints — the
+                    branded "Hi {company}!" chip above already greets. */}
+                {company ? "I’m C Stavridis, " : "Hey! I’m C Stavridis, "}
                 <br aria-hidden className="hidden md:inline" />
                 {"a "}
               </span>
