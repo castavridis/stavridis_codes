@@ -11,4 +11,4 @@ export const colophon =
 export const acknowledgements =
   'Many thanks to Kris Baumgartner, Matt D. Smith, Frank Albenesius, Charlie Tran, Jason Tasso, and Kacper Bieryło for the in-depth feedback of this portfolio.';
 
-export const coDevelopedTag = 'Co-developed with Claude Code, v2.0.';
+export const coDevelopedTag = 'Co-developed with Claude Code.';

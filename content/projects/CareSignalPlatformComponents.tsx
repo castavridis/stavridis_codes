@@ -147,10 +147,11 @@ export function Monitors() {
 					width="100%"
 					height={409}
 					background="transparent"
+					className="p-[16px]"
 				/>
 
-				<p className="type-callout-meta m-0 text-confetti-black/70">
-					<span className="font-semibold">A typical workstation for clinical users.</span>{' '}
+				<p className="type-callout-meta m-0 text-confetti-black/70 text-center">
+					<span className="font-semibold">A typical workstation for clinical users.</span><br />
 					Our users (both in-office and remote) navigated two or more large monitors, and a slew of applications.
 				</p>
 			</div>
