@@ -41,7 +41,7 @@ function ProjectOverview({
       <button
         type="button"
         onClick={() => onClick?.(slug)}
-        className={`outline-confetti-black relative flex h-[304.03px] w-[463px] items-center justify-center overflow-hidden rounded-[8px] ${thumbnailClassName ?? ''}`}
+        className={`outline-confetti-black relative flex aspect-[463/304] w-full items-center justify-center overflow-hidden rounded-[8px] md:aspect-auto md:h-[304.03px] md:w-[463px] ${thumbnailClassName ?? ''}`}
       >
         {image ? (
           <img
@@ -159,13 +159,13 @@ export function FeaturedWork({
   const stampSlugs = new Set(featuredProjectSlugs ?? []);
 
   return (
-    <section className="w-[944px]">
+    <section className="w-full max-w-[944px] px-[16px] md:px-0">
       <div className="mb-[40px]">
         <Text variant="headline-small" className="text-[#251900]">
           Featured Work
         </Text>
       </div>
-      <div className="grid grid-cols-2 gap-x-[16px] gap-y-[40px]">
+      <div className="grid grid-cols-1 gap-x-[16px] gap-y-[40px] md:grid-cols-2">
         {projects.map((project, i) => (
           <FadeDown key={project.slug} delay={i * 80}>
             <ProjectOverview

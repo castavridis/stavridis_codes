@@ -38,15 +38,15 @@ export default function Colophon({
   coDevelopedTag = DEFAULT_CO_DEVELOPED_TAG,
 }: ColophonProps) {
   return (
-    <div className="text-white/75 grid w-full grid-cols-12 gap-x-[16px] gap-y-[48px] py-[120px] text-left">
+    <div className="text-white/75 grid w-full grid-cols-1 gap-x-[16px] gap-y-[48px] px-[16px] py-[80px] text-left md:grid-cols-12 md:px-0 md:py-[120px]">
       {/* Row 1 — body columns */}
-      <div className="col-span-5 col-start-2 flex flex-col items-start gap-[24px]">
+      <div className="col-span-1 md:col-span-5 md:col-start-2 flex flex-col items-start gap-[24px]">
         <Text variant="headline-small" className="w-full">
           Colophon
         </Text>
         <p className="type-tag m-0 w-full">{colophon}</p>
       </div>
-      <div className="col-span-5 col-start-7 flex flex-col items-start gap-[24px]">
+      <div className="col-span-1 md:col-span-5 md:col-start-7 flex flex-col items-start gap-[24px]">
         <Text variant="headline-small" className="w-full">
           Acknowledgements
         </Text>
@@ -55,7 +55,7 @@ export default function Colophon({
 
       {/* Row 2 — metadata. Left: © year + Last Updated link to the
           latest commit. Right: co-development tag. */}
-      <p className="type-tag col-span-5 col-start-2 m-0">
+      <p className="type-tag col-span-1 md:col-span-5 md:col-start-2 m-0">
         <span>© {CURRENT_YEAR}</span>
         {LAST_UPDATED_DATE ? (
           <>
@@ -78,7 +78,7 @@ export default function Colophon({
           </>
         ) : null}
       </p>
-      <p className="type-tag col-span-5 col-start-7 m-0">{coDevelopedTag}</p>
+      <p className="type-tag col-span-1 md:col-span-5 md:col-start-7 m-0">{coDevelopedTag}</p>
     </div>
   );
 }

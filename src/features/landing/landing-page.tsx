@@ -572,7 +572,7 @@ export default function LandingPage({
     // 72px gutter on top + sides and 80px on bottom; everything is
     // centered. Background is washes-paper (#fbf6ea), text confetti-black.
     // -----------------------------------------------------------------------
-    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-[72px] pt-[8px] pb-[80px]">
+    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-0 pt-[8px] pb-[40px] md:px-[72px] md:pb-[80px]">
       {/* -------------------------------------------------------------------
           Sticky Header — fades in as the visitor scrolls past the wash
           shell's in-shell Header. Cream backdrop + bottom gradient mask
@@ -896,7 +896,7 @@ export default function LandingPage({
             spans the page-card edges. Width is parent + 144px to cancel
             the px-[72px] on both sides; the parent `overflow-hidden`
             guards against any sub-pixel overflow. */}
-        <div className="bg-confetti-black -mx-[72px] -mb-[80px] mt-[120px] w-[calc(100%+144px)]">
+        <div className="bg-confetti-black mt-[120px] w-full md:-mx-[72px] md:-mb-[80px] md:w-[calc(100%+144px)]">
           <div className="mx-auto flex w-full max-w-[944px] justify-center">
             <Colophon />
           </div>
