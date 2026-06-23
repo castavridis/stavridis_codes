@@ -128,6 +128,15 @@ export function WashesCanvas({
         // disc + "Click to Paint" ring); its custom pointerdown spawn-Wash
         // pipeline was removed in favor of the lib's native handling.
         pointer: true,
+        // Disable the lib's mobile palm-rejection heuristics. Auto-detected
+        // ON for coarse-pointer devices, it drops any pointer whose contact
+        // size exceeds PALM_CONTACT_PX (40). iOS Safari reports fingertip
+        // PointerEvent.width/height well above 40 (derived from the touch
+        // radius), so EVERY touch was classified as a palm and dropped —
+        // the PaintToggle (a click) worked but no stroke ever landed. This
+        // is a single-finger painting surface; it needs none of the palm /
+        // pen-lockout / multitouch gates. continuousFlow stays on (separate).
+        mobile: false,
         scale: 1.5,
       });
       washRef.current = wash;
