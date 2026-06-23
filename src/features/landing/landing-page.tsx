@@ -453,6 +453,22 @@ export default function LandingPage({
     }
   }, [paintActive]);
 
+  // Auto-exit paint mode when the visitor scrolls past the wash canvas.
+  // Once the canvas region is entirely above the viewport, the paint
+  // surface isn't reachable anymore — staying in paint mode would leave
+  // the X-toggle visible in the sticky Header for a paint surface the
+  // user can't see. Checks on every scroll tick (scrollY drives the
+  // effect via the dep list).
+  const setPaintActiveInStore = usePaintStore((s) => s.setPaintActive);
+  useEffect(() => {
+    if (!paintActive) return;
+    const washesEl = washesRef.current;
+    if (!washesEl) return;
+    if (washesEl.getBoundingClientRect().bottom <= 0) {
+      setPaintActiveInStore(false);
+    }
+  }, [scrollY, paintActive, setPaintActiveInStore]);
+
   // Project-overlay state — the click-project chain pre-arms this in the
   // store before route navigation so the glass card starts fading
   // Glass card fade/translate animates on paintActive — clicking a
@@ -575,14 +591,14 @@ export default function LandingPage({
         aria-hidden={stickyHeaderOpacity < 0.5}
       >
         <div className="bg-washes-paper relative">
-          <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between px-[16px] py-[16px]">
+          <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between py-[16px]">
             <Header paintActive={paintActive} />
           </div>
           <div
-            className="pointer-events-none absolute left-0 right-0 top-full h-[24px]"
+            className="pointer-events-none absolute left-0 right-0 top-full h-[8px]"
             style={{
               background:
-                "linear-gradient(to bottom, #fbf6ea 0%, rgba(251, 246, 234, 0) 100%)",
+                "linear-gradient(to bottom, rgba(251, 246, 234, 0.5) 0%, rgba(251, 246, 234, 0) 100%)",
             }}
             aria-hidden
           />
