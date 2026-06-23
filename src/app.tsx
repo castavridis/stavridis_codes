@@ -7,6 +7,16 @@ import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
 import { getCompany, type CompanyConfig } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
+import {
+  getStoredRole,
+  setStoredRole,
+  clearStoredRole,
+  ROLE_LABEL,
+  ROLE_TITLE,
+  DEFAULT_ROLE_LABEL,
+  DEFAULT_ROLE_TITLE,
+  type Role,
+} from './features/role/role-context.js';
 import { usePaintStore } from './lib/paint-store.js';
 
 // Height of the landing's wash-shell section (logo + nav + Contact Me +
@@ -59,6 +69,9 @@ export function App() {
   const [matchSandboxSlides] = useRoute('/sandbox/slides');
   const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
   const [matchSandboxSection] = useRoute('/sandbox/section');
+  const [matchRoleDe] = useRoute(routes.roleDe.path);
+  const [matchRolePd] = useRoute(routes.rolePd.path);
+  const [matchRoleClear] = useRoute(routes.roleClear.path);
 
   // Route-matched config (visitor is on /for/:company right now).
   const routeCompany: CompanyConfig | null = matchForCompany && params?.company
@@ -87,6 +100,50 @@ export function App() {
     setStoredCompanyState(null);
     if (matchForCompany) navigate(routes.home.href());
   }, [matchForCompany, navigate]);
+
+  // Role override. Four states:
+  //   - no role (default)      → H1 "Designer and Engineer",
+  //                              title "Product Designer & Design Engineer"
+  //   - /de visited (persists) → H1 + title "Design Engineer"
+  //   - /pd visited (persists) → H1 + title "Product Designer"
+  //   - /clear visited         → reverts to default (clears storage)
+  // The override sticks in localStorage until the visitor explicitly
+  // switches via /de, /pd, or /clear, or until an active company's own
+  // `role` field changes the active role while its context is in scope.
+  const [storedRoleState, setStoredRoleState] = useState<Role | null>(() => getStoredRole());
+
+  useEffect(() => {
+    if (matchRolePd) {
+      setStoredRole('pd');
+      setStoredRoleState('pd');
+    } else if (matchRoleDe) {
+      setStoredRole('de');
+      setStoredRoleState('de');
+    } else if (matchRoleClear) {
+      clearStoredRole();
+      setStoredRoleState(null);
+    }
+  }, [matchRolePd, matchRoleDe, matchRoleClear]);
+
+  // Role resolution precedence (highest → lowest):
+  //   1. URL match (/pd or /de) — most explicit, no flash on first paint
+  //   2. Active company's `role` field — companies can specify a preferred
+  //      role while their context is in scope
+  //   3. Visitor's stored role
+  //   4. Default (null → "Designer and Engineer")
+  // `/clear` is handled in the useEffect above, not here — clearing
+  // storage falls through to null naturally.
+  const role: Role | null = matchRolePd
+    ? 'pd'
+    : matchRoleDe
+      ? 'de'
+      : (company?.role ?? storedRoleState);
+  const roleLabel = role ? ROLE_LABEL[role] : DEFAULT_ROLE_LABEL;
+  const documentTitleSuffix = role ? ROLE_TITLE[role] : DEFAULT_ROLE_TITLE;
+
+  useEffect(() => {
+    document.title = `C Stavridis — ${documentTitleSuffix}`;
+  }, [documentTitleSuffix]);
 
   // The FeaturedWork cards pass v2 project slugs directly (`caresignal-
   // platform`, `fracta`, `sqshbook`, `caresignal-ai`), so we route on the
@@ -224,6 +281,7 @@ export function App() {
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
+          roleLabel={roleLabel}
         />
       </div>
 

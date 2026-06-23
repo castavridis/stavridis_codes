@@ -53,6 +53,10 @@ type LandingPageProps = {
   // visitor — see CompanyConfig.featuredSlugs. Undefined renders the
   // canonical 4.
   featuredSlugs?: string[];
+  // Role label shown in the headline phrase ("a {roleLabel} with…").
+  // Defaults to "Design Engineer" — the alternate "Product Designer"
+  // flows from a /pd visit via app.tsx's role state.
+  roleLabel?: string;
 };
 
 // Small page-local helper. Wraps an inline phrase (e.g. an italic span) so
@@ -264,6 +268,7 @@ export default function LandingPage({
   blurb,
   onDismiss,
   featuredSlugs,
+  roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
   // Weather / location state. Lifted from the legacy hero so the PresetWidget
@@ -658,7 +663,7 @@ export default function LandingPage({
                   as="span"
                   className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted"
                 >
-                  Design Engineer
+                  {roleLabel}
                 </Text>
               </HoverPopover>
               <span>
