@@ -297,6 +297,7 @@ export function App() {
           companySeal={company?.seal}
           companyColors={company?.colors}
           companySalutation={company?.salutation}
+          companySalutationColors={company?.salutation_colors}
           roleLabel={roleLabel}
         />
       </div>

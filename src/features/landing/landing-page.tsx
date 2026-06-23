@@ -35,7 +35,7 @@ import {
   type WeatherKey,
 } from "./lib/weather.js";
 import { usePaintStore } from "../../lib/paint-store.js";
-import type { CompanyColors, SealColors } from "../companies/companies.js";
+import type { CompanyColors, SalutationColors, SealColors } from "../companies/companies.js";
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -66,6 +66,9 @@ type LandingPageProps = {
   // Per-company greeting override (CompanyConfig.salutation). When unset
   // the chip defaults to `Hey! {company}`.
   companySalutation?: string;
+  // Greeting chip color override (CompanyConfig.salutation_colors).
+  // Falls back to the brand palette (brand bg + dark text) when unset.
+  companySalutationColors?: SalutationColors;
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
@@ -285,6 +288,7 @@ export default function LandingPage({
   companySeal,
   companyColors,
   companySalutation,
+  companySalutationColors,
   roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
@@ -761,26 +765,37 @@ export default function LandingPage({
                 className="text-confetti-black/60 mb-[16px] flex items-baseline gap-[8px]"
                 style={{ pointerEvents: "auto" }}
               >
-                {/* Branded greeting chip — brand bg + dark text from the
-                    company's palette (CompanyConfig.colors). Falls back to a
-                    plain greeting when the company has no `colors` set. The
-                    salutation is CompanyConfig.salutation or `Hey! {name}`. */}
-                {companyColors ? (
-                  <span
-                    style={{
-                      backgroundColor: companyColors.brand,
-                      color: companyColors.dark,
-                      padding: "4px 12px",
-                      borderRadius: "4px",
-                      fontFamily: "sans-serif",
-                      fontStyle: "normal",
-                    }}
-                  >
-                    {companySalutation ?? `Hey! ${company}`}
-                  </span>
-                ) : (
-                  <span>{companySalutation ?? `Hey! ${company}`}</span>
-                )}
+                {/* Branded greeting chip. Colors resolve from
+                    salutation_colors first, then the brand palette
+                    (brand bg + dark text); with neither set it renders as
+                    plain text. Salutation text is CompanyConfig.salutation
+                    or the default `Hey! {name}`. */}
+                {(() => {
+                  const salutationText =
+                    companySalutation ?? `Hey! ${company}`;
+                  const chipBg =
+                    companySalutationColors?.background_color ??
+                    companyColors?.brand;
+                  const chipFg =
+                    companySalutationColors?.foreground_color ??
+                    companyColors?.dark;
+                  return chipBg ? (
+                    <span
+                      style={{
+                        backgroundColor: chipBg,
+                        color: chipFg,
+                        padding: "4px 12px",
+                        borderRadius: "4px",
+                        fontFamily: "sans-serif",
+                        fontStyle: "normal",
+                      }}
+                    >
+                      {salutationText}
+                    </span>
+                  ) : (
+                    <span>{salutationText}</span>
+                  );
+                })()}
                 {onDismiss ? (
                   <button
                     type="button"

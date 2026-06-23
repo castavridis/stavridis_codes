@@ -36,12 +36,25 @@ export type SealColors = {
   background_color: string;
 };
 
+// `salutation_colors` — colors for the landing greeting chip.
+// `foreground_color` paints the text, `background_color` the chip fill.
+// When unset, the chip falls back to the brand palette (`colors.brand`
+// background + `colors.dark` text). Set this to fix contrast for dark
+// brands (e.g. Counsel, ambrook) where dark-on-brand is illegible.
+export type SalutationColors = {
+  foreground_color: string;
+  background_color: string;
+};
+
 export type CompanyConfig = {
   name: string;
   // `salutation` — greeting shown in the per-company chip on the landing
   // page. When unset it defaults to `Hey! {name}` (the "hey.c" voice).
   // Set it to override per company, e.g. "Hey there, team Ramp".
   salutation?: string;
+  // `salutation_colors` — override the greeting chip's colors. See
+  // SalutationColors; defaults to the brand palette when unset.
+  salutation_colors?: SalutationColors;
   blurb?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
