@@ -180,7 +180,13 @@ export function WashesCanvas({
       // Smooth strokes on touch devices where pointermove is sparse.
       const isTouch = window.matchMedia("(pointer: coarse)").matches;
       wash.continuousFlow(isTouch);
-      wash.keepSimulating(true);
+      // Don't force the physics sim to run every frame. With the default
+      // (false) the lib idles the simulation once the canvas settles
+      // (dry, low suspended pigment) and wakes it on the next deposit —
+      // so a calm/dry wash costs nothing. The weather animationStep runs
+      // independently of this gate, so ambient rain/snow still animate
+      // (and their deposits wake the sim as needed).
+      wash.keepSimulating(false);
       // Initial pigment from the current brush color in the store.
       const initColor = usePaintStore.getState().brushColor;
       wash.pigment(
