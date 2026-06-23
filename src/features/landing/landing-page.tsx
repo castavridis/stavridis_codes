@@ -856,7 +856,13 @@ export default function LandingPage({
               </span>
               <HoverPopover
                 popover={
-                  <Popover title="Tools I like to build with">
+                  <Popover
+                    title="Tools I like to build with"
+                    // Narrower on mobile (matches the golden-retriever
+                    // popover's footprint) so it anchors with a right-margin
+                    // instead of the 368px box being clamped to the edge.
+                    className="!w-[280px] md:!w-[368px]"
+                  >
                     React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP,
                     react-three-fiber, Figma.
                   </Popover>
