@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { MDXColumn, MDXWrapper } from '../../components/mdx/Layout.js';
 import { routes } from '../../routes.js';
 import { getProject, type Project } from './projects.js';
+import type { SealColors } from '../companies/companies.js';
 import { ProjectNavigation } from '../../components/ProjectNavigation.js';
 import MDXLayout, { mdxComponents as v2MdxComponents } from './components/MDXLayout.js';
 
@@ -46,10 +47,12 @@ export function ProjectPost({
   slug,
   onBack,
   stampCompanyName,
+  stampSeal,
 }: {
   slug: string;
   onBack?: () => void;
   stampCompanyName?: string;
+  stampSeal?: SealColors;
 }) {
   const project = getProject(slug);
 
@@ -58,7 +61,7 @@ export function ProjectPost({
   }
 
   if (isV2Project(project)) {
-    return <V2ProjectPost project={project} onBack={onBack} stampCompanyName={stampCompanyName} />;
+    return <V2ProjectPost project={project} onBack={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal} />;
   }
 
   return <V1ProjectPost project={project} onBack={onBack} />;
@@ -68,10 +71,12 @@ function V2ProjectPost({
   project,
   onBack,
   stampCompanyName,
+  stampSeal,
 }: {
   project: Project;
   onBack?: () => void;
   stampCompanyName?: string;
+  stampSeal?: SealColors;
 }) {
   const front = {
     headline: project.headline ?? project.summary,
@@ -79,7 +84,7 @@ function V2ProjectPost({
     tags: project.tags.join(' · '),
   };
   return (
-    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName}>
+    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal}>
       <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
         <ProjectContent project={project} components={v2MdxComponents} />
       </Suspense>

@@ -5,7 +5,7 @@ import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
-import { getCompany, type CompanyConfig } from './features/companies/companies.js';
+import { getCompany, type CompanyConfig, type SealColors } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
 import {
   getStoredRole,
@@ -294,6 +294,7 @@ export function App() {
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
           featuredProjectSlugs={company?.featuredProjects}
+          companySeal={company?.seal}
           roleLabel={roleLabel}
         />
       </div>
@@ -319,6 +320,11 @@ export function App() {
             stampCompanyName={
               company?.featuredProjects?.includes(renderedProjectSlug)
                 ? company.name
+                : undefined
+            }
+            stampSeal={
+              company?.featuredProjects?.includes(renderedProjectSlug)
+                ? company.seal
                 : undefined
             }
           />
@@ -357,10 +363,12 @@ function ProjectSheetContent({
   slug,
   onBack,
   stampCompanyName,
+  stampSeal,
 }: {
   slug: string;
   onBack: () => void;
   stampCompanyName?: string;
+  stampSeal?: SealColors;
 }) {
   const project = getProject(slug);
   // Mirrors `isV2Project` in project-post.tsx.
@@ -376,7 +384,7 @@ function ProjectSheetContent({
       }}
     >
       <Suspense fallback={<RoutePending />}>
-        <ProjectPost slug={slug} onBack={onBack} stampCompanyName={stampCompanyName} />
+        <ProjectPost slug={slug} onBack={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal} />
       </Suspense>
     </div>
   );

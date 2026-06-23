@@ -18,12 +18,32 @@ import type { Role } from '../role/role-context.js';
 // an explicit `/de` / `/pd` URL visit. When the company is dismissed
 // (via the landing's dismiss affordance) the role falls back to the
 // visitor's stored choice or the default.
+// `colors` — the company's brand palette. `brand` is the primary brand
+// hue; `light` / `dark` are the tints/shades used for surfaces + text on
+// company-themed chrome. All CSS color strings (hex, rgb(), etc.).
+export type CompanyColors = {
+  brand: string;
+  light: string;
+  dark: string;
+};
+
+// `seal` — colors for the rotating "Featured Project" seal stamp. Consumed
+// by RotatingSeal: `foreground_color` paints the curved + center text,
+// `background_color` paints the disc (defaults to Hansa Yellow when the
+// company has no `seal` set). Snake_case mirrors the source palette export.
+export type SealColors = {
+  foreground_color: string;
+  background_color: string;
+};
+
 export type CompanyConfig = {
   name: string;
   blurb?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
+  colors?: CompanyColors;
+  seal?: SealColors;
 };
 
 export const companies: Record<string, CompanyConfig> = {

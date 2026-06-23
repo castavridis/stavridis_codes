@@ -35,6 +35,7 @@ import {
   type WeatherKey,
 } from "./lib/weather.js";
 import { usePaintStore } from "../../lib/paint-store.js";
+import type { SealColors } from "../companies/companies.js";
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -56,6 +57,9 @@ type LandingPageProps = {
   // Subset of slugs that get a rotating "Featured Project" seal over
   // their thumbnail. See CompanyConfig.featuredProjects.
   featuredProjectSlugs?: string[];
+  // Seal text/disc colors for this company. See CompanyConfig.seal.
+  // Undefined → RotatingSeal falls back to its defaults (Hansa Yellow).
+  companySeal?: SealColors;
   // Role label shown in the headline phrase ("a {roleLabel} with…").
   // Defaults to "Design Engineer" — the alternate "Product Designer"
   // flows from a /pd visit via app.tsx's role state.
@@ -272,6 +276,7 @@ export default function LandingPage({
   onDismiss,
   featuredSlugs,
   featuredProjectSlugs,
+  companySeal,
   roleLabel = 'Designer and Engineer',
 }: LandingPageProps = {}): React.ReactElement {
   // -----------------------------------------------------------------------
@@ -889,6 +894,7 @@ export default function LandingPage({
             slugs={featuredSlugs}
             featuredProjectSlugs={featuredProjectSlugs}
             stampCompanyName={company}
+            stampSeal={companySeal}
           />
         </div>
       </DomMarker>

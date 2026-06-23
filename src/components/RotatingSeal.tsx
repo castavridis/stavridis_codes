@@ -19,9 +19,20 @@ type RotatingSealProps = {
   size?: number;
   // Full rotation duration in seconds. Lower = faster spin.
   durationSeconds?: number;
+  // Curved + center text color. Defaults to confetti-black. Driven by
+  // CompanyConfig.seal.foreground_color.
+  foregroundColor?: string;
+  // Disc fill color. Defaults to Hansa Yellow. Driven by
+  // CompanyConfig.seal.background_color.
+  backgroundColor?: string;
   // Optional extra class names applied to the wrapper.
   className?: string;
 };
+
+// Defaults match the original Tailwind classes: confetti-black text on a
+// Hansa Yellow disc (see src/globals.css).
+const DEFAULT_FOREGROUND = '#391f00'; // confetti-black
+const DEFAULT_BACKGROUND = '#e3af08'; // washes-hansa-yellow
 
 // Compute how many whole repetitions of `companyName` fit on the
 // circumference, separated by SEPARATOR between each repetition (no
@@ -46,6 +57,8 @@ export default function RotatingSeal({
   centerText = 'Featured Project',
   size = 120,
   durationSeconds = 30,
+  foregroundColor = DEFAULT_FOREGROUND,
+  backgroundColor = DEFAULT_BACKGROUND,
   className,
 }: RotatingSealProps) {
   // useId returns a string like `:r0:` — strip the colons so the
@@ -59,8 +72,15 @@ export default function RotatingSeal({
 
   return (
     <div
-      className={`bg-washes-hansa-yellow text-confetti-black relative inline-block rounded-full shadow-md ${className ?? ''}`}
-      style={{ width: size, height: size }}
+      className={`relative inline-block rounded-full shadow-md ${className ?? ''}`}
+      style={{
+        width: size,
+        height: size,
+        // `color` drives both the curved <text fill="currentColor"> and the
+        // center label (which inherits), so foreground_color covers both.
+        color: foregroundColor,
+        backgroundColor,
+      }}
       aria-label={`${centerText}: ${companyName}`}
       role="img"
     >

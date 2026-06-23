@@ -8,6 +8,7 @@
 import FadeDown from '../../../components/anim/FadeDown.js';
 import RotatingSeal from '../../../components/RotatingSeal.js';
 import Text from '../../../components/Text.js';
+import type { SealColors } from '../../companies/companies.js';
 
 type ProjectOverviewProps = {
   slug: string;
@@ -24,6 +25,9 @@ type ProjectOverviewProps = {
   // top-right of the thumbnail with the company name curved on the
   // perimeter. Driven by CompanyConfig.featuredProjects.
   stampCompanyName?: string;
+  // Seal colors for this company (CompanyConfig.seal). Undefined → the
+  // seal uses its Hansa Yellow / confetti-black defaults.
+  stampSeal?: SealColors;
 };
 
 function ProjectOverview({
@@ -35,6 +39,7 @@ function ProjectOverview({
   image,
   imageAlt,
   stampCompanyName,
+  stampSeal,
 }: ProjectOverviewProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-[16px]">
@@ -64,7 +69,12 @@ function ProjectOverview({
               top: '24px',
             }}
           >
-            <RotatingSeal companyName={stampCompanyName} size={104} />
+            <RotatingSeal
+              companyName={stampCompanyName}
+              size={104}
+              foregroundColor={stampSeal?.foreground_color}
+              backgroundColor={stampSeal?.background_color}
+            />
           </span>
         ) : null}
       </button>
@@ -138,11 +148,13 @@ export function FeaturedWork({
   slugs,
   featuredProjectSlugs,
   stampCompanyName,
+  stampSeal,
 }: {
   onCardClick?: (slug: string) => void;
   slugs?: string[];
   featuredProjectSlugs?: string[];
   stampCompanyName?: string;
+  stampSeal?: SealColors;
 }): React.ReactElement {
   const projects = slugs
     ? slugs
@@ -174,6 +186,7 @@ export function FeaturedWork({
                   ? stampCompanyName
                   : undefined
               }
+              stampSeal={stampSeal}
               onClick={onCardClick}
             />
           </FadeDown>

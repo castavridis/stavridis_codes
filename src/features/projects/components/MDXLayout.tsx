@@ -6,6 +6,7 @@ import FrontMatter from './FrontMatter.js';
 import OutcomeStat from './OutcomeStat.js';
 import RotatingSeal from '../../../components/RotatingSeal.js';
 import Section from './Section.js';
+import type { SealColors } from '../../companies/companies.js';
 
 type Front = {
   headline: string;
@@ -21,6 +22,9 @@ type MDXLayoutProps = {
   // FrontMatter, slightly overlapping the headline. Driven by the
   // active /for/:company context — see ProjectSheetContent in app.tsx.
   stampCompanyName?: string;
+  // Seal colors for the active company (CompanyConfig.seal). Undefined →
+  // RotatingSeal uses its Hansa Yellow / confetti-black defaults.
+  stampSeal?: SealColors;
 };
 
 // MDX overrides — exposed via the `components` prop on the rendered MDX
@@ -257,7 +261,7 @@ function ChromeRow({
   );
 }
 
-export default function MDXLayout({ front, onClose, children, stampCompanyName }: MDXLayoutProps) {
+export default function MDXLayout({ front, onClose, children, stampCompanyName, stampSeal }: MDXLayoutProps) {
   // Anchor used by ChromeRow to find the nearest scrollable ancestor
   // at mount. The project SheetOverlay's `ProjectSheetContent` wraps
   // content with `position: absolute; inset: 0; overflow: auto` (in
@@ -294,7 +298,12 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName }
               // overlaps the top of the title block — "stamped onto" the
               // case study. Left-aligned with the content column.
               <div className="relative z-10 ml-[-48px] mb-[-16px] flex justify-start">
-                <RotatingSeal companyName={stampCompanyName} size={120} />
+                <RotatingSeal
+                  companyName={stampCompanyName}
+                  size={120}
+                  foregroundColor={stampSeal?.foreground_color}
+                  backgroundColor={stampSeal?.background_color}
+                />
               </div>
             ) : null}
             <FrontMatter
