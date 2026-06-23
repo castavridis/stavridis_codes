@@ -46,6 +46,12 @@ export type CompanyConfig = {
   seal?: SealColors;
 };
 
+// NOTE: `colors` is populated only where a real brand value could be
+// sourced. Still missing (no public palette found — add manually from the
+// brand's CSS/logo SVG): civai, atomicdust, vvd, counsel, hume, sapiom,
+// instrumentl. The two seal-rendering companies (civai, counsel) are among
+// these, so their seals currently fall back to the Hansa Yellow default.
+// `seal` is intentionally unset everywhere for now — see RotatingSeal.
 export const companies: Record<string, CompanyConfig> = {
   civai: {
     name: 'CivAI',
@@ -55,10 +61,12 @@ export const companies: Record<string, CompanyConfig> = {
   },
   ramp: {
     name: 'Ramp',
+    colors: { brand: '#E4F222', light: '#FFFFFF', dark: '#1F1F1F' },
     role: 'de',
   },
   stripe: {
     name: 'Stripe',
+    colors: { brand: '#635BFF', light: '#F6F9FC', dark: '#0A2540' },
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta', 'sqshbook'],
     role: 'pd',
   },
@@ -72,15 +80,18 @@ export const companies: Record<string, CompanyConfig> = {
   // which is the strongest signal for these, so most are role-only.
   ashby: {
     name: 'Ashby',
+    colors: { brand: '#5D4ED6', light: '#FFFFFF', dark: '#141415' },
     featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'fracta', 'sqshbook'],
     role: 'de', // also has a Senior PD role — flip to 'pd' if applying to that
   },
   vercel: {
     name: 'Vercel',
+    colors: { brand: '#000000', light: '#FFFFFF', dark: '#171717' },
     role: 'de',
   },
   infisical: {
     name: 'Infisical',
+    colors: { brand: '#E0ED34', light: '#FCFCE8', dark: '#19191C' },
     role: 'de',
   },
   vvd: {
@@ -90,16 +101,21 @@ export const companies: Record<string, CompanyConfig> = {
   },
   weedmaps: {
     name: 'Weedmaps',
+    colors: { brand: '#00CDBE', light: '#FFFFFF', dark: '#252935' },
     role: 'de',
   },
   a16z: {
     name: 'a16z',
+    // medium confidence — verify against a16z.com
+    colors: { brand: '#ED8B00', light: '#FFFFFF', dark: '#4B5058' },
     role: 'de', // Design Systems Lead — flip to 'pd' if the role leans pure-design
   },
 
   // ── Health / clinical / AI ── lead with the AI + health work
   maven: {
     name: 'Maven Clinic',
+    // medium confidence — verify against mavenclinic.com
+    colors: { brand: '#02856F', light: '#FFFFFF', dark: '#263633' },
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'sqshbook', 'fracta'],
     role: 'pd',
   },
@@ -111,11 +127,15 @@ export const companies: Record<string, CompanyConfig> = {
   },
   flatiron: {
     name: 'Flatiron Health',
+    // medium confidence — verify against brand.flatiron.com
+    colors: { brand: '#5051DB', light: '#3882F5', dark: '#5051DB' },
     featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'fracta', 'sqshbook'],
     role: 'pd',
   },
   headway: {
     name: 'Headway',
+    // low confidence — palette only, verify against headway.co
+    colors: { brand: '#74E4C4', light: '#A3B9E2', dark: '#213843' },
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta', 'sqshbook'],
     role: 'pd',
   },
@@ -128,6 +148,8 @@ export const companies: Record<string, CompanyConfig> = {
   // ── Craft studio ── lead with design-system craft, then community work
   upstatement: {
     name: 'Upstatement',
+    // medium confidence — verify against upstatement.com/brand
+    colors: { brand: '#3F3E3A', light: '#F3EFE1', dark: '#000000' },
     featuredSlugs: ['caresignal-platform', 'sqshbook', 'caresignal-ai', 'fracta'],
     role: 'pd',
   },
