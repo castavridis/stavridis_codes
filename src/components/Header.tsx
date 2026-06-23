@@ -1,4 +1,4 @@
-import { PaintbrushVertical, X } from 'lucide-react';
+import { ArrowUpRight, PaintbrushVertical, X } from 'lucide-react';
 
 import Button from './Button.js';
 import Text from './Text.js';
@@ -206,7 +206,7 @@ export default function Header({
           </div>
         </div>
       </div>
-      <nav className="inline-flex items-center gap-[22px]">
+      <nav className="inline-flex items-center gap-[8px]  md:gap-[24px]">
         {/* About / Experiments are not surfaced yet:
         <a href="#about" onClick={onAboutClick} style={fadeOutStyle} className="type-nav text-black underline decoration-solid [text-underline-position:from-font]">About</a>
         <a href="#experiments" onClick={onExperimentsClick} style={fadeOutStyle} className="type-nav text-black underline decoration-solid [text-underline-position:from-font]">Experiments</a>
@@ -222,7 +222,8 @@ export default function Header({
             style={fadeOutStyle}
             className="type-nav text-black underline decoration-solid [text-underline-position:from-font]"
           >
-            Resume
+            Résumé
+            <ArrowUpRight className="inline-block ml-1" size={12} strokeWidth={2.5} aria-hidden />
           </a>
         ) : null}
         <a href="mailto:hey.c@stavridis.codes?subject=Hey C!" className="bg-confetti-black font-mono rounded-sm text-washes-paper px-[9px] py-[5px] text-xs">Contact Me</a>

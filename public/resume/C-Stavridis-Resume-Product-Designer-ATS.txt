@@ -1,0 +1,71 @@
+C STAVRIDIS
+Product Designer (they/them)
+
+Location: Saint Louis, MO (open to remote work)
+Email: hey.c@stavridis.codes
+Phone: 928-713-3945
+Portfolio: https://c.stavridis.codes/pd/
+GitHub: https://github.com/castavridis
+LinkedIn: https://www.linkedin.com/in/castavridis/
+
+
+SUMMARY
+
+I design products from 0 to 1, build design systems, and ship them in code. Previously co-founded and exited an enterprise digital-health company. Now I use AI to explore and prototype, delivering high-craft work across design and front-end.
+
+
+SKILLS
+
+Figma, React, TypeScript, Next.js, Tailwind CSS, Adobe Creative Suite, Storybook, Node.js, Electron, SCSS, design systems, accessibility (WCAG 2.1), AI-native prototyping, user research, brand and product design, product strategy and roadmapping
+
+
+EXPERIENCE
+
+Participant, Recurse Center
+Remote | Sep 2025 - Mar 2026
+Designed several full-stack prototypes to explore creativity and joy, primarily using Next.js, Tailwind CSS, React, TypeScript, Supabase, and Vercel. Highlights:
+- Facets is a tool to codify your taste and generate experiments. Users save and rank visuals against Aaker's Dimensions of Brand Personality, with written rationale. Facets can prompt many AI models via OpenRouter to generate novel assets in HTML, SVG, p5.js, and GSAP.
+- Rain Check helps users send thoughtful event cancellations, inspired by paper invites and bank-note design. Visualized with SVG, CSS, Mapbox, and GSAP.
+
+Creative Technologist, prompt && pleasant
+Remote | Jan 2013 - Sep 2025
+prompt && pleasant is a studio practice I share with my spouse.
+- Recently built a distributed, air-gapped Electron app for a scaling manufacturing team compressing their complex, six-month builds down to one month. The app digitized and centralized their records to track progress, improve adherence, and meet ISO compliance.
+- Led design, user research, front-end engineering, and API design. Used AI to quickly prototype, pitch, and test features; hand-wrote code for production. Built the core scaffolding in Node.js, React, TypeScript, and Electron's IPC API. Designed bespoke UI flows and branded components with shadcn-ui.
+
+Career Break
+Aug 2024 - Sep 2025
+Spent time building community and bonding with my toddlers, spouse, and dog.
+
+Co-Founder, Product and Brand Lead, CareSignal
+Saint Louis and Remote | Jun 2015 - Aug 2024
+Established and led a compassionate product practice while contributing as an individual across the full product development lifecycle: research, production, support, and maintenance.
+- Created CareSignal's design system. Built WCAG 2.1-compliant components using atomic design and utility-first principles. Documented the component API in Storybook. Used SCSS and tokens to generate a branded color and type system. The system improved load speed 1.5x and is still in use today.
+- Increased patient enrollment rates 300%. Increased quarterly call volume by 37% to 192,000 calls. Designed an omni-channel strategy; led a cross-disciplinary team; and personally designed print materials and developed full-stack digital touchpoints necessary to achieve those outcomes.
+- Contributed to $5M ARR and 144% NRR YoY, leading to our acquisition in November 2021. CareSignal debuted in KLAS as an Emerging Solutions Spotlight in 2023; won Best in KLAS in 2024 and 2025.
+
+
+PROJECTS & ACTIVITIES
+
+Designer, Poimandres
+Apr 2026 - Present
+Working with community lead Kris Baumgartner to develop a design system for the collective.
+
+Developer, Washes.js
+Apr 2026 - Present
+Vibe-coded a novel in-browser library that simulates watercolor painting.
+
+UI/UX Designer and Developer, St. Louis Queer Support and Healing
+Saint Louis | Jun 2025 - Present (low-bono contractor)
+- Established analytics for SQSHBook, a web app, to support product decision-making and grant reporting.
+- Interviewed community members to refine SQSHBook's key submission form, reducing the core experience from 200+ fields to five.
+
+Speaker, Strange Loop Conference
+Saint Louis | Sep 2019
+With my spouse, researched, prototyped, and presented several machine-learning approaches to exploring and conserving the work of conceptual artist Sol LeWitt.
+
+
+EDUCATION
+
+BFA, Communication Design; Minor, Computer Science
+Washington University in St. Louis | May 2011
