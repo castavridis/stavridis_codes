@@ -12,7 +12,7 @@ export function HorseTab(): React.ReactElement {
   const [hovered, setHovered] = useState(false);
   const tabStyle = useSpring({
     transform: hovered
-      ? "translateX(-50%) translateY(-550px) rotate(-3deg)"
+      ? "translateX(-50%) translateY(-575px) rotate(-3deg)"
       : "translateX(-50%) translateY(0px) rotate(0deg)",
     config: { tension: 180, friction: 15 },
   });
@@ -24,7 +24,7 @@ export function HorseTab(): React.ReactElement {
       onBlur={() => setHovered(false)}
       tabIndex={0}
       style={tabStyle}
-      className="bg-washes-paper absolute -bottom-[650px] left-1/2 z-40 flex w-[201px] origin-bottom flex-col items-center gap-[16px] overflow-clip rounded-t-[8px] px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
+      className="bg-washes-paper absolute -bottom-[675px] left-1/2 z-40 flex w-[201px] origin-bottom flex-col items-center gap-[16px] overflow-clip rounded-t-[8px] px-[20px] pt-[24px] pb-[144px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#fbf6ea]"
     >
       {/* BTS photo — confetti-black border, 4px radius. The actual frame
           is 161×339 (the parent's w-full inside px-[20px] of 201px container).
