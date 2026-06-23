@@ -572,7 +572,7 @@ export default function LandingPage({
     // 72px gutter on top + sides and 80px on bottom; everything is
     // centered. Background is washes-paper (#fbf6ea), text confetti-black.
     // -----------------------------------------------------------------------
-    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-0 pt-[8px] pb-[40px] md:px-[72px] md:pb-[80px]">
+    <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-0 pt-0 pb-[40px] md:px-[72px] md:pt-[8px] md:pb-[80px]">
       {/* -------------------------------------------------------------------
           Sticky Header — fades in as the visitor scrolls past the wash
           shell's in-shell Header. Cream backdrop + bottom gradient mask
@@ -595,7 +595,7 @@ export default function LandingPage({
         aria-hidden={stickyHeaderOpacity < 0.5}
       >
         <div className="bg-washes-paper relative">
-          <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between py-[16px]">
+          <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between px-[16px] py-[16px] md:px-0">
             <Header paintActive={paintActive} />
           </div>
           <div
@@ -626,13 +626,16 @@ export default function LandingPage({
             wash painting can't bleed outside. */}
         <div
           ref={washesRef}
-          className="absolute left-0 right-0 top-0 overflow-hidden rounded-tl-[12px] rounded-tr-[12px] select-none"
-          // OS crosshair cursor — PR 4c-paint-4. Replaces the custom
-          // crosshair SVG previously rendered inside the PaintBrush. The
-          // soft 10%-fill brush indicator (paint-brush.tsx) still tracks
-          // the cursor for color preview; the OS crosshair gives the
-          // exact pixel anchor.
-          style={{ bottom: 0, cursor: "crosshair" }}
+          className="absolute left-0 right-0 top-0 overflow-hidden select-none md:rounded-tl-[12px] md:rounded-tr-[12px]"
+          // OS crosshair cursor only when paint mode is active. The
+          // pointer-events gate is enforced by the "tap catcher" overlay
+          // below (z-15), not on this wrapper — putting it on the wrapper
+          // would block the Header's PaintToggle even with
+          // pointer-events-auto on the Header.
+          style={{
+            bottom: 0,
+            cursor: paintActive ? "crosshair" : "default",
+          }}
         >
           {/* No `scrollRef` — the outer wrapper IS the scroll target.
               PresetWidget + PaintBrush both reference `washesRef` (the
@@ -739,10 +742,13 @@ export default function LandingPage({
             </FadeDown>
           ) : null}
           <FadeDown>
-            <Text variant="headline" className="text-confetti-black w-[784px]">
+            <Text
+              variant="headline"
+              className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
+            >
               <span>
                 {"Hey! I’m C Stavridis, "}
-                <br aria-hidden />
+                <br aria-hidden className="hidden md:inline" />
                 {"a "}
               </span>
               <HoverPopover
@@ -763,7 +769,7 @@ export default function LandingPage({
               </HoverPopover>
               <span>
                 {" with"}
-                <br aria-hidden />
+                <br aria-hidden className="hidden md:inline" />
               </span>
               <HoverPopover popover={<BaileyPopover />}>
                 <Text
@@ -785,7 +791,7 @@ export default function LandingPage({
             // copy stays comfortably readable rather than stretching
             // across both columns. See CompanyConfig.blurb.
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] w-[385px]">
+              <div className="text-confetti-black mt-[24px] w-full max-w-[385px]">
                 <Text variant="copy" className="mb-0">
                   {blurb}
                 </Text>
@@ -794,7 +800,7 @@ export default function LandingPage({
           ) : (
             <FadeDown delay={120}>
               <div className="text-confetti-black mt-[24px] flex items-start gap-[16px]">
-                <div className="w-[385px]">
+                <div className="w-full max-w-[385px]">
                   <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     then
                   </Text>
@@ -811,7 +817,7 @@ export default function LandingPage({
                     spent the time learning and building, too.
                   </Text>
                 </div>
-                <div className="w-[385px]">
+                <div className="w-full max-w-[385px]">
                   <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     now
                   </Text>
@@ -896,7 +902,7 @@ export default function LandingPage({
             spans the page-card edges. Width is parent + 144px to cancel
             the px-[72px] on both sides; the parent `overflow-hidden`
             guards against any sub-pixel overflow. */}
-        <div className="bg-confetti-black mt-[120px] w-full md:-mx-[72px] md:-mb-[80px] md:w-[calc(100%+144px)]">
+        <div className="bg-confetti-black mt-[120px] -mb-[40px] w-full md:-mx-[72px] md:-mb-[80px] md:w-[calc(100%+144px)]">
           <div className="mx-auto flex w-full max-w-[944px] justify-center">
             <Colophon />
           </div>

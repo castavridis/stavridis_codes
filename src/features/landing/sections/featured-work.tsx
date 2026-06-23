@@ -90,13 +90,7 @@ const PROJECTS: Project[] = [
     // Matches the MDX file at content/projects/caresignal-platform.mdx so
     // clicking the card routes to /project/caresignal-platform cleanly.
     slug: 'caresignal-platform',
-    headline: (
-      <>
-        Creating a design system to make
-        <br />
-        health care automation human.
-      </>
-    ),
+    headline: 'Creating a design system to make health care automation human.',
     tags: 'Design System · Front-End Engineering',
     thumbnailClassName: 'bg-washes-hansa-yellow',
     image: '/images/projects/CareSignal%20Thumbnail.png',

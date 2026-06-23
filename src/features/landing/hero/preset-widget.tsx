@@ -118,7 +118,7 @@ export function PresetWidget({
       }`}
     >
       <div className="flex items-center gap-[0px] whitespace-nowrap">
-        <span className={textClass}>Visualization above based on </span>
+        <span className={`${textClass} hidden md:inline`}>Visualization above based on </span>
         <PresetBug
           onClick={wrapHandler(onLocation)}
           label={`Change location (currently ${location.city})`}

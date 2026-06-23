@@ -63,7 +63,10 @@ function PaintToggle({
       data-paint-skip
       aria-label={paintActive ? 'Stop painting' : 'Start painting'}
       aria-pressed={paintActive}
-      className="inline-flex size-[24px] items-center justify-center rounded-[12px]"
+      // Visible disc stays 24px; the negative-inset pseudo-element bumps
+      // the effective tap target to ~44px on touch viewports so the
+      // brush is reliably hit on mobile without changing the visual.
+      className="relative inline-flex size-[24px] items-center justify-center rounded-[12px] before:absolute before:-inset-[10px] before:content-['']"
       style={{ backgroundColor: bg, color: fg }}
     >
       {paintActive ? <X size={12} strokeWidth={1.6} /> : <PaintbrushVertical size={14} strokeWidth={1.4} />}

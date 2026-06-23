@@ -28,10 +28,17 @@ export default function FrontMatter({
         <TopNavigation tags={tags} onClose={onClose} />
       )}
       <div className="flex w-full flex-col items-start gap-[16px] text-confetti-black">
-        <Text variant="headline" as="h1" className="m-0 w-full">
+        <Text
+          variant="headline"
+          as="h1"
+          className="m-0 w-full !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
+        >
           {headline}
         </Text>
-        <Text variant="copy-large" className="m-0 max-w-[704px]">
+        <Text
+          variant="copy-large"
+          className="m-0 w-full max-w-[704px] !text-[18px] !leading-[28px] md:!text-[24px] md:!leading-[32px]"
+        >
           {introduction}
         </Text>
       </div>

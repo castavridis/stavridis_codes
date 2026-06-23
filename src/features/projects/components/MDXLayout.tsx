@@ -197,17 +197,17 @@ function ChromeRow({
         // explicit `relative`.
       }}
     >
-      <div className="relative mx-auto w-full max-w-[1110px] px-[72px]">
+      <div className="relative mx-auto w-full max-w-[1110px] px-[16px] md:px-[72px]">
         <div className="mx-auto w-full max-w-[1104px]">
           {/* The two-mode chrome row. Two children share the left slot
               via absolute overlap: the tags paragraph and the
               truncated title sit in the same grid cell, each
               opacity-controlled. The Close button stays put on the
               right at full opacity at all times. */}
-          <div className="flex w-[944px] items-center gap-[24px] overflow-clip py-[32px]">
+          <div className="flex w-full max-w-[944px] items-center gap-[24px] overflow-clip py-[32px]">
             <div className="relative min-w-0 flex-1">
               <p
-                className="type-tag text-confetti-black"
+                className="type-tag text-confetti-black m-0 truncate"
                 style={{
                   opacity: tagsOpacity * 0.5,
                   transition: 'opacity 80ms linear',
@@ -278,7 +278,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName }
         onClose={onClose}
         anchorRef={anchorRef}
       />
-      <div className="relative mx-auto w-full max-w-[1280px] px-[72px]">
+      <div className="relative mx-auto w-full max-w-[1280px] px-[16px] md:px-[72px]">
         {/* Project Detail card content: 1104 wide, centered. The
             chrome row above already carries the tags + Close, so
             FrontMatter renders just the headline + introduction

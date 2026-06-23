@@ -240,6 +240,24 @@ export function WashesCanvas({
   }, []);
 
   // ------------------------------------------------------------------------
+  // Gate the canvas element's pointer events on paintActive. The Washes
+  // lib attaches its built-in pointer handlers (pointer: true) to its own
+  // <canvas>; setting pointer-events: none on that canvas blocks the lib
+  // from receiving taps without affecting any sibling elements (the
+  // Header's PaintToggle, the WashesInfo, etc., which sit at z-20+ above
+  // the canvas in the wash shell). Only the PaintToggle button next to
+  // "C Stavridis" can enter paint mode now.
+  // ------------------------------------------------------------------------
+  useEffect(() => {
+    const wash = washRef.current;
+    if (!wash) return;
+    const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
+    if (canvasEl) {
+      canvasEl.style.pointerEvents = paintActive ? 'auto' : 'none';
+    }
+  }, [paintActive]);
+
+  // ------------------------------------------------------------------------
   // Apply day-phase + weather changes without recreating the canvas.
   // ------------------------------------------------------------------------
   useEffect(() => {

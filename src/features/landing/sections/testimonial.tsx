@@ -12,7 +12,7 @@ import Text from "../../../components/Text.js";
 
 export function Testimonial(): React.ReactElement {
   return (
-    <section className="relative w-[944px] overflow-clip rounded-[12px]">
+    <section className="relative w-full max-w-[944px] overflow-clip rounded-[12px]">
       {/* Faded washes backdrop. Anchored to the left so the wash reads as
           a soft warm blob behind the "My Favorite Testimonial" label, with
           the quote sitting in cleaner cream space to the right. Spread is
@@ -36,14 +36,14 @@ export function Testimonial(): React.ReactElement {
         }}
       />
 
-      <div className="relative flex h-[312px] flex-col gap-[24px] px-[80px] pt-[72px]">
+      <div className="relative flex flex-col gap-[24px] px-[24px] py-[48px] md:h-[312px] md:px-[80px] md:pt-[72px]">
         <Text variant="headline-small-italic" className="text-[#251900]">
           My Favorite Testimonial
         </Text>
 
         <Text
           variant="copy-large"
-          className="text-[#391f00]"
+          className="text-[#391f00] w-full !text-[18px] !leading-[28px] md:!text-[24px] md:!leading-[32px]"
           style={{ maxWidth: 720 }}
         >
           “I love working with you, C. You have an infectious energy and passion

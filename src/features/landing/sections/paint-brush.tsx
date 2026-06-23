@@ -112,20 +112,25 @@ export function PaintBrush({
       if (!rafId) rafId = window.requestAnimationFrame(handle);
     };
 
-    // PR-paint-arch: the Washes lib now handles ALL paint events itself
-    // (pointer: true, continuousFlow). This handler is purely a STATE LATCH
-    // — when the user first clicks inside the wash area, flip paintActive
-    // so the glass card fades + slides out of the way and the Header
-    // swaps in the paint controls. No paintAt / spawn pipeline anymore.
+    // Paint mode is now ONLY entered via the Header's PaintToggle button
+    // (the brush icon next to "C Stavridis"). Tapping anywhere on the
+    // wash canvas — including the intro card area — must NOT auto-latch
+    // paintActive. This handler is now a stroke-state tracker that only
+    // runs once paintActive is already true; it sets isPainting for the
+    // ring fade-out behavior. The Washes lib's own pointer handler does
+    // the actual brush stroke once the canvas accepts pointer events
+    // (gated on paintActive at the host-element level in landing-page).
     const onPointerDown = (e: PointerEvent) => {
+      const store = usePaintStore.getState();
+      if (!store.paintActive) return;
       const target = targetRef.current;
       if (!target) return;
       const rect = target.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-      // Don't latch when the click was on an interactive element (Header
-      // nav, HoverPopover spans, swatches).
+      // Don't track strokes for clicks on interactive elements (nav,
+      // HoverPopover spans, swatches).
       const targetEl = e.target as Element | null;
       if (
         targetEl &&
@@ -134,9 +139,7 @@ export function PaintBrush({
       ) {
         return;
       }
-      const store = usePaintStore.getState();
       store.setIsPainting(true);
-      store.setPaintActive(true);
     };
 
     const onPointerUp = () => {
