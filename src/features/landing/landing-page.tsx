@@ -471,6 +471,19 @@ export default function LandingPage({
   const paintActive = usePaintStore((s) => s.paintActive);
   const projectOpen = usePaintStore((s) => s.projectOpen);
 
+  // One-shot "wag" of the per-company greeting chip once the page has
+  // loaded (the wash flips washesVisible true after its first frame). A
+  // short beat after that, latch `eyebrowWag` so the chip plays its
+  // tail-wag keyframe a single time. Stays latched, so a later preset
+  // reset (which toggles washesVisible) doesn't re-trigger it.
+  const washesVisible = usePaintStore((s) => s.washesVisible);
+  const [eyebrowWag, setEyebrowWag] = useState(false);
+  useEffect(() => {
+    if (!washesVisible || eyebrowWag) return;
+    const t = window.setTimeout(() => setEyebrowWag(true), 300);
+    return () => window.clearTimeout(t);
+  }, [washesVisible, eyebrowWag]);
+
   // Window scrollY for driving the sticky-header fade. The in-shell
   // Header scrolls out of view around scrollY ~80px, so we fade the
   // sticky header in over the 60–160 band — the in-shell Header is
@@ -819,7 +832,7 @@ export default function LandingPage({
                     SEAL_DEFAULT_FOREGROUND;
                   return (
                     <span
-                      className="shadow-md"
+                      className={`shadow-md ${eyebrowWag ? "motion-safe:[animation:chip-wag_800ms_ease-in-out]" : ""}`}
                       style={{
                         backgroundColor: chipBg,
                         color: chipFg,
@@ -830,6 +843,10 @@ export default function LandingPage({
                         position: "relative",
                         left: "-16px",
                         transform: "rotate(-2deg)",
+                        // Pivot from the left so the wag swings the chip's
+                        // free end like a tail. The keyframe starts + ends at
+                        // rotate(-2deg) so it settles back to this resting tilt.
+                        transformOrigin: "left center",
                       }}
                     >
                       {salutationText}
