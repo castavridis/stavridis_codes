@@ -241,7 +241,7 @@ function ChromeRow({
           1280-max wrapper so it spans the full overlay width across
           the scroll container, not just the centered chrome strip. */}
       <div
-        className="pointer-events-none absolute left-0 right-0 top-full h-[24px]"
+        className="pointer-events-none absolute left-0 right-0 top-full h-[12px]"
         style={{
           background:
             'linear-gradient(to bottom, #FFFFFF 0%, rgba(255, 255, 255, 0) 100%)',

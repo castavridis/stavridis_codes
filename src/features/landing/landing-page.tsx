@@ -414,6 +414,45 @@ export default function LandingPage({
   // ~33% of the shell.
   const paintActive = usePaintStore((s) => s.paintActive);
   const projectOpen = usePaintStore((s) => s.projectOpen);
+
+  // Window scrollY for driving the sticky-header fade. The in-shell
+  // Header scrolls out of view around scrollY ~80px, so we fade the
+  // sticky header in over the 60–160 band — the in-shell Header is
+  // just leaving as the sticky one finishes arriving.
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    let rafId = 0;
+    const onScroll = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        setScrollY(window.scrollY);
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafId) window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+  const stickyHeaderOpacity = Math.min(
+    1,
+    Math.max(0, (scrollY - 60) / 100),
+  );
+
+  // Scroll to top when paint mode activates. If the intro is visible at
+  // the top of the page, the existing glass-card spring fades it out;
+  // if the visitor was scrolled down, this brings them back so the
+  // wash canvas is in view ready to paint.
+  const prevPaintActiveForScrollRef = useRef(paintActive);
+  useEffect(() => {
+    const wasActive = prevPaintActiveForScrollRef.current;
+    prevPaintActiveForScrollRef.current = paintActive;
+    if (paintActive && !wasActive) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [paintActive]);
+
   // Project-overlay state — the click-project chain pre-arms this in the
   // store before route navigation so the glass card starts fading
   // Glass card fade/translate animates on paintActive — clicking a
@@ -514,6 +553,42 @@ export default function LandingPage({
     // centered. Background is washes-paper (#fbf6ea), text confetti-black.
     // -----------------------------------------------------------------------
     <div className="font-body bg-washes-paper text-confetti-black relative flex w-full flex-col items-center overflow-hidden px-[72px] pt-[8px] pb-[80px]">
+      {/* -------------------------------------------------------------------
+          Sticky Header — fades in as the visitor scrolls past the wash
+          shell's in-shell Header. Cream backdrop + bottom gradient mask
+          so content scrolling under the bar reads as a soft fade rather
+          than a hard edge. The in-shell Header (inside the wash shell
+          below) stays in place — it's the source of truth at scrollY=0;
+          this sticky copy takes over once the user scrolls. Both share
+          the same paint store, so clicking either PaintToggle flips
+          paintActive identically. `position: fixed` is used in place of
+          `sticky` because the page root has `overflow-hidden` (required
+          for the Colophon's negative-margin breakout below) which would
+          otherwise neutralize a sticky element.
+          ------------------------------------------------------------------- */}
+      <div
+        className="pointer-events-none fixed left-0 right-0 top-0 z-30"
+        style={{
+          opacity: stickyHeaderOpacity,
+          pointerEvents: stickyHeaderOpacity > 0.5 ? "auto" : "none",
+        }}
+        aria-hidden={stickyHeaderOpacity < 0.5}
+      >
+        <div className="bg-washes-paper relative">
+          <div className="mx-auto flex w-full max-w-[1104px] items-center justify-between px-[16px] py-[16px]">
+            <Header paintActive={paintActive} />
+          </div>
+          <div
+            className="pointer-events-none absolute left-0 right-0 top-full h-[24px]"
+            style={{
+              background:
+                "linear-gradient(to bottom, #fbf6ea 0%, rgba(251, 246, 234, 0) 100%)",
+            }}
+            aria-hidden
+          />
+        </div>
+      </div>
+
       {/* -------------------------------------------------------------------
           Washes Shell — Figma node 4012:42332 "Header". The single rounded
           container that holds the Header (logo + nav), the Washes Canvas
