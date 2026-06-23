@@ -14,6 +14,11 @@ type ProjectOverviewProps = {
   tags: string;
   onClick?: (slug: string) => void;
   thumbnailClassName?: string;
+  // Optional thumbnail image. When present the card renders the image
+  // (object-cover) inside the tinted slot; absent → the slug-name
+  // placeholder used as a layout aid before assets land.
+  image?: string;
+  imageAlt?: string;
 };
 
 function ProjectOverview({
@@ -22,6 +27,8 @@ function ProjectOverview({
   tags,
   onClick,
   thumbnailClassName,
+  image,
+  imageAlt,
 }: ProjectOverviewProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-[16px]">
@@ -30,7 +37,15 @@ function ProjectOverview({
         onClick={() => onClick?.(slug)}
         className={`outline-confetti-black relative flex h-[304.03px] w-[463px] items-center justify-center overflow-hidden rounded-[8px] ${thumbnailClassName ?? ''}`}
       >
-        <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
+        {image ? (
+          <img
+            src={image}
+            alt={imageAlt ?? ''}
+            className="block size-full object-cover"
+          />
+        ) : (
+          <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
+        )}
       </button>
       <div className="flex flex-col gap-[8px]">
         <Text variant="copy-large" className="w-full text-[#251900]">{headline}</Text>
@@ -45,6 +60,8 @@ type Project = {
   headline: React.ReactNode;
   tags: string;
   thumbnailClassName: string;
+  image?: string;
+  imageAlt?: string;
 };
 
 const PROJECTS: Project[] = [
@@ -61,6 +78,8 @@ const PROJECTS: Project[] = [
     ),
     tags: 'Design System · Front-End Engineering',
     thumbnailClassName: 'bg-washes-hansa-yellow',
+    image: '/images/projects/CareSignal%20Thumbnail.png',
+    imageAlt: 'CareSignal Platform thumbnail.',
   },
   {
     slug: 'fracta',
@@ -68,18 +87,24 @@ const PROJECTS: Project[] = [
     tags: 'Product Design · User Research · Full-Stack Engineering',
     // Dark teal from Figma — no design token yet, inline for now.
     thumbnailClassName: 'bg-[#101e1e]',
+    image: '/images/projects/Fracta%20Thumbnail.png',
+    imageAlt: 'Fracta thumbnail.',
   },
   {
     slug: 'sqshbook',
     headline: 'Crafting a joyful experience to increase community access through engagement.',
     tags: 'Design System · User Research · Front-End Engineering',
     thumbnailClassName: 'bg-gradient-to-br from-[#eeeead] via-[#d3e6e5] to-[#ecc6d4]',
+    image: '/images/projects/SQSHBook%20Thumbnail.png',
+    imageAlt: 'SQSHBook thumbnail.',
   },
   {
     slug: 'caresignal-ai',
     headline: 'Expressing a the value of a novel predictive model in healthcare.',
     tags: 'Visual Design · Copywriting · Front-End Engineering',
     thumbnailClassName: 'bg-washes-cerulean-blue',
+    image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
+    imageAlt: 'CareSignal AI thumbnail.',
   },
 ];
 
@@ -116,6 +141,8 @@ export function FeaturedWork({
               headline={project.headline}
               tags={project.tags}
               thumbnailClassName={project.thumbnailClassName}
+              image={project.image}
+              imageAlt={project.imageAlt}
               onClick={onCardClick}
             />
           </FadeDown>
