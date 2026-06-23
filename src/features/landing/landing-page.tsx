@@ -1,6 +1,6 @@
 import "../../globals.css";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { animated, easings, useSpring, useTransition } from "@react-spring/web";
 
@@ -119,11 +119,11 @@ function BaileyPopover(): React.ReactElement {
 // don't re-fire the spring on every pointermove.
 function PopoverPortal({
   open,
-  coords,
+  anchor,
   children,
 }: {
   open: boolean;
-  coords: { bottom: number; left: number } | null;
+  anchor: { x: number; y: number } | null;
   children: ReactNode;
 }): React.ReactElement {
   const transitions = useTransition(open, {
@@ -132,21 +132,54 @@ function PopoverPortal({
     leave: { opacity: 0, y: 6 },
     config: { duration: 240, easing: easings.easeOutCubic },
   });
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  // Measure the popover and keep it inside the viewport: prefer placing it
+  // ABOVE the anchor (the tap/cursor point); flip BELOW when above would
+  // clip the top edge; clamp horizontally so it never runs off the sides.
+  // useLayoutEffect runs before paint, so the pre-measure render (which may
+  // hold a stale position) never reaches the screen. Re-runs on anchor
+  // changes too, so cursor-tracked hovers stay clamped.
+  useLayoutEffect(() => {
+    if (!open || !anchor) return;
+    const el = boxRef.current;
+    if (!el) return;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const M = 8; // min gap to the viewport edge
+    const GAP = 8; // gap between the anchor point and the popover
+
+    const left = Math.max(M, Math.min(anchor.x - GAP, vw - w - M));
+
+    const above = anchor.y - GAP - h;
+    const below = anchor.y + GAP;
+    let top: number;
+    if (above >= M) top = above; // fits above
+    else if (below + h <= vh - M) top = below; // flip below
+    else top = Math.max(M, Math.min(above, vh - h - M)); // clamp into view
+
+    setPos({ top, left });
+  }, [open, anchor]);
+
   return (
     <>
       {transitions((style, isOpen) =>
-        isOpen && coords
+        isOpen && anchor
           ? createPortal(
-              // Anchored at the bottom-left corner (coords from
-              // updateCoords place that corner 8px above + 8px left of
-              // the cursor). `pointer-events: none` so the cursor
-              // moving over the popover itself doesn't pull focus away
-              // from the phrase (popover is hint-only).
+              // `pointer-events: none` so the cursor moving over the
+              // popover itself doesn't pull focus from the phrase (the
+              // popover is hint-only). Hidden until measured so it never
+              // flashes at the top-left corner.
               <animated.div
+                ref={boxRef}
                 className="fixed z-50 pointer-events-none"
                 style={{
-                  bottom: coords.bottom,
-                  left: coords.left,
+                  top: pos?.top ?? 0,
+                  left: pos?.left ?? 0,
+                  visibility: pos ? "visible" : "hidden",
                   opacity: style.opacity,
                   transform: style.y.to((v) => `translateY(${v}px)`),
                 }}
@@ -166,10 +199,10 @@ function HoverPopover({
   children,
 }: HoverPopoverProps): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const [coords, setCoords] = useState<{
-    bottom: number;
-    left: number;
-  } | null>(null);
+  // The tap/cursor point the popover positions itself against. Placement
+  // (above/below + horizontal clamping) is resolved in PopoverPortal once
+  // it can measure the popover against the viewport.
+  const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null);
   const wrapperRef = useRef<HTMLSpanElement | null>(null);
   const closeTimer = useRef<number | null>(null);
   // When paintActive flips true the glass card fades out + the underlying
@@ -198,16 +231,11 @@ function HoverPopover({
     }, 120);
   }, [cancelClose]);
 
-  // Position the popover so its bottom-LEFT corner sits 8px above and
-  // 8px to the left of the cursor — popover extends up + right from
-  // there. Coords update on every pointermove while open so the
-  // popover tracks the cursor smoothly (no `translateX(-50%)` — we
-  // anchor at the corner directly).
+  // Record the anchor point (cursor/tap). PopoverPortal turns this into a
+  // viewport-clamped position. Updates on every pointermove while open so
+  // the popover tracks the cursor on desktop.
   const updateCoords = useCallback((clientX: number, clientY: number) => {
-    setCoords({
-      bottom: window.innerHeight - clientY + 8,
-      left: clientX - 8,
-    });
+    setAnchor({ x: clientX, y: clientY });
   }, []);
 
   const openAt = useCallback(
@@ -226,14 +254,10 @@ function HoverPopover({
     cancelClose();
     const el = wrapperRef.current;
     if (el) {
+      // No cursor position from a focus event — anchor to the wrapper's
+      // top-left corner instead.
       const r = el.getBoundingClientRect();
-      // Same anchor as cursor-positioned mode: bottom-left corner 8px
-      // above + 8px left of the wrapper's top-left. (We don't have a
-      // cursor position from a focus event so we use the wrapper rect.)
-      setCoords({
-        bottom: window.innerHeight - r.top + 8,
-        left: r.left - 8,
-      });
+      setAnchor({ x: r.left, y: r.top });
     }
     setOpen(true);
   }, [cancelClose, hoverSuppressed]);
@@ -259,7 +283,11 @@ function HoverPopover({
     // `none` to let clicks fall through to the wash / overlay below.
     <span
       ref={wrapperRef}
-      className="relative inline-block"
+      // `inline` (not inline-block) so the phrase flows + wraps with the
+      // surrounding headline text instead of being forced onto its own
+      // line as a single unwrappable unit. The popover is portaled to
+      // <body>, so no positioning context is needed here.
+      className="inline"
       style={{ pointerEvents: hoverSuppressed ? "none" : "auto" }}
       onMouseEnter={(e) => openAt(e.clientX, e.clientY)}
       onMouseMove={(e) => {
@@ -270,7 +298,7 @@ function HoverPopover({
       onBlur={scheduleClose}
     >
       {children}
-      <PopoverPortal open={open} coords={coords}>
+      <PopoverPortal open={open} anchor={anchor}>
         {popover}
       </PopoverPortal>
     </span>
@@ -878,9 +906,9 @@ export default function LandingPage({
                   </Text>
                   <Text variant="copy" className="mb-0">
                     {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
-                    <br aria-hidden />
+                    <br aria-hidden className="hidden md:inline" />
                     {"an enterprise digital health company (acquired "}
-                    <br aria-hidden />
+                    <br aria-hidden className="hidden md:inline" />
                     {"by Lightbeam), where I led Product and Brand."}
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
@@ -895,15 +923,15 @@ export default function LandingPage({
                   </Text>
                   <Text variant="copy" className="mb-0">
                     {"I’ve finished two batches at the Recurse Center,"}
-                    <br aria-hidden />
+                    <br aria-hidden className="hidden md:inline" />
                     {"built AI-native tooling, and I’m currently building"}
-                    <br aria-hidden />
+                    <br aria-hidden className="hidden md:inline" />
                     {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
                   <Text variant="copy">
                     {"I am looking to join a dynamic team that values"}
-                    <br aria-hidden />
+                    <br aria-hidden className="hidden md:inline" />
                     {"high-craft design and engineering."}
                   </Text>
                 </div>
