@@ -38,6 +38,8 @@ export function HorseTab(): React.ReactElement {
           alt=""
           aria-hidden="true"
           src="/images/horse-bts.png"
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 size-full object-cover"
         />
         <div

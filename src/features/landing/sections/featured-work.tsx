@@ -52,6 +52,8 @@ function ProjectOverview({
           <img
             src={image}
             alt={imageAlt ?? ''}
+            loading="lazy"
+            decoding="async"
             className="block size-full object-cover"
           />
         ) : (

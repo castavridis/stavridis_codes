@@ -90,7 +90,7 @@ export const blogMdxComponents = {
     <hr {...props} className="my-[48px] border-0 border-t border-confetti-black/15" />
   ),
   img: (props: ComponentProps<'img'>) => (
-    <img {...props} className="my-[32px] block w-full rounded-[8px]" />
+    <img loading="lazy" decoding="async" {...props} className="my-[32px] block w-full rounded-[8px]" />
   ),
   Callout,
   OutcomeStat,

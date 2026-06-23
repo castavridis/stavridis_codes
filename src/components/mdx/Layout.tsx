@@ -28,6 +28,8 @@ export function ProjectImage ({ src, alt, className, placeholderColor = 'rgba(25
         className="my-0 block w-full"
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         style={{
           opacity: loaded ? 1 : 0,
           transition: loaded ? 'opacity 400ms ease-out' : 'none',

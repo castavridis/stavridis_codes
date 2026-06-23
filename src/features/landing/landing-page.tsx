@@ -109,6 +109,8 @@ function BaileyPopover(): React.ReactElement {
         <img
           src="/images/bailey.png"
           alt="Bailey, a golden retriever"
+          loading="lazy"
+          decoding="async"
           className="size-full object-cover"
         />
       </div>
