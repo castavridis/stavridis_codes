@@ -141,6 +141,7 @@ export default function Header({
     pointerEvents: paintActive ? 'auto' : 'none',
     transition: 'opacity 240ms ease-out',
   };
+  
   return (
     <>
       <div className="relative inline-flex items-center">
@@ -199,6 +200,7 @@ export default function Header({
         </div>
       </div>
       <nav className="inline-flex items-center gap-[22px]">
+        {/*
         <a
           href="#about"
           onClick={onAboutClick}
@@ -223,7 +225,8 @@ export default function Header({
         >
           Resume
         </a>
-        <Button variant="default" label="Contact Me" onClick={onContactClick} />
+        */}
+        <a href="mailto:hey.c@stavridis.codes?subject=Hey C!" className="bg-confetti-black font-mono rounded-sm text-washes-paper px-[9px] py-[5px] text-xs">Contact Me</a>
       </nav>
     </>
   );
