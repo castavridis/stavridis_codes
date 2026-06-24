@@ -2,7 +2,6 @@ import { ArrowUpRight } from 'lucide-react';
 import {
   colophon as DEFAULT_COLOPHON,
   acknowledgements as DEFAULT_ACKNOWLEDGEMENTS,
-  coDevelopedTag as DEFAULT_CO_DEVELOPED_TAG,
 } from '../../content/footer.js';
 import Text from './Text.js';
 
@@ -11,7 +10,6 @@ type ColophonProps = {
   // not arrays. Author-overridable via these props.
   colophon?: string;
   acknowledgements?: string;
-  coDevelopedTag?: string;
 };
 
 // © year — live so the footer rolls forward automatically.
@@ -28,14 +26,13 @@ const COMMIT_URL =
 
 // Footer layout: 12-col grid, two rows. Each row has two cells —
 //   row 1: Colophon (col 2–6) + Acknowledgements (col 7–11)
-//   row 2: © / Last Updated (col 2–6) + Co-developed tag (col 7–11)
+//   row 2: © (col 2–6) + Last Updated stamp (col 7–11)
 // Col 1 + col 12 are gutters. All text is text-align: left (the right
 // column is left-aligned within its own column, not flush-right against
 // the grid edge).
 export default function Colophon({
   colophon = DEFAULT_COLOPHON,
   acknowledgements = DEFAULT_ACKNOWLEDGEMENTS,
-  coDevelopedTag = DEFAULT_CO_DEVELOPED_TAG,
 }: ColophonProps) {
   return (
     <div className="text-white/75 grid w-full grid-cols-1 gap-x-[16px] gap-y-[48px] px-[16px] py-[80px] text-left md:grid-cols-12 md:px-0 md:py-[120px]">
@@ -53,13 +50,14 @@ export default function Colophon({
         <p className="type-tag m-0 w-full">{acknowledgements}</p>
       </div>
 
-      {/* Row 2 — metadata. Left: © year + Last Updated link to the
-          latest commit. Right: co-development tag. */}
+      {/* Row 2 — metadata. Left: © year. Right: Last Updated stamp
+          (links to the latest commit when git metadata is available). */}
       <p className="type-tag col-span-1 md:col-span-5 md:col-start-2 m-0">
         <span>© {CURRENT_YEAR}</span>
+      </p>
+      <p className="type-tag col-span-1 md:col-span-5 md:col-start-7 m-0">
         {LAST_UPDATED_DATE ? (
           <>
-            <span aria-hidden> · </span>
             <span>Last Updated on </span>
             {COMMIT_URL ? (
               <a
@@ -78,7 +76,6 @@ export default function Colophon({
           </>
         ) : null}
       </p>
-      <p className="type-tag col-span-1 md:col-span-5 md:col-start-7 m-0">{coDevelopedTag}</p>
     </div>
   );
 }
