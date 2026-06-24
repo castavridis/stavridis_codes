@@ -67,8 +67,9 @@ export function DesignDetails() {
           alt="Four AI-stack cursor stickers in a row — “found rare data”, “use while hot”, “catch if you can”, and “actually powers models”."
         />
 
-        {/* IBM Watson sticker + engagement chart (sticker ~1/3, chart ~2/3) */}
-        <div className="flex flex-col items-start gap-[24px] md:flex-row">
+        {/* IBM Watson sticker + engagement chart (sticker ~1/3, chart ~2/3).
+            16px between columns at md+, 24px when stacked on mobile. */}
+        <div className="flex flex-col items-start gap-[24px] md:flex-row md:gap-[16px]">
           <div className="w-full md:w-[303px] md:shrink-0">
             <ProjectImage
               className={PANEL}
@@ -85,8 +86,9 @@ export function DesignDetails() {
           </div>
         </div>
 
-        {/* Three rare-data principles */}
-        <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-3">
+        {/* Three rare-data principles. 16px between columns at sm+, 24px when
+            stacked on mobile. */}
+        <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-3 sm:gap-[16px]">
           <ProjectImage
             className={PANEL}
             src={`${BASE}/Data%201.png`}
@@ -111,8 +113,9 @@ export function DesignDetails() {
           alt="A panel of line-art illustrations visualizing rare clinical data feeding predictive models."
         />
 
-        {/* Close — "engaged (n)" definition (~2/3) + stacked-cards card (~1/3) */}
-        <div className="flex flex-col items-start gap-[24px] md:flex-row">
+        {/* Close — "engaged (n)" definition (~2/3) + stacked-cards card (~1/3).
+            16px between columns at md+, 24px when stacked on mobile. */}
+        <div className="flex flex-col items-start gap-[24px] md:flex-row md:gap-[16px]">
           <div className="w-full min-w-0 md:flex-1">
             <ProjectImage
               className={PANEL}
