@@ -61,9 +61,6 @@ type LandingPageProps = {
   // Subset of slugs that get a rotating "Featured Project" seal over
   // their thumbnail. See CompanyConfig.featuredProjects.
   featuredProjectSlugs?: string[];
-  // Subset of slugs that get a "Preview Only" tag on their card. See
-  // CompanyConfig.previewProjects.
-  previewProjectSlugs?: string[];
   // Seal text/disc colors for this company. See CompanyConfig.seal.
   // Undefined → RotatingSeal falls back to its defaults (Hansa Yellow).
   companySeal?: SealColors;
@@ -338,7 +335,6 @@ export default function LandingPage({
   onDismiss,
   featuredSlugs,
   featuredProjectSlugs,
-  previewProjectSlugs,
   companySeal,
   companySalutation,
   companySalutationColors,
@@ -1026,7 +1022,6 @@ export default function LandingPage({
             onCardClick={onCardClick}
             slugs={featuredSlugs}
             featuredProjectSlugs={featuredProjectSlugs}
-            previewProjectSlugs={previewProjectSlugs}
             stampCompanyName={company}
             stampSeal={companySeal}
           />

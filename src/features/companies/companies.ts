@@ -58,10 +58,6 @@ export type CompanyConfig = {
   blurb?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
-  // `previewProjects` — slugs shown with a "Preview Only" tag on their
-  // FeaturedWork card, for case studies surfaced as a preview to this
-  // company (e.g. an unpublished draft). Slugs not on screen silently no-op.
-  previewProjects?: string[];
   role?: Role;
   colors?: CompanyColors;
   seal?: SealColors;

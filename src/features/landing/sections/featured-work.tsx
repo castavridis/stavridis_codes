@@ -9,6 +9,7 @@ import FadeDown from '../../../components/anim/FadeDown.js';
 import RotatingSeal from '../../../components/RotatingSeal.js';
 import Text from '../../../components/Text.js';
 import type { SealColors } from '../../companies/companies.js';
+import { getProject } from '../../projects/projects.js';
 
 type ProjectOverviewProps = {
   slug: string;
@@ -29,8 +30,8 @@ type ProjectOverviewProps = {
   // seal uses its Hansa Yellow / confetti-black defaults.
   stampSeal?: SealColors;
   // When true, overlays a "Preview Only" tag on the thumbnail — for case
-  // studies surfaced as a preview (e.g. an unpublished draft shown to a
-  // specific company). Driven by CompanyConfig.previewProjects.
+  // studies that are still drafts/previews. Driven by the project's own
+  // `preview` frontmatter flag (see ProjectFrontmatter).
   previewOnly?: boolean;
 };
 
@@ -165,16 +166,12 @@ export function FeaturedWork({
   featuredProjectSlugs,
   stampCompanyName,
   stampSeal,
-  previewProjectSlugs,
 }: {
   onCardClick?: (slug: string) => void;
   slugs?: string[];
   featuredProjectSlugs?: string[];
   stampCompanyName?: string;
   stampSeal?: SealColors;
-  // Slugs that get a "Preview Only" tag on their card. See
-  // CompanyConfig.previewProjects.
-  previewProjectSlugs?: string[];
 }): React.ReactElement {
   const projects = slugs
     ? slugs
@@ -183,7 +180,6 @@ export function FeaturedWork({
     : PROJECTS;
 
   const stampSlugs = new Set(featuredProjectSlugs ?? []);
-  const previewSlugs = new Set(previewProjectSlugs ?? []);
 
   return (
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
@@ -208,7 +204,7 @@ export function FeaturedWork({
                   : undefined
               }
               stampSeal={stampSeal}
-              previewOnly={previewSlugs.has(project.slug)}
+              previewOnly={Boolean(getProject(project.slug)?.preview)}
               onClick={onCardClick}
             />
           </FadeDown>
