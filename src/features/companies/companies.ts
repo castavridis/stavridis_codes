@@ -134,11 +134,20 @@ export const companies: Record<string, CompanyConfig> = {
   },
 
   // ── Health / clinical / AI ── lead with the AI + health work
-  maven: {
+  maven_clinic: {
     name: 'Maven Clinic',
     // medium confidence — verify against mavenclinic.com
-    colors: { brand: '#02856F', light: '#FFFFFF', dark: '#263633' },
-    featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'sqshbook', 'fracta'],
+    colors: { brand: '#09866f', light: 'rgb(237, 233, 227)', dark: 'rgb(1, 49, 38)' },
+    salutation_colors: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: '#09866F',
+    },
+    seal: {
+      foreground_color: 'rgb(88, 237, 162)',
+      background_color: 'rgb(3, 87, 72)',
+    },
+    featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'sqshbook', 'fracta'],
+    featuredProjects: ['caresignal-platform'],
     role: 'pd',
   },
   counsel_health: {
