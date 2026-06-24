@@ -94,15 +94,12 @@ export default function SheetOverlay({
     let raf = window.requestAnimationFrame(() => {
       const sheet = sheetRef.current;
       if (!sheet) return;
-      const focusables = getFocusables(sheet);
-      if (focusables.length > 0) {
-        focusables[0].focus();
-      } else {
-        // No focusables — make the sheet itself programmatically
-        // focusable so keyboard users land somewhere meaningful.
-        sheet.tabIndex = -1;
-        sheet.focus();
-      }
+      // Land focus on the sheet container itself (tabIndex=-1, outline:none
+      // in the markup) rather than the first inner control. This keeps
+      // focus inside the trap without drawing a visible focus ring on a
+      // button/link when the sheet is opened by tap/click — keyboard users
+      // then Tab into the controls and get proper focus-visible rings.
+      sheet.focus({ preventScroll: true });
     });
 
     const onKey = (e: KeyboardEvent) => {
@@ -167,6 +164,11 @@ export default function SheetOverlay({
             // click target via `closest('[data-paint-skip]')` and
             // bails when this attribute is found.
             data-paint-skip
+            // Focus target on open (see the focus-trap effect). tabIndex=-1
+            // makes it programmatically focusable; outline-none suppresses
+            // the focus ring so opening the sheet by tap doesn't draw a blue
+            // outline around it.
+            tabIndex={-1}
             // left/right are set via Tailwind (not inline) so the responsive
             // mobile inset actually applies — an inline left/right would
             // override the class. 8px clearance each side on mobile; flush at
@@ -177,7 +179,7 @@ export default function SheetOverlay({
               bottom: 0,
               zIndex: 50,
             }}
-            className="left-2 right-2 md:left-0 md:right-0 max-w-[1104px] m-auto overflow-hidden"
+            className="left-2 right-2 md:left-0 md:right-0 max-w-[1104px] m-auto overflow-hidden outline-none"
           >
             <animated.div
               className="bg-white rounded-xl overflow-hidden"
