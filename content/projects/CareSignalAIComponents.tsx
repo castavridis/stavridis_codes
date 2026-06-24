@@ -5,11 +5,11 @@ import Section from '../../src/features/projects/components/Section';
 import Text from '../../src/components/Text';
 
 // ---------------------------------------------------------------------------
-// CareSignal AI — v2 case study (Figma node 4014:47015). Each section is a
-// flattened panel asset from /public/images/projects/caresignal-ai laid out
-// responsively (full-bleed images stack; two-column rows collapse to one
-// column below md). FrontMatter (headline + intro) and the wash hero are
-// rendered by MDXLayout, so the body starts at the iPad mockup.
+// CareSignal AI — v2 case study (Figma node 4014:47015). Each panel is a
+// flattened asset from /public/images/projects/caresignal-ai laid out
+// responsively (full-bleed panels stack; two-/three-column rows collapse to
+// one column below the breakpoint). FrontMatter (headline + intro) and the
+// wash hero are rendered by MDXLayout, so the body starts at the iPad mockup.
 //
 // NOTE: the text-bearing panels (the three principle cards, the "engaged (n)"
 // definition) ship as images with the copy baked in, so the descriptive
@@ -21,6 +21,9 @@ const BASE = '/images/projects/caresignal-ai';
 
 // Live demo the hero CTA links out to (carried over from the v1 case study).
 const LIVE_SITE = 'https://caresignal-ai.vercel.app';
+
+// Shared panel chrome — 20px corner radius per Figma, clipping the image.
+const PANEL = 'rounded-[20px] overflow-hidden';
 
 // Hero — iPad mockup + "View Live Site" link (Figma `Mockup + CTA`).
 export function Hero() {
@@ -46,98 +49,84 @@ export function Hero() {
   );
 }
 
-// Design Details title + the four AI-stack cursor stickers (Figma `Group 63`).
-export function Stickers() {
+// Design Details — the title + the panel grid (Figma `Design Details`). All
+// panels sit 24px apart (vertical stack gap + the gap inside each row), with
+// 20px-radius corners, matching Figma.
+export function DesignDetails() {
   return (
     <Section>
       <div className="flex flex-col gap-[24px]">
         <Text variant="headline-small" as="h2" className="m-0 text-confetti-black">
           Design Details
         </Text>
+
+        {/* Four AI-stack cursor stickers */}
         <ProjectImage
+          className={PANEL}
           src={`${BASE}/Stickers.png`}
           alt="Four AI-stack cursor stickers in a row — “found rare data”, “use while hot”, “catch if you can”, and “actually powers models”."
         />
-      </div>
-    </Section>
-  );
-}
 
-// IBM Watson sticker + engagement chart (Figma `Group 68`). Two columns at
-// md+ (sticker ~1/3, chart ~2/3), stacked below.
-export function DataChart() {
-  return (
-    <Section>
-      <div className="flex flex-col items-start gap-[16px] md:flex-row">
-        <div className="w-full md:w-[303px] md:shrink-0">
+        {/* IBM Watson sticker + engagement chart (sticker ~1/3, chart ~2/3) */}
+        <div className="flex flex-col items-start gap-[24px] md:flex-row">
+          <div className="w-full md:w-[303px] md:shrink-0">
+            <ProjectImage
+              className={PANEL}
+              src={`${BASE}/IBM%20Sticker.png`}
+              alt="A round sticker reading “We see you, IBM Watson!” with cartoon googly eyes."
+            />
+          </div>
+          <div className="w-full min-w-0 md:flex-1">
+            <ProjectImage
+              className={PANEL}
+              src={`${BASE}/Graphs.png`}
+              alt="A line chart showing trained patient engagement decaying over time."
+            />
+          </div>
+        </div>
+
+        {/* Three rare-data principles */}
+        <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-3">
           <ProjectImage
-            src={`${BASE}/IBM%20Sticker.png`}
-            alt="A round sticker reading “We see you, IBM Watson!” with cartoon googly eyes."
+            className={PANEL}
+            src={`${BASE}/Data%201.png`}
+            alt="Principle 1 — Extreme scarcity: rare data includes clinically-relevant, condition-specific sign and symptom data, even the metadata from a patient’s interaction with technology over time."
+          />
+          <ProjectImage
+            className={PANEL}
+            src={`${BASE}/Data%202.png`}
+            alt="Principle 2 — Brief actionability: rare data’s window of opportunity to inform clinical care or power predictive models is often less than ten days."
+          />
+          <ProjectImage
+            className={PANEL}
+            src={`${BASE}/Data%203.png`}
+            alt="Principle 3 — Proven efficacy: rare data, used correctly, impacts outcomes on its own — and becomes more powerful assimilated into predictive models, delivering better outcomes and higher ROI."
           />
         </div>
-        <div className="w-full min-w-0 md:flex-1">
-          <ProjectImage
-            src={`${BASE}/Graphs.png`}
-            alt="A line chart showing trained patient engagement decaying over time."
-          />
-        </div>
-      </div>
-    </Section>
-  );
-}
 
-// Three rare-data principles (Figma `Frame 137`). Stacked on mobile, three
-// across at sm+.
-export function Principles() {
-  return (
-    <Section>
-      <div className="grid grid-cols-1 gap-[16px] sm:grid-cols-3">
+        {/* Gradient line-art illustration panel */}
         <ProjectImage
-          src={`${BASE}/Data%201.png`}
-          alt="Principle 1 — Extreme scarcity: rare data includes clinically-relevant, condition-specific sign and symptom data, even the metadata from a patient’s interaction with technology over time."
+          className={PANEL}
+          src={`${BASE}/Illustrations.png`}
+          alt="A panel of line-art illustrations visualizing rare clinical data feeding predictive models."
         />
-        <ProjectImage
-          src={`${BASE}/Data%202.png`}
-          alt="Principle 2 — Brief actionability: rare data’s window of opportunity to inform clinical care or power predictive models is often less than ten days."
-        />
-        <ProjectImage
-          src={`${BASE}/Data%203.png`}
-          alt="Principle 3 — Proven efficacy: rare data, used correctly, impacts outcomes on its own — and becomes more powerful assimilated into predictive models, delivering better outcomes and higher ROI."
-        />
-      </div>
-    </Section>
-  );
-}
 
-// Gradient line-art illustration panel (Figma `Group 64`).
-export function Illustrations() {
-  return (
-    <Section>
-      <ProjectImage
-        src={`${BASE}/Illustrations.png`}
-        alt="A panel of line-art illustrations visualizing rare clinical data feeding predictive models."
-      />
-    </Section>
-  );
-}
-
-// Closing definition + stacked-cards card (Figma `Group 66`). Definition
-// panel ~2/3, stacked-cards card ~1/3 at md+, stacked below.
-export function Close() {
-  return (
-    <Section>
-      <div className="flex flex-col items-start gap-[16px] md:flex-row">
-        <div className="w-full min-w-0 md:flex-1">
-          <ProjectImage
-            src={`${BASE}/Index%20Card.png`}
-            alt="A definition card — engaged (n): providing clinically-relevant and actionable data. “CareSignal really keeps patients engaged! The average clinically-relevant engagement duration is over a year!”"
-          />
-        </div>
-        <div className="w-full md:w-[303px] md:shrink-0">
-          <ProjectImage
-            src={`${BASE}/AI%20Stacks.png`}
-            alt="A stack of index cards representing accumulated rare data."
-          />
+        {/* Close — "engaged (n)" definition (~2/3) + stacked-cards card (~1/3) */}
+        <div className="flex flex-col items-start gap-[24px] md:flex-row">
+          <div className="w-full min-w-0 md:flex-1">
+            <ProjectImage
+              className={PANEL}
+              src={`${BASE}/Index%20Card.png`}
+              alt="A definition card — engaged (n): providing clinically-relevant and actionable data. “CareSignal really keeps patients engaged! The average clinically-relevant engagement duration is over a year!”"
+            />
+          </div>
+          <div className="w-full md:w-[303px] md:shrink-0">
+            <ProjectImage
+              className={PANEL}
+              src={`${BASE}/AI%20Stacks.png`}
+              alt="A stack of index cards representing accumulated rare data."
+            />
+          </div>
         </div>
       </div>
     </Section>
