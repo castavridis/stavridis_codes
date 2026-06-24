@@ -41,8 +41,8 @@ export function Intro () {
 export function DesignIntro() {
 	return (
 		<Section>
-			<div className="flex w-full items-start gap-[35px]">
-				<div className="flex w-[349px] shrink-0 flex-col gap-[24px] pt-[104px]">
+			<div className="flex w-full flex-col items-start gap-[24px] md:flex-row md:gap-[35px]">
+				<div className="flex w-full flex-col gap-[24px] md:w-[349px] md:shrink-0 md:pt-[104px]">
 					<h2 className="type-headline-small m-0 text-confetti-black">
 						We designed a low-burden way to offer clinicians a snapshot of their patient panel
 					</h2>
@@ -63,6 +63,26 @@ export function DesignIntro() {
 	);
 }
 
+// Responsive slot sizing. A numeric width becomes a max-width with a
+// width:100% base + aspect-ratio, so the slot scales down on narrow
+// viewports instead of overflowing. String widths (e.g. "100%") already
+// flex, so they keep their fixed height.
+function slotStyle(
+	width: number | string,
+	height: number,
+	background: string,
+): React.CSSProperties {
+	if (typeof width === 'number') {
+		return {
+			width: '100%',
+			maxWidth: width,
+			aspectRatio: `${width} / ${height}`,
+			background,
+		};
+	}
+	return { width, height, background };
+}
+
 function IllustrationPlaceholder({
 	name,
 	width,
@@ -80,8 +100,8 @@ function IllustrationPlaceholder({
 }) {
 	return (
 		<div
-			className={`flex shrink-0 items-center justify-center overflow-hidden rounded-[12px] border border-dashed ${dark ? 'border-white/20' : 'border-confetti-black/25'} ${className ?? ''}`}
-			style={{ width, height, background }}
+			className={`flex items-center justify-center overflow-hidden rounded-[12px] border border-dashed ${dark ? 'border-white/20' : 'border-confetti-black/25'} ${className ?? ''}`}
+			style={slotStyle(width, height, background)}
 		>
 			<span
 				className={`type-tag uppercase tracking-[0.08em] ${dark ? 'text-white/60' : 'text-confetti-black/60'}`}
@@ -113,8 +133,8 @@ function Illustration({
 }) {
 	return (
 		<div
-			className={`shrink-0 overflow-hidden rounded-[12px] ${className ?? ''}`}
-			style={{ width, height, background }}
+			className={`overflow-hidden rounded-[12px] ${className ?? ''}`}
+			style={slotStyle(width, height, background)}
 		>
 			<img src={src} alt={alt} className="block size-full object-contain" />
 		</div>
@@ -132,7 +152,7 @@ export function Monitors() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-[705px] flex-col gap-[8px]">
+				<div className="flex w-full max-w-[705px] flex-col gap-[8px]">
 					<h2 className="type-headline-small m-0 text-confetti-black">
 						Clinical users work within complex software environments with heightened scrutiny.
 					</h2>
@@ -251,7 +271,7 @@ export function Outcomes() {
 			<div className="flex w-full flex-col gap-[24px]">
 				<p className="type-eyebrow m-0 text-confetti-black">Select Outcomes</p>
 
-				<div className="grid w-full grid-cols-3 gap-[16px]">
+				<div className="grid w-full grid-cols-1 gap-[16px] sm:grid-cols-3">
 					<OutcomeStat stat="≥ 10x" caption="Growth in patients per clinical user" />
 					<OutcomeStat stat="144%" caption="Net recurring revenue year over year" />
 					<Illustration
