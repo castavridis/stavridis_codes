@@ -17,7 +17,6 @@
 // resets the visualization."
 // ---------------------------------------------------------------------------
 
-import { useState } from "react";
 import {
   weatherLabel,
   type DayPhase,
@@ -68,9 +67,6 @@ export function PresetWidget({
   // (it uses its own in-place wipe).
   scrollTargetRef?: React.RefObject<HTMLDivElement | null>;
 }): React.ReactElement {
-  const [isMobile] = useState(() =>
-    window.matchMedia("(max-width: 767px)").matches,
-  );
   const triggerReset = usePaintStore((s) => s.triggerReset);
   const paintActive = usePaintStore((s) => s.paintActive);
   const setPaintActive = usePaintStore((s) => s.setPaintActive);
@@ -106,17 +102,15 @@ export function PresetWidget({
   // briefly render as raw washes-paper (cream-on-cream → invisible).
   const textClass = "text-confetti-black type-tag";
 
-  // Desktop layout (Figma node 4014:43167) is a single horizontal row:
+  // Layout (Figma node 4014:43167): a single horizontal row at md+ —
   //   [Location] is where I'm based. It's currently [Time], NN°F and [Weather].
-  // Mobile (< 768px) keeps the two-row stack because the full sentence
-  // overflows narrow screens. `whitespace-nowrap` on every chip + connector
-  // prevents browser word-wrap inside the row at desktop widths.
+  // Below md it stacks into two rows because the full sentence overflows
+  // narrow screens. Driven by Tailwind `md:` (not a JS snapshot) so it tracks
+  // the real viewport; `whitespace-nowrap` at md+ keeps each chip + connector
+  // from wrapping mid-row.
   return (
-    <div
-      className={`flex items-center rounded-md type-tag ${
-        isMobile ? "flex-col gap-[6px]" : "flex-row flex-nowrap gap-[6px] whitespace-nowrap"
-      }`}
-    >
+    <div className="flex flex-col items-center gap-[6px] rounded-md type-tag md:flex-row md:flex-nowrap md:whitespace-nowrap">
+
       <div className="flex items-center gap-[0px] whitespace-nowrap">
         <span className={`${textClass} hidden md:inline`}>Visualization above based on </span>
         <PresetBug
@@ -135,7 +129,8 @@ export function PresetWidget({
             onClick={wrapHandler(onTime)}
             label={`Show the next time (now showing ${f.label})`}
           >
-            {isMobile ? `${f.time}` : `${f.time} (${f.label.toLowerCase()})`}
+            {f.time}
+            <span className="hidden md:inline">{` (${f.label.toLowerCase()})`}</span>
           </PresetBug>
           <span className={textClass}>it will be {f.temp}°F and</span>
           <PresetBug
