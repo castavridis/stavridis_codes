@@ -382,14 +382,14 @@ function ProjectSheetContent({
   const backgroundColor = isV2 ? 'transparent' : (project?.background ?? '#fbf6ea');
   return (
     <div
-      // no-scrollbar: the sheet scrolls but hides the bar, which otherwise
-      // sat at the rounded right edge overlapping content (the top-right
-      // Close button) and the 8px mobile clearance.
-      className="no-scrollbar"
+      // scrollbar-gutter: stable reserves a lane for the scrollbar so it
+      // stays visible (scroll affordance) but no longer overlaps content
+      // (the top-right Close button) or the rounded right edge.
       style={{
         position: 'absolute',
         inset: 0,
         overflow: 'auto',
+        scrollbarGutter: 'stable',
         backgroundColor,
       }}
     >
@@ -415,11 +415,11 @@ function BlogSheetContent({
 }) {
   return (
     <div
-      className="no-scrollbar"
       style={{
         position: 'absolute',
         inset: 0,
         overflow: 'auto',
+        scrollbarGutter: 'stable',
         backgroundColor: 'transparent',
       }}
     >
