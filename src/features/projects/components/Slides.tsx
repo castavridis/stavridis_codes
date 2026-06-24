@@ -21,9 +21,16 @@ type SlidesProps = {
   // Opt in with `windowChrome` when the slide content is a raw mockup
   // that should be presented as if it lives in an app window.
   windowChrome?: boolean;
+  // Custom fill for the slide frame (any CSS color/gradient string), like
+  // Illustration's `background`. Defaults to confetti-black when unset.
+  background?: string;
 };
 
-export default function Slides({ children, windowChrome = false }: SlidesProps) {
+export default function Slides({
+  children,
+  windowChrome = false,
+  background,
+}: SlidesProps) {
   const slides = Children.toArray(children).filter(
     (child): child is ReactElement<SlideProps> =>
       isValidElement(child) && child.type === Slide,
@@ -48,7 +55,12 @@ export default function Slides({ children, windowChrome = false }: SlidesProps) 
 
   return (
     <div className="flex w-full flex-col gap-[16px]">
-      <div className="relative w-full overflow-hidden rounded-[16px] bg-confetti-black p-[72px]">
+      <div
+        className="relative w-full overflow-hidden rounded-[16px] bg-confetti-black p-[72px]"
+        // Inline background (when provided) overrides the bg-confetti-black
+        // default — same pattern as Illustration's `background`.
+        style={background ? { background } : undefined}
+      >
         <div className="overflow-hidden rounded-[12px] bg-transparent shadow-lg">
           {windowChrome ? (
             <div className="flex items-center gap-[8px] bg-[#1f1f1f] px-[16px] py-[12px]">
