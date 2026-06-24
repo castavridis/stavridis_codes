@@ -52,10 +52,7 @@ export default function Colophon({
 
       {/* Row 2 — metadata. Left: © year. Right: Last Updated stamp
           (links to the latest commit when git metadata is available). */}
-      <p className="type-tag col-span-1 md:col-span-5 md:col-start-2 m-0">
-        <span>© {CURRENT_YEAR}</span>
-      </p>
-      <p className="type-tag col-span-1 md:col-span-5 md:col-start-7 m-0">
+      <p className="type-tag col-span-1 md:col-span-5 md:col-start-2 m-0 opacity-70">
         {LAST_UPDATED_DATE ? (
           <>
             <span>Last Updated on </span>
@@ -75,6 +72,9 @@ export default function Colophon({
             <span>.</span>
           </>
         ) : null}
+      </p>
+      <p className="type-tag col-span-1 md:col-span-5 md:col-start-7 m-0 opacity-70">
+        <span>© {CURRENT_YEAR}</span>
       </p>
     </div>
   );
