@@ -190,19 +190,48 @@ export function KeyObjects() {
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
 				<Illustration
-					src="/images/projects/caresignal-platform/Alert.png"
+					src="/images/projects/caresignal-platform/Alert Layout.png"
 					alt="A diagonal stack of patient alert flags, each showing time-since, patient name, vital sign, and resolve / snooze controls."
 					width="100%"
 					height={504}
 					background="#191716"
+					className="p-[24px] md:p-[72px]"
 				/>
 				<Illustration
-					src="/images/projects/caresignal-platform/Patients.png"
+					src="/images/projects/caresignal-platform/Patient Layout.png"
 					alt="A list of patient rows over a dark background — Patient Banner cards stacked with optional Program Banner sub-rows for high-priority patients."
 					width="100%"
 					height={484}
 					background="#191716"
+					className="p-[24px] md:p-[72px]"
 				/>
+
+			<Slides>
+				<Slide
+					caption={
+						<>
+							<span className="font-semibold">Patient summaries</span> give providers a more holistic perspective about their patients than an Alert can provide, and support them in prioritizing outreach.
+						</>
+					}
+				>
+					<SlideImage
+						src="/images/projects/caresignal-platform/Task-Based%20Dashboard.png"
+						alt="The task-based dashboard listing patient alerts and summaries with high-risk / medium-risk / low-risk badges and snooze / resolve actions."
+					/>
+				</Slide>
+				<Slide
+					caption={
+						<>
+							<span className="font-semibold">Hub and Spoke</span> — placeholder slide, real capture coming later.
+						</>
+					}
+				>
+					<SlideImage
+						src="/images/projects/caresignal-platform/Hub%20and%20Spoke.png"
+						alt="A care-team diagram showing one assistant routing patients to multiple nurses in a hub-and-spoke configuration."
+					/>
+				</Slide>
+			</Slides>
 			</div>
 		</Section>
 	);
@@ -250,7 +279,7 @@ export function Screenshots() {
 
 function SlideImage({ src, alt }: { src: string; alt: string }) {
 	return (
-		<div className="aspect-[770/463] w-full bg-white">
+		<div className="aspect-[770/463] w-full bg-transparent">
 			<img src={src} alt={alt} className="block size-full object-contain" />
 		</div>
 	);

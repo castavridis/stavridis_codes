@@ -49,7 +49,7 @@ export default function Slides({ children, windowChrome = false }: SlidesProps) 
   return (
     <div className="flex w-full flex-col gap-[16px]">
       <div className="relative w-full overflow-hidden rounded-[16px] bg-confetti-black p-[72px]">
-        <div className="overflow-hidden rounded-[12px] bg-white shadow-lg">
+        <div className="overflow-hidden rounded-[12px] bg-transparent shadow-lg">
           {windowChrome ? (
             <div className="flex items-center gap-[8px] bg-[#1f1f1f] px-[16px] py-[12px]">
               <span className="size-[13px] rounded-full bg-[#ff5f57]" />
