@@ -12,20 +12,16 @@ background: '#FBF6EA'
 color: '#201E1F'
 ---
 
-{/* Sections coming in PR 9. */}
+import Section from '../../src/features/projects/components/Section'
+import { ProjectImage } from '../../src/components/mdx/Layout'
 
-{/* Hero screenshot */}
-
-{/* Resources from the Community — category chips */}
-
-{/* Confetti illustration + resource cards */}
-
-{/* Form Container — Tell Us About a Resource */}
-
-{/* Form Container — Existing resource flow */}
-
-{/* Form Container — Compact form variant */}
-
-{/* Outro */}
-
-*Case study coming soon.*
+{/* SQSHBook Design System — the "Tell Us About a Resource" submission form in
+    a browser window, surrounded by category chips and component states (input,
+    checkbox, radio) on a confetti background. Figma node 4143:3681. */}
+<Section>
+  <ProjectImage
+    className="overflow-hidden rounded-[20px]"
+    src="/images/projects/sqshbook/SQSHBook%20Design%20System.png"
+    alt="SQSHBook's design system: a “Tell Us About a Resource” submission form shown in a browser window, surrounded by category chips and component states — input fields, checkboxes, and radio options — on a confetti background."
+  />
+</Section>
