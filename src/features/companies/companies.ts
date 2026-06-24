@@ -139,8 +139,8 @@ export const companies: Record<string, CompanyConfig> = {
   },
   counsel_health: {
     name: 'Counsel Health',
-    featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
-    featuredProjects: ['caresignal-platform', 'fracta'],
+    featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'fracta', 'sqshbook'],
+    featuredProjects: ['caresignal-platform'],
     colors: {
       brand: '#243866',
       light: 'rgb(215, 221, 197)',
