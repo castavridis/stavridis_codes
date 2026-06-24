@@ -82,6 +82,7 @@ function V2ProjectPost({
     headline: project.headline ?? project.summary,
     introduction: project.introduction ?? '',
     tags: project.tags.join(' · '),
+    preview: project.preview,
   };
   return (
     <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal}>

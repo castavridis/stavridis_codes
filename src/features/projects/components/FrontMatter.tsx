@@ -13,6 +13,9 @@ type FrontMatterProps = {
   // Authors / non-overlay hosts can still render FrontMatter standalone
   // (e.g. preview pages) and the navigation will appear by default.
   hideTopNavigation?: boolean;
+  // When true, a "Preview Only" tag renders above the headline — for case
+  // studies still in draft/preview. Driven by the project's `preview` flag.
+  previewOnly?: boolean;
 };
 
 export default function FrontMatter({
@@ -21,6 +24,7 @@ export default function FrontMatter({
   tags,
   onClose,
   hideTopNavigation = false,
+  previewOnly = false,
 }: FrontMatterProps) {
   return (
     <div className="flex w-full max-w-[944px] flex-col items-start gap-[48px] md:gap-[84px]">
@@ -28,6 +32,15 @@ export default function FrontMatter({
         <TopNavigation tags={tags} onClose={onClose} />
       )}
       <div className="flex w-full flex-col items-start gap-[16px] text-confetti-black">
+        {previewOnly ? (
+          // "Preview Only" tag — Figma node 4140:10325. Dark pill above the
+          // headline (inverse of the lighter card tag).
+          <span className="border-confetti-black bg-confetti-black/75 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
+            <span className="text-washes-paper/75 font-mono text-[12px] font-medium italic leading-[12px]">
+              Preview Only
+            </span>
+          </span>
+        ) : null}
         <Text
           variant="headline"
           as="h1"

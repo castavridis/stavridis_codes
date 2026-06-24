@@ -12,6 +12,9 @@ type Front = {
   headline: string;
   introduction: string;
   tags?: string;
+  // When true, a "Preview Only" tag renders above the headline. Driven by
+  // the project's `preview` frontmatter flag.
+  preview?: boolean;
 };
 
 type MDXLayoutProps = {
@@ -309,6 +312,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
             <FrontMatter
               headline={front.headline}
               introduction={front.introduction}
+              previewOnly={front.preview}
               hideTopNavigation
             />
           </div>
