@@ -11,20 +11,29 @@ background: '#FBF6EA'
 color: '#201E1F'
 ---
 
-{/* Sections coming in PR 10. */}
+import {
+  Hero,
+  Stickers,
+  DataChart,
+  Principles,
+  Illustrations,
+  Close,
+} from '../projects/CareSignalAIComponents.tsx'
 
-{/* Hero — iPad mockup */}
+{/* Hero — iPad mockup + View Live Site */}
+<Hero />
 
-{/* Design Details — sticker grid */}
+{/* Design Details — four AI-stack cursor stickers */}
+<Stickers />
 
-{/* Stickers — IBM Watson + supporting visuals */}
+{/* IBM Watson sticker + engagement chart */}
+<DataChart />
 
-{/* Blocks — three principles (Extreme scarcity / Brief actionability / Proven efficacy) */}
+{/* Three principles — Extreme scarcity / Brief actionability / Proven efficacy */}
+<Principles />
 
-{/* Illustrations — gradient panel with illos */}
+{/* Gradient illustration panel */}
+<Illustrations />
 
-{/* Close — engagement definition card */}
-
-{/* CTA — link out to live site */}
-
-*Case study coming soon.*
+{/* Close — “engaged (n)” definition + stacked cards */}
+<Close />
