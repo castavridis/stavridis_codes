@@ -28,6 +28,10 @@ type ProjectOverviewProps = {
   // Seal colors for this company (CompanyConfig.seal). Undefined → the
   // seal uses its Hansa Yellow / confetti-black defaults.
   stampSeal?: SealColors;
+  // When true, overlays a "Preview Only" tag on the thumbnail — for case
+  // studies surfaced as a preview (e.g. an unpublished draft shown to a
+  // specific company). Driven by CompanyConfig.previewProjects.
+  previewOnly?: boolean;
 };
 
 function ProjectOverview({
@@ -40,6 +44,7 @@ function ProjectOverview({
   imageAlt,
   stampCompanyName,
   stampSeal,
+  previewOnly,
 }: ProjectOverviewProps): React.ReactElement {
   return (
     <div className="flex flex-col gap-[16px]">
@@ -59,6 +64,15 @@ function ProjectOverview({
         ) : (
           <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
         )}
+        {previewOnly ? (
+          // "Preview Only" tag — Figma node 4140:10216. Paper-tinted pill at
+          // the thumbnail's top-left.
+          <span className="border-washes-paper bg-washes-paper/90 pointer-events-none absolute left-[12px] top-[12px] z-10 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
+            <span className="text-confetti-black/75 font-mono text-[12px] font-medium italic leading-[12px]">
+              Preview Only
+            </span>
+          </span>
+        ) : null}
         {stampCompanyName ? (
           <span
             className="pointer-events-none"
@@ -151,12 +165,16 @@ export function FeaturedWork({
   featuredProjectSlugs,
   stampCompanyName,
   stampSeal,
+  previewProjectSlugs,
 }: {
   onCardClick?: (slug: string) => void;
   slugs?: string[];
   featuredProjectSlugs?: string[];
   stampCompanyName?: string;
   stampSeal?: SealColors;
+  // Slugs that get a "Preview Only" tag on their card. See
+  // CompanyConfig.previewProjects.
+  previewProjectSlugs?: string[];
 }): React.ReactElement {
   const projects = slugs
     ? slugs
@@ -165,6 +183,7 @@ export function FeaturedWork({
     : PROJECTS;
 
   const stampSlugs = new Set(featuredProjectSlugs ?? []);
+  const previewSlugs = new Set(previewProjectSlugs ?? []);
 
   return (
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
@@ -189,6 +208,7 @@ export function FeaturedWork({
                   : undefined
               }
               stampSeal={stampSeal}
+              previewOnly={previewSlugs.has(project.slug)}
               onClick={onCardClick}
             />
           </FadeDown>

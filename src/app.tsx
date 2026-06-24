@@ -297,6 +297,7 @@ export function App() {
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
           featuredProjectSlugs={company?.featuredProjects}
+          previewProjectSlugs={company?.previewProjects}
           companySeal={company?.seal}
           companySalutation={company?.salutation}
           companySalutationColors={company?.salutation_colors}
