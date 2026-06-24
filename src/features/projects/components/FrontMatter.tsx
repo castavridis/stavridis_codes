@@ -23,7 +23,7 @@ export default function FrontMatter({
   hideTopNavigation = false,
 }: FrontMatterProps) {
   return (
-    <div className="flex w-[944px] flex-col items-start gap-[84px]">
+    <div className="flex w-full max-w-[944px] flex-col items-start gap-[48px] md:gap-[84px]">
       {hideTopNavigation ? null : (
         <TopNavigation tags={tags} onClose={onClose} />
       )}
