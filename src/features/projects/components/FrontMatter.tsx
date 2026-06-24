@@ -33,10 +33,10 @@ export default function FrontMatter({
       )}
       <div className="flex w-full flex-col items-start gap-[16px] text-confetti-black">
         {previewOnly ? (
-          // "Preview Only" tag — Figma node 4140:10325. Dark pill above the
-          // headline (inverse of the lighter card tag).
-          <span className="border-confetti-black bg-confetti-black/75 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
-            <span className="text-washes-paper/75 font-mono text-[12px] font-medium italic leading-[12px]">
+          // "Preview Only" tag — Figma node 4014:46487 (4140:10325). Light
+          // tinted pill above the headline.
+          <span className="border-confetti-black/25 bg-confetti-black/5 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
+            <span className="text-confetti-black font-mono text-[12px] font-medium italic leading-[12px]">
               Preview Only
             </span>
           </span>
