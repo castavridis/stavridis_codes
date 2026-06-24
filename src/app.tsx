@@ -146,7 +146,10 @@ export function App() {
       : (company?.role ?? storedRoleState);
   const roleLabel = role ? ROLE_LABEL[role] : DEFAULT_ROLE_LABEL;
   const documentTitleSuffix = role ? ROLE_TITLE[role] : DEFAULT_ROLE_TITLE;
-  const resumeHref = role ? ROLE_RESUME[role] : DEFAULT_ROLE_RESUME;
+  // A company can point the Resume link at a custom URL (e.g. a tailored
+  // résumé); otherwise it falls back to the role-specific PDF.
+  const resumeHref =
+    company?.resume ?? (role ? ROLE_RESUME[role] : DEFAULT_ROLE_RESUME);
 
   useEffect(() => {
     document.title = `C Stavridis — ${documentTitleSuffix}`;

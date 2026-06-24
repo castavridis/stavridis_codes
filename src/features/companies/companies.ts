@@ -56,6 +56,10 @@ export type CompanyConfig = {
   // SalutationColors; defaults to the brand palette when unset.
   salutation_colors?: SalutationColors;
   blurb?: string;
+  // `resume` — a custom URL for the Header's Resume link while this
+  // company's context is active (e.g. a tailored résumé). When unset the
+  // link falls back to the role-specific PDF (see role-context.ROLE_RESUME).
+  resume?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
