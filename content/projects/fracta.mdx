@@ -12,16 +12,25 @@ background: '#FBF6EA'
 color: '#201E1F'
 ---
 
-{/* Sections coming in PR 8. */}
+import Section from '../../src/features/projects/components/Section'
+import Callout from '../../src/features/projects/components/Callout'
+import { ProjectImage } from '../../src/components/mdx/Layout'
 
-{/* Callout (quote + photo) */}
+{/* Fracta Device — the Production Traveler on a rugged Dell tablet
+    (Figma node 4140:10150). */}
+<Section>
+  <ProjectImage
+    className="max-w-[944px]"
+    src="/images/projects/fracta/Preview%20Device.png"
+    alt="Fracta's Production Traveler running on a rugged Dell tablet — a job detail view with part rows and section checkboxes."
+  />
+</Section>
 
-{/* Device — Production Traveler overview */}
-
-{/* Device — Production Traveler detail (issues + sections) */}
-
-{/* Monitors — process screenshots */}
-
-{/* Outro */}
-
-*Case study coming soon.*
+{/* Quote callout (Figma node 4014:45038). */}
+<Section>
+  <Callout
+    title="Quotes from the field"
+    content="“We live in the freakin’ future! We should be able to use a device to check things off.”"
+    attribution={<><strong>Team Lead</strong> on the paper traveler</>}
+  />
+</Section>
