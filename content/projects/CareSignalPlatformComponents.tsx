@@ -305,7 +305,7 @@ function SlideImage({ src, alt }: { src: string; alt: string }) {
 		enter: { opacity: 1, scale: 1 },
 		leave: { opacity: 0, scale: 0.96 },
 		config: (_item, _index, phase) => ({
-			duration: phase === 'leave' ? 320 : 130,
+			duration: phase === 'leave' ? 320 : 200,
 			easing: phase === 'leave' ? easings.easeInCubic : easings.easeOutCubic,
 		}),
 	});
