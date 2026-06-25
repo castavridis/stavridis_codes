@@ -1,0 +1,42 @@
+---
+preview: true
+title: Fracta
+date: 2026-06-19
+time: 00:00
+summary: Supporting a High-Growth Manufacturing Line
+headline: A Digital Production Traveler for a High-Growth Manufacturing Line
+introduction: Fracta is a digital production traveler, co-designed with a manufacturing team compressing their build time from six months to one. They build complex data-center cooling units, each requiring long-term documentation throughout the build.
+tags: ['Product Design', 'Design System', 'User Research', 'Full-Stack Engineering']
+gradient: 'blue'
+background: '#FBF6EA'
+color: '#201E1F'
+---
+
+import Section from '../../src/features/projects/components/Section'
+import Callout from '../../src/features/projects/components/Callout'
+import { ProjectImage } from '../../src/components/mdx/Layout'
+
+{/* Fracta Device — the Production Traveler on a rugged Dell tablet
+    (Figma node 4140:10150). */}
+<Section>
+  <ProjectImage
+    className="max-w-[944px]"
+    src="/images/projects/fracta/Preview%20Device.png"
+    alt="Fracta's Production Traveler running on a rugged Dell tablet — a job detail view with part rows and section checkboxes."
+  />
+</Section>
+
+{/* Quote callout (Figma node 4014:45038). */}
+<Section>
+  <Callout
+    title="Quotes from the field"
+    content={
+      <span style={{
+        'hangingPunctuation': 'first',
+      }}>
+        “We live in the freakin’ future! We should be able to use a device to check things off.”
+      </span>
+    }
+    attribution={<><strong>Team Lead</strong> on the paper traveler</>}
+  />
+</Section>

@@ -9,6 +9,15 @@ export type ProjectFrontmatter = {
   gradient?: ProjectGradientType;
   background?: string;
   color?: string;
+  // When true, the project's FeaturedWork card shows a "Preview Only" tag —
+  // for case studies that are still drafts/previews. The project controls
+  // this itself via its `.mdx` frontmatter.
+  preview?: boolean;
+  // v2-only fields. Their presence is the discriminator that tells
+  // project-post.tsx to render with the v2 MDXLayout chrome instead of the
+  // legacy gradient-header chrome.
+  headline?: string;
+  introduction?: string;
 };
 
 export type Project = ProjectFrontmatter & {

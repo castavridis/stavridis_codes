@@ -1,70 +1,177 @@
-@import 'tailwindcss';
-@source inline('{bg,text,border}-paper-{black,blue,blue-mid,blue-dark,green,green-mid,pink,pink-mid,purple,purple-mid,purple-dark,white,yellow,yellow-mid,yellow-dark,gray}'
-);
-@source inline('{bg,border}-accent-{blue,green,orange,red,white}');
-@source inline('border-b-paper-{blue-mid,pink} drop-shadow-fieldset');
+@import "tailwindcss";
+
+/* PP Kyoto — Pangram Pangram Foundry. Headline + logotype face for the v2
+   redesign. Only Medium and Medium Italic are used (Light + Extrabold Italic
+   were dropped to reduce licensing cost). Files belong in /public/fonts/;
+   until they land, browsers fall back to Young Serif / Georgia. */
+@font-face {
+  font-family: "PP Kyoto";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/PPKyoto-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "PP Kyoto";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/PPKyoto-MediumItalic.woff2") format("woff2");
+}
 
 @theme {
   --color-cream: #fbf6ea;
-  --color-cream-50: #fffefc;
-  --color-blackberry: #28001e;
-  --color-synthetic-black: #100e08;
-  --color-coffee: #1b1207;
-  --color-coffee-deep: #0e0000;
-  --color-ink: #211e1f;
 
-  --color-cs-black: #211E1F;
-  --color-cs-white: #FFFBF0;
-  --color-cs-brand-text: #D08101;
-  --color-cs-primary: #1363BD;
-  --color-cs-success: #79B315;
-  --color-cs-warning: #F2AA35;
-  --color-cs-danger: #F06A41;
-  --color-cs-gray: #706C69;
+  /* Legacy CareSignal palette — still referenced by the V1 project posts
+     (CareSignal Design System, CareSignal AI v1). Kept until those v1
+     content files are migrated to the v2 chrome. */
+  --color-cs-black: #211e1f;
+  --color-cs-white: #fffbf0;
+  --color-cs-warning: #f2aa35;
 
-  --color-washes-rose: #a50e53;
-  --color-washes-yellow: #e3af08;
-  --color-washes-blue: #108ba0;
+  /* v2 redesign palette — names mirror the Figma variable groups
+     (CareSignal / Washes / Confetti / status gradients). */
+  --color-caresignal-white: #fffbf0;
+  --color-caresignal-none: #706c69;
 
-  --color-paper-blue: #cae7ed;
-  --color-paper-blue-mid: rgb(149, 207, 219);
-  --color-paper-blue-dark: rgb(84, 178, 197);
+  --color-confetti-black: #391f00;
 
-  --color-paper-green: #a7d9b8;
-  --color-paper-green-mid: rgb(45, 164, 86);
+  --color-washes-hansa-yellow: #e3af08;
+  --color-washes-cerulean-blue: #108ba0;
+  --color-washes-paper: #fbf6ea;
 
-  --color-paper-pink: rgb(245, 201, 211);
-  --color-paper-pink-mid: rgb(235, 147, 167);
+  --color-grad-danger-start: #e5562e40;
+  --color-grad-warning-start: #f9ac3140;
+  --color-grad-success-start: #b2d07f40;
+  --color-grad-none-start: #211e1f40;
 
-  --color-paper-purple: #aeadd7;
-  --color-paper-purple-mid: rgb(147, 146, 202);
-  --color-paper-purple-dark: rgb(94, 92, 175);
-
-  --color-paper-yellow: #fcf5be;
-  --color-paper-yellow-mid: rgb(245, 223, 45);
-  --color-paper-yellow-dark: rgb(240, 205, 0);
-
-  --color-paper-white: #fffef8;
-  --color-paper-gray: #bfbfbf;
-  --color-paper-black: #404040;
-  --color-paper-dark-black: rgb(35, 35, 35);
-
-  --color-accent-blue: #0d6193;
-  --color-accent-green: #4b7358;
-  --color-accent-red: #da4942;
-  --color-accent-orange: #e9842f;
-  --color-accent-white: #e9e2c7;
-
-  --font-display: 'Ultra', 'Young Serif', Georgia, serif;
-  --font-body: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-serif: 'Young Serif', Georgia, serif;
-
-  --drop-shadow-fieldset: 2px 2px 0px black;
+  --font-display: "Ultra", "Young Serif", Georgia, serif;
+  --font-body: "Funnel Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-kyoto: "PP Kyoto", "Young Serif", Georgia, serif;
 }
 
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.no-scrollbar::-webkit-scrollbar { display: none; }
+/* -------------------------------------------------------------------------
+   Text styles — one utility per Figma typography token. Bundles family +
+   style + weight + size + line-height into a single class so consumers
+   write `type-headline` instead of `font-kyoto text-[48px] leading-[60px]
+   font-medium`. Color is intentionally NOT included (composed per surface
+   via `text-confetti-black` etc).
+
+   Companion: `<Text variant="...">` component at src/components/Text.tsx.
+
+   The class names are composed dynamically (`type-${variant}`) so
+   Tailwind's JIT can't see them in source — `@source inline(...)` below
+   forces all 14 to be emitted regardless of whether the literal string
+   appears in JSX.
+   ------------------------------------------------------------------------- */
+
+@source inline('type-{headline,headline-italic,headline-small,headline-small-italic,headline-meta,logotype,nav,tag,copy-large,copy,eyebrow,callout-title,callout-body,callout-meta,outcome}');
+
+@utility type-headline {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 60px;
+}
+@utility type-headline-italic {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 60px;
+}
+@utility type-headline-small {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-headline-small-italic {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-headline-meta {
+  font-family: var(--font-kyoto);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+}
+@utility type-logotype {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 20px;
+}
+@utility type-nav {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+}
+@utility type-tag {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+}
+@utility type-copy-large {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 32px;
+}
+@utility type-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility type-eyebrow {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+}
+@utility type-callout-title {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+}
+@utility type-callout-body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 40px;
+}
+@utility type-callout-meta {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 28px;
+}
+@utility type-outcome {
+  font-family: var(--font-kyoto);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 64px;
+  line-height: 64px;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
 @keyframes fade-up {
   from {
@@ -93,7 +200,6 @@
 /* Hero "Project 01" card — annotation: "Gently move this card up and down."
    The rotation lives on an outer wrapper; this only drives the vertical bob. */
 @keyframes card-bob {
-
   0%,
   100% {
     transform: translateY(-3px);
@@ -104,7 +210,30 @@
   }
 }
 
-/* Page transition — radial clip-path mask. The project overlay is revealed
-   via an animated clip-path: circle() that grows from the cursor click point.
-   Closing reverses the mask, shrinking the circle back to nothing. The CSS
-   transition is driven from RadialTransition.tsx — no keyframes needed. */
+/* Per-company greeting chip "wag" — a one-shot decaying tail-wag played
+   once after load. Pivots from the left (transform-origin set on the
+   element) and starts + ends at the chip's resting rotate(0deg) so it
+   settles cleanly without a jump. */
+@keyframes chip-wag {
+  0% {
+    transform: rotate(0deg);
+  }
+  12% {
+    transform: rotate(-11deg);
+  }
+  30% {
+    transform: rotate(6deg);
+  }
+  48% {
+    transform: rotate(-8deg);
+  }
+  66% {
+    transform: rotate(3deg);
+  }
+  82% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}

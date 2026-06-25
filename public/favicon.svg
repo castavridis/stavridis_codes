@@ -1,8 +1,8 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><style>
-    .background { fill: #391F00; }
-    .pencil { fill: #FFF7EB; }
+    .background { fill: #FFF7EB; }
+    .pencil { fill: #391F00; }
     @media (prefers-color-scheme: dark) {
-      .background { fill: #FFF7EB; }
-      .pencil { fill: #391F00; }
+      .background { fill: #391F00; }
+      .pencil { fill: #FFF7EB; }
     }
   </style><path class="background" d="M42 3H45V6H48V42H45V45H42V48H6V45H3V42H0V6H3V3H6V0H42V3Z"/><path d="M39 33H42V36H39V33Z" fill="#F954B7"/><path d="M33 33H36V36H33V33Z" fill="#26BCD7"/><path d="M36 33H39V36H36V33Z" fill="#26BCD7"/><path d="M27 33H30V36H27V33Z" fill="#6FCA37"/><path d="M30 33H33V36H30V33Z" fill="#6FCA37"/><path d="M21 33H24V36H21V33Z" fill="#F9D800"/><path d="M24 33H27V36H24V33Z" fill="#F9D800"/><path d="M15 33H18V36H15V33Z" fill="#F2A900"/><path d="M18 33H21V36H18V33Z" fill="#F2A900"/><path d="M42 36H45V39H42V36Z" fill="#F954B7"/><path d="M36 36H39V39H36V36Z" fill="#26BCD7"/><path d="M39 36H42V39H39V36Z" fill="#26BCD7"/><path d="M30 36H33V39H30V36Z" fill="#6FCA37"/><path d="M33 36H36V39H33V36Z" fill="#6FCA37"/><path d="M24 36H27V39H24V36Z" fill="#F9D800"/><path d="M27 36H30V39H27V36Z" fill="#F9D800"/><path d="M18 36H21V39H18V36Z" fill="#F2A900"/><path d="M21 36H24V39H21V36Z" fill="#F2A900"/><path d="M12 36H15V39H12V36Z" fill="#F95233"/><path d="M15 36H18V39H15V36Z" fill="#F95233"/><path d="M6 36H9V39H6V36Z" fill="#F954B7"/><path d="M9 36H12V39H9V36Z" fill="#F954B7"/><path d="M39 39H42V42H39V39Z" fill="#26BCD7"/><path d="M33 39H36V42H33V39Z" fill="#6FCA37"/><path d="M36 39H39V42H36V39Z" fill="#6FCA37"/><path d="M27 39H30V42H27V39Z" fill="#F9D800"/><path d="M30 39H33V42H30V39Z" fill="#F9D800"/><path d="M21 39H24V42H21V39Z" fill="#F2A900"/><path d="M24 39H27V42H24V39Z" fill="#F2A900"/><path d="M15 39H18V42H15V39Z" fill="#F95233"/><path d="M18 39H21V42H18V39Z" fill="#F95233"/><path d="M9 39H12V42H9V39Z" fill="#F954B7"/><path d="M12 39H15V42H12V39Z" fill="#F954B7"/><path class="pencil" d="M6 33H12V30H15V27H18V24H21V21H18V18H15V15H12V18H9V6H6V33ZM21 21H24V18H21V21ZM24 18H27V15H24V18ZM27 15H30V12H27V15ZM30 12H33V9H30V12ZM33 9H36V6H33V9ZM36 6H39V3H36V6Z"/></svg>

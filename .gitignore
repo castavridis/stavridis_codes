@@ -154,3 +154,6 @@ vite.config.ts.timestamp-*
 
 # Claude Code transient worktrees
 .claude/worktrees/
+
+# Claude Code project-local skills (kept out of git per user preference)
+.claude/skills/

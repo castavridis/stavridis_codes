@@ -1,13 +1,14 @@
-import type { MDXContent } from 'mdx/types';
+import type { MDXComponents, MDXContent } from 'mdx/types';
 import { createElement, Suspense, use } from 'react';
 import { Link } from 'wouter';
-import author from '../../../content/author.json';
 import { MDXColumn, MDXWrapper } from '../../components/mdx/Layout.js';
 import { routes } from '../../routes.js';
-import { formatProjectDate, getProject, type Project } from './projects.js';
+import { getProject, type Project } from './projects.js';
+import type { SealColors } from '../companies/companies.js';
 import { ProjectNavigation } from '../../components/ProjectNavigation.js';
+import MDXLayout, { mdxComponents as v2MdxComponents } from './components/MDXLayout.js';
 
-const mdxComponents = { MDXWrapper, MDXColumn };
+const v1MdxComponents = { MDXWrapper, MDXColumn };
 
 const projectComponentPromises = new Map<string, Promise<MDXContent>>();
 
@@ -35,13 +36,64 @@ function formatTags(tags: string[]) {
   return _tags;
 }
 
-export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => void }) {
+// A project is v2-shape when its frontmatter declares the new copy fields
+// `headline` and `introduction`. v2 posts render bare body inside MDXLayout;
+// v1 posts keep the legacy gradient header + prose column chrome.
+function isV2Project(project: Project): boolean {
+  return Boolean(project.headline && project.introduction);
+}
+
+export function ProjectPost({
+  slug,
+  onBack,
+  stampCompanyName,
+  stampSeal,
+}: {
+  slug: string;
+  onBack?: () => void;
+  stampCompanyName?: string;
+  stampSeal?: SealColors;
+}) {
   const project = getProject(slug);
 
   if (!project) {
     return <ProjectNotFound />;
   }
 
+  if (isV2Project(project)) {
+    return <V2ProjectPost project={project} onBack={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal} />;
+  }
+
+  return <V1ProjectPost project={project} onBack={onBack} />;
+}
+
+function V2ProjectPost({
+  project,
+  onBack,
+  stampCompanyName,
+  stampSeal,
+}: {
+  project: Project;
+  onBack?: () => void;
+  stampCompanyName?: string;
+  stampSeal?: SealColors;
+}) {
+  const front = {
+    headline: project.headline ?? project.summary,
+    introduction: project.introduction ?? '',
+    tags: project.tags.join(' · '),
+    preview: project.preview,
+  };
+  return (
+    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal}>
+      <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
+        <ProjectContent project={project} components={v2MdxComponents} />
+      </Suspense>
+    </MDXLayout>
+  );
+}
+
+function V1ProjectPost({ project, onBack }: { project: Project; onBack?: () => void }) {
   const backClassName =
     "cursor-pointer font-mono text-[12px] leading-normal text-cream rounded-md py-[4px] px-[8px] mix-blend-difference text-right transition-colors hover:text-black bg-[rgba(79,61,27,0.5)]";
 
@@ -69,7 +121,14 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
                   )}
                 />
               </div>
-              <h1 className="font-display text-2xl mt-14">
+              {project.preview ? (
+                <div className="mt-14">
+                  <span className="inline-flex items-center rounded-[6px] border border-current/40 px-[12px] py-[8px] font-mono text-[12px] font-medium italic leading-[12px]">
+                    Preview Only
+                  </span>
+                </div>
+              ) : null}
+              <h1 className={`font-display text-2xl ${project.preview ? 'mt-4' : 'mt-14'}`}>
                 {project.summary}
               </h1>
               <p className="font-mono text-xs text-gray-600 mt-4" dangerouslySetInnerHTML={{__html: formatTags(project.tags)}}>
@@ -81,7 +140,7 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
       <div className="prose prose-gray max-w-none" style={{ backgroundColor: project.background }}>
         <div className="max-w-[1280px] mx-auto p-4 md:p-18">
           <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
-            <ProjectContent project={project} />
+            <ProjectContent project={project} components={v1MdxComponents} />
           </Suspense>
         </div>
       </div>
@@ -89,9 +148,15 @@ export function ProjectPost({ slug, onBack }: { slug: string; onBack?: () => voi
   );
 }
 
-function ProjectContent({ project }: { project: Project }) {
+function ProjectContent({
+  project,
+  components,
+}: {
+  project: Project;
+  components: MDXComponents;
+}) {
   const Component = use(getProjectComponentPromise(project));
-  return createElement(Component, { components: mdxComponents });
+  return createElement(Component, { components });
 }
 
 function getProjectComponentPromise(project: Project) {

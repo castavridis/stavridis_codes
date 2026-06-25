@@ -28,6 +28,8 @@ export function ProjectImage ({ src, alt, className, placeholderColor = 'rgba(25
         className="my-0 block w-full"
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         style={{
           opacity: loaded ? 1 : 0,
           transition: loaded ? 'opacity 400ms ease-out' : 'none',
@@ -103,8 +105,8 @@ type End = keyof typeof END;
 // A 12-column grid container. Place one or more <MDXColumn> children inside it.
 // The surrounding `.prose` (see blog-post.tsx) cascades into the columns via
 // descendant selectors, so markdown inside still gets typography styles.
-export function MDXWrapper({ children }: { children: ReactNode }) {
-  return <div className="mb-8 grid grid-cols-12 gap-6 leading-normal">{children}</div>;
+export function MDXWrapper({ gap = 6, children }: { gap?: number, children: ReactNode }) {
+  return <div className={`mb-8 grid grid-cols-12 gap-[${gap}px] leading-normal`}>{children}</div>;
 }
 
 // A single grid item spanning `span` of 12 columns. Wrap markdown in exactly one
