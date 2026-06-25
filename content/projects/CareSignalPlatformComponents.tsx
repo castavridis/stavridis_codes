@@ -231,17 +231,17 @@ export function KeyObjects() {
 				}>
 					<SlideImage
 						src="/images/projects/caresignal-platform/Dashboard Overview.png"
-						alt="The dashboard shows a comprehensive view of a patient group. "
+						alt="The dashboard shows a comprehensive view of a patient group."
 					/>
 				</Slide>
 				<Slide caption={
 					<>
-						<span className="font-semibold">Support for Fax</span> Data from CareSignal may be shared in various ways include via Fax.
+						<span className="font-semibold">Support for Fax</span> Data from CareSignal may be shared in various ways, including via Fax.
 					</>
 				}>
 					<SlideImage
 						src="/images/projects/caresignal-platform/Fax.png"
-						alt=""
+						alt="A faxable patient summary generated from CareSignal data."
 					/>
 				</Slide>
 			</Slides>
