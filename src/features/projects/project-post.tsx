@@ -121,7 +121,14 @@ function V1ProjectPost({ project, onBack }: { project: Project; onBack?: () => v
                   )}
                 />
               </div>
-              <h1 className="font-display text-2xl mt-14">
+              {project.preview ? (
+                <div className="mt-14">
+                  <span className="inline-flex items-center rounded-[6px] border border-current/40 px-[12px] py-[8px] font-mono text-[12px] font-medium italic leading-[12px]">
+                    Preview Only
+                  </span>
+                </div>
+              ) : null}
+              <h1 className={`font-display text-2xl ${project.preview ? 'mt-4' : 'mt-14'}`}>
                 {project.summary}
               </h1>
               <p className="font-mono text-xs text-gray-600 mt-4" dangerouslySetInnerHTML={{__html: formatTags(project.tags)}}>
