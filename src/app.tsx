@@ -63,6 +63,9 @@ const SectionSandbox = import.meta.env.DEV
 const SealSandbox = import.meta.env.DEV
   ? lazy(() => import('./sandbox/seal-sandbox.js'))
   : undefined;
+const HoverSandbox = import.meta.env.DEV
+  ? lazy(() => import('./sandbox/hover-sandbox.js'))
+  : undefined;
 
 
 export function App() {
@@ -75,6 +78,7 @@ export function App() {
   const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
   const [matchSandboxSection] = useRoute('/sandbox/section');
   const [matchSandboxSeal] = useRoute('/sandbox/seal');
+  const [matchSandboxHover] = useRoute('/sandbox/hover');
   const [matchRoleDe] = useRoute(routes.roleDe.path);
   const [matchRolePd] = useRoute(routes.rolePd.path);
   const [matchRoleClear] = useRoute(routes.roleClear.path);
@@ -282,6 +286,14 @@ export function App() {
     return (
       <Suspense fallback={<RoutePending />}>
         <SealSandbox />
+      </Suspense>
+    );
+  }
+
+  if (import.meta.env.DEV && matchSandboxHover && HoverSandbox) {
+    return (
+      <Suspense fallback={<RoutePending />}>
+        <HoverSandbox />
       </Suspense>
     );
   }
