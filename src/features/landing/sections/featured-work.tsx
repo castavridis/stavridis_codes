@@ -141,7 +141,7 @@ const PROJECTS: Project[] = [
   },
   {
     slug: 'caresignal-ai',
-    headline: 'Expressing a the value of a novel predictive model in healthcare.',
+    headline: 'Expressing the value of a novel predictive model in healthcare.',
     tags: 'Visual Design · Copywriting · Front-End Engineering',
     thumbnailClassName: 'bg-washes-cerulean-blue',
     image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
