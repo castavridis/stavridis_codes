@@ -74,6 +74,19 @@ export type CompanyConfig = {
 // these, so their seals currently fall back to the Hansa Yellow default.
 // `seal` is intentionally unset everywhere for now — see RotatingSeal.
 export const companies: Record<string, CompanyConfig> = {
+  decimals: {
+    name: 'Decimals',
+    featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
+    featuredProjects: ['caresignal-platform'],
+    salutation_colors: {
+      foreground_color: '#4d4638',
+      background_color: 'rgb(233,195,185)',
+    },
+    seal: {
+      foreground_color: 'rgb(256,241,233)',
+      background_color: 'rgb(90,75,61)',
+    },
+  },
   civai: {
     name: 'CivAI',
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta'],
@@ -95,6 +108,11 @@ export const companies: Record<string, CompanyConfig> = {
   atomicdust: {
     name: 'Atomicdust',
     featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'sqshbook', 'fracta'],
+  },
+  instrumentl: {
+    name: 'Instrumentl',
+    featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
+    role: 'pd',
   },
 
   // ── Design Engineer targets ──
