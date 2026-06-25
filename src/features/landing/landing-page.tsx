@@ -891,7 +891,7 @@ export default function LandingPage({
                     onClick={() => setConfirmDismiss(true)}
                     className="font-body decoration-from-font [text-underline-position:from-font] text-confetti-black/50 hover:text-confetti-black cursor-pointer text-[12px] not-italic underline decoration-dotted relative left-[-12px]"
                   >
-                    dismiss
+                    remove
                   </button>
                 ) : null}
               </Text>
@@ -1097,7 +1097,7 @@ export default function LandingPage({
                 <animated.div
                   role="dialog"
                   aria-modal="true"
-                  aria-label="Dismiss tailored landing"
+                  aria-label="Remove tailored landing"
                   className="relative w-full max-w-[368px]"
                   style={{ transform: style.y.to((v) => `translateY(${v}px)`) }}
                 >
@@ -1107,18 +1107,19 @@ export default function LandingPage({
                     onClose={() => setConfirmDismiss(false)}
                   >
                     <p className="mb-0">
-                      I’ve crafted this landing especially for {company}.
-                      Dismissing it takes you back to my standard portfolio.
+                      This site has been customized for {company}. It highlights the projects I think are most relevant to your organization. { resumeHref && <>It also includes a résumé tailored to you all.</> }
+                      <br /><br />
+                      Removing customizations will take you back to my standard portfolio. Visit the URL given to you to see the customized site.
                     </p>
                     <div className="mt-[16px] flex items-center gap-[8px]">
                       <Button
                         variant="default"
-                        label="Keep it"
+                        label="Keep Customizations"
                         onClick={() => setConfirmDismiss(false)}
                       />
                       <Button
                         variant="outline"
-                        label="Dismiss"
+                        label="Remove"
                         onClick={() => {
                           setConfirmDismiss(false);
                           onDismiss?.();
