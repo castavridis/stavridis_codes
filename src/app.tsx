@@ -104,6 +104,15 @@ export function App() {
   }, [routeCompany, params?.company]);
 
   const company = routeCompany ?? storedCompany;
+  // The slug behind the active company — `params.company` on a /for/:company
+  // visit, otherwise the persisted slug. Used to show the /for/{slug} URL in
+  // the dismiss-confirmation modal so the visitor can bookmark it.
+  const companySlug =
+    matchForCompany && params?.company
+      ? params.company
+      : storedCompany
+        ? getStoredCompany()?.slug ?? null
+        : null;
 
   const handleDismiss = useCallback(() => {
     clearStoredCompany();
@@ -308,6 +317,7 @@ export function App() {
           onCardHover={handleCardHover}
           onCardClick={handleCardClick}
           company={company?.name}
+          companySlug={companySlug ?? undefined}
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
