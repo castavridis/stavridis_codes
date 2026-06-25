@@ -211,11 +211,11 @@ export function KeyObjects() {
 					className="p-[24px] md:p-[72px]"
 				/>
 
-			<Slides>
+			<Slides background="#191716">
 				<Slide
 					caption={
 						<>
-							<span className="font-semibold">Patient summaries</span> give providers a more holistic perspective about their patients than an Alert can provide, and support them in prioritizing outreach.
+							<span className="font-semibold">Task-Based Dashboard</span> This streamlined view show providers which Alerts or Patients need to be actioned based on their organization's Standard Operating Procedures. Clinicians may group patients however makes sense to them and their workflows.
 						</>
 					}
 				>
@@ -224,16 +224,20 @@ export function KeyObjects() {
 						alt="The task-based dashboard listing patient alerts and summaries with high-risk / medium-risk / low-risk badges and snooze / resolve actions."
 					/>
 				</Slide>
-				<Slide
-					caption={
-						<>
-							<span className="font-semibold">Hub and Spoke</span> — placeholder slide, real capture coming later.
-						</>
-					}
-				>
+				<Slide caption={
+					<>
+						<span className="font-semibold"></span>
+					</>
+				}>
 					<SlideImage
-						src="/images/projects/caresignal-platform/Hub%20and%20Spoke.png"
-						alt="A care-team diagram showing one assistant routing patients to multiple nurses in a hub-and-spoke configuration."
+						src="/images/projects/caresignal-platform/Dashboard Overview.png"
+						alt="The dashboard shows a comprehensive view of a patient group. "
+					/>
+				</Slide>
+				<Slide>
+					<SlideImage
+						src="/images/projects/caresignal-platform/Fax.png"
+						alt=""
 					/>
 				</Slide>
 			</Slides>
@@ -377,6 +381,7 @@ export function Outcomes() {
 						width="100%"
 						height={176}
 						background="#f0eeeb"
+						className="text-left md:text-center"
 					/>
 				</div>
 			</div>

@@ -136,7 +136,6 @@ export const companies: Record<string, CompanyConfig> = {
   // ── Health / clinical / AI ── lead with the AI + health work
   maven_clinic: {
     name: 'Maven Clinic',
-    // medium confidence — verify against mavenclinic.com
     colors: { brand: '#09866f', light: 'rgb(237, 233, 227)', dark: 'rgb(1, 49, 38)' },
     salutation_colors: {
       foreground_color: 'rgb(255,255,255)',

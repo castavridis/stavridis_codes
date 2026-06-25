@@ -56,7 +56,7 @@ export default function Slides({
   return (
     <div className="flex w-full flex-col gap-[16px]">
       <div
-        className="relative w-full overflow-hidden rounded-[16px] bg-confetti-black p-[72px]"
+        className="relative w-full overflow-hidden rounded-[16px] bg-confetti-black p-[60px]"
         // Inline background (when provided) overrides the bg-confetti-black
         // default — same pattern as Illustration's `background`.
         style={background ? { background } : undefined}

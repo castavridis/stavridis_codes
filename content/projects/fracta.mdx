@@ -30,7 +30,13 @@ import { ProjectImage } from '../../src/components/mdx/Layout'
 <Section>
   <Callout
     title="Quotes from the field"
-    content="“We live in the freakin’ future! We should be able to use a device to check things off.”"
+    content={
+      <span style={{
+        'hangingPunctuation': 'first',
+      }}>
+        “We live in the freakin’ future! We should be able to use a device to check things off.”
+      </span>
+    }
     attribution={<><strong>Team Lead</strong> on the paper traveler</>}
   />
 </Section>

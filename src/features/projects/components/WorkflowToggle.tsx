@@ -13,7 +13,7 @@ export default function WorkflowToggle({
     <div
       className={
         className ??
-        'aspect-[1280/820] w-full overflow-hidden rounded-[16px] border border-confetti-black/10'
+        'h-[900px] md:h-[762px] w-full overflow-hidden rounded-[16px] bg-[#191716] border border-confetti-black/10'
       }
     >
       <iframe
