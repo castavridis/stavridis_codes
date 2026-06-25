@@ -59,7 +59,7 @@ function ProjectOverview({
   }, []);
 
   return (
-    <div className="flex flex-col gap-[16px]">
+    <div className="relative flex flex-col gap-[16px]">
       <button
         type="button"
         onClick={() => onClick?.(slug)}
@@ -88,27 +88,23 @@ function ProjectOverview({
             </span>
           </span>
         ) : null}
-        {stampCompanyName ? (
-          <span
-            className="pointer-events-none"
-            style={{
-              right: 'auto',
-              left: '-16px',
-              isolation: 'isolate',
-              zIndex: 10,
-              position: 'fixed',
-              top: '24px',
-            }}
-          >
-            <RotatingSeal
-              companyName={stampCompanyName}
-              size={104}
-              foregroundColor={stampSeal?.foreground_color}
-              backgroundColor={stampSeal?.background_color}
-            />
-          </span>
-        ) : null}
       </button>
+      {/* Seal sits on the (relative) card wrapper, NOT inside the
+          overflow-hidden button — otherwise the button's hover transform
+          turns it into the containing block and clips the seal. */}
+      {stampCompanyName ? (
+        <span
+          className="pointer-events-none absolute left-[-16px] top-[24px] z-10"
+          style={{ isolation: 'isolate' }}
+        >
+          <RotatingSeal
+            companyName={stampCompanyName}
+            size={104}
+            foregroundColor={stampSeal?.foreground_color}
+            backgroundColor={stampSeal?.background_color}
+          />
+        </span>
+      ) : null}
       <div className="flex flex-col gap-[8px]">
         <Text variant="copy-large" className="w-full text-[#251900]">{headline}</Text>
         <Text variant="tag" className="text-caresignal-none">{tags}</Text>
