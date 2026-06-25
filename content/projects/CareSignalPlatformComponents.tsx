@@ -215,7 +215,7 @@ export function KeyObjects() {
 				<Slide
 					caption={
 						<>
-							<span className="font-semibold">Task-Based Dashboard</span> This streamlined view show providers which Alerts or Patients need to be actioned based on their organization's Standard Operating Procedures. Clinicians may group patients however makes sense to them and their workflows.
+							<span className="font-semibold">Task-Based Dashboard</span> A streamlined view of Alerts and Patients that need to be actioned based on their organization's Standard Operating Procedures. Clinicians may group patients however makes sense to them and their workflows.
 						</>
 					}
 				>
@@ -226,7 +226,7 @@ export function KeyObjects() {
 				</Slide>
 				<Slide caption={
 					<>
-						<span className="font-semibold"></span>
+						<span className="font-semibold">Overview</span> This is a more comprehensive view that allows clinicians to see a broader picture of their patients.
 					</>
 				}>
 					<SlideImage
@@ -234,7 +234,11 @@ export function KeyObjects() {
 						alt="The dashboard shows a comprehensive view of a patient group. "
 					/>
 				</Slide>
-				<Slide>
+				<Slide caption={
+					<>
+						<span className="font-semibold">Support for Fax</span> Data from CareSignal may be shared in various ways include via Fax.
+					</>
+				>
 					<SlideImage
 						src="/images/projects/caresignal-platform/Fax.png"
 						alt=""
