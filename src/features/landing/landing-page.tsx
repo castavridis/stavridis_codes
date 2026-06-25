@@ -7,6 +7,7 @@ import { animated, easings, useSpring, useTransition } from "@react-spring/web";
 import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
+import Button from "../../components/Button.js";
 import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
 import Text from "../../components/Text.js";
@@ -502,6 +503,17 @@ export default function LandingPage({
     return () => window.clearTimeout(t);
   }, [washesVisible]);
 
+  // Dismiss-confirmation modal. Clicking "dismiss" next to the company name
+  // opens a Popover-styled confirm dialog rather than dropping the tailored
+  // landing immediately. Fades in/out like the hover popovers.
+  const [confirmDismiss, setConfirmDismiss] = useState(false);
+  const dismissTransition = useTransition(confirmDismiss, {
+    from: { opacity: 0, y: 8 },
+    enter: { opacity: 1, y: 0 },
+    leave: { opacity: 0, y: 8 },
+    config: { duration: 200, easing: easings.easeOutCubic },
+  });
+
   // Window scrollY for driving the sticky-header fade. The in-shell
   // Header scrolls out of view around scrollY ~80px, so we fade the
   // sticky header in over the 60–160 band — the in-shell Header is
@@ -876,7 +888,7 @@ export default function LandingPage({
                 {onDismiss ? (
                   <button
                     type="button"
-                    onClick={onDismiss}
+                    onClick={() => setConfirmDismiss(true)}
                     className="font-body decoration-from-font [text-underline-position:from-font] text-confetti-black/50 hover:text-confetti-black cursor-pointer text-[12px] not-italic underline decoration-dotted relative left-[-12px]"
                   >
                     dismiss
@@ -1067,6 +1079,59 @@ export default function LandingPage({
       <DomMarker name="horse-tab">
         <HorseTab />
       </DomMarker>
+
+      {/* Dismiss-confirmation modal — Popover-styled confirm dialog,
+          portaled to <body> and centered over a scrim. */}
+      {dismissTransition((style, open) =>
+        open
+          ? createPortal(
+              <animated.div
+                className="fixed inset-0 z-[60] flex items-center justify-center p-[16px]"
+                style={{ opacity: style.opacity }}
+              >
+                <div
+                  className="bg-confetti-black/30 absolute inset-0"
+                  onClick={() => setConfirmDismiss(false)}
+                  aria-hidden
+                />
+                <animated.div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Dismiss tailored landing"
+                  className="relative w-full max-w-[368px]"
+                  style={{ transform: style.y.to((v) => `translateY(${v}px)`) }}
+                >
+                  <Popover
+                    title="Are you sure?"
+                    className="!w-full"
+                    onClose={() => setConfirmDismiss(false)}
+                  >
+                    <p className="mb-0">
+                      I’ve crafted this landing especially for {company}.
+                      Dismissing it takes you back to my standard portfolio.
+                    </p>
+                    <div className="mt-[16px] flex items-center gap-[8px]">
+                      <Button
+                        variant="default"
+                        label="Keep it"
+                        onClick={() => setConfirmDismiss(false)}
+                      />
+                      <Button
+                        variant="outline"
+                        label="Dismiss"
+                        onClick={() => {
+                          setConfirmDismiss(false);
+                          onDismiss?.();
+                        }}
+                      />
+                    </div>
+                  </Popover>
+                </animated.div>
+              </animated.div>,
+              document.body,
+            )
+          : null,
+      )}
     </div>
   );
 }
