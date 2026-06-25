@@ -53,6 +53,9 @@ type LandingPageProps = {
   paused?: boolean;
   transitioning?: boolean;
   company?: string;
+  // The active company's slug, used to show the /for/{slug} URL in the
+  // dismiss-confirmation modal for the visitor to bookmark.
+  companySlug?: string;
   blurb?: string;
   onDismiss?: () => void;
   // Ordered list of FeaturedWork project slugs to surface for this
@@ -332,6 +335,7 @@ export default function LandingPage({
   paused = false,
   transitioning: _transitioning = false,
   company,
+  companySlug,
   blurb,
   onDismiss,
   featuredSlugs,
@@ -1109,8 +1113,16 @@ export default function LandingPage({
                     <p className="mb-0">
                       This site has been customized for {company}. It highlights the projects I think are most relevant to your organization. { resumeHref && <>It also includes a résumé tailored to you all.</> }
                       <br /><br />
-                      Removing customizations will take you back to my standard portfolio. Visit the URL given to you to see the customized site.
+                      Removing customizations will take you back to my standard portfolio. You can return to this customized site anytime at:
                     </p>
+                    {companySlug ? (
+                      <a
+                        href={`/for/${companySlug}`}
+                        className="text-confetti-black mt-[12px] inline-block break-all rounded-[6px] bg-confetti-black/5 px-[10px] py-[8px] font-mono text-[12px] underline decoration-dotted"
+                      >
+                        {`${typeof window !== "undefined" ? window.location.origin : ""}/for/${companySlug}`}
+                      </a>
+                    ) : null}
                     <div className="mt-[16px] flex items-center gap-[8px]">
                       <Button
                         variant="default"
