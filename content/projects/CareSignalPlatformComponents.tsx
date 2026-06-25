@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { animated, easings, useTransition } from '@react-spring/web';
 import { X } from 'lucide-react';
 
 import {
@@ -294,6 +295,17 @@ function SlideImage({ src, alt }: { src: string; alt: string }) {
 		return () => window.removeEventListener('keydown', onKey);
 	}, [expanded]);
 
+	// Snappy in, gentler out — fast enter, slower leave.
+	const transitions = useTransition(expanded, {
+		from: { opacity: 0, scale: 0.96 },
+		enter: { opacity: 1, scale: 1 },
+		leave: { opacity: 0, scale: 0.96 },
+		config: (_item, _index, phase) => ({
+			duration: phase === 'leave' ? 320 : 130,
+			easing: phase === 'leave' ? easings.easeInCubic : easings.easeOutCubic,
+		}),
+	});
+
 	return (
 		<>
 			<button
@@ -305,33 +317,38 @@ function SlideImage({ src, alt }: { src: string; alt: string }) {
 				<img src={src} alt={alt} className="block size-full object-contain" />
 			</button>
 
-			{/* Lightbox — full-screen, click anywhere or Esc to close. */}
-			{expanded
-				? createPortal(
-						<div
-							role="dialog"
-							aria-modal="true"
-							aria-label={alt}
-							onClick={() => setExpanded(false)}
-							className="bg-confetti-black/85 fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center p-[24px]"
-						>
-							<button
-								type="button"
-								aria-label="Close"
+			{/* Lightbox — translucent cream scrim, click anywhere or Esc to
+			    close. Fades + zooms in fast, out slower. */}
+			{transitions((style, open) =>
+				open
+					? createPortal(
+							<animated.div
+								role="dialog"
+								aria-modal="true"
+								aria-label={alt}
 								onClick={() => setExpanded(false)}
-								className="text-washes-paper/80 hover:text-washes-paper absolute right-[20px] top-[20px] inline-flex size-[40px] items-center justify-center"
+								style={{ opacity: style.opacity }}
+								className="bg-washes-paper/85 fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center p-[24px]"
 							>
-								<X size={28} strokeWidth={1.6} aria-hidden />
-							</button>
-							<img
-								src={src}
-								alt={alt}
-								className="max-h-full max-w-[1400px] object-contain"
-							/>
-						</div>,
-						document.body,
-					)
-				: null}
+								<button
+									type="button"
+									aria-label="Close"
+									onClick={() => setExpanded(false)}
+									className="text-confetti-black/60 hover:text-confetti-black absolute right-[20px] top-[20px] inline-flex size-[40px] items-center justify-center"
+								>
+									<X size={28} strokeWidth={1.6} aria-hidden />
+								</button>
+								<animated.img
+									src={src}
+									alt={alt}
+									style={{ scale: style.scale }}
+									className="max-h-full max-w-[1400px] object-contain"
+								/>
+							</animated.div>,
+							document.body,
+						)
+					: null,
+			)}
 		</>
 	);
 }
