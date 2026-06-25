@@ -5,6 +5,8 @@
 // thumbnail is a solid/gradient placeholder so the layout can land first.
 // ---------------------------------------------------------------------------
 
+import { useMemo } from 'react';
+
 import FadeDown from '../../../components/anim/FadeDown.js';
 import RotatingSeal from '../../../components/RotatingSeal.js';
 import Text from '../../../components/Text.js';
@@ -47,12 +49,24 @@ function ProjectOverview({
   stampSeal,
   previewOnly,
 }: ProjectOverviewProps): React.ReactElement {
+  // Golden-retriever "head tilt" — each card leans a random direction + angle
+  // (~2–5°) on hover, picked once per mount so it's stable but varied across
+  // the grid. Exposed as a CSS var the hover transform reads.
+  const tilt = useMemo(() => {
+    const magnitude = 2 + Math.random() * 3; // 2–5°
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    return `${(sign * magnitude).toFixed(2)}deg`;
+  }, []);
+
   return (
     <div className="flex flex-col gap-[16px]">
       <button
         type="button"
         onClick={() => onClick?.(slug)}
-        className={`outline-confetti-black relative flex aspect-[463/304] w-full items-center justify-center overflow-hidden rounded-[8px] md:aspect-auto md:h-[304.03px] md:w-[463px] ${thumbnailClassName ?? ''}`}
+        style={{ '--tilt': tilt } as React.CSSProperties}
+        // Head tilt on hover (motion-safe); reduced-motion users get a gentle
+        // brightness lift instead. Transition covers both.
+        className={`outline-confetti-black relative flex aspect-[463/304] w-full items-center justify-center overflow-hidden rounded-[8px] transition-[transform,filter] duration-300 ease-out motion-safe:hover:[transform:rotate(var(--tilt))_scale(1.02)] motion-reduce:hover:brightness-[1.05] md:aspect-auto md:h-[304.03px] md:w-[463px] ${thumbnailClassName ?? ''}`}
       >
         {image ? (
           <img
