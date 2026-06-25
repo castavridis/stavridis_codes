@@ -238,7 +238,7 @@ export function KeyObjects() {
 					<>
 						<span className="font-semibold">Support for Fax</span> Data from CareSignal may be shared in various ways include via Fax.
 					</>
-				>
+				}>
 					<SlideImage
 						src="/images/projects/caresignal-platform/Fax.png"
 						alt=""
