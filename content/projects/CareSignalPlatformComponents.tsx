@@ -1,3 +1,7 @@
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
+
 import {
 	MDXWrapper,
 	MDXColumn,
@@ -278,10 +282,57 @@ export function Screenshots() {
 }
 
 function SlideImage({ src, alt }: { src: string; alt: string }) {
+	const [expanded, setExpanded] = useState(false);
+
+	// Close the lightbox on Escape while it's open.
+	useEffect(() => {
+		if (!expanded) return;
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') setExpanded(false);
+		};
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	}, [expanded]);
+
 	return (
-		<div className="aspect-[770/463] w-full bg-transparent">
-			<img src={src} alt={alt} className="block size-full object-contain" />
-		</div>
+		<>
+			<button
+				type="button"
+				onClick={() => setExpanded(true)}
+				aria-label={`Expand image: ${alt}`}
+				className="block aspect-[770/463] w-full cursor-zoom-in bg-transparent"
+			>
+				<img src={src} alt={alt} className="block size-full object-contain" />
+			</button>
+
+			{/* Lightbox — full-screen, click anywhere or Esc to close. */}
+			{expanded
+				? createPortal(
+						<div
+							role="dialog"
+							aria-modal="true"
+							aria-label={alt}
+							onClick={() => setExpanded(false)}
+							className="bg-confetti-black/85 fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center p-[24px]"
+						>
+							<button
+								type="button"
+								aria-label="Close"
+								onClick={() => setExpanded(false)}
+								className="text-washes-paper/80 hover:text-washes-paper absolute right-[20px] top-[20px] inline-flex size-[40px] items-center justify-center"
+							>
+								<X size={28} strokeWidth={1.6} aria-hidden />
+							</button>
+							<img
+								src={src}
+								alt={alt}
+								className="max-h-full max-w-[1400px] object-contain"
+							/>
+						</div>,
+						document.body,
+					)
+				: null}
+		</>
 	);
 }
 
