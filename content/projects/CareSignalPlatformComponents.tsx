@@ -18,7 +18,7 @@ export function Intro () {
 		<MDXWrapper>
 			<MDXColumn span={12}>
 				<Callout
-					title="Guiding Principle"
+					title="Key Insight"
 					content={
 						<span style={{
 							hangingPunctuation: 'first',
@@ -49,10 +49,10 @@ export function DesignIntro() {
 			<div className="flex w-full flex-col items-start gap-[24px] md:flex-row md:gap-[35px]">
 				<div className="flex w-full flex-col gap-[24px] md:w-[349px] md:shrink-0 md:pt-[104px]">
 					<h2 className="type-headline-small m-0 text-confetti-black">
-						We designed a low-burden way to offer clinicians a snapshot of their patient panel
+						I designed a low-burden way to offer clinicians a snapshot of their patient panel
 					</h2>
 					<p className="type-copy m-0 text-confetti-black/80">
-						Working with clinicians and buyers we designed a system aligned with value-based care and to signal urgent and emergent needs at-a-glance.
+						Working with clinicians and buyers I designed a system aligned with value-based care and to signal urgent and emergent needs at-a-glance.
 					</p>
 				</div>
 
