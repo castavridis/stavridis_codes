@@ -272,9 +272,13 @@ export function WashesCanvas({
   //   - `paused` prop  — a project/blog overlay is covering the wash
   //   - offscreen      — the shell has scrolled out of view (IntersectionObserver)
   //   - tab hidden     — the document is backgrounded (visibilitychange)
-  // wash.pause()/resume() are idempotent; the sim loop skips its work while
-  // paused. `washReady` re-runs this once the instance exists so the initial
-  // state is correct even when the canvas is created asynchronously.
+  // EXCEPT while paint mode is active: entering paint mode slides the project
+  // sheet away to reveal the wash (sheetOpen = projectOpen && !paintActive),
+  // so `paused` is still true even though the user is now painting on a
+  // visible canvas. Keeping the sim running while painting fixes strokes not
+  // registering on mobile with a project up. wash.pause()/resume() are
+  // idempotent; the sim loop skips its work while paused. `washReady` re-runs
+  // this once the instance exists (async-created canvas path).
   // ------------------------------------------------------------------------
   useEffect(() => {
     let offscreen = false;
@@ -283,7 +287,7 @@ export function WashesCanvas({
     const apply = () => {
       const wash = washRef.current;
       if (!wash) return;
-      const shouldPause = paused || offscreen || hidden;
+      const shouldPause = !paintActive && (paused || offscreen || hidden);
       try {
         if (shouldPause) wash.pause();
         else wash.resume();
@@ -317,7 +321,7 @@ export function WashesCanvas({
       io?.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [paused, washReady]);
+  }, [paused, paintActive, washReady]);
 
   // ------------------------------------------------------------------------
   // Gate the canvas element's pointer events + touch-action on paintActive.
