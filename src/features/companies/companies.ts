@@ -99,6 +99,31 @@ export const companies: Record<string, CompanyConfig> = {
     featuredProjects: ['caresignal-platform'],
     role: 'de',
   },
+  li: {
+    name: 'You',
+    featuredSlugs:['caresignal-ai', 'caresignal-platform', 'sqshbook', 'fracta'],
+    featuredProjects: ['caresignal-ai'],
+    salutation_colors: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: 'rgb(45,100,188)',
+    },
+    seal: {
+      background_color: 'rgb(255,255,255)',
+      foreground_color: 'rgb(45,100,188)',
+    },
+  },
+  riffle: {
+    name: 'Riffle',
+    featuredProjects: ['caresignal-platform'],
+    salutation_colors: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: 'rgb(0,0,0)',
+    },
+    seal: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: 'rgb(33,82,211)',
+    },
+  },
   stripe: {
     name: 'Stripe',
     colors: { brand: '#635BFF', light: '#F6F9FC', dark: '#0A2540' },
@@ -112,7 +137,21 @@ export const companies: Record<string, CompanyConfig> = {
   instrumentl: {
     name: 'Instrumentl',
     featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
+    featuredProjects: ['caresignal-platform'],
     role: 'pd',
+    // colors: {
+    //   brand: 'rgb(255, 79, 43)',
+    //   light: 'rgb(255, 255, 255)',
+    //   dark: 'rgb(0, 0, 0)',
+    // },
+    salutation_colors: {
+      foreground_color: 'rgb(255, 255, 255)',
+      background_color: 'rgb(255, 79, 43)',
+    },
+    seal: {
+      foreground_color: 'rgb(51, 51, 51)',
+      background_color: 'rgb(225, 255, 141)',
+    },
   },
 
   // ── Design Engineer targets ──
@@ -220,10 +259,6 @@ export const companies: Record<string, CompanyConfig> = {
   // ── Other product-design targets ── canonical order
   sapiom: {
     name: 'Sapiom',
-    role: 'pd',
-  },
-  instrumentl: {
-    name: 'Instrumentl',
     role: 'pd',
   },
 

@@ -112,7 +112,7 @@ function BaileyPopover(): React.ReactElement {
       <div className="aspect-[500/438] w-full overflow-hidden rounded-[2.128px]">
         <img
           src="/images/bailey.png"
-          alt="Bailey, a golden retriever"
+          alt="Bailey, a Golden Retriever"
           loading="lazy"
           decoding="async"
           className="size-full object-cover"
@@ -811,7 +811,7 @@ export default function LandingPage({
           // grows to fit it and the "now" copy isn't cut off. At md+ it
           // returns to the fixed overlay: absolute with percentage insets +
           // overflow-clip. Mobile pt clears the absolute in-shell Header.
-          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] md:px-[16px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] left-[8px] md:left-[1.41%] right-[8px] md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
+          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] md:px-[16px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
           style={{
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",
@@ -922,8 +922,8 @@ export default function LandingPage({
                     // instead of the 368px box being clamped to the edge.
                     className="!w-[280px] md:!w-[368px]"
                   >
-                    React, TypeScript, Tailwind, vanilla HTML/CSS, p5, GSAP,
-                    react-three-fiber, Figma.
+                    Figma, Claude Code, Ghostty, Helix, React, TypeScript, Tailwind CSS, vanilla HTML/CSS, p5, GSAP,
+                    react-three-fiber, Vercel, Supabase.
                   </Popover>
                 }
               >
@@ -947,7 +947,7 @@ export default function LandingPage({
                   as="span"
                   className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
                 >
-                  big golden retriever energy
+                  big Golden Retriever energy
                 </Text>
               </HoverPopover>
               <span>.</span>
