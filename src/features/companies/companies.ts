@@ -74,6 +74,19 @@ export type CompanyConfig = {
 // these, so their seals currently fall back to the Hansa Yellow default.
 // `seal` is intentionally unset everywhere for now — see RotatingSeal.
 export const companies: Record<string, CompanyConfig> = {
+  upstatement: {
+    name: 'Upstatement',
+    featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta', 'sqshbook'],
+    featuredProjects: ['caresignal-ai'],
+    salutation_colors: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: 'rgb(0,0,0)',
+    },
+    seal: {
+      foreground_color: 'rgb(255,255,255)',
+      background_color: '#1f1f1f',
+    },
+  },
   decimals: {
     name: 'Decimals',
     featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
@@ -244,15 +257,6 @@ export const companies: Record<string, CompanyConfig> = {
   hume: {
     name: 'Hume AI',
     featuredSlugs: ['caresignal-ai', 'caresignal-platform', 'fracta', 'sqshbook'],
-    role: 'pd',
-  },
-
-  // ── Craft studio ── lead with design-system craft, then community work
-  upstatement: {
-    name: 'Upstatement',
-    // medium confidence — verify against upstatement.com/brand
-    colors: { brand: '#3F3E3A', light: '#F3EFE1', dark: '#000000' },
-    featuredSlugs: ['caresignal-platform', 'sqshbook', 'caresignal-ai', 'fracta'],
     role: 'pd',
   },
 
