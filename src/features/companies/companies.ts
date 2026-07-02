@@ -76,15 +76,17 @@ export type CompanyConfig = {
 export const companies: Record<string, CompanyConfig> = {
   thatch: {
     name: 'Thatch',
+    featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'sqshbook', 'fracta'],
     featuredProjects: ['caresignal-platform', 'caresignal-ai'],
     salutation_colors: {
       foreground_color: 'rgb(255,255,255)',
-      background_color: 'rbg(98,0,198)',
+      background_color: 'rgb(98,0,198)',
     },
     seal: {
       foreground_color: 'rgb(255,255,255)',
       background_color: 'rgb(0,0,0)',
     },
+    role: 'pd',
   },
   nexhealth: {
     name: 'NexHealth',
@@ -97,6 +99,7 @@ export const companies: Record<string, CompanyConfig> = {
       foreground_color: 'rgb(26,30,35)',
       background_color: 'rgb(26,229,194)',
     },
+    role: 'pd',
   },
   upstatement: {
     name: 'Upstatement',
