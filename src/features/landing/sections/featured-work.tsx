@@ -55,7 +55,7 @@ function ProjectOverview({
         // Golden-retriever "perk up" on hover — an eager lift + grow + shadow
         // (motion-safe). Reduced-motion users get a gentle brightness lift
         // instead. Transition covers both.
-        className={`outline-confetti-black relative flex aspect-[463/304] w-full items-center justify-center overflow-hidden rounded-[8px] transition-[transform,box-shadow,filter] duration-300 ease-out motion-safe:hover:[transform:translateY(-10px)_scale(1.03)] motion-safe:hover:shadow-[0_20px_44px_rgba(57,31,0,0.18)] motion-reduce:hover:brightness-[1.05] md:aspect-auto md:h-[304.03px] md:w-[463px] ${thumbnailClassName ?? ''}`}
+        className={`outline-confetti-black relative flex aspect-[463/304] w-full items-center justify-center overflow-hidden rounded-[8px] transition-[transform,box-shadow,filter] duration-300 ease-out motion-safe:hover:[transform:translateY(-10px)_scale(1.03)] motion-safe:hover:shadow-[0_20px_44px_rgba(57,31,0,0.18)] motion-reduce:hover:brightness-[1.05] md:aspect-auto md:h-[304.03px] ${thumbnailClassName ?? ''}`}
       >
         {image ? (
           <img
