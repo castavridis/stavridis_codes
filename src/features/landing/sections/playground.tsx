@@ -106,7 +106,7 @@ const CELLS: Cell[] = [
   { id: 'pocket-pika-tama', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/304]', media: img('pocket-pika-tama.png', 'Pocket Pikatama — 3D render') }] },
   // pocket-pikachu.mp4 is still pending; pocket-pikachu.png is the poster
   // placeholder until it lands.
-  { id: 'pocket-pikachu', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: video('pocket-pikachu', 'Pocket Pikachu', 'object-cover', 0, 'pocket-pikachu.png') }] },
+  { id: 'pocket-pikachu', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: video('pocket-pikachu', 'Pocket Pikachu', 'object-cover', 1500, 'pocket-pikachu.png') }] },
 
   // Row 9 — wompshop (½) + sun buddy (½), both motion
   { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1500) }] },
