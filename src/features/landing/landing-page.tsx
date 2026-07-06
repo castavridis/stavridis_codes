@@ -12,6 +12,7 @@ import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
 import Text from "../../components/Text.js";
 import { FeaturedWork } from "./sections/featured-work.js";
+import { Playground } from "./sections/playground.js";
 import { HorseTab } from "./sections/horse-tab.js";
 import { WashesCanvas } from "./sections/washes-canvas.js";
 import { WashesInfo } from "./sections/washes-info.js";
@@ -1041,6 +1042,12 @@ export default function LandingPage({
             stampCompanyName={company}
             stampSeal={companySeal}
           />
+        </div>
+      </DomMarker>
+
+      <DomMarker name="playground">
+        <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
+          <Playground />
         </div>
       </DomMarker>
 

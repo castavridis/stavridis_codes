@@ -83,7 +83,10 @@ const CELLS: Cell[] = [
   {
     id: 'washes-facets',
     span: 'md:col-span-3',
-    slots: [{ aspect: 'aspect-[464/368]', bg: PLACEHOLDER_BG, media: { kind: 'placeholder', file: 'washes-facets.webp' } }],
+    // facets.mp4 — user-provided. This is the one empty media slot in the row
+    // (the neighbouring facets-collector tile is a fully-drawn mockup exported
+    // as a still). If this video belongs on a different tile, move the media.
+    slots: [{ aspect: 'aspect-[464/368]', bg: 'bg-[#191716]', media: { kind: 'video', src: '/images/playground/facets.mp4' } }],
   },
   {
     id: 'facets-app-frame',
@@ -153,21 +156,13 @@ const CELLS: Cell[] = [
     slots: [{ aspect: 'aspect-[624/316]', bg: PLACEHOLDER_BG, media: { kind: 'placeholder', file: 'tile-4213-16988.webp' } }],
   },
 
-  // Row 8 — pocket pikatama (⅔) + CodePen embed (⅓). Real media.
+  // Row 8 — pocket pikatama (⅔) + CodePen embed (⅓). The pikatama image was
+  // present pre-reset (as a 10 MB PNG) but is gone now — re-export it as an
+  // optimized WebP. The CodePen embed needs no asset and renders live.
   {
     id: 'pocket-pikatama',
     span: 'md:col-span-4',
-    slots: [
-      {
-        aspect: 'aspect-[624/304]',
-        bg: 'bg-[#211e1f]',
-        media: {
-          kind: 'image',
-          src: '/images/playground/pocket-pikatama.png',
-          alt: 'Pocket Pikatama — a 3D render of popsicles and a creature in a pan.',
-        },
-      },
-    ],
+    slots: [{ aspect: 'aspect-[624/304]', bg: 'bg-[#211e1f]', media: { kind: 'placeholder', file: 'pocket-pikatama.webp' } }],
   },
   {
     id: 'codepen-eayorpz',
@@ -181,16 +176,17 @@ const CELLS: Cell[] = [
     ],
   },
 
-  // Row 9 — wompshop (½) + sun buddy (½). Real media.
+  // Row 9 — wompshop (½) + sun buddy (½). Both videos were present pre-reset
+  // and need re-providing.
   {
     id: 'wompshop-mask-tool',
     span: 'md:col-span-3',
-    slots: [{ aspect: 'aspect-[464/304]', bg: 'bg-[#1a1aff]', media: { kind: 'video', src: '/images/playground/wompshop-mask-tool.mp4' } }],
+    slots: [{ aspect: 'aspect-[464/304]', bg: 'bg-[#1a1aff]', media: { kind: 'placeholder', file: 'wompshop-mask-tool.mp4' } }],
   },
   {
     id: 'sun-buddy',
     span: 'md:col-span-3',
-    slots: [{ aspect: 'aspect-[464/304]', bg: 'bg-washes-hansa-yellow', media: { kind: 'video', src: '/images/playground/sun-buddy.mp4' } }],
+    slots: [{ aspect: 'aspect-[464/304]', bg: 'bg-washes-hansa-yellow', media: { kind: 'placeholder', file: 'sun-buddy.mp4' } }],
   },
 ];
 
