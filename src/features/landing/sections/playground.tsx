@@ -99,8 +99,8 @@ const CELLS: Cell[] = [
   { id: 'codepen-fortune', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: img('codepen-fortune.png', 'CodePen — fortune') }] },
 
   // Row 9 — wompshop (½) + sun buddy (½), both motion
-  { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1000) }] },
-  { id: 'sun-buddy', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('sun-buddy', 'sun buddy') }] },
+  { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1500) }] },
+  { id: 'sun-buddy', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('sun-buddy', 'sun buddy', 'object-cover', 1500) }] },
 ];
 
 // Video tile — a muted loop with its poster ({name}-thumb.png) as the fallback
