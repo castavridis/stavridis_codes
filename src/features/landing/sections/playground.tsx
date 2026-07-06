@@ -26,7 +26,9 @@ type Media =
 
 // A single visual within a cell. `aspect` matches the Figma slot (w/h) so the
 // desktop grid derives the correct height from the cell's column width.
-type Slot = { aspect: string; media: Media };
+// `bg` overrides the tile's fill (defaults to a faint neutral). Useful when a
+// clip is object-contain and its letterbox should match the artwork.
+type Slot = { aspect: string; media: Media; bg?: string };
 
 // A grid cell. `span` is the md+ column span (mobile is always full-width).
 // Most cells hold one slot; a cell with multiple slots is a vertical stack
@@ -68,7 +70,7 @@ const CELLS: Cell[] = [
     id: 'facets-stack',
     span: 'md:col-span-2',
     slots: [
-      { aspect: 'aspect-[304/146]', media: video('facets-3d-crystal', 'facets 3D crystal', 'object-contain') },
+      { aspect: 'aspect-[304/146]', media: video('facets-3d-crystal', 'facets 3D crystal', 'object-contain'), bg: 'bg-[#111111]' },
       { aspect: 'aspect-[304/316]', media: img('facets-landing.png', 'facets landing page') },
     ],
   },
@@ -124,7 +126,7 @@ function TileCell({ cell }: { cell: Cell }): React.ReactElement {
   return (
     <div className={`flex flex-col gap-[16px] ${cell.span}`}>
       {cell.slots.map((slot, i) => (
-        <div key={i} className={`relative w-full overflow-hidden rounded-[8px] bg-confetti-black/[0.03] ${slot.aspect}`}>
+        <div key={i} className={`relative w-full overflow-hidden rounded-[8px] ${slot.bg ?? 'bg-confetti-black/[0.03]'} ${slot.aspect}`}>
           <MediaSlot media={slot.media} />
         </div>
       ))}
