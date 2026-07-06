@@ -83,10 +83,7 @@ const CELLS: Cell[] = [
   {
     id: 'washes-facets',
     span: 'md:col-span-3',
-    // facets.mp4 — user-provided. This is the one empty media slot in the row
-    // (the neighbouring facets-collector tile is a fully-drawn mockup exported
-    // as a still). If this video belongs on a different tile, move the media.
-    slots: [{ aspect: 'aspect-[464/368]', bg: 'bg-[#191716]', media: { kind: 'video', src: '/images/playground/facets.mp4' } }],
+    slots: [{ aspect: 'aspect-[464/368]', bg: PLACEHOLDER_BG, media: { kind: 'placeholder', file: 'washes-facets.webp' } }],
   },
   {
     id: 'facets-app-frame',
@@ -105,7 +102,9 @@ const CELLS: Cell[] = [
     id: 'facets-stack',
     span: 'md:col-span-2',
     slots: [
-      { aspect: 'aspect-[304/146]', bg: PLACEHOLDER_BG, media: { kind: 'placeholder', file: 'facets-research.webp' } },
+      // facets.mp4 (user-provided) — the short slot directly below the facets
+      // collector. Object-cover crops the landscape recording to this slot.
+      { aspect: 'aspect-[304/146]', bg: 'bg-[#191716]', media: { kind: 'video', src: '/images/playground/facets.mp4' } },
       { aspect: 'aspect-[304/316]', bg: PLACEHOLDER_BG, media: { kind: 'placeholder', file: 'facets-intro.webp' } },
     ],
   },
