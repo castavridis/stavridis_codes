@@ -42,10 +42,18 @@ const img = (file: string, alt: string): Media => ({ kind: 'image', src: ASSET +
 // e.g. 'object-fill' to stretch a clip to its slot instead of cropping).
 // `startDelayMs` holds the first frame that long before playing — applied on
 // initial load and again at the top of every loop (0 = autoplay seamlessly).
-const video = (name: string, label: string, objectClass = 'object-cover', startDelayMs = 0): Media => ({
+// `posterFile` overrides the poster (defaults to {name}-thumb.png) — handy as
+// a placeholder while the {name}.mp4 source is still pending.
+const video = (
+  name: string,
+  label: string,
+  objectClass = 'object-cover',
+  startDelayMs = 0,
+  posterFile = `${name}-thumb.png`,
+): Media => ({
   kind: 'video',
   src: `${ASSET}${name}.mp4`,
-  poster: `${ASSET}${name}-thumb.png`,
+  poster: `${ASSET}${posterFile}`,
   label,
   objectClass,
   startDelayMs,
@@ -96,7 +104,9 @@ const CELLS: Cell[] = [
 
   // Row 8 — pocket pikatama (⅔) + codepen fortune (⅓)
   { id: 'pocket-pika-tama', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/304]', media: img('pocket-pika-tama.png', 'Pocket Pikatama — 3D render') }] },
-  { id: 'codepen-fortune', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: img('pocket-pikachu.png', 'CodePen — Pocket Pikachu') }] },
+  // pocket-pikachu.mp4 is still pending; pocket-pikachu.png is the poster
+  // placeholder until it lands.
+  { id: 'pocket-pikachu', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: video('pocket-pikachu', 'Pocket Pikachu', 'object-cover', 0, 'pocket-pikachu.png') }] },
 
   // Row 9 — wompshop (½) + sun buddy (½), both motion
   { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1500) }] },
