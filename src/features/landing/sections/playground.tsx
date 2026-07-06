@@ -65,7 +65,7 @@ const CELLS: Cell[] = [
     id: 'facets-stack',
     span: 'md:col-span-2',
     slots: [
-      { aspect: 'aspect-[304/146]', media: img('facets-3d-crystal.png', 'facets 3D crystal') },
+      { aspect: 'aspect-[304/146]', media: video('facets-3d-crystal', 'facets 3D crystal') },
       { aspect: 'aspect-[304/316]', media: img('facets-landing.png', 'facets landing page') },
     ],
   },
