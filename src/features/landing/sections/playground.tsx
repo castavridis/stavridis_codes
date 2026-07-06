@@ -96,7 +96,7 @@ const CELLS: Cell[] = [
 
   // Row 8 — pocket pikatama (⅔) + codepen fortune (⅓)
   { id: 'pocket-pika-tama', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/304]', media: img('pocket-pika-tama.png', 'Pocket Pikatama — 3D render') }] },
-  { id: 'codepen-fortune', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: img('codepen-fortune.png', 'CodePen — fortune') }] },
+  { id: 'codepen-fortune', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: img('pocket-pikachu.png', 'CodePen — Pocket Pikachu') }] },
 
   // Row 9 — wompshop (½) + sun buddy (½), both motion
   { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1500) }] },
