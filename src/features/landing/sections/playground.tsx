@@ -16,8 +16,6 @@
 // is only fetched on interaction, not at page load.
 // ---------------------------------------------------------------------------
 
-import { useRef } from 'react';
-
 import Text from '../../../components/Text.js';
 
 const ASSET = '/images/playground/';
@@ -95,29 +93,21 @@ const CELLS: Cell[] = [
   { id: 'sun-buddy', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('sun-buddy', 'sun buddy') }] },
 ];
 
-// Video tile — shows its poster until hovered, then plays. preload="none"
-// defers the (large) source until the user hovers; click toggles play/pause
-// for touch devices where there's no hover.
+// Video tile — autoplays a muted loop, with its poster ({name}-thumb.png)
+// shown as the fallback until the first frame is ready (and if autoplay is
+// blocked or the source fails to load).
 function VideoTile({ media }: { media: Extract<Media, { kind: 'video' }> }): React.ReactElement {
-  const ref = useRef<HTMLVideoElement>(null);
-  const play = () => {
-    void ref.current?.play().catch(() => {});
-  };
-  const pause = () => ref.current?.pause();
   return (
     <video
-      ref={ref}
       src={media.src}
       poster={media.poster}
       aria-label={media.label}
       className="block size-full object-cover"
+      autoPlay
       muted
       loop
       playsInline
-      preload="none"
-      onMouseEnter={play}
-      onMouseLeave={pause}
-      onClick={() => (ref.current?.paused ? play() : pause())}
+      preload="metadata"
     />
   );
 }
