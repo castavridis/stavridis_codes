@@ -22,7 +22,7 @@ const ASSET = '/images/playground/';
 
 type Media =
   | { kind: 'image'; src: string; alt: string }
-  | { kind: 'video'; src: string; poster: string; label: string };
+  | { kind: 'video'; src: string; poster: string; label: string; objectClass: string };
 
 // A single visual within a cell. `aspect` matches the Figma slot (w/h) so the
 // desktop grid derives the correct height from the cell's column width.
@@ -34,11 +34,14 @@ type Slot = { aspect: string; media: Media };
 type Cell = { id: string; span: string; slots: Slot[] };
 
 const img = (file: string, alt: string): Media => ({ kind: 'image', src: ASSET + file, alt });
-const video = (name: string, label: string): Media => ({
+// `objectClass` sets the video's object-fit (defaults to object-cover; pass
+// e.g. 'object-fill' to stretch a clip to its slot instead of cropping).
+const video = (name: string, label: string, objectClass = 'object-cover'): Media => ({
   kind: 'video',
   src: `${ASSET}${name}.mp4`,
   poster: `${ASSET}${name}-thumb.png`,
   label,
+  objectClass,
 });
 
 // Ordered exactly as the design reads top-to-bottom, left-to-right. Each row's
@@ -65,7 +68,7 @@ const CELLS: Cell[] = [
     id: 'facets-stack',
     span: 'md:col-span-2',
     slots: [
-      { aspect: 'aspect-[304/146]', media: video('facets-3d-crystal', 'facets 3D crystal') },
+      { aspect: 'aspect-[304/146]', media: video('facets-3d-crystal', 'facets 3D crystal', 'object-fill') },
       { aspect: 'aspect-[304/316]', media: img('facets-landing.png', 'facets landing page') },
     ],
   },
@@ -102,7 +105,7 @@ function VideoTile({ media }: { media: Extract<Media, { kind: 'video' }> }): Rea
       src={media.src}
       poster={media.poster}
       aria-label={media.label}
-      className="block size-full object-cover"
+      className={`block size-full ${media.objectClass}`}
       autoPlay
       muted
       loop
