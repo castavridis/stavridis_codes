@@ -16,13 +16,15 @@
 // is only fetched on interaction, not at page load.
 // ---------------------------------------------------------------------------
 
+import { useEffect, useRef } from 'react';
+
 import Text from '../../../components/Text.js';
 
 const ASSET = '/images/playground/';
 
 type Media =
   | { kind: 'image'; src: string; alt: string }
-  | { kind: 'video'; src: string; poster: string; label: string; objectClass: string };
+  | { kind: 'video'; src: string; poster: string; label: string; objectClass: string; startDelayMs: number };
 
 // A single visual within a cell. `aspect` matches the Figma slot (w/h) so the
 // desktop grid derives the correct height from the cell's column width.
@@ -38,12 +40,15 @@ type Cell = { id: string; span: string; slots: Slot[] };
 const img = (file: string, alt: string): Media => ({ kind: 'image', src: ASSET + file, alt });
 // `objectClass` sets the video's object-fit (defaults to object-cover; pass
 // e.g. 'object-fill' to stretch a clip to its slot instead of cropping).
-const video = (name: string, label: string, objectClass = 'object-cover'): Media => ({
+// `startDelayMs` holds the first frame that long before playing — applied on
+// initial load and again at the top of every loop (0 = autoplay seamlessly).
+const video = (name: string, label: string, objectClass = 'object-cover', startDelayMs = 0): Media => ({
   kind: 'video',
   src: `${ASSET}${name}.mp4`,
   poster: `${ASSET}${name}-thumb.png`,
   label,
   objectClass,
+  startDelayMs,
 });
 
 // Ordered exactly as the design reads top-to-bottom, left-to-right. Each row's
@@ -94,23 +99,48 @@ const CELLS: Cell[] = [
   { id: 'codepen-fortune', span: 'md:col-span-2', slots: [{ aspect: 'aspect-square', media: img('codepen-fortune.png', 'CodePen — fortune') }] },
 
   // Row 9 — wompshop (½) + sun buddy (½), both motion
-  { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool') }] },
+  { id: 'wompshop', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('wompshop', 'wompshop mask tool', 'object-cover', 1000) }] },
   { id: 'sun-buddy', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/304]', media: video('sun-buddy', 'sun buddy') }] },
 ];
 
-// Video tile — autoplays a muted loop, with its poster ({name}-thumb.png)
-// shown as the fallback until the first frame is ready (and if autoplay is
-// blocked or the source fails to load).
+// Video tile — a muted loop with its poster ({name}-thumb.png) as the fallback
+// until the first frame is ready. When `startDelayMs` is 0 it autoplays and
+// loops seamlessly. When positive, the first frame is held that long before
+// playing — on load and again at the top of each loop (so `loop` is driven
+// manually via the `ended` event rather than the native attribute).
 function VideoTile({ media }: { media: Extract<Media, { kind: 'video' }> }): React.ReactElement {
+  const ref = useRef<HTMLVideoElement>(null);
+  const delay = media.startDelayMs;
+
+  useEffect(() => {
+    if (delay <= 0) return;
+    const v = ref.current;
+    if (!v) return;
+    let timer = 0;
+    // Hold on the first frame, then play. Re-armed on `ended`.
+    const holdThenPlay = () => {
+      v.pause();
+      v.currentTime = 0;
+      timer = window.setTimeout(() => void v.play().catch(() => {}), delay);
+    };
+    v.addEventListener('ended', holdThenPlay);
+    holdThenPlay();
+    return () => {
+      v.removeEventListener('ended', holdThenPlay);
+      window.clearTimeout(timer);
+    };
+  }, [delay]);
+
   return (
     <video
+      ref={ref}
       src={media.src}
       poster={media.poster}
       aria-label={media.label}
       className={`block size-full ${media.objectClass}`}
-      autoPlay
+      autoPlay={delay <= 0}
       muted
-      loop
+      loop={delay <= 0}
       playsInline
       preload="metadata"
     />
