@@ -70,6 +70,10 @@ for domain in \
     "mcp.figma.com" \
     "api.figma.com" \
     "registry.npmjs.org" \
+    "cdn.playwright.dev" \
+    "playwright.azureedge.net" \
+    "storage.googleapis.com" \
+    "edgedl.me.gvt1.com" \
     "api.anthropic.com" \
     "sentry.io" \
     "statsig.com" \
