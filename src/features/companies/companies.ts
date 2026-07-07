@@ -176,8 +176,8 @@ export const companies: Record<string, CompanyConfig> = {
   },
   instrumentl: {
     name: 'Instrumentl',
-    featuredSlugs: ['caresignal-platform', 'fracta', 'sqshbook', 'caresignal-ai'],
-    featuredProjects: ['caresignal-platform'],
+    featuredSlugs: ['caresignal-platform', 'caresignal-brand', 'caresignal-ai', 'sqshbook'],
+    featuredProjects: ['caresignal-platform', 'caresignal-brand'],
     role: 'pd',
     // colors: {
     //   brand: 'rgb(255, 79, 43)',
