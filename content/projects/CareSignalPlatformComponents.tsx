@@ -53,7 +53,7 @@ export function Monitors() {
 				</div>
 
 				<Illustration
-					src="/images/projects/caresignal-platform/Monitors.png"
+					src="/images/projects/caresignal-platform/Sample Monitors 2.png"
 					alt="Two Dell monitors side-by-side. The left monitor shows Epic and a spreadsheet; the right shows Microsoft Outlook and Teams."
 					width="100%"
 					height={409}
@@ -158,14 +158,14 @@ export function KeyObjects() {
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
 				<DarkFeature
-					src="/images/projects/caresignal-platform/Alert Layout.png"
+					src="/images/projects/caresignal-platform/Alert Layout 2.png"
 					alt="A diagonal stack of patient alert flags, each showing time-since, patient name, vital sign, and resolve / snooze controls."
 					title="Alerts"
 					blurb="When patients trigger an alert, they’ve reported an acute need that requires attention."
 					resolution="24 – 72 Hours"
 				/>
 				<DarkFeature
-					src="/images/projects/caresignal-platform/Patient Layout.png"
+					src="/images/projects/caresignal-platform/Patient Layout 2.png"
 					alt="A list of patient rows over a dark background — Patient Banner cards stacked with optional Program Banner sub-rows for high-priority patients."
 					title="Statuses"
 					blurb="In addition to Alerts, Statuses help clinical users intervene before a patient’s conditions worsen to a hospitalization or preventable ED admission."
@@ -175,7 +175,7 @@ export function KeyObjects() {
 
 				<div className="mt-[16px] flex w-full flex-col gap-[28px]">
 					<Illustration
-						src="/images/projects/caresignal-platform/Dashboard Overview.png"
+						src="/images/projects/caresignal-platform/Dashboard Overview 2.png"
 						alt="The dashboard overview: alerts and statuses across all patients with high-risk / medium-risk / low-risk badges and patient summary stats."
 						width="100%"
 						height={500}
