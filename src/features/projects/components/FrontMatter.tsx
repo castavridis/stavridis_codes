@@ -80,11 +80,8 @@ export default function FrontMatter({
         </Text>
         <div className="flex w-full max-w-[704px] flex-col gap-[16px]">
           {paragraphs.map((paragraph, index) => (
-            <Text
-              key={index}
-              variant="copy-large"
-              className="m-0 w-full !text-[18px] !leading-[28px] md:!text-[24px] md:!leading-[32px]"
-            >
+            // Copy Small — Funnel Sans 16/24 (type-copy), per Figma front matter.
+            <Text key={index} variant="copy" className="m-0 w-full">
               {paragraph}
             </Text>
           ))}
