@@ -15,6 +15,10 @@ type Front = {
   // When true, a "Preview Only" tag renders above the headline. Driven by
   // the project's `preview` frontmatter flag.
   preview?: boolean;
+  // Optional credits block rendered below the introduction.
+  roles?: string;
+  team?: string;
+  tools?: string;
 };
 
 type MDXLayoutProps = {
@@ -313,6 +317,9 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
               headline={front.headline}
               introduction={front.introduction}
               previewOnly={front.preview}
+              roles={front.roles}
+              team={front.team}
+              tools={front.tools}
               hideTopNavigation
             />
           </div>
