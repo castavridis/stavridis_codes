@@ -18,6 +18,12 @@ export type ProjectFrontmatter = {
   // legacy gradient-header chrome.
   headline?: string;
   introduction?: string;
+  // Optional front-matter credits block (v2). Rendered below the
+  // introduction as a labelled Roles / Team / Tools list. Each is a plain
+  // string; absent fields are skipped.
+  roles?: string;
+  team?: string;
+  tools?: string;
 };
 
 export type Project = ProjectFrontmatter & {

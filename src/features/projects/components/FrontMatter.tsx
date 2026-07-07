@@ -16,7 +16,31 @@ type FrontMatterProps = {
   // When true, a "Preview Only" tag renders above the headline — for case
   // studies still in draft/preview. Driven by the project's `preview` flag.
   previewOnly?: boolean;
+  // Optional credits block rendered below the introduction. Each is a plain
+  // string; absent fields are skipped and the block is omitted entirely when
+  // all three are empty. Mirrors the Figma "Front Matter" Roles block.
+  roles?: string;
+  team?: string;
+  tools?: string;
 };
+
+// Split an introduction on blank lines so a multi-paragraph intro (stored as
+// a YAML block scalar in frontmatter) renders as separate paragraphs rather
+// than one run-on block. Single-paragraph intros pass through unchanged.
+function toParagraphs(introduction: string): string[] {
+  return introduction
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
+function CreditLine({ label, value }: { label: string; value: string }) {
+  return (
+    <Text variant="tag" className="m-0 w-full text-confetti-black/70">
+      <span className="font-bold text-confetti-black">{label}</span> {value}
+    </Text>
+  );
+}
 
 export default function FrontMatter({
   headline,
@@ -25,7 +49,13 @@ export default function FrontMatter({
   onClose,
   hideTopNavigation = false,
   previewOnly = false,
+  roles,
+  team,
+  tools,
 }: FrontMatterProps) {
+  const paragraphs = toParagraphs(introduction);
+  const hasCredits = Boolean(roles || team || tools);
+
   return (
     <div className="flex w-full max-w-[944px] flex-col items-start gap-[48px] md:gap-[84px]">
       {hideTopNavigation ? null : (
@@ -48,12 +78,26 @@ export default function FrontMatter({
         >
           {headline}
         </Text>
-        <Text
-          variant="copy-large"
-          className="m-0 w-full max-w-[704px] !text-[18px] !leading-[28px] md:!text-[24px] md:!leading-[32px]"
-        >
-          {introduction}
-        </Text>
+        <div className="flex w-full max-w-[704px] flex-col gap-[16px]">
+          {paragraphs.map((paragraph, index) => (
+            // Copy Small — Funnel Sans 16/24 (type-copy), per Figma front matter.
+            <Text key={index} variant="copy" className="m-0 w-full">
+              {paragraph}
+            </Text>
+          ))}
+        </div>
+        {hasCredits ? (
+          // Roles / Team / Tools credits block — Figma "Roles" frame. A hair
+          // rule then labelled lines in the mono tag style.
+          <div className="mt-[24px] flex w-full max-w-[704px] flex-col gap-[16px]">
+            <div className="h-px w-full bg-confetti-black/15" />
+            <div className="flex flex-col gap-[8px]">
+              {roles ? <CreditLine label="Roles" value={roles} /> : null}
+              {team ? <CreditLine label="Team" value={team} /> : null}
+              {tools ? <CreditLine label="Tools" value={tools} /> : null}
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

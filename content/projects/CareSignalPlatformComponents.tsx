@@ -1,7 +1,4 @@
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { animated, easings, useTransition } from '@react-spring/web';
-import { X } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 import {
 	MDXWrapper,
@@ -10,20 +7,20 @@ import {
 import Callout from '../../src/features/projects/components/Callout';
 import OutcomeStat from '../../src/features/projects/components/OutcomeStat';
 import Section from '../../src/features/projects/components/Section';
-import Slides, { Slide } from '../../src/features/projects/components/Slides';
 import WorkflowToggle from '../../src/features/projects/components/WorkflowToggle';
+import { Illustration } from '../../src/features/projects/components/Illustration';
 
 export function Intro () {
 	return (
 		<MDXWrapper>
 			<MDXColumn span={12}>
 				<Callout
-					title="Key Insight"
+					title="Quote from the field"
 					content={
 						<span style={{
 							hangingPunctuation: 'first',
 						}}>
-							“You have to understand... Everybody is busy. All&nbsp;we’re doing is putting out fires and we just want to know if a fire is put out and move on to  the next one.”
+							“You have to understand... Everybody is busy. All&nbsp;we’re doing is putting out fires and we just want to know if a fire is put out and move on to  the next one.”
 						</span>
 				}
 					attribution={
@@ -37,11 +34,45 @@ export function Intro () {
 }
 
 // ---------------------------------------------------------------------------
-// Design Intro — Figma section `Section: Design Intro` (node 2232:32309).
-// Layout: 349w title block (left) + 560w illustration slot (right) inside
-// the 944w content column. The illustration itself ships as an exported
-// Figma asset; this renders a placeholder at the right size with the
-// section's tinted paper background until the asset lands.
+// Monitors — Figma section `Frame 226` (Sample Monitors). Sits near the top,
+// right after the pull-quote. Title + blurb stacked, a 944×409 monitors
+// illustration below, then a centered attribution caption. The illustration
+// sits on the case study's cream paper so no tinted container.
+// ---------------------------------------------------------------------------
+export function Monitors() {
+	return (
+		<Section>
+			<div className="flex w-full flex-col gap-[28px]">
+				<div className="flex w-full max-w-[705px] flex-col gap-[8px]">
+					<h2 className="type-headline-small m-0 text-confetti-black">
+						Our clinical users worked within complex software environments with heightened scrutiny.
+					</h2>
+					<p className="type-copy m-0 text-confetti-black/80">
+						Many of our users had to toggle between several information-dense interfaces to call patients and document their work. Although CareSignal offered integration, our platform needed to be usable out of the box to onboard teams in days, not months. It also needed to be easy to use.
+					</p>
+				</div>
+
+				<Illustration
+					src="/images/projects/caresignal-platform/Sample Monitors 2.png"
+					alt="Two Dell monitors side-by-side. The left monitor shows Epic and a spreadsheet; the right shows Microsoft Outlook and Teams."
+					width="100%"
+					height={409}
+					background="transparent"
+					className="p-[16px]"
+				/>
+
+				<p className="type-callout-meta m-0 text-confetti-black/70 text-center">
+					<span className="font-semibold">A Typical Workstation for Clinical Users</span><br />
+					Our users (both in-office and remote) navigated at least two large monitors, and a slew of applications.
+				</p>
+			</div>
+		</Section>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// Design Intro — Figma `Section: Design Intro`. A 349w title block (left) +
+// 560w illustration slot (right) inside the 944w content column.
 // ---------------------------------------------------------------------------
 export function DesignIntro() {
 	return (
@@ -49,10 +80,10 @@ export function DesignIntro() {
 			<div className="flex w-full flex-col items-start gap-[24px] md:flex-row md:gap-[35px]">
 				<div className="flex w-full flex-col gap-[24px] md:w-[349px] md:shrink-0 md:pt-[104px]">
 					<h2 className="type-headline-small m-0 text-confetti-black">
-						I designed a low-burden way to offer clinicians a snapshot of their patient panel
+						I designed low-burden ways to offer clinicians a snapshot of their patients’ statuses.
 					</h2>
 					<p className="type-copy m-0 text-confetti-black/80">
-						Working with clinicians and buyers I designed a system aligned with value-based care and to signal urgent and emergent needs at-a-glance.
+						Working with our clinical staff, external clinicians and buyers, I designed a system aligned with value-based care and to signal urgent and emergent needs at-a-glance.
 					</p>
 				</div>
 
@@ -68,307 +99,105 @@ export function DesignIntro() {
 	);
 }
 
-// Responsive slot sizing. A numeric width becomes a max-width with a
-// width:100% base + aspect-ratio, so the slot scales down on narrow
-// viewports instead of overflowing. String widths (e.g. "100%") already
-// flex, so they keep their fixed height.
-function slotStyle(
-	width: number | string,
-	height: number,
-	background: string,
-): React.CSSProperties {
-	if (typeof width === 'number') {
-		return {
-			width: '100%',
-			maxWidth: width,
-			aspectRatio: `${width} / ${height}`,
-			background,
-		};
-	}
-	return { width, height, background };
-}
-
-function IllustrationPlaceholder({
-	name,
-	width,
-	height,
-	background,
-	dark,
-	className,
-}: {
-	name: string;
-	width: number | string;
-	height: number;
-	background: string;
-	dark?: boolean;
-	className?: string;
-}) {
-	return (
-		<div
-			className={`flex items-center justify-center overflow-hidden rounded-[12px] border border-dashed ${dark ? 'border-white/20' : 'border-confetti-black/25'} ${className ?? ''}`}
-			style={slotStyle(width, height, background)}
-		>
-			<span
-				className={`type-tag uppercase tracking-[0.08em] ${dark ? 'text-white/60' : 'text-confetti-black/60'}`}
-			>
-				Illustration · {name}
-			</span>
-		</div>
-	);
-}
-
-// Renders an exported Figma illustration inside the same sized + tinted
-// slot the placeholder uses. Use `object-contain` so the image is bounded
-// by the slot regardless of its native aspect; the slot's `background`
-// shows around any letterboxed area, which matches the Figma frame.
-function Illustration({
+// Dark illustration panel with a side caption — the Alerts and Statuses
+// "key object" features from Figma `Frame 228`. The illustration and its
+// white caption share one near-black panel; `reverse` swaps their sides so
+// Alerts reads illustration→caption and Statuses reads caption→illustration,
+// matching the alternating Figma layout.
+function DarkFeature({
 	src,
 	alt,
-	width,
-	height,
-	background,
-	className,
+	title,
+	blurb,
+	resolution,
+	reverse,
 }: {
 	src: string;
 	alt: string;
-	width: number | string;
-	height: number;
-	background: string;
-	className?: string;
+	title: string;
+	blurb: string;
+	resolution: string;
+	reverse?: boolean;
 }) {
 	return (
-		<div
-			className={`overflow-hidden rounded-[12px] ${className ?? ''}`}
-			style={slotStyle(width, height, background)}
-		>
-			<img src={src} alt={alt} className="block size-full object-contain" />
+		<div className="overflow-hidden rounded-[12px] bg-[#191716] p-[24px] md:p-[56px]">
+			<div
+				className={`flex flex-col gap-[32px] md:items-center md:gap-[56px] ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'}`}
+			>
+				<img
+					src={src}
+					alt={alt}
+					className="block w-full object-contain md:min-w-0 md:flex-1"
+				/>
+				<div className="flex w-full flex-col gap-[16px] text-white md:w-[303px] md:shrink-0">
+					<h3 className="type-headline-small m-0">{title}</h3>
+					<p className="type-copy m-0 text-white/80">{blurb}</p>
+					<div className="flex items-start gap-[8px] text-white/70">
+						<Clock size={16} strokeWidth={1.6} className="mt-[3px] shrink-0" aria-hidden />
+						<span className="type-callout-meta">
+							<span className="font-semibold">Recommended Resolution Time</span>
+							<br />
+							{resolution}
+						</span>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 }
 
 // ---------------------------------------------------------------------------
-// Monitors — Figma section `Section: Monitors` (node 2232:32291).
-// Layout: title + blurb stacked at top, 944×409 monitors illustration slot
-// below, attribution caption at the bottom. The illustration sits on the
-// case study's cream paper so no tinted container — placeholder uses the
-// same paper tone with the dashed border.
-// ---------------------------------------------------------------------------
-export function Monitors() {
-	return (
-		<Section>
-			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col gap-[8px]">
-					<h2 className="type-headline-small m-0 text-confetti-black">
-						Clinical users work within complex software environments with heightened scrutiny.
-					</h2>
-					<p className="type-copy m-0 text-confetti-black/80">
-						Many of our users had to toggle between several information-dense interfaces in order to outreach patients and document their work. Although CareSignal offered integration, our platform needed to be usable out of the box to onboard teams in days, not months.
-					</p>
-				</div>
-
-				<Illustration
-					src="/images/projects/caresignal-platform/Monitors.png"
-					alt="Two Dell monitors side-by-side. The left monitor shows Epic and a spreadsheet; the right shows Microsoft Outlook and Teams."
-					width="100%"
-					height={409}
-					background="transparent"
-					className="p-[16px]"
-				/>
-
-				<p className="type-callout-meta m-0 text-confetti-black/70 text-center">
-					<span className="font-semibold">A typical workstation for clinical users.</span><br />
-					Our users (both in-office and remote) navigated two or more large monitors, and a slew of applications.
-				</p>
-			</div>
-		</Section>
-	);
-}
-
-// ---------------------------------------------------------------------------
-// Key Objects — Figma section `Section: Key Objects` (node 2232:32342).
-// No section-level title/blurb; two stacked illustration slots (Alerts and
-// Patients) on near-black backgrounds. The dark bg is part of each
-// illustration container, not the section itself.
+// Key Objects — Figma `Frame 228` (Alerts → Statuses → Dashboard Overview).
+// Two dark feature panels (Alerts, Statuses) each pairing artwork with a
+// side caption, then a single light Dashboard Overview window with a caption
+// below. (The earlier draft's 3-slide carousel is dropped — the final design
+// shows one dashboard.)
 // ---------------------------------------------------------------------------
 export function KeyObjects() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
-				<Illustration
-					src="/images/projects/caresignal-platform/Alert Layout.png"
+				<DarkFeature
+					src="/images/projects/caresignal-platform/Alert Layout 2.png"
 					alt="A diagonal stack of patient alert flags, each showing time-since, patient name, vital sign, and resolve / snooze controls."
-					width="100%"
-					height={504}
-					background="#191716"
-					className="p-[24px] md:p-[72px]"
+					title="Alerts"
+					blurb="When patients trigger an alert, they’ve reported an acute need that requires attention."
+					resolution="24 – 72 Hours"
 				/>
-				<Illustration
-					src="/images/projects/caresignal-platform/Patient Layout.png"
+				<DarkFeature
+					src="/images/projects/caresignal-platform/Patient Layout 2.png"
 					alt="A list of patient rows over a dark background — Patient Banner cards stacked with optional Program Banner sub-rows for high-priority patients."
-					width="100%"
-					height={484}
-					background="#191716"
-					className="p-[24px] md:p-[72px]"
+					title="Statuses"
+					blurb="In addition to Alerts, Statuses help clinical users intervene before a patient’s conditions worsen to a hospitalization or preventable ED admission."
+					resolution="1 – 4+ Weeks"
+					reverse
 				/>
 
-			<Slides background="#191716">
-				<Slide
-					caption={
-						<>
-							<span className="font-semibold">Task-Based Dashboard</span> A streamlined view of Alerts and Patients that need to be actioned based on their organization's Standard Operating Procedures. Clinicians may group patients however makes sense to them and their workflows.
-						</>
-					}
-				>
-					<SlideImage
-						src="/images/projects/caresignal-platform/Task-Based%20Dashboard.png"
-						alt="The task-based dashboard listing patient alerts and summaries with high-risk / medium-risk / low-risk badges and snooze / resolve actions."
+				<div className="mt-[16px] flex w-full flex-col gap-[28px]">
+					<Illustration
+						src="/images/projects/caresignal-platform/Dashboard Overview 2.png"
+						alt="The dashboard overview: alerts and statuses across all patients with high-risk / medium-risk / low-risk badges and patient summary stats."
+						width="100%"
+						height={500}
+						background="#f0eeeb"
+						className="p-[16px] md:p-[24px]"
 					/>
-				</Slide>
-				<Slide caption={
-					<>
-						<span className="font-semibold">Overview</span> This is a more comprehensive view that allows clinicians to see a broader picture of their patients.
-					</>
-				}>
-					<SlideImage
-						src="/images/projects/caresignal-platform/Dashboard Overview.png"
-						alt="The dashboard shows a comprehensive view of a patient group."
-					/>
-				</Slide>
-				<Slide caption={
-					<>
-						<span className="font-semibold">Support for Fax</span> Data from CareSignal may be shared in various ways, including via Fax.
-					</>
-				}>
-					<SlideImage
-						src="/images/projects/caresignal-platform/Fax.png"
-						alt="A faxable patient summary generated from CareSignal data."
-					/>
-				</Slide>
-			</Slides>
+					<div className="mx-auto flex w-full max-w-[784px] flex-col gap-[8px] text-center">
+						<h3 className="type-headline-small m-0 text-confetti-black">Dashboard Overview</h3>
+						<p className="type-copy m-0 text-confetti-black/80">
+							The overview shows Alerts and Statuses for All Patients or pre-defined groups of patients defined by each clinical user. Clinicians may group patients by condition, associated doctors, or custom tags. This view remained largely unchanged while we developed other features and led to significant outcomes.
+						</p>
+					</div>
+				</div>
 			</div>
 		</Section>
 	);
 }
 
 // ---------------------------------------------------------------------------
-// Screenshots — Figma section `Section: Screenshots` (node 2232:32360).
-// A Slides carousel showing dashboard captures. Each Slide's children are
-// wrapped in a fixed-aspect viewport so cycling between slides of different
-// natural image dimensions doesn't cause the carousel to jump in height.
-// Hub and Spoke is a placeholder slide — real screenshots will land later.
-// ---------------------------------------------------------------------------
-export function Screenshots() {
-	return (
-		<Section>
-			<Slides>
-				<Slide
-					caption={
-						<>
-							<span className="font-semibold">Patient summaries</span> give providers a more holistic perspective about their patients than an Alert can provide, and support them in prioritizing outreach.
-						</>
-					}
-				>
-					<SlideImage
-						src="/images/projects/caresignal-platform/Task-Based%20Dashboard.png"
-						alt="The task-based dashboard listing patient alerts and summaries with high-risk / medium-risk / low-risk badges and snooze / resolve actions."
-					/>
-				</Slide>
-				<Slide
-					caption={
-						<>
-							<span className="font-semibold">Hub and Spoke</span> — placeholder slide, real capture coming later.
-						</>
-					}
-				>
-					<SlideImage
-						src="/images/projects/caresignal-platform/Hub%20and%20Spoke.png"
-						alt="A care-team diagram showing one assistant routing patients to multiple nurses in a hub-and-spoke configuration."
-					/>
-				</Slide>
-			</Slides>
-		</Section>
-	);
-}
-
-function SlideImage({ src, alt }: { src: string; alt: string }) {
-	const [expanded, setExpanded] = useState(false);
-
-	// Close the lightbox on Escape while it's open.
-	useEffect(() => {
-		if (!expanded) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') setExpanded(false);
-		};
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
-	}, [expanded]);
-
-	// Snappy in, gentler out — fast enter, slower leave.
-	const transitions = useTransition(expanded, {
-		from: { opacity: 0, scale: 0.96 },
-		enter: { opacity: 1, scale: 1 },
-		leave: { opacity: 0, scale: 0.96 },
-		config: (_item, _index, phase) => ({
-			duration: phase === 'leave' ? 320 : 200,
-			easing: phase === 'leave' ? easings.easeInCubic : easings.easeOutCubic,
-		}),
-	});
-
-	return (
-		<>
-			<button
-				type="button"
-				onClick={() => setExpanded(true)}
-				aria-label={`Expand image: ${alt}`}
-				className="block aspect-[770/463] w-full cursor-zoom-in bg-transparent"
-			>
-				<img src={src} alt={alt} className="block size-full object-contain" />
-			</button>
-
-			{/* Lightbox — translucent cream scrim, click anywhere or Esc to
-			    close. Fades + zooms in fast, out slower. */}
-			{transitions((style, open) =>
-				open
-					? createPortal(
-							<animated.div
-								role="dialog"
-								aria-modal="true"
-								aria-label={alt}
-								onClick={() => setExpanded(false)}
-								style={{ opacity: style.opacity }}
-								className="bg-washes-paper/85 fixed inset-0 z-[70] flex cursor-zoom-out items-center justify-center p-[24px]"
-							>
-								<button
-									type="button"
-									aria-label="Close"
-									onClick={() => setExpanded(false)}
-									className="text-confetti-black/60 hover:text-confetti-black absolute right-[20px] top-[20px] inline-flex size-[40px] items-center justify-center"
-								>
-									<X size={28} strokeWidth={1.6} aria-hidden />
-								</button>
-								<animated.img
-									src={src}
-									alt={alt}
-									style={{ scale: style.scale }}
-									className="max-h-full max-w-[1400px] object-contain"
-								/>
-							</animated.div>,
-							document.body,
-						)
-					: null,
-			)}
-		</>
-	);
-}
-
-// ---------------------------------------------------------------------------
-// Outcomes — Figma section `Section: Outcomes` (node 2232:32449).
-// Two stacked sub-blocks:
-//   1. "Select Outcomes" eyebrow + a 3-column row (2 OutcomeStats + a KLAS
-//      awards block). Each card is 303w x 176h.
-//   2. "One platform, many workflows" intro + WorkflowToggle (the embedded
-//      Claude Design care-models artifact) + caption describing the toggle
-//      states inside the iframe.
+// Outcomes — Figma `Section: Outcomes`. "Select Outcomes" eyebrow + a
+// 3-column row (2 OutcomeStats + a KLAS awards block), then a workflows
+// block with the embedded Claude Design care-models artifact.
 // ---------------------------------------------------------------------------
 export function Outcomes() {
 	return (
@@ -392,7 +221,7 @@ export function Outcomes() {
 
 			<div className="mt-[40px] flex w-full flex-col gap-[16px] p-[16px] bg-[#f0eeeb] rounded-lg">
 				<p className="type-headline-small-italic my-[12px] text-confetti-black">
-					One platform, many workflows
+					CareSignal’s platform supports many workflows
 				</p>
 
 				<WorkflowToggle
@@ -405,3 +234,74 @@ export function Outcomes() {
 	);
 }
 
+// Single phase column inside the "General Design Phases" card.
+function PhaseColumn({ title, items }: { title: string; items: string[] }) {
+	return (
+		<div className="flex flex-col gap-[8px]">
+			<p className="type-copy m-0 font-bold text-confetti-black">{title}</p>
+			<ul className="m-0 flex list-none flex-col gap-[4px] p-0">
+				{items.map((item) => (
+					<li key={item} className="type-copy text-confetti-black/80">
+						{item}
+					</li>
+				))}
+			</ul>
+		</div>
+	);
+}
+
+// ---------------------------------------------------------------------------
+// High-Level Process — Figma frame `Section: Monitors` (mislabeled; its
+// content is the design-process narrative). Intro + a "General Design Phases"
+// card (Research / Prototype / Launch / Iteration) + closing paragraphs.
+// ---------------------------------------------------------------------------
+export function Process() {
+	return (
+		<Section>
+			<div className="flex w-full flex-col gap-[28px]">
+				<div className="flex w-full max-w-[704px] flex-col gap-[16px]">
+					<h2 className="type-headline-small m-0 text-confetti-black">High-Level Process</h2>
+					<p className="type-copy m-0 text-confetti-black/80">
+						The CareSignal platform was iterated on for a number of years but the core process remains the same. I use my intuition to guide the beginning of projects to connect the needs of users to those of the business. My core philosophy is that if the needs of a product’s core users are met, we can increase adoption. I also believe a strong brand can support product touch points.
+					</p>
+				</div>
+
+				<div className="rounded-[12px] bg-[#f0eeeb] p-[24px] md:p-[48px]">
+					<p className="type-headline-small-italic m-0 mb-[24px] text-confetti-black">
+						General Design Phases
+					</p>
+					<div className="grid grid-cols-1 gap-[24px] sm:grid-cols-2 md:grid-cols-4">
+						<PhaseColumn
+							title="Research"
+							items={['Shadowing', 'User interviews', 'Persona development', 'Business opportunity', 'Roadmapping']}
+						/>
+						<PhaseColumn
+							title="Prototype"
+							items={['Paper prototypes', 'Functional prototypes', 'Feasibility prototypes', 'Live-data prototypes']}
+						/>
+						<PhaseColumn
+							title="Launch"
+							items={['Product marketing', 'Internal education', 'External education', 'Support articles']}
+						/>
+						<PhaseColumn
+							title="Iteration"
+							items={['Bug fixes', 'Note areas for improvement']}
+						/>
+					</div>
+				</div>
+
+				<div className="flex w-full max-w-[704px] flex-col gap-[16px]">
+					<p className="type-copy m-0 text-confetti-black/80">
+						Although I use my intuition to guide the beginning of a project, there are certain questions that must be answered by users. I try to conduct research with as little bias as possible to surface what our users actually need and to question the foundation of a product hypothesis or proposal.
+					</p>
+					<p className="type-copy m-0 text-confetti-black/80">
+						After conducting initial research I will synthesize my findings and create prototypes against which I’ll generally try to test with a new group of users. After that user testing is done I usually feel confident enough to move forward with the feature to completion. I’ll have different people within the organization or my company, as well as friends and family or users with time to test the flows. After the flows are in production I pay close attention to support tickets to understand how we might iterate on the feature and if that iteration is necessary.
+					</p>
+					<p className="type-copy m-0 text-confetti-black/80">
+						This approach has helped me develop a strong intuition about the needs of clinical users while building rapport with our buyers and daily users.
+					</p>
+				</div>
+			</div>
+		</Section>
+	);
+}
