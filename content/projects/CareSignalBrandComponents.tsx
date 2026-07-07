@@ -2,13 +2,9 @@ import type { ReactNode } from 'react';
 
 import Section from '../../src/features/projects/components/Section';
 import Text from '../../src/components/Text';
-import {
-	Illustration,
-	IllustrationPlaceholder,
-} from '../../src/features/projects/components/Illustration';
+import { Illustration } from '../../src/features/projects/components/Illustration';
 
-// Brand asset directory. All slots below are exported except
-// `naming-feasibility-matrix`, which stays a placeholder until it lands.
+// Brand asset directory — every slot below is an exported asset.
 const DIR = '/images/projects/caresignal-brand';
 
 // Real exported photograph — object-cover inside a fixed-aspect rounded frame.
@@ -163,8 +159,9 @@ export function Process() {
 					</Blurb>
 				</div>
 
-				<IllustrationPlaceholder
-					name="Naming feasibility matrix"
+				<Illustration
+					src={`${DIR}/naming-feasibility-matrix.png`}
+					alt="The naming feasibility matrix scoring shortlisted names against objective and subjective criteria."
 					width={944}
 					height={708}
 					background="#f0eeeb"
