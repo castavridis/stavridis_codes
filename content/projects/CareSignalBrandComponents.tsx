@@ -66,26 +66,40 @@ function BrandCallout({
 export function KeyDeliverables() {
 	return (
 		<Section>
-			<div className="flex w-full flex-col gap-[24px]">
-				<h2 className="type-headline-small m-0 text-confetti-black">Key Deliverables</h2>
+			{/* 16px gap between the Values callout and the CareSignal logo hero:
+			    an outer gap-16 wrapper holds the deliverables block (its own
+			    gap-24 rhythm) plus the hero directly beneath it. */}
+			<div className="flex w-full flex-col gap-[16px]">
+				<div className="flex w-full flex-col gap-[24px]">
+					<h2 className="type-headline-small m-0 text-confetti-black">Key Deliverables</h2>
 
-				<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
-					<BrandCallout title="Mission">
-						Highlight key moments for life-changing intervention, accentuating the care our partners provide.
-					</BrandCallout>
-					<BrandCallout title="Vision">
-						Be the keystone for Standards of Care in digital health to deliver high-quality care to any patient.
-					</BrandCallout>
+					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
+						<BrandCallout title="Mission">
+							Highlight key moments for life-changing intervention, accentuating the care our partners provide.
+						</BrandCallout>
+						<BrandCallout title="Vision">
+							Be the keystone for Standards of Care in digital health to deliver high-quality care to any patient.
+						</BrandCallout>
+					</div>
+
+					<div className="flex w-full flex-col gap-[8px] rounded-[8px] bg-[#f0eeeb] p-[24px] md:flex-row md:items-baseline md:gap-[24px] md:p-[32px]">
+						<Text variant="callout-title" className="m-0 shrink-0 text-confetti-black">
+							Values
+						</Text>
+						<p className="type-copy-large m-0 text-confetti-black">
+							Caring · Expert · Accessible · Impactful
+						</p>
+					</div>
 				</div>
 
-				<div className="flex w-full flex-col gap-[8px] rounded-[8px] bg-[#f0eeeb] p-[24px] md:flex-row md:items-baseline md:gap-[24px] md:p-[32px]">
-					<Text variant="callout-title" className="m-0 shrink-0 text-confetti-black">
-						Values
-					</Text>
-					<p className="type-copy-large m-0 text-confetti-black">
-						Caring · Expert · Accessible · Impactful
-					</p>
-				</div>
+				<Illustration
+					src={`${DIR}/logo-hero.png`}
+					alt="The CareSignal logo hero — the fireworks mark and wordmark."
+					width={944}
+					height={531}
+					background="#f0eeeb"
+					fill
+				/>
 			</div>
 		</Section>
 	);
@@ -99,14 +113,6 @@ export function BrandVisuals() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
-				<Illustration
-					src={`${DIR}/logo-hero.png`}
-					alt="The CareSignal logo hero — the fireworks mark and wordmark."
-					width={944}
-					height={531}
-					background="#f0eeeb"
-				/>
-
 				<div className="grid grid-cols-2 gap-[16px] md:grid-cols-4">
 					<Photo src={`${DIR}/jamie-lawrence.jpeg`} alt="Portrait of Jamie Lawrence" ratio="224 / 298" />
 					<Photo src={`${DIR}/nathan-beck.jpeg`} alt="Portrait of Nathan Beck" ratio="224 / 298" />
@@ -120,6 +126,7 @@ export function BrandVisuals() {
 					width={944}
 					height={708}
 					background="#f0eeeb"
+					fill
 				/>
 				<Illustration
 					src={`${DIR}/website.png`}
@@ -127,6 +134,7 @@ export function BrandVisuals() {
 					width={944}
 					height={660}
 					background="#f0eeeb"
+					fill
 				/>
 
 				<Photo
@@ -165,6 +173,7 @@ export function Process() {
 					width={944}
 					height={708}
 					background="#f0eeeb"
+					fill
 				/>
 
 				<Blurb>
@@ -184,7 +193,8 @@ export function Process() {
 						alt="The interim CareSignal landing page used for the A/B test."
 						width={529}
 						height={418}
-						background="#ffffff"
+						background="#f0eeeb"
+						fit="cover"
 					/>
 				</div>
 
@@ -214,7 +224,9 @@ export function Process() {
 					alt="Preliminary logo lockups explored across several directions."
 					width={944}
 					height={409}
-					background="#f0eeeb"
+					background="#ffffff"
+					fill
+					className="border border-[#f0eeeb]"
 				/>
 
 				<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
@@ -245,7 +257,9 @@ export function Process() {
 					alt="The chosen “fireworks” mark direction."
 					width={944}
 					height={365}
-					background="#f0eeeb"
+					background="#ffffff"
+					fill
+					className="border border-[#f0eeeb]"
 				/>
 
 				<Blurb>
@@ -260,6 +274,7 @@ export function Process() {
 							width="100%"
 							height={366}
 							background="#f0eeeb"
+							fit="cover"
 						/>
 						<Illustration
 							src={`${DIR}/type-and-colors.png`}
@@ -267,6 +282,7 @@ export function Process() {
 							width="100%"
 							height={366}
 							background="#f0eeeb"
+							fit="cover"
 						/>
 					</div>
 					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[2fr_1fr]">
@@ -275,7 +291,8 @@ export function Process() {
 							alt="The CareSignal logotype lockup."
 							width="100%"
 							height={366}
-							background="#f0eeeb"
+							background="#ffffff"
+							className="border border-[#f0eeeb]"
 						/>
 						<Illustration
 							src={`${DIR}/type-figure-lockup.png`}
@@ -283,9 +300,12 @@ export function Process() {
 							width="100%"
 							height={366}
 							background="#f0eeeb"
+							fit="cover"
 						/>
 					</div>
 				</div>
+
+				<VisualizationsGrid />
 
 				<Blurb>
 					As part of the update, Nathan and I researched content management systems to enable our Marketing team to update messaging on the fly. I eventually sourced HubSpot as one of the key tools in our Sales funnel and I coded our new marketing website and email templates in HubL.
@@ -326,44 +346,45 @@ function ImageCredits() {
 }
 
 // ---------------------------------------------------------------------------
-// Visualizations — Figma `Frame 227`: a three-column explainer of the brand's
-// core data-visualization idea (one column per audience).
+// Visualizations grid — Figma `Frame 227` (node 4269:14089): a three-column
+// explainer of the brand's core data-visualization idea (one column per
+// audience), wrapped in a single tinted card. Rendered inline near the end of
+// the Process section (before the closing HubL note + image credits), matching
+// the Figma order.
 // ---------------------------------------------------------------------------
-export function Visualizations() {
+function VisualizationsGrid() {
 	const columns: Array<{ file: string; caption: string; description: string }> = [
 		{
 			file: 'disparate-data-points',
-			caption: 'Disparate Data Points',
-			description: 'For providers, CareSignal tools display which patients need care most.',
-		},
-		{
-			file: 'joined-by-trends',
-			caption: 'Joined by Trends',
+			caption: 'Disparate data points',
 			description: 'For patients, CareSignal exchanges show that their clinical team cares for them.',
 		},
 		{
+			file: 'joined-by-trends',
+			caption: 'Joined by trends',
+			description: 'For providers, CareSignal tools display which patients need care most.',
+		},
+		{
 			file: 'highlight-new-insights',
-			caption: 'Highlight New Insights',
+			caption: 'Highlight key insights',
 			description: 'For organizations, CareSignal services report where teams can make the most impact.',
 		},
 	];
 	return (
-		<Section>
-			<div className="grid grid-cols-1 gap-[24px] md:grid-cols-3">
-				{columns.map((column) => (
-					<div key={column.caption} className="flex flex-col gap-[16px]">
-						<Illustration
+		<div className="grid grid-cols-1 gap-[24px] rounded-[12px] bg-[#f0eeeb] px-[24px] py-[40px] md:grid-cols-3 md:gap-[16px] md:px-[48px] md:py-[60px]">
+			{columns.map((column) => (
+				<div key={column.caption} className="flex flex-col gap-[16px]">
+					<div className="h-[144px] w-full">
+						<img
 							src={`${DIR}/${column.file}.png`}
 							alt={column.caption}
-							width="100%"
-							height={144}
-							background="#f0eeeb"
+							className="block size-full object-contain"
 						/>
-						<p className="type-tag m-0 font-bold text-confetti-black">{column.caption}</p>
-						<p className="type-tag m-0 text-confetti-black/70">{column.description}</p>
 					</div>
-				))}
-			</div>
-		</Section>
+					<p className="type-tag m-0 font-bold text-confetti-black">{column.caption}</p>
+					<p className="type-tag m-0 text-confetti-black/70">{column.description}</p>
+				</div>
+			))}
+		</div>
 	);
 }

@@ -261,7 +261,10 @@ export function Process() {
 				<div className="flex w-full max-w-[704px] flex-col gap-[16px]">
 					<h2 className="type-headline-small m-0 text-confetti-black">High-Level Process</h2>
 					<p className="type-copy m-0 text-confetti-black/80">
-						The CareSignal platform was iterated on for a number of years but the core process remains the same. I use my intuition to guide the beginning of projects to connect the needs of users to those of the business. My core philosophy is that if the needs of a product’s core users are met, we can increase adoption. I also believe a strong brand can support product touch points.
+						I’ve launched a number of features and products while working on CareSignal. Although the circumstances of projects vary, I keep to a very user-centered workflow. I believe that every touch point or interaction with the product a user experiences builds trust in the brand, and eventually drives adoption.
+					</p>
+					<p className="type-copy m-0 text-confetti-black/80">
+						Over time I’ve noticed that my work tends to follow this iterative process:
 					</p>
 				</div>
 
@@ -279,25 +282,22 @@ export function Process() {
 							items={['Paper prototypes', 'Functional prototypes', 'Feasibility prototypes', 'Live-data prototypes']}
 						/>
 						<PhaseColumn
+							title="Build"
+							items={['Product requirements', 'User flows', 'UI mock ups', 'Component code updates']}
+						/>
+						<PhaseColumn
 							title="Launch"
 							items={['Product marketing', 'Internal education', 'External education', 'Support articles']}
 						/>
-						<PhaseColumn
-							title="Iteration"
-							items={['Bug fixes', 'Note areas for improvement']}
-						/>
 					</div>
+					<p className="type-copy mt-[24px] m-0 text-confetti-black/80">
+						<span className="font-bold text-confetti-black">Iteration</span> (happens at every step) Fill gaps, Fix bugs, Log issues and enhancements, Update materials
+					</p>
 				</div>
 
 				<div className="flex w-full max-w-[704px] flex-col gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
-						Although I use my intuition to guide the beginning of a project, there are certain questions that must be answered by users. I try to conduct research with as little bias as possible to surface what our users actually need and to question the foundation of a product hypothesis or proposal.
-					</p>
-					<p className="type-copy m-0 text-confetti-black/80">
-						After conducting initial research I will synthesize my findings and create prototypes against which I’ll generally try to test with a new group of users. After that user testing is done I usually feel confident enough to move forward with the feature to completion. I’ll have different people within the organization or my company, as well as friends and family or users with time to test the flows. After the flows are in production I pay close attention to support tickets to understand how we might iterate on the feature and if that iteration is necessary.
-					</p>
-					<p className="type-copy m-0 text-confetti-black/80">
-						This approach has helped me develop a strong intuition about the needs of clinical users while building rapport with our buyers and daily users.
+						The time I spend in the Research phase may vary based on how broad the problem space is. I use research to de-risk the process. Research helps test hypotheses and assumptions and hone in on the key features necessary to produce a good experience for users. This approach has helped me develop a strong intuition about the needs of clinical users while building rapport with our buyers and daily users.
 					</p>
 				</div>
 			</div>

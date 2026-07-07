@@ -14,11 +14,14 @@ export function slotStyle(
 	width: number | string,
 	height: number,
 	background: string,
+	fill = false,
 ): CSSProperties {
 	if (typeof width === 'number') {
 		return {
 			width: '100%',
-			maxWidth: width,
+			// `fill` drops the natural-size cap so the slot spans the full
+			// content column (aspect ratio is still driven by width/height).
+			...(fill ? {} : { maxWidth: width }),
 			aspectRatio: `${width} / ${height}`,
 			background,
 		};
@@ -56,15 +59,20 @@ export function IllustrationPlaceholder({
 }
 
 // Renders an exported Figma illustration inside the same sized + tinted
-// slot the placeholder uses. Use `object-contain` so the image is bounded
-// by the slot regardless of its native aspect; the slot's `background`
-// shows around any letterboxed area, which matches the Figma frame.
+// slot the placeholder uses. `fit` defaults to `object-contain` so the image
+// is bounded by the slot and the slot's `background` shows around any
+// letterboxed area (right for logos/marks that must not crop). Pass
+// `fit="cover"` for photos/screenshots that should fill the slot edge-to-edge,
+// and `fill` to let the slot span the full content column instead of capping
+// at its natural width.
 export function Illustration({
 	src,
 	alt,
 	width,
 	height,
 	background,
+	fit = 'contain',
+	fill = false,
 	className,
 }: {
 	src: string;
@@ -72,14 +80,17 @@ export function Illustration({
 	width: number | string;
 	height: number;
 	background: string;
+	fit?: 'contain' | 'cover';
+	fill?: boolean;
 	className?: string;
 }) {
+	const objectFit = fit === 'cover' ? 'object-cover' : 'object-contain';
 	return (
 		<div
 			className={`overflow-hidden rounded-[12px] ${className ?? ''}`}
-			style={slotStyle(width, height, background)}
+			style={slotStyle(width, height, background, fill)}
 		>
-			<img src={src} alt={alt} className="block size-full object-contain" />
+			<img src={src} alt={alt} className={`block size-full ${objectFit}`} />
 		</div>
 	);
 }
