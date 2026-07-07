@@ -250,8 +250,8 @@ export const companies: Record<string, CompanyConfig> = {
   counsel_health: {
     name: 'Counsel Health',
     resume: '/resumes/C-Stavridis-Resume_Counsel-Health.pdf',
-    featuredSlugs: ['caresignal-platform', 'caresignal-ai', 'fracta', 'sqshbook'],
-    featuredProjects: ['caresignal-platform'],
+    featuredSlugs: ['caresignal-platform', 'caresignal-brand', 'caresignal-ai', 'sqshbook'],
+    featuredProjects: ['caresignal-platform', 'caresignal-brand'],
     colors: {
       brand: '#243866',
       light: 'rgb(215, 221, 197)',
