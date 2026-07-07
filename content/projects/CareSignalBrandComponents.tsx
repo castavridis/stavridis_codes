@@ -2,11 +2,13 @@ import type { ReactNode } from 'react';
 
 import Section from '../../src/features/projects/components/Section';
 import Text from '../../src/components/Text';
-import { IllustrationPlaceholder } from '../../src/features/projects/components/Illustration';
+import {
+	Illustration,
+	IllustrationPlaceholder,
+} from '../../src/features/projects/components/Illustration';
 
-// Brand asset directory. The five portraits + group photo are exported; every
-// other slot renders a labelled placeholder at its Figma size until the user
-// drops the exported asset in (see the case-study asset checklist).
+// Brand asset directory. All slots below are exported except
+// `naming-feasibility-matrix`, which stays a placeholder until it lands.
 const DIR = '/images/projects/caresignal-brand';
 
 // Real exported photograph — object-cover inside a fixed-aspect rounded frame.
@@ -94,15 +96,16 @@ export function KeyDeliverables() {
 }
 
 // ---------------------------------------------------------------------------
-// Brand visuals — Figma `Frame 221` imagery: brand overview, the four team
+// Brand visuals — Figma `Frame 221` imagery: logo hero, the four team
 // portraits (real photos), stationery + website mockups, and the group photo.
 // ---------------------------------------------------------------------------
 export function BrandVisuals() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[16px]">
-				<IllustrationPlaceholder
-					name="Brand overview"
+				<Illustration
+					src={`${DIR}/logo-hero.png`}
+					alt="The CareSignal logo hero — the fireworks mark and wordmark."
 					width={944}
 					height={531}
 					background="#f0eeeb"
@@ -115,14 +118,16 @@ export function BrandVisuals() {
 					<Photo src={`${DIR}/c-stavridis.jpeg`} alt="Portrait of C Stavridis" ratio="224 / 298" />
 				</div>
 
-				<IllustrationPlaceholder
-					name="Stationery"
+				<Illustration
+					src={`${DIR}/stationary.png`}
+					alt="CareSignal stationery — letterhead, folder, and business cards."
 					width={944}
 					height={708}
 					background="#f0eeeb"
 				/>
-				<IllustrationPlaceholder
-					name="Website mockup"
+				<Illustration
+					src={`${DIR}/website.png`}
+					alt="The CareSignal.health marketing website shown on a MacBook."
 					width={944}
 					height={660}
 					background="#f0eeeb"
@@ -140,8 +145,8 @@ export function BrandVisuals() {
 
 // ---------------------------------------------------------------------------
 // Process — Figma `Frame 219`: the naming/rebrand narrative interleaved with
-// research photos, interim-brand test, mark explorations, the objective /
-// subjective criteria callouts, and closing image credits.
+// the feasibility matrix, interim-brand test, mark explorations, the objective
+// / subjective criteria callouts, the chosen mark, type boards, and credits.
 // ---------------------------------------------------------------------------
 export function Process() {
 	return (
@@ -159,7 +164,7 @@ export function Process() {
 				</div>
 
 				<IllustrationPlaceholder
-					name="Research & workshops"
+					name="Naming feasibility matrix"
 					width={944}
 					height={708}
 					background="#f0eeeb"
@@ -170,8 +175,20 @@ export function Process() {
 				</Blurb>
 
 				<div className="flex flex-col items-center justify-center gap-[24px] rounded-[12px] bg-[#f0eeeb] p-[24px] md:flex-row">
-					<IllustrationPlaceholder name="Interim full-page ad" width={305} height={390} background="#ffffff" />
-					<IllustrationPlaceholder name="Interim landing page" width={529} height={418} background="#ffffff" />
+					<Illustration
+						src={`${DIR}/caresignal-interim-ad.png`}
+						alt="The interim Epharmix full-page conference ad used for the A/B test."
+						width={305}
+						height={390}
+						background="#ffffff"
+					/>
+					<Illustration
+						src={`${DIR}/caresignal-interim-website.png`}
+						alt="The interim CareSignal landing page used for the A/B test."
+						width={529}
+						height={418}
+						background="#ffffff"
+					/>
 				</div>
 
 				<Blurb>
@@ -179,23 +196,29 @@ export function Process() {
 				</Blurb>
 
 				<div className="grid grid-cols-2 gap-[16px] sm:grid-cols-3 md:grid-cols-5">
-					<IllustrationPlaceholder name="Mark study 1" width={176} height={234} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark study 2" width={176} height={234} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark study 3" width={176} height={234} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark study 4" width={176} height={234} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark study 5" width={176} height={234} background="#f0eeeb" />
+					{[1, 2, 3, 4, 5].map((n) => (
+						<Illustration
+							key={n}
+							src={`${DIR}/mark-exploration-${n}.png`}
+							alt={`Mark exploration ${n}`}
+							width="100%"
+							height={234}
+							background="#f0eeeb"
+						/>
+					))}
 				</div>
 
 				<Blurb>
 					CareSignal lead to more leads and easier conversations than Epharmix. With that proof point, we sketched out marks and ran initial directions against our objective and subjective criteria with our internal team and designers within our networks.
 				</Blurb>
 
-				<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
-					<IllustrationPlaceholder name="Logo lockup" width={436} height={168} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark direction 1" width={436} height={168} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark direction 2" width={436} height={168} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Mark direction 3" width={436} height={168} background="#f0eeeb" />
-				</div>
+				<Illustration
+					src={`${DIR}/preliminary-logo-lockups.png`}
+					alt="Preliminary logo lockups explored across several directions."
+					width={944}
+					height={409}
+					background="#f0eeeb"
+				/>
 
 				<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
 					<BrandCallout title="Objective Criteria">
@@ -220,8 +243,9 @@ export function Process() {
 					</BrandCallout>
 				</div>
 
-				<IllustrationPlaceholder
-					name="Final mark"
+				<Illustration
+					src={`${DIR}/preliminary-logo-chosen.png`}
+					alt="The chosen “fireworks” mark direction."
 					width={944}
 					height={365}
 					background="#f0eeeb"
@@ -231,9 +255,39 @@ export function Process() {
 					The “fireworks” mark stood out with high marks across our criteria and when given the prompt to select their favorite mark without concerning the objective/subjective criteria. Most concerns raised about this mark were about its legibility at small sizes and if it were possible to convey the idea that CareSignal serves “rising-risk” patients.
 				</Blurb>
 
-				<div className="flex flex-col gap-[16px] md:flex-row md:items-start">
-					<IllustrationPlaceholder name="Typography & colors" width={624} height={366} background="#f0eeeb" />
-					<IllustrationPlaceholder name="Brand in use" width={304} height={366} background="#f0eeeb" />
+				<div className="flex flex-col gap-[16px]">
+					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[1fr_2fr]">
+						<Illustration
+							src={`${DIR}/type-explorations.png`}
+							alt="Typography explorations."
+							width="100%"
+							height={366}
+							background="#f0eeeb"
+						/>
+						<Illustration
+							src={`${DIR}/type-and-colors.png`}
+							alt="The CareSignal type system and color palette."
+							width="100%"
+							height={366}
+							background="#f0eeeb"
+						/>
+					</div>
+					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[2fr_1fr]">
+						<Illustration
+							src={`${DIR}/type-logo-lockup.png`}
+							alt="The CareSignal logotype lockup."
+							width="100%"
+							height={366}
+							background="#f0eeeb"
+						/>
+						<Illustration
+							src={`${DIR}/type-figure-lockup.png`}
+							alt="A CareSignal figure lockup showing diabetes ROI cost savings."
+							width="100%"
+							height={366}
+							background="#f0eeeb"
+						/>
+					</div>
 				</div>
 
 				<Blurb>
@@ -246,7 +300,7 @@ export function Process() {
 	);
 }
 
-// Image credits — Figma `Blurb` 4260:13285. Mono tag style with bold lead-ins.
+// Image credits — Figma `Blurb` 4263:14148. Mono tag style with bold lead-ins.
 function ImageCredits() {
 	const credits: Array<{ lead: string; rest: string }> = [
 		{ lead: 'Final Mark', rest: ' designed by C Stavridis; refined with Jamie Lawrence.' },
@@ -279,19 +333,19 @@ function ImageCredits() {
 // core data-visualization idea (one column per audience).
 // ---------------------------------------------------------------------------
 export function Visualizations() {
-	const columns: Array<{ name: string; caption: string; description: string }> = [
+	const columns: Array<{ file: string; caption: string; description: string }> = [
 		{
-			name: 'Disparate data points',
+			file: 'disparate-data-points',
 			caption: 'Disparate Data Points',
 			description: 'For providers, CareSignal tools display which patients need care most.',
 		},
 		{
-			name: 'Joined by trends',
+			file: 'joined-by-trends',
 			caption: 'Joined by Trends',
 			description: 'For patients, CareSignal exchanges show that their clinical team cares for them.',
 		},
 		{
-			name: 'Highlight new insights',
+			file: 'highlight-new-insights',
 			caption: 'Highlight New Insights',
 			description: 'For organizations, CareSignal services report where teams can make the most impact.',
 		},
@@ -301,7 +355,13 @@ export function Visualizations() {
 			<div className="grid grid-cols-1 gap-[24px] md:grid-cols-3">
 				{columns.map((column) => (
 					<div key={column.caption} className="flex flex-col gap-[16px]">
-						<IllustrationPlaceholder name={column.name} width={304} height={144} background="#f0eeeb" />
+						<Illustration
+							src={`${DIR}/${column.file}.png`}
+							alt={column.caption}
+							width="100%"
+							height={144}
+							background="#f0eeeb"
+						/>
 						<p className="type-tag m-0 font-bold text-confetti-black">{column.caption}</p>
 						<p className="type-tag m-0 text-confetti-black/70">{column.description}</p>
 					</div>
