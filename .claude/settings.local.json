@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_figma_figma__get_screenshot",
+      "mcp__plugin_figma_figma__get_metadata",
+      "mcp__plugin_figma_figma__get_design_context",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(node node_modules/typescript/bin/tsc --noEmit --force 2>&1 | head -50)",
+      "Bash(node node_modules/typescript/bin/tsc --build --noEmit --force 2>&1 | head -60)",
+      "Bash(node node_modules/typescript/bin/tsc --build --noEmit --force 2>&1 | grep -v 'next/font\\\\|components/PageTransitionWrapper\\\\|src/page.tsx\\\\|fonts/')",
+      "Bash(node node_modules/typescript/bin/tsc --build --noEmit --force 2>&1)",
+      "Bash(grep -rn 'blog-index\\\\|BlogIndex' /workspace/src/ --include='*.ts' --include='*.tsx' 2>/dev/null | grep -v 'blog-index.tsx')",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)"
+    ]
+  }
+}
