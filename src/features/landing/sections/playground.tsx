@@ -179,7 +179,7 @@ export function Playground(): React.ReactElement {
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
       <div className="mb-[24px]">
         <Text variant="headline-small" className="text-[#251900]">
-          Playground
+          Recent Explorations
         </Text>
       </div>
       <div className="grid grid-cols-1 gap-[16px] md:grid-cols-6">
