@@ -100,19 +100,6 @@ export function KeyDeliverables() {
 					background="#f0eeeb"
 					fill
 				/>
-			</div>
-		</Section>
-	);
-}
-
-// ---------------------------------------------------------------------------
-// Brand visuals — Figma `Frame 221` imagery: logo hero, the four team
-// portraits (real photos), stationery + website mockups, and the group photo.
-// ---------------------------------------------------------------------------
-export function BrandVisuals() {
-	return (
-		<Section>
-			<div className="flex w-full flex-col gap-[16px]">
 				<div className="grid grid-cols-2 gap-[16px] md:grid-cols-4">
 					<Photo src={`${DIR}/jamie-lawrence.jpeg`} alt="Portrait of Jamie Lawrence" ratio="224 / 298" />
 					<Photo src={`${DIR}/nathan-beck.jpeg`} alt="Portrait of Nathan Beck" ratio="224 / 298" />
@@ -231,7 +218,7 @@ export function Process() {
 
 				<div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
 					<BrandCallout title="Objective Criteria">
-						<ol className="m-0 flex list-decimal flex-col gap-[8px] pl-[20px]">
+						<ol className="m-0 flex list-decimal text-sm flex-col gap-[8px] pl-[20px]">
 							<li>Is it recognizable?</li>
 							<li>Is it memorable?</li>
 							<li>Is it unique in healthcare and legally protectable?</li>
@@ -240,7 +227,7 @@ export function Process() {
 						</ol>
 					</BrandCallout>
 					<BrandCallout title="Subjective Criteria">
-						<ol className="m-0 flex list-decimal flex-col gap-[8px] pl-[20px]">
+						<ol className="m-0 flex list-decimal text-sm flex-col gap-[8px] pl-[20px]">
 							<li>Does it communicate expertise in healthcare?</li>
 							<li>Does it convey flexibility, dynamism, or nimbleness?</li>
 							<li>Does it allude to our portfolio approach, that we’re not a single-point solution?</li>
