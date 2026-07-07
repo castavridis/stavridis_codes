@@ -116,15 +116,23 @@ const PROJECTS: Project[] = [
     // Matches the MDX file at content/projects/caresignal-platform.mdx so
     // clicking the card routes to /project/caresignal-platform cleanly.
     slug: 'caresignal-platform',
-    headline: 'Creating a design system to make health care automation human.',
+    headline: 'Creating a design system to make health care automation human',
     tags: 'Design System · Front-End Engineering',
     thumbnailClassName: 'bg-washes-hansa-yellow',
     image: '/images/projects/CareSignal%20Thumbnail.png',
     imageAlt: 'CareSignal Platform thumbnail.',
   },
   {
+    slug: 'caresignal-brand',
+    headline: 'Finding the right name for a growing digital health company',
+    tags: 'Brand Design · Brand Strategy · Front-end Engineering',
+    thumbnailClassName: 'bg-cs-black',
+    image: '/images/projects/CareSignal%20Brand%20Thumbnail.png',
+    imageAlt: 'CareSignal logo'
+  },
+  {
     slug: 'fracta',
-    headline: 'Developing a consistent way to comply with manufacturing standards.',
+    headline: 'Developing a consistent way to comply with manufacturing standards',
     tags: 'Product Design · User Research · Full-Stack Engineering',
     // Dark teal from Figma — no design token yet, inline for now.
     thumbnailClassName: 'bg-[#101e1e]',
@@ -133,7 +141,7 @@ const PROJECTS: Project[] = [
   },
   {
     slug: 'sqshbook',
-    headline: 'Crafting a joyful experience to increase community access through engagement.',
+    headline: 'Crafting a joyful experience to increase community access through engagement',
     tags: 'Design System · User Research · Front-End Engineering',
     thumbnailClassName: 'bg-gradient-to-br from-[#eeeead] via-[#d3e6e5] to-[#ecc6d4]',
     image: '/images/projects/SQSHBook%20Thumbnail.png',
@@ -141,7 +149,7 @@ const PROJECTS: Project[] = [
   },
   {
     slug: 'caresignal-ai',
-    headline: 'Expressing the value of a novel predictive model in healthcare.',
+    headline: 'Designing a novel marketing site  for a new predictive model',
     tags: 'Visual Design · Copywriting · Front-End Engineering',
     thumbnailClassName: 'bg-washes-cerulean-blue',
     image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
