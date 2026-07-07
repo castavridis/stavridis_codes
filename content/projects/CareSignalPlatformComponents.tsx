@@ -120,9 +120,9 @@ function DarkFeature({
 	reverse?: boolean;
 }) {
 	return (
-		<div className="overflow-hidden rounded-[12px] bg-[#191716] p-[24px] md:p-[56px]">
+		<div className="overflow-hidden rounded-[12px] bg-[#191716] p-[24px] md:p-[72px]">
 			<div
-				className={`flex flex-col gap-[32px] md:items-center md:gap-[56px] ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'}`}
+				className={`flex flex-col gap-[32px] md:items-center md:gap-[96px] ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'}`}
 			>
 				<img
 					src={src}
@@ -173,14 +173,13 @@ export function KeyObjects() {
 					reverse
 				/>
 
-				<div className="mt-[16px] flex w-full flex-col gap-[28px]">
+				<div className="mt-[16px] flex w-full flex-col gap-[28px] bg-[#f0eeeb] p-[16px] md:p-[72px] rounded-lg">
 					<Illustration
 						src="/images/projects/caresignal-platform/Dashboard Overview 2.png"
 						alt="The dashboard overview: alerts and statuses across all patients with high-risk / medium-risk / low-risk badges and patient summary stats."
 						width="100%"
 						height={500}
 						background="#f0eeeb"
-						className="p-[16px] md:p-[24px]"
 					/>
 					<div className="mx-auto flex w-full max-w-[784px] flex-col gap-[8px] text-center">
 						<h3 className="type-headline-small m-0 text-confetti-black">Dashboard Overview</h3>
