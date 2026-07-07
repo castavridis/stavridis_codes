@@ -305,6 +305,8 @@ export function Process() {
 					</div>
 				</div>
 
+				<VisualizationsGrid />
+
 				<Blurb>
 					As part of the update, Nathan and I researched content management systems to enable our Marketing team to update messaging on the fly. I eventually sourced HubSpot as one of the key tools in our Sales funnel and I coded our new marketing website and email templates in HubL.
 				</Blurb>
@@ -344,44 +346,45 @@ function ImageCredits() {
 }
 
 // ---------------------------------------------------------------------------
-// Visualizations — Figma `Frame 227`: a three-column explainer of the brand's
-// core data-visualization idea (one column per audience).
+// Visualizations grid — Figma `Frame 227` (node 4269:14089): a three-column
+// explainer of the brand's core data-visualization idea (one column per
+// audience), wrapped in a single tinted card. Rendered inline near the end of
+// the Process section (before the closing HubL note + image credits), matching
+// the Figma order.
 // ---------------------------------------------------------------------------
-export function Visualizations() {
+function VisualizationsGrid() {
 	const columns: Array<{ file: string; caption: string; description: string }> = [
 		{
 			file: 'disparate-data-points',
-			caption: 'Disparate Data Points',
-			description: 'For providers, CareSignal tools display which patients need care most.',
-		},
-		{
-			file: 'joined-by-trends',
-			caption: 'Joined by Trends',
+			caption: 'Disparate data points',
 			description: 'For patients, CareSignal exchanges show that their clinical team cares for them.',
 		},
 		{
+			file: 'joined-by-trends',
+			caption: 'Joined by trends',
+			description: 'For providers, CareSignal tools display which patients need care most.',
+		},
+		{
 			file: 'highlight-new-insights',
-			caption: 'Highlight New Insights',
+			caption: 'Highlight key insights',
 			description: 'For organizations, CareSignal services report where teams can make the most impact.',
 		},
 	];
 	return (
-		<Section>
-			<div className="grid grid-cols-1 gap-[24px] md:grid-cols-3">
-				{columns.map((column) => (
-					<div key={column.caption} className="flex flex-col gap-[16px]">
-						<Illustration
+		<div className="grid grid-cols-1 gap-[24px] rounded-[12px] bg-[#f0eeeb] px-[24px] py-[40px] md:grid-cols-3 md:gap-[16px] md:px-[48px] md:py-[60px]">
+			{columns.map((column) => (
+				<div key={column.caption} className="flex flex-col gap-[16px]">
+					<div className="h-[144px] w-full">
+						<img
 							src={`${DIR}/${column.file}.png`}
 							alt={column.caption}
-							width="100%"
-							height={144}
-							background="#f0eeeb"
+							className="block size-full object-contain"
 						/>
-						<p className="type-tag m-0 font-bold text-confetti-black">{column.caption}</p>
-						<p className="type-tag m-0 text-confetti-black/70">{column.description}</p>
 					</div>
-				))}
-			</div>
-		</Section>
+					<p className="type-tag m-0 font-bold text-confetti-black">{column.caption}</p>
+					<p className="type-tag m-0 text-confetti-black/70">{column.description}</p>
+				</div>
+			))}
+		</div>
 	);
 }
