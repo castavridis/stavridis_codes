@@ -113,11 +113,19 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
+    slug: 'caresignal-ai',
+    headline: 'Designing a novel marketing site  for a new predictive model',
+    tags: 'Visual Design · Copywriting · Front-End Engineering',
+    thumbnailClassName: 'bg-washes-cerulean-blue',
+    image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
+    imageAlt: 'CareSignal AI thumbnail.',
+  },
+  {
     // Matches the MDX file at content/projects/caresignal-platform.mdx so
     // clicking the card routes to /project/caresignal-platform cleanly.
     slug: 'caresignal-platform',
-    headline: 'Creating a design system to make health care automation human',
-    tags: 'Design System · Front-End Engineering',
+    headline: 'Building a friendly and flexible enterprise healthcare platform',
+    tags: 'Product Design · Strategy · User Research',
     thumbnailClassName: 'bg-washes-hansa-yellow',
     image: '/images/projects/CareSignal%20Thumbnail.png',
     imageAlt: 'CareSignal Platform thumbnail.',
@@ -131,6 +139,14 @@ const PROJECTS: Project[] = [
     imageAlt: 'CareSignal logo'
   },
   {
+    slug: 'sqshbook',
+    headline: 'Crafting a joyful experience to increase community submissions to a non-profit',
+    tags: 'Design System · User Research · Front-End Engineering',
+    thumbnailClassName: 'bg-gradient-to-br from-[#eeeead] via-[#d3e6e5] to-[#ecc6d4]',
+    image: '/images/projects/SQSHBook%20Thumbnail.png',
+    imageAlt: 'SQSHBook thumbnail.',
+  },
+  {
     slug: 'fracta',
     headline: 'Developing a consistent way to comply with manufacturing standards',
     tags: 'Product Design · User Research · Full-Stack Engineering',
@@ -138,22 +154,6 @@ const PROJECTS: Project[] = [
     thumbnailClassName: 'bg-[#101e1e]',
     image: '/images/projects/Fracta%20Thumbnail.png',
     imageAlt: 'Fracta thumbnail.',
-  },
-  {
-    slug: 'sqshbook',
-    headline: 'Crafting a joyful experience to increase community access through engagement',
-    tags: 'Design System · User Research · Front-End Engineering',
-    thumbnailClassName: 'bg-gradient-to-br from-[#eeeead] via-[#d3e6e5] to-[#ecc6d4]',
-    image: '/images/projects/SQSHBook%20Thumbnail.png',
-    imageAlt: 'SQSHBook thumbnail.',
-  },
-  {
-    slug: 'caresignal-ai',
-    headline: 'Designing a novel marketing site  for a new predictive model',
-    tags: 'Visual Design · Copywriting · Front-End Engineering',
-    thumbnailClassName: 'bg-washes-cerulean-blue',
-    image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
-    imageAlt: 'CareSignal AI thumbnail.',
   },
 ];
 
