@@ -44,7 +44,7 @@ export function Testimonial(): React.ReactElement {
         <Text
           variant="copy-large"
           className="text-[#391f00] w-full !text-[18px] !leading-[28px] md:!text-[24px] md:!leading-[32px]"
-          style={{ maxWidth: 720 }}
+          style={{ maxWidth: 720, hangingPunctuation: 'first' }}
         >
           “I love working with you, C. You have an infectious energy and passion
           for what you do and you know how to push people in the right
