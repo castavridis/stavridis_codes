@@ -59,7 +59,7 @@ export function HorseTab(): React.ReactElement {
       {/* Quote — Spline Sans Mono 12/20 confetti-black, matching the
           Figma line breaks. */}
       <div className="-rotate-[0.51deg] w-full">
-        <Text variant="tag" className="text-confetti-black w-full whitespace-pre-wrap">
+        <Text variant="tag" className="text-confetti-black w-full whitespace-pre-wrap" style={{ hangingPunctuation: 'first' }}>
           {`"Let a horse whisper`}
           <br aria-hidden />
           {`in your ear and breathe on your heart.`}

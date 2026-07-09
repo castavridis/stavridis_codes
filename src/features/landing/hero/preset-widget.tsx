@@ -25,6 +25,7 @@ import {
   type WeatherKey,
 } from "../lib/weather.js";
 import { usePaintStore } from "../../../lib/paint-store.js";
+import { LucidePaintbrush2 } from "lucide-react";
 
 // A non-interactive "bug" chip — used for the read-only forecast values.
 function DisplayBug({
@@ -112,6 +113,7 @@ export function PresetWidget({
     <div className="flex flex-col items-center gap-[6px] rounded-md type-tag md:flex-row md:flex-nowrap md:whitespace-nowrap">
 
       <div className="flex items-center gap-[0px] whitespace-nowrap">
+        <LucidePaintbrush2 onClick={wrapHandler(() => {})} size={16} className="mr-2 opacity-50 transition hover:opacity-100 hover:cursor-pointer" />
         <span className={`${textClass} hidden md:inline`}>Visualization above based on </span>
         <PresetBug
           onClick={wrapHandler(onLocation)}

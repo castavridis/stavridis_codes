@@ -190,7 +190,7 @@ export function FeaturedWork({
 
   return (
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
-      <div className="mb-[40px]">
+      <div className="mb-[24px]">
         <Text variant="headline-small" className="text-[#251900]">
           Featured Work
         </Text>

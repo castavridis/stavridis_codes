@@ -1045,15 +1045,15 @@ export default function LandingPage({
         </div>
       </DomMarker>
 
-      <DomMarker name="playground">
-        <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
-          <Playground />
+      <DomMarker name="testimonial">
+        <div className="mt-[72px] flex w-full max-w-[944px] justify-center">
+          <Testimonial />
         </div>
       </DomMarker>
 
-      <DomMarker name="testimonial">
-        <div className="mt-[120px] flex w-full max-w-[944px] justify-center">
-          <Testimonial />
+      <DomMarker name="playground">
+        <div className="mt-[72px] flex w-full max-w-[944px] justify-center">
+          <Playground />
         </div>
       </DomMarker>
 
