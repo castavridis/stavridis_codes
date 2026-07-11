@@ -310,19 +310,24 @@ export const companies: Record<string, CompanyConfig> = {
   // elicit: { name: 'Elicit', role: 'de' }, // posting was closed last we checked — re-add if it reopens
   
 	ambrook: {
-		name: 'ambrook',
-		featuredSlugs: ['fracta', 'sqsh', 'caresignal-platform','caresignal-ai'],
+		name: 'Ambrook',
+		resume: '/resumes/C-Stavridis-Resume_Ambrook.pdf',
+		featuredSlugs: ['caresignal-platform', 'fracta', 'caresignal-brand', 'sqshbook'],
 		featuredProjects: ['fracta'],
 		colors: {
 			brand: 'rgb(67, 79, 64)',
 			light: 'rgb(252, 250, 241)',
 			dark: 'rgb(33, 27, 21)',
 		},
+		salutation_colors: {
+		  foreground_color: 'rgb(255,255,255)',
+		  background_color: 'rgb(48, 57, 45)',
+		},
 		seal: {
 			foreground_color: 'rgb(37, 42, 35)',
 			background_color: 'rgb(232, 182, 114)',
 		},
-	}  
+	}
 };
 
 export function getCompany(slug: string): CompanyConfig | null {
