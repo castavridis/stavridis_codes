@@ -6,6 +6,7 @@ import {
 	type ReactNode,
 } from 'react';
 
+import Text from '../../../../components/Text';
 import Figure from './Figure';
 import { prefersReducedMotion } from './motion';
 
@@ -15,21 +16,23 @@ import { prefersReducedMotion } from './motion';
 // between them; everything else dims. Ported from the case-study handoff
 // prototype (Anatomy of a Text Message.dc.html).
 
-const IMG = '/images/projects/caresignal-clinician-app';
+const DEFAULT_ASSET_BASE = '/images/projects/caresignal-clinician-app';
 const INK = 'var(--color-confetti-black)';
 const DIM = 'color-mix(in srgb, var(--color-confetti-black) 40%, transparent)';
 const PAPER = 'var(--color-washes-paper)';
 const MONO = { fontFamily: 'var(--font-mono)' } as const;
 const BODY = { fontFamily: 'var(--font-body)' } as const;
 
-const AV: Record<number, Array<{ src: string; alt: string }>> = {
+const avFor = (
+	base: string,
+): Record<number, Array<{ src: string; alt: string }>> => ({
 	2: [
-		{ src: `${IMG}/doctor-v7.webp`, alt: 'Chief Medical Officer' },
-		{ src: `${IMG}/legal.webp`, alt: 'Legal' },
+		{ src: `${base}/doctor-v7.webp`, alt: 'Chief Medical Officer' },
+		{ src: `${base}/legal.webp`, alt: 'Legal' },
 	],
-	5: [{ src: `${IMG}/nurse-team-v3.webp`, alt: 'Noel, care manager' }],
-	6: [{ src: `${IMG}/patient-phone.webp`, alt: 'Pat, patient' }],
-};
+	5: [{ src: `${base}/nurse-team-v3.webp`, alt: 'Noel, care manager' }],
+	6: [{ src: `${base}/patient-phone.webp`, alt: 'Pat, patient' }],
+});
 
 const STEPS: Array<[string, string, string, string, string]> = [
 	[
@@ -146,7 +149,13 @@ function Reply({ opacity, children }: { opacity: number; children: ReactNode }) 
 	);
 }
 
-export default function AnatomyOfATextMessage() {
+export default function AnatomyOfATextMessage({
+	// Avatar/photo directory — override to reuse outside this case study.
+	assetBase = DEFAULT_ASSET_BASE,
+}: {
+	assetBase?: string;
+} = {}) {
+	const AV = avFor(assetBase);
 	const figRef = useRef<HTMLElement>(null);
 	const rafRef = useRef(0);
 	const prevKey = useRef('');
@@ -283,9 +292,9 @@ export default function AnatomyOfATextMessage() {
 						Governance / Alerts and risk
 					</span>
 				</div>
-				<h2 className="type-headline-small m-0 [text-wrap:balance]">
+				<Text variant="headline-small" as="h2" className="m-0 [text-wrap:balance]">
 					Anatomy of a text message
-				</h2>
+				</Text>
 				<p
 					className="m-0 max-w-[704px] text-[15px] leading-[22px] [text-wrap:pretty]"
 					style={BODY}
@@ -301,7 +310,7 @@ export default function AnatomyOfATextMessage() {
 				{/* Left column — the patient experience */}
 				<div className="flex min-w-0 flex-col gap-[20px]">
 					<div className="flex flex-col gap-[4px]">
-						<span className="type-eyebrow block">the patient experience</span>
+						<Text variant="eyebrow" as="span" className="block">the patient experience</Text>
 						<span className="text-[15px] leading-[22px]" style={BODY}>
 							A simple check-in for Pat
 						</span>
@@ -393,10 +402,10 @@ export default function AnatomyOfATextMessage() {
 
 					{/* What Noel sees */}
 					<div className="flex w-full max-w-[380px] flex-col gap-[10px]">
-						<span className="type-eyebrow block">what Noel sees</span>
+						<Text variant="eyebrow" as="span" className="block">what Noel sees</Text>
 						<div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-[12px] gap-y-[4px] rounded-[12px] border-[1.25px] border-confetti-black bg-white p-[12px_14px]">
 							<img
-								src={`${IMG}/nurse-team-v3.webp`}
+								src={`${assetBase}/nurse-team-v3.webp`}
 								alt=""
 								className="row-span-2 size-[36px] rounded-full object-cover"
 							/>
@@ -424,7 +433,7 @@ export default function AnatomyOfATextMessage() {
 				{/* Right column — the decisions behind it */}
 				<div className="flex min-w-0 flex-col gap-[20px]">
 					<div className="flex flex-col gap-[4px]">
-						<span className="type-eyebrow block">the decisions behind it</span>
+						<Text variant="eyebrow" as="span" className="block">the decisions behind it</Text>
 						<span className="text-[15px] leading-[22px]" style={BODY}>
 							Who may decide, where it’s configured, and how it’s audited
 						</span>

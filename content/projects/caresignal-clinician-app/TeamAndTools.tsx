@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { SectionHeading } from './shared';
@@ -27,19 +28,19 @@ export function TeamAndTools() {
 		<Section>
 			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 				<SectionHeading id="team-and-tools">Team and Tools</SectionHeading>
-				<p className="type-copy m-0 text-confetti-black/80">
+				<Text variant="copy" className="m-0 text-confetti-black/80">
 					<strong className="text-confetti-black">Tools</strong> Sketch,
 					Figma, React, TypeScript, CoffeeScript, Pug, SCSS, Blueprint.js,
 					Storybook, axe-core, Node.js, Sequelize
-				</p>
+				</Text>
 				<div className="flex flex-col gap-[8px]">
-					<p className="type-copy m-0 font-bold text-confetti-black">Teams</p>
+					<Text variant="copy" className="m-0 font-bold text-confetti-black">Teams</Text>
 					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
 						{TEAMS.map((team) => (
-							<li key={team.label} className="type-copy text-confetti-black/80">
+							<Text variant="copy" as="li" key={team.label} className="text-confetti-black/80">
 								<strong className="text-confetti-black">{team.label}:</strong>{' '}
 								{team.people}
-							</li>
+							</Text>
 						))}
 					</ul>
 				</div>

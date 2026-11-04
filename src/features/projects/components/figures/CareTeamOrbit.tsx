@@ -4,6 +4,7 @@ import {
 	type ChangeEvent,
 	type ReactNode,
 } from 'react';
+import Text from '../../../../components/Text';
 import { createPortal } from 'react-dom';
 
 import Button from '../../../../components/Button';
@@ -367,7 +368,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 		const cols = roles.map((r, i) => { const [word, text, cite] = COPY[r], v = pv(i), on = !f || f.includes(i), shown = narrow ? (f ? f[0] === i || (hub && f.includes(i) && i === f[0]) : i === 0) : true;
 			const stats = r === 'ma' ? [{ label: 'Patients monitored', value: fmtN(C.N), of: '', color: ink }, { label: hub ? 'Criticals routed' : 'Alerts reviewed', value: String(v[1]), of: hub ? '' : ' / ' + perDay, color: hub ? P.rT : P.aT }]
 				: r === 'md' ? [{ label: 'Escalations seen', value: String(v[0]), of: '', color: P.rT }, { label: 'Waiting', value: String(v[2]), of: '', color: ink }]
-				: hub ? [{ label: 'Critical in care', value: String(v[2] + (v[0] ? 0 : 0)), of: '', color: P.rT }, { label: 'Resolved', value: String(v[1]), of: '', color: P.gT }]
+				: hub ? [{ label: 'Critical in care', value: String(v[2]), of: '', color: P.rT }, { label: 'Resolved', value: String(v[1]), of: '', color: P.gT }]
 				: [{ label: 'Alerts called', value: String(v[0]), of: '', color: P.aT }, { label: 'Cleared', value: String(v[1]), of: '', color: P.gT }];
 			return { k: String(i), word, text, cite, color: on ? ink : dim, display: shown ? 'flex' : 'none', pDisplay: shown ? 'block' : 'none', stats, who: WHO[r] + (hub && C.nurses > 1 && r === 'rn' ? ' (' + i + ')' : ''), busy: hm(v[3]) + ' busy', dayRef: ref('d', i), eqRef: ref('e', i), dayAria: 'Where ' + WHO[r] + ' time went today', eqAria: 'Impactful work through ' + WHO[r] + ' day, 0 to 5' }; });
 		const pill = (i: number) => { const on = f != null && f.includes(hub && i === 1 ? 1 : i) && !(s.final && s.manual == null); return { on, bg: on ? ink : 'transparent', fg: on ? 'var(--color-washes-paper)' : ink }; };
@@ -428,7 +429,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 					</div>
 
 					{v.isAcute ? (
-						<h2 className="type-headline-small m-0 mt-[8px] max-w-full text-left text-confetti-black [text-wrap:balance]">
+						<Text variant="headline-small" as="h2" className="m-0 mt-[8px] max-w-full text-left text-confetti-black [text-wrap:balance]">
 							A 24/7 acute team’s day:
 							<br />
 							an assistant{' '}
@@ -440,9 +441,9 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 								<Pill p={v.p1} onClick={v.pick1}>calls</Pill>,
 							</span>{' '}
 							and a physician <Pill p={v.p2} onClick={v.pick2}>treats</Pill>
-						</h2>
+						</Text>
 					) : (
-						<h2 className="type-headline-small m-0 mt-[8px] max-w-full text-left text-confetti-black [text-wrap:balance]">
+						<Text variant="headline-small" as="h2" className="m-0 mt-[8px] max-w-full text-left text-confetti-black [text-wrap:balance]">
 							A hub-and-spoke team’s day:
 							<br />
 							an assistant{' '}
@@ -453,7 +454,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 							<span className="whitespace-nowrap">
 								<Pill p={v.p1} onClick={v.pick1}>{v.resolveWord}</Pill>
 							</span>
-						</h2>
+						</Text>
 					)}
 
 					<div className="mt-[20px] grid" style={{ gridTemplateColumns: L.cols, gap: '8px 24px' }}>
@@ -463,9 +464,9 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 								className="m-0 text-left text-[15px] leading-[22px] [text-wrap:pretty]"
 								style={{ display: c.pDisplay, fontFamily: 'var(--font-body)', color: c.color, transition: 'color 400ms ease' }}
 							>
-								<span className="type-eyebrow mb-[4px] block text-confetti-black">
+								<Text variant="eyebrow" as="span" className="mb-[4px] block text-confetti-black">
 									<span data-eb={c.k}>{c.word}</span>
-								</span>
+								</Text>
 								{c.text}
 								{c.cite ? (
 									<Citation title={v.citeTitle} source={v.citeSource} citeKey={v.citeKey} />
@@ -586,7 +587,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 						aria-modal="true"
 						aria-label="Assumptions"
 						onClick={v.closeAssum}
-						className="fixed inset-0 z-[100] flex items-center justify-center p-[24px] text-confetti-black"
+						className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-[24px] text-confetti-black"
 						style={{ background: 'color-mix(in srgb,var(--color-confetti-black) 25%,transparent)', fontFamily: 'var(--font-body)' }}
 					>
 						<div

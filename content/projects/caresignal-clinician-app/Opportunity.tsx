@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
@@ -29,28 +30,28 @@ export function Opportunity() {
 		<Section>
 			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 				<SectionHeading id="opportunity">Opportunity</SectionHeading>
-				<p className="type-copy m-0 text-confetti-black/80">
+				<Text variant="copy" className="m-0 text-confetti-black/80">
 					Centralized care management was created to address that gap. These
 					care teams could follow up and render necessary care between visits,
 					gaining more insight into their patients’ health. However, a standard
 					implementation of this approach has downsides:
-				</p>
+				</Text>
 				{/* Watercolour drop numerals come with the wash engine; plain
 				    numbered badges until then */}
 				<ol className="m-0 flex list-none flex-col gap-[16px] p-0">
 					{DOWNSIDES.map((item, i) => (
 						<li key={item.lead} className="flex gap-[14px]">
-							<span className="type-callout-title mt-[2px] flex size-[32px] shrink-0 items-center justify-center rounded-full bg-[#a50e53]/10 font-bold text-[#a50e53]">
+							<Text variant="callout-title" as="span" className="mt-[2px] flex size-[32px] shrink-0 items-center justify-center rounded-full bg-[#a50e53]/10 font-bold text-[#a50e53]">
 								{i + 1}
-							</span>
-							<p className="type-copy m-0 text-confetti-black/80">
+							</Text>
+							<Text variant="copy" className="m-0 text-confetti-black/80">
 								<strong className="text-confetti-black">{item.lead}</strong>
 								{item.rest}
-							</p>
+							</Text>
 						</li>
 					))}
 				</ol>
-				<p className="type-copy m-0 text-confetti-black/80">
+				<Text variant="copy" className="m-0 text-confetti-black/80">
 					<strong className="text-confetti-black">
 						Nurse care managers were able to manage 30 to 100 patients
 					</strong>{' '}
@@ -58,7 +59,7 @@ export function Opportunity() {
 					<Citation {...CITATIONS.standardCaseload} />
 					<sup className="type-callout-meta text-confetti-black/60">,</sup>
 					<Citation {...CITATIONS.standardCaseload2} />
-				</p>
+				</Text>
 			</div>
 		</Section>
 	);

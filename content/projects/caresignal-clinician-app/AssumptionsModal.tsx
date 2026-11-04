@@ -74,7 +74,7 @@ export function AssumptionsModal() {
 			aria-modal="true"
 			aria-label="Assumptions"
 			onClick={() => setOpen(false)}
-			className="fixed inset-0 z-[100] flex items-center justify-center p-[24px] text-confetti-black"
+			className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-[24px] text-confetti-black"
 			style={{
 				background:
 					'color-mix(in srgb, var(--color-confetti-black) 25%, transparent)',

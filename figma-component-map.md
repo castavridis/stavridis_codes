@@ -24,8 +24,8 @@ main table once a React equivalent ships.
 | Back To Top     | `<BackToTop>`     | `src/features/projects/components/figures/BackToTop.tsx` | `label?`, `stickySelector?`, `alignSelector?` — fixed pill, appears when the section nav pins |
 | Design Principle | `<DesignPrinciple>` | `src/features/projects/components/figures/DesignPrinciple.tsx` | `number`, `text`, `pigment`, `startY?`, `endY?`, `arc?` + stroke params — numbered principle over an animated brush swipe |
 | Wash Highlight  | `<WashHighlight>` | `src/features/projects/components/figures/WashHighlight.tsx` | engine options (`pigment`, `mark`, `delay`, `threshold`…) — watercolour underline/highlighter behind its children |
-| Anatomy of a Text Message | `<AnatomyOfATextMessage>` | `src/features/projects/components/figures/AnatomyOfATextMessage.tsx` | none yet — six-decision annotated SMS figure (asset paths currently hardcoded to caresignal-clinician-app; parameterize before reusing) |
-| Care Team Orbit | `<CareTeamOrbit>` | `src/features/projects/components/figures/CareTeamOrbit.tsx` | `model`, `patients`, `nurses?`, `alertRate?`, `escalateRate?` + team/motion props (avatar paths currently hardcoded to caresignal-clinician-app; parameterize before reusing) |
+| Anatomy of a Text Message | `<AnatomyOfATextMessage>` | `src/features/projects/components/figures/AnatomyOfATextMessage.tsx` | `assetBase?` — six-decision annotated SMS figure; copy is CareSignal-specific, avatars overridable |
+| Care Team Orbit | `<CareTeamOrbit>` | `src/features/projects/components/figures/CareTeamOrbit.tsx` | `model`, `patients`, `nurses?`, `alertRate?`, `escalateRate?` + team/motion props; `nursePhoto`/`doctorPhoto`/`assistantPhoto` override the default avatars |
 
 ## Unmapped
 

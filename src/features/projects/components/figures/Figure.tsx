@@ -9,6 +9,8 @@ export default function Figure({ label = 'figure' }: { label?: string }) {
 	const { n, ready } = useDomOrderNumber(ref, 'data-figure-chip');
 
 	return (
+		// Plain span, not <Text variant="eyebrow">: the numbering hook needs a
+		// DOM ref, which Text doesn't forward.
 		<span
 			ref={ref}
 			data-figure-chip=""

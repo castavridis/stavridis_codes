@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import type { ReactNode } from 'react';
 
 import Figure from '../../../src/features/projects/components/figures/Figure';
@@ -9,7 +10,11 @@ export const IMG = '/images/projects/caresignal-clinician-app';
 
 // Interim stand-in for the animated watercolour figures (nurse orbit, care
 // team orbits, design-principle swipes, text-message anatomy). Figure panel
-// background per the handoff token sheet.
+// background per the handoff token sheet. Deliberately NOT
+// IllustrationPlaceholder (src/features/projects/components/Illustration.tsx):
+// that one is a dashed slot for a missing exported image; this is an
+// accessible role="img" stand-in for an interactive figure, described by its
+// label while the real figure is pending or lazy-loading.
 export function FigPlaceholder({
 	label,
 	height = 420,
@@ -24,9 +29,9 @@ export function FigPlaceholder({
 			className="flex w-full items-center justify-center rounded-[16px] bg-[#f7f6f5]"
 			style={{ height }}
 		>
-			<p className="type-callout-meta m-0 px-[24px] text-center text-confetti-black/50">
+			<Text variant="callout-meta" className="m-0 px-[24px] text-center text-confetti-black/50">
 				Placeholder — {label}
-			</p>
+			</Text>
 		</div>
 	);
 }
@@ -53,9 +58,9 @@ export function FigCaption({
 		);
 	}
 	return (
-		<p className="type-callout-meta m-0 text-center text-confetti-black/70">
+		<Text variant="callout-meta" className="m-0 text-center text-confetti-black/70">
 			{children}
-		</p>
+		</Text>
 	);
 }
 

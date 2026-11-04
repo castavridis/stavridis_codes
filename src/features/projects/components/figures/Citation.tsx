@@ -185,7 +185,7 @@ export default function Citation({ title, source, href, citeKey }: CitationProps
 							ref={tipRef}
 							onMouseEnter={show}
 							onMouseLeave={scheduleClose}
-							className="fixed z-[200] box-border flex w-[min(380px,calc(100vw-32px))] flex-col gap-[14px] rounded-[12px] bg-[#fffbf0] px-[24px] pb-[26px] pt-[22px] text-left align-baseline font-normal not-italic tracking-normal whitespace-normal text-confetti-black shadow-[0_10px_30px_rgba(57,31,0,0.12),0_1px_3px_rgba(57,31,0,0.08)]"
+							className="fixed z-[var(--z-tooltip)] box-border flex w-[min(380px,calc(100vw-32px))] flex-col gap-[14px] rounded-[12px] bg-[#fffbf0] px-[24px] pb-[26px] pt-[22px] text-left align-baseline font-normal not-italic tracking-normal whitespace-normal text-confetti-black shadow-[0_10px_30px_rgba(57,31,0,0.12),0_1px_3px_rgba(57,31,0,0.08)]"
 							style={{
 								left: pos.x,
 								top: pos.y,

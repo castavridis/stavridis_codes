@@ -19,6 +19,16 @@
   src: url("/fonts/PPKyoto-MediumItalic.woff2") format("woff2");
 }
 
+/* Stacking scale for elements portaled to <body> above the sheet overlay
+   (which creates its own stacking context). Keep ordered: modal scrims sit
+   under floating chrome, which sits under tooltips. Reference these via
+   z-[var(--z-modal)] etc. rather than inventing new raw numbers. */
+:root {
+  --z-modal: 100;
+  --z-floating: 150;
+  --z-tooltip: 200;
+}
+
 @theme {
   --color-cream: #fbf6ea;
 

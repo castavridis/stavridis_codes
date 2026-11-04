@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { SectionHeading } from './shared';
@@ -20,26 +21,26 @@ export function KeyLearnings() {
 			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
 				<SectionHeading id="conclusion">Key Learnings</SectionHeading>
 				<div className="flex flex-col gap-[8px]">
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						Challenges
-					</h3>
+					</Text>
 					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
 						{CHALLENGES.map((item) => (
-							<li key={item} className="type-copy text-confetti-black/80">
+							<Text variant="copy" as="li" key={item} className="text-confetti-black/80">
 								{item}
-							</li>
+							</Text>
 						))}
 					</ul>
 				</div>
 				<div className="flex flex-col gap-[8px]">
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						Lessons Learned
-					</h3>
+					</Text>
 					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
 						{LESSONS.map((item) => (
-							<li key={item} className="type-copy text-confetti-black/80">
+							<Text variant="copy" as="li" key={item} className="text-confetti-black/80">
 								{item}
-							</li>
+							</Text>
 						))}
 					</ul>
 				</div>

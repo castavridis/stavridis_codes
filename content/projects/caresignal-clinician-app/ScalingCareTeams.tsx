@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 import AnatomyOfATextMessage from '../../../src/features/projects/components/figures/AnatomyOfATextMessage';
 
@@ -19,15 +20,15 @@ export function ScalingCareTeams() {
 					<SectionHeading id="scaling-care-teams">
 						Scaling Care Teams
 					</SectionHeading>
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						<NumBadge n={3} />
 						Visualize up-to-date risk stratification
-					</h3>
-					<p className="type-headline-small m-0 text-confetti-black">
+					</Text>
+					<Text variant="headline-small" className="m-0 text-confetti-black">
 						I updated our dashboard to adapt to workflows that could be
 						defined at the organization, clinician, and patient level.
-					</p>
-					<p className="type-copy m-0 text-confetti-black/80">
+					</Text>
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						Focusing on urgent needs via alerts wasn’t the only way our
 						customers wanted to support patients. Risk stratification could
 						help providers catch patients before they had urgent needs. Our
@@ -35,7 +36,7 @@ export function ScalingCareTeams() {
 						as COPD and CHF that assessed risk and triggered alerts.
 						Visualizing risk would turn CareSignal from a reactive tool to a
 						preventative tool.
-					</p>
+					</Text>
 				</div>
 
 				<figure className="m-0 flex w-full flex-col gap-[12px]">
@@ -51,14 +52,14 @@ export function ScalingCareTeams() {
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<p className="type-copy m-0 text-confetti-black/80">
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						I collaborated with our research team to understand how risk was
 						communicated in a clinical setting. This visualization itself was
 						straightforward, most people understood red, yellow, and green to
 						mean high-, medium-, and low-risk. Our clinical users worked
 						within complex software environments, CareSignal needed to be
 						easy to get in and out of.
-					</p>
+					</Text>
 				</div>
 
 				<figure className="m-0 flex w-full flex-col gap-[12px]">
@@ -71,7 +72,7 @@ export function ScalingCareTeams() {
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<p className="type-copy m-0 text-confetti-black/80">
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						Knowing which patients were low-risk turned out to be as
 						important as understanding patients who were high-risk,
 						medium-risk, or had triggered alerts. The Zeigarnik effect
@@ -79,7 +80,7 @@ export function ScalingCareTeams() {
 						Account Success team and my own research indicated that nurses
 						had trouble leaving the system if they saw patients with
 						unaddressed tasks.
-					</p>
+					</Text>
 				</div>
 
 				<figure className="m-0 flex w-full flex-col gap-[12px]">
@@ -94,10 +95,10 @@ export function ScalingCareTeams() {
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<p className="type-copy m-0 text-confetti-black/80">
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						I designed additional ways for nurses to manage their tasks.
-					</p>
-					<p className="type-copy m-0 text-confetti-black/80">
+					</Text>
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						The layers that controlled task management could be customized at
 						different levels, allowing for governance that could be set at
 						the organization level with certain customization available down
@@ -105,18 +106,18 @@ export function ScalingCareTeams() {
 						to a patient’s history. Our clinical users were able to use their
 						front-line judgement and the patient’s doctors could see their
 						activity if they wanted to.
-					</p>
+					</Text>
 				</div>
 
 				<AnatomyOfATextMessage />
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<p className="type-copy m-0 text-confetti-black/80">
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						Our analytics showed that users usually searched for patients and
 						then viewed their detailed data. Users could click in to view
 						patient data, leave notes, and extract data the way they needed
 						to send to doctors.
-					</p>
+					</Text>
 				</div>
 
 				<FigPlaceholder
@@ -125,12 +126,12 @@ export function ScalingCareTeams() {
 				/>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<p className="type-copy m-0 text-confetti-black/80">
+					<Text variant="copy" className="m-0 text-confetti-black/80">
 						Data was shared to downstream providers using the channels most
 						convenient for them. I designed multiple ways to get patient data
 						to those providers: plain text formatted for various EHRs, CSV,
 						PDF that was downloadable and faxable.
-					</p>
+					</Text>
 				</div>
 			</div>
 		</Section>

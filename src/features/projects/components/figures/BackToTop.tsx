@@ -141,7 +141,7 @@ export default function BackToTop({
 			onClick={toTop}
 			aria-hidden={!shown}
 			tabIndex={shown ? 0 : -1}
-			className="fixed bottom-[32px] z-[150] inline-flex h-[40px] items-center gap-[8px] rounded-full border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
+			className="fixed bottom-[32px] z-[var(--z-floating)] inline-flex h-[40px] items-center gap-[8px] rounded-full border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
 			style={{
 				left,
 				fontFamily: 'var(--font-kyoto)',

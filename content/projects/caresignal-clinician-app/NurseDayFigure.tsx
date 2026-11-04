@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import Figure from '../../../src/features/projects/components/figures/Figure';
@@ -524,7 +525,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 							i
 						</button>
 					</div>
-					<h2 className="type-headline-small m-0 text-left text-confetti-black [text-wrap:balance]">
+					<Text variant="headline-small" as="h2" className="m-0 text-left text-confetti-black [text-wrap:balance]">
 						A centralized nurse care manager’s shift{' '}
 						<PillButton
 							active={!view.done && view.phase === 'before'}
@@ -540,7 +541,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 							after
 						</PillButton>{' '}
 						CareSignal
-					</h2>
+					</Text>
 					<div className="pointer-events-auto mt-[8px] grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px] md:gap-y-[8px]">
 						<div
 							className="flex min-w-0 flex-col gap-[6px]"
@@ -549,7 +550,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 								transition: 'opacity 400ms ease',
 							}}
 						>
-							<span className="type-eyebrow block text-confetti-black">before</span>
+							<Text variant="eyebrow" as="span" className="block text-confetti-black">before</Text>
 							<p
 								className="m-0 text-left text-[15px] leading-[22px] text-confetti-black [text-wrap:pretty]"
 								style={{ fontFamily: 'var(--font-body)' }}
@@ -566,7 +567,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 								transition: 'opacity 400ms ease',
 							}}
 						>
-							<span className="type-eyebrow block text-confetti-black">after</span>
+							<Text variant="eyebrow" as="span" className="block text-confetti-black">after</Text>
 							<p
 								className="m-0 text-left text-[15px] leading-[22px] [text-wrap:pretty]"
 								style={{

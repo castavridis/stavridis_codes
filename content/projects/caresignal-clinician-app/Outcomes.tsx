@@ -1,3 +1,4 @@
+import Text from '../../../src/components/Text';
 import { lazy, Suspense } from 'react';
 
 import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
@@ -49,9 +50,9 @@ export function Outcomes() {
 			<div className="flex w-full flex-col gap-[28px]">
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						Centralized Care Management Nurse Panel Size
-					</h3>
+					</Text>
 					<div className="flex flex-wrap gap-[24px]">
 						<OutcomeStat stat="100" caption="Patients per nurse, before" />
 						<OutcomeStat stat="1,500" caption="Patients per nurse, after" />
@@ -59,9 +60,9 @@ export function Outcomes() {
 				</div>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						Acute Patient Panel
-					</h3>
+					</Text>
 					<div className="flex flex-wrap gap-[24px]">
 						<OutcomeStat stat="3" caption="Providers" />
 						<OutcomeStat stat="3,500" caption="Patients" />
@@ -79,9 +80,9 @@ export function Outcomes() {
 				/>
 
 				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<h3 className="type-callout-title m-0 text-confetti-black">
+					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
 						Hub and Spoke Model
-					</h3>
+					</Text>
 					<div className="flex flex-wrap gap-[24px]">
 						<OutcomeStat stat="2" caption="Providers" />
 						<OutcomeStat stat="330" caption="Patients" />
