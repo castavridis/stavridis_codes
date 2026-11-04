@@ -1,4 +1,5 @@
 import Section from '../../../src/features/projects/components/Section';
+import WashHighlight from '../../../src/features/projects/components/figures/WashHighlight';
 
 import { CITATIONS } from './citations';
 import { Citation, SectionHeading } from './shared';
@@ -17,9 +18,11 @@ export function Background() {
 					encompass a total of two hours a year.
 				</p>
 				<p className="type-copy-large m-0 font-bold text-confetti-black">
-					{/* "6,208 waking hours" gets the wash highlight once the
-					    wash-highlight engine is ported */}
-					What about care needed during the other 6,208 waking hours?
+					What about care needed during the other{' '}
+					<WashHighlight mark="highlight" pigment="hansa" delay={64} threshold={1}>
+						6,208 waking hours
+					</WashHighlight>
+					?
 					<Citation {...CITATIONS.wakingHours} />
 				</p>
 			</div>

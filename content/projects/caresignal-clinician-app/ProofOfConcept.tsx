@@ -1,4 +1,5 @@
 import Section from '../../../src/features/projects/components/Section';
+import DesignPrinciple from '../../../src/features/projects/components/figures/DesignPrinciple';
 
 import { CITATIONS } from './citations';
 import { DialysisFlowChart } from './DialysisFlowChart';
@@ -106,13 +107,31 @@ export function ProofOfConcept() {
 					</p>
 				</div>
 
-				{/* Design principles 1–3: animated watercolour brush swipes
-				    (Design Principle.dc.html); placeholders until the wash engine
-				    is ported. Pigments: rose / hansa / cerulean. */}
 				<div className="flex w-full flex-col gap-[16px]">
-					<FigPlaceholder label="Design principle 1 — “Prioritize loginless experiences.” (rose brush swipe)" height={140} />
-					<FigPlaceholder label="Design principle 2 — “Build for our users’ environments, not our own.” (hansa brush swipe)" height={140} />
-					<FigPlaceholder label="Design principle 3 — “Assume users are busy, not wrong.” (cerulean brush swipe)" height={140} />
+					<DesignPrinciple
+						number={1}
+						pigment="rose"
+						text="Prioritize loginless experiences."
+						startY={0.62}
+						endY={0.43}
+						arc={0.12}
+					/>
+					<DesignPrinciple
+						number={2}
+						pigment="hansa"
+						text="Build for our users’ environments, not our own."
+						startY={0.42}
+						endY={0.57}
+						arc={0.08}
+					/>
+					<DesignPrinciple
+						number={3}
+						pigment="cerulean"
+						text="Assume users are busy, not wrong."
+						startY={0.55}
+						endY={0.44}
+						arc={0.1}
+					/>
 				</div>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
