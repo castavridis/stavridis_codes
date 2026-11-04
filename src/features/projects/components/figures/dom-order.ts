@@ -1,0 +1,54 @@
+import { useEffect, useState, type RefObject } from 'react';
+
+// Figures and citations are numbered by their order in the document, not
+// their order of mounting — late-mounting (lazy) figures renumber the ones
+// already on the page. Every numbered element re-syncs on this event, and
+// mount/unmount of any of them fires it.
+const EVT = 'stavridis-renumber';
+
+export function notifyRenumber() {
+	window.dispatchEvent(new Event(EVT));
+}
+
+// Returns this element's 1-based number among all `[attr]` elements in DOM
+// order. With `dedupeByValue`, elements sharing the same attribute value
+// share a number (repeat citations of one source), and numbers count unique
+// values instead of elements.
+export function useDomOrderNumber(
+	ref: RefObject<Element | null>,
+	attr: string,
+	dedupeByValue = false,
+) {
+	const [n, setN] = useState(1);
+
+	useEffect(() => {
+		const sync = () => {
+			const el = ref.current;
+			if (!el) return;
+			const els = [...document.querySelectorAll(`[${attr}]`)];
+			let next: number;
+			if (dedupeByValue) {
+				const keys: string[] = [];
+				for (const c of els) {
+					const k = c.getAttribute(attr) ?? '';
+					if (!keys.includes(k)) keys.push(k);
+				}
+				next = keys.indexOf(el.getAttribute(attr) ?? '') + 1;
+			} else {
+				next = els.indexOf(el) + 1;
+			}
+			if (next > 0) setN(next);
+		};
+		window.addEventListener(EVT, sync);
+		notifyRenumber();
+		const raf = requestAnimationFrame(sync);
+		return () => {
+			window.removeEventListener(EVT, sync);
+			cancelAnimationFrame(raf);
+			// After this element is gone, let the survivors close the gap.
+			requestAnimationFrame(notifyRenumber);
+		};
+	}, [ref, attr, dedupeByValue]);
+
+	return n;
+}
