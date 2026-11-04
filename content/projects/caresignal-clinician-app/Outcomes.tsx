@@ -1,7 +1,73 @@
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+
 import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
 import Section from '../../../src/features/projects/components/Section';
+import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
 
 import { FigPlaceholder, SectionHeading } from './shared';
+
+const CareTeamOrbit = lazy(
+	() => import('../../../src/features/projects/components/figures/CareTeamOrbit'),
+);
+
+// Shared orbit/motion tuning for both Care Team Orbit instances, per the
+// handoff (Care Team Orbit.dc.html prop defaults).
+const TEAM = {
+	tilt: 40,
+	queueSpeed: 0.1,
+	servedSpeed: 0.6,
+	poolSpeed: 0.09,
+	wobble: 1,
+	eccentricity: 1,
+	breathe: 4.5,
+	alternate: true,
+	avatarSize: 120,
+	avatarSmall: 100,
+	daySeconds: 30,
+} satisfies Partial<CareTeamOrbitProps>;
+
+// Mount-once in-view gate so the orbit chunk (simulation + watercolour
+// engine) only loads as the figure approaches the viewport.
+function useInView(rootMargin = '400px') {
+	const ref = useRef<HTMLDivElement>(null);
+	const [inView, setInView] = useState(false);
+	useEffect(() => {
+		if (inView) return;
+		const el = ref.current;
+		if (!el || typeof IntersectionObserver === 'undefined') {
+			setInView(true);
+			return;
+		}
+		const io = new IntersectionObserver(
+			(es) => {
+				if (es.some((e) => e.isIntersecting)) {
+					setInView(true);
+					io.disconnect();
+				}
+			},
+			{ rootMargin },
+		);
+		io.observe(el);
+		return () => io.disconnect();
+	}, [rootMargin, inView]);
+	return { ref, inView };
+}
+
+function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) {
+	const { ref, inView } = useInView();
+	const fallback = <FigPlaceholder label={label} height={520} />;
+	return (
+		<div ref={ref} className="w-full">
+			{inView ? (
+				<Suspense fallback={fallback}>
+					<CareTeamOrbit {...props} />
+				</Suspense>
+			) : (
+				fallback
+			)}
+		</div>
+	);
+}
 
 export function Outcomes() {
 	return (
@@ -28,11 +94,14 @@ export function Outcomes() {
 					</div>
 				</div>
 
-				{/* Care Team Orbit, model="acute" — watercolour-orbit engine,
-				    ported separately */}
-				<FigPlaceholder
+				{/* Care Team Orbit, model="acute" */}
+				<OrbitSlot
 					label="Care Team Orbit (acute): a team of three — an assistant, a nurse and a physician — covers 3,500 patients around the clock. About 80% answer a check-in, and alerts are called first."
-					height={520}
+					model="acute"
+					patients={3500}
+					alertRate={0.5}
+					escalateRate={15}
+					{...TEAM}
 				/>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
@@ -46,9 +115,12 @@ export function Outcomes() {
 				</div>
 
 				{/* Care Team Orbit, model="hub" */}
-				<FigPlaceholder
+				<OrbitSlot
 					label="Care Team Orbit (hub and spoke): an assistant (the hub) and a nurse (the spoke) share 330 patients. About 80% answer a check-in, and the assistant routes each critical patient to the nurse."
-					height={520}
+					model="hub"
+					patients={330}
+					nurses={1}
+					{...TEAM}
 				/>
 			</div>
 		</Section>
