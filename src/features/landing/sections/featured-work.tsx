@@ -113,6 +113,15 @@ type Project = {
 
 const PROJECTS: Project[] = [
   {
+    // Matches content/projects/caresignal-clinician-app/index.mdx (nested
+    // {slug}/index.mdx layout). No thumbnail asset yet — paper tone from the
+    // case study until one is exported.
+    slug: 'caresignal-clinician-app',
+    headline: 'Scaling centralized care teams to safely manage 15 to 20× as many patients',
+    tags: 'Product Strategy · Product Design · Service Design · Design Engineering',
+    thumbnailClassName: 'bg-[#fdfbf5]',
+  },
+  {
     slug: 'caresignal-ai',
     headline: 'Designing a novel marketing site  for a new predictive model',
     tags: 'Visual Design · Copywriting · Front-End Engineering',
