@@ -31,18 +31,23 @@ export type Project = ProjectFrontmatter & {
   loadComponent: () => Promise<MDXContent>;
 };
 
+// Two layouts are supported: legacy flat files (`{slug}.mdx`) and the
+// CLAUDE.md convention (`{slug}/index.mdx` with sibling section .tsx files).
 const projectFrontmatterModules = import.meta.glob<ProjectFrontmatter>(
-  '../../../content/projects/*.mdx',
+  ['../../../content/projects/*.mdx', '../../../content/projects/*/index.mdx'],
   { eager: true, import: 'frontmatter' },
 );
 
 const projectComponentModules = import.meta.glob<MDXContent>(
-  '../../../content/projects/*.mdx',
+  ['../../../content/projects/*.mdx', '../../../content/projects/*/index.mdx'],
   { import: 'default' },
 );
 
 function slugFromPath(path: string) {
-  return path.replace(/^..\/..\/..\/content\/projects\//, '').replace(/\.mdx$/, '');
+  return path
+    .replace(/^..\/..\/..\/content\/projects\//, '')
+    .replace(/\/index\.mdx$/, '')
+    .replace(/\.mdx$/, '');
 }
 
 export const projects: Project[] = Object.entries(projectFrontmatterModules)
