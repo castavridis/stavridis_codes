@@ -182,7 +182,7 @@ export function WashesCanvas({
       // so a calm/dry wash costs nothing. The weather animationStep runs
       // independently of this gate, so ambient rain/snow still animate
       // (and their deposits wake the sim as needed).
-      wash.run("auto");
+      wash.run("until-dry");
       // Initial pigment from the current brush color in the store.
       const initColor = usePaintStore.getState().brushColor;
       wash.pigment(
