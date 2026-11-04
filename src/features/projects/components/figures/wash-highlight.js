@@ -1,11 +1,18 @@
 /* Wash highlight → window.WashHighlightFX.attach(el, opts) · a brush of watercolour swept behind a run of text (one stroke per line), left to right; it dries in place.
    opts: pigment 'hansa'|'rose'|'cerulean'|hex · duration ms · delay ms · load 0–2 · height (fraction of line height) · trigger 'view'|'load'|'hover' · onDone */
 const WashHighlightFX = (() => {
-// One engine since the v2 unification: the same lib/washes module the
-// landing page imports, pulled in lazily here (its own chunk) so figures
-// keep it out of the first load.
-let lib = null;
-const loadWashes = () => (lib ||= import('../../../../../lib/washes/washes.js').then(m => m.Washes));
+// The v2 washes engine ships as a classic-script public asset (not the older
+// ESM engine in lib/washes that the landing page uses — the figures need v2's
+// normalized paint space, localized rewet and per-instance pigments). Loaded
+// on demand the first time a wash fires. Both engines assign window.Washes,
+// and the landing engine is always loaded first, so never trust the global:
+// capture v2 off the script load and put the previous global back.
+let lib = null, v2 = null;
+const loadWashes = () => v2 ? Promise.resolve(v2) : (lib ||= new Promise((res, rej) => {
+  const prevW = window.Washes, prevC = window.Watercolor;
+  const s = document.createElement('script'); s.src = (import.meta.env?.BASE_URL ?? '/') + 'vendor/washes.standalone.js';
+  s.onload = () => { v2 = window.Washes; window.Washes = prevW; window.Watercolor = prevC; res(v2); };
+  s.onerror = () => { lib = null; rej(new Error('washes failed to load')); }; document.head.appendChild(s); }));
 const rgba = (() => { let ctx; return css => { if (!css) return null; ctx ||= document.createElement('canvas').getContext('2d', { willReadFrequently: true });
   ctx.fillStyle = '#010203'; ctx.fillStyle = css; if (ctx.fillStyle === '#010203' && css !== '#010203') return null; ctx.clearRect(0, 0, 1, 1); ctx.fillRect(0, 0, 1, 1); const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data; return { r, g, b, a: a / 255 }; }; })();
 const hex = c => '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');

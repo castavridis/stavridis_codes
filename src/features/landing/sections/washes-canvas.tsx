@@ -23,6 +23,7 @@ import { animated, useSpring } from "@react-spring/web";
 
 import { Washes } from "../../../../lib/washes/washes.js";
 import type { WashesInstance } from "../../../../lib/washes/washes.js";
+import { initGpuSim } from "../../../../lib/washes/washes-gpu-sim.js";
 
 import { hexToRgb } from "../lib/colors.js";
 import {
@@ -119,8 +120,8 @@ export function WashesCanvas({
       const paper = DAY_PHASE_PAPER[phase];
       const rgb = hexToRgb(paper);
       wash.paperColor(rgb.r / 255, rgb.g / 255, rgb.b / 255);
-      wash.backgroundAnimation(DAY_PHASE_BACKGROUND[phase]);
-      wash.animation(WEATHER_PRESETS[w].animation);
+      wash.setBackground(DAY_PHASE_BACKGROUND[phase]);
+      wash.setAnimation(WEATHER_PRESETS[w].animation);
       const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
       if (canvasEl) canvasEl.style.backgroundColor = paper;
     };
@@ -152,22 +153,25 @@ export function WashesCanvas({
       if (wash.webglAvailable()) {
         wash.webgl(true);
       }
-      // GPU sim: the engine auto-activates its folded-in WebGL2 backend
-      // (v2 _tryAutoGpu); the external washes-gpu-sim module is gone.
+
+      const gpuCtx = wash.gpuSimContext();
+      if (gpuCtx) {
+        try {
+          const handle = initGpuSim(gpuCtx.gl, gpuCtx.GW, gpuCtx.GH);
+          wash.gpuSim(handle);
+        } catch (e) {
+          console.warn("GPU sim init failed; falling back to CPU sim", e);
+        }
+      }
 
       wash.gouacheMode("auto");
       wash.paperWetness("damp");
       wash.paintLoad(0.15);
       wash.waterLoad(8.0);
       wash.evaporation(2.5);
-      // v2 units: brushSize is a fraction of the canvas's smaller side.
-      // 160px matched the legacy hero (BRUSH_DEFAULT) — convert at init so
-      // the stroke feel stays identical.
-      {
-        const r = host.getBoundingClientRect();
-        const side = Math.min(r.width, r.height) || 620;
-        wash.brushSize(160 / side);
-      }
+      // 160 matches the legacy hero (BRUSH_DEFAULT). Smaller values feel
+      // pinched; the lib's stamp calibration assumes ~160px.
+      wash.brushSize(160);
       wash.edgeMode("gravity");
       wash.gravityDirection("down");
       wash.gravityStrength(0.075);
@@ -176,13 +180,13 @@ export function WashesCanvas({
       // Smooth strokes on touch devices where pointermove is sparse.
       const isTouch = window.matchMedia("(pointer: coarse)").matches;
       wash.continuousFlow(isTouch);
-      // Don't force the physics sim to run every frame. run('auto') idles
-      // the simulation once the canvas settles
+      // Don't force the physics sim to run every frame. With the default
+      // (false) the lib idles the simulation once the canvas settles
       // (dry, low suspended pigment) and wakes it on the next deposit —
       // so a calm/dry wash costs nothing. The weather animationStep runs
       // independently of this gate, so ambient rain/snow still animate
       // (and their deposits wake the sim as needed).
-      wash.run("auto");
+      wash.keepSimulating(false);
       // Initial pigment from the current brush color in the store.
       const initColor = usePaintStore.getState().brushColor;
       wash.pigment(
@@ -359,8 +363,8 @@ export function WashesCanvas({
     const paper = DAY_PHASE_PAPER[dayPhase];
     const rgb = hexToRgb(paper);
     wash.paperColor(rgb.r / 255, rgb.g / 255, rgb.b / 255);
-    wash.backgroundAnimation(DAY_PHASE_BACKGROUND[dayPhase]);
-    wash.animation(WEATHER_PRESETS[weather].animation);
+    wash.setBackground(DAY_PHASE_BACKGROUND[dayPhase]);
+    wash.setAnimation(WEATHER_PRESETS[weather].animation);
     const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
     if (canvasEl) canvasEl.style.backgroundColor = paper;
   }, [dayPhase, weather]);
@@ -398,8 +402,8 @@ export function WashesCanvas({
       const paper = DAY_PHASE_PAPER[currentDayPhase];
       const rgb = hexToRgb(paper);
       wash.paperColor(rgb.r / 255, rgb.g / 255, rgb.b / 255);
-      wash.backgroundAnimation(DAY_PHASE_BACKGROUND[currentDayPhase]);
-      wash.animation(WEATHER_PRESETS[currentWeather].animation);
+      wash.setBackground(DAY_PHASE_BACKGROUND[currentDayPhase]);
+      wash.setAnimation(WEATHER_PRESETS[currentWeather].animation);
       const canvasEl = (wash as unknown as { canvas: HTMLCanvasElement }).canvas;
       if (canvasEl) canvasEl.style.backgroundColor = paper;
       setWashesVisible(true);
