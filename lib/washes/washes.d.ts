@@ -517,15 +517,12 @@ export interface WashesInstance {
   pauseDrying(v?: boolean): boolean;
 
   /**
-   * Force the simulation to step every frame, even when the canvas is
-   * quiet (no fresh paint). Default false — the lib auto-idles after a
-   * brief grace period to save CPU/GPU. Set true to watch slow effects
-   * settle: wet dissipating, gravity drift continuing, edge darkening
-   * stabilizing. Independent of `pauseDrying`: `pauseDrying` freezes
-   * the evaporation phase only; `keepSimulating` re-runs every phase
-   * each frame.
+   * v2 — run policy, replacing v1's `keepSimulating`/`runUntilDry`.
+   * 'auto' (default): idle once the canvas settles, wake on deposits.
+   * 'until-dry': keep stepping until everything dries, then idle.
+   * 'always': step every frame. Call with no argument to read.
    */
-  keepSimulating(v?: boolean): boolean;
+  run(policy?: 'auto' | 'until-dry' | 'always'): string | WashesInstance;
 
   // ─── GPU sim integration ───────────────────────────────────────────
   /**
@@ -803,13 +800,19 @@ export interface WashesInstance {
   // Background animation / visualization
   // -----------------------------------------------------------------------
 
-  /** Set a named time-driven background wash. */
-  setBackground(name: string): WashesInstance;
-  isBackgroundRunning(): boolean;
+  /**
+   * v2 — set (or read, with no argument) the named time-driven background
+   * wash. Replaces v1's `setBackground`.
+   */
+  backgroundAnimation(name?: string): string | null | WashesInstance;
+  /** v2 — replaces v1's `isBackgroundRunning`. */
+  backgroundAnimationRunning(): boolean;
 
-  /** Toggle an animation mode (breathe, drift, pulse, etc.). */
-  setAnimation(name: AnimationName, opts?: AnimationOptions): WashesInstance;
-  getAnimation(): AnimationName;
+  /**
+   * v2 — set (or read, with no argument) the animation mode (breathe,
+   * drift, pulse, etc.). Replaces v1's `setAnimation`/`getAnimation`.
+   */
+  animation(name?: AnimationName, opts?: AnimationOptions): AnimationName | WashesInstance;
 
   /** Toggle a debug visualization (velocity vectors, pressure heat, etc.). */
   setVisualization(name: VisualizationName, opts?: VisualizationOptions): WashesInstance;
