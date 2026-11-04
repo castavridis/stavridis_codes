@@ -29,16 +29,17 @@ import { TeamAndTools } from './TeamAndTools.tsx'
 {/* Wash underlines on the frontmatter headline + intro phrases */}
 <FrontMatterWashes />
 
+{/* Nav anchors for the front-matter region (the nav column itself starts
+    below the hero, as in the reference) */}
+<div id="introduction" className="h-0" aria-hidden="true" />
+
+{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
+<HeroFigure />
+
+<div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
+
 <div className="relative">
 	<SectionNav />
-
-	{/* Nav anchors for the front-matter region */}
-	<div id="introduction" className="absolute top-0 h-0" aria-hidden="true" />
-
-	{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
-	<HeroFigure />
-
-	<div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
 
 	<Background />
 

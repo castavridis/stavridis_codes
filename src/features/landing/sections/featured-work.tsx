@@ -114,12 +114,14 @@ type Project = {
 const PROJECTS: Project[] = [
   {
     // Matches content/projects/caresignal-clinician-app/index.mdx (nested
-    // {slug}/index.mdx layout). No thumbnail asset yet — paper tone from the
-    // case study until one is exported.
+    // {slug}/index.mdx layout). Interim thumbnail: the risk dashboard
+    // screenshot until a dedicated card asset is exported.
     slug: 'caresignal-clinician-app',
     headline: 'Scaling centralized care teams to safely manage 15 to 20× as many patients',
     tags: 'Product Strategy · Product Design · Service Design · Design Engineering',
     thumbnailClassName: 'bg-[#fdfbf5]',
+    image: '/images/projects/caresignal-clinician-app/fig-risk-dashboard.webp',
+    imageAlt: 'CareSignal risk-stratified dashboard thumbnail.',
   },
   {
     slug: 'caresignal-ai',

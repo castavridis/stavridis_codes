@@ -107,7 +107,10 @@ export function ProofOfConcept() {
 					</p>
 				</div>
 
-				<div className="flex w-full flex-col gap-[16px]">
+				{/* Principle cards live in the reading column (the reference
+				    right-aligns them; centered full-width they'd underlap the
+				    sticky nav) */}
+				<div className="flex w-full max-w-[705px] flex-col gap-[16px] xl:ml-auto">
 					<DesignPrinciple
 						number={1}
 						pigment="rose"
