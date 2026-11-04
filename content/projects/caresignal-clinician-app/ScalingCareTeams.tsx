@@ -1,4 +1,5 @@
 import Section from '../../../src/features/projects/components/Section';
+import AnatomyOfATextMessage from '../../../src/features/projects/components/figures/AnatomyOfATextMessage';
 
 import {
 	FigCaption,
@@ -107,10 +108,7 @@ export function ScalingCareTeams() {
 					</p>
 				</div>
 
-				<FigPlaceholder
-					label="Anatomy of a Text Message — annotated SMS check-in figure"
-					height={520}
-				/>
+				<AnatomyOfATextMessage />
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
