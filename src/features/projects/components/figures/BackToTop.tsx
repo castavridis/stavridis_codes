@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { findScrollport } from './scrollport';
+
 const reducedMotion = () =>
 	!!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -65,18 +67,22 @@ export default function BackToTop({
 			raf = 0;
 			const m = 24;
 			const el = document.querySelector(stickySelector);
+			const r = el?.getBoundingClientRect();
 			let nextShown: boolean;
-			if (el) {
+			if (el && r && r.width > 0) {
 				// Container-relative: sticky has engaged once the element has
 				// separated from the top of its parent. (The case study scrolls
 				// inside the sheet overlay, so a viewport comparison against the
 				// sticky `top` offset would never match.)
 				const cs = getComputedStyle(el);
-				const r = el.getBoundingClientRect();
 				const pr = el.parentElement?.getBoundingClientRect() ?? r;
 				nextShown = cs.position === 'sticky' && r.top - pr.top > 2;
 			} else {
-				nextShown = window.scrollY > window.innerHeight;
+				// Nav absent or hidden (sub-xl viewports render it display:none,
+				// where its rects are all zero) — fall back to scroll distance,
+				// read from the sheet's inner scroller when there is one.
+				const sp = findScrollport(el);
+				nextShown = (sp ? sp.scrollTop : window.scrollY) > window.innerHeight;
 			}
 
 			let nextLeft = m;
@@ -116,16 +122,8 @@ export default function BackToTop({
 		const behavior: ScrollBehavior = reducedMotion() ? 'auto' : 'smooth';
 		// The page may scroll in an inner container (sheet overlay) — send
 		// both it and the window home.
-		let scroller: Element | null = null;
-		let n = document.querySelector(stickySelector)?.parentElement ?? null;
-		for (; n; n = n.parentElement) {
-			const cs = getComputedStyle(n);
-			if (/(auto|scroll|overlay)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight) {
-				scroller = n;
-				n.scrollTo({ top: 0, behavior });
-				break;
-			}
-		}
+		const scroller = findScrollport(document.querySelector(stickySelector));
+		scroller?.scrollTo({ top: 0, behavior });
 		window.scrollTo({ top: 0, behavior });
 		// Lazy figures re-mounting on the way up shift layout: they cancel a
 		// smooth scroll mid-flight, and scroll anchoring drags a finished

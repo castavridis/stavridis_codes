@@ -75,6 +75,76 @@ const STEPS: Array<[string, string, string, string, string]> = [
 	],
 ];
 
+// Per-decision derived styling (ink/dim/fill states for the active number).
+type DecisionStyle = { c: string; b: string; t: string; o: number; l: string };
+
+// These stay at module scope: defined inside the component they'd get a new
+// identity every render, and React would remount (not update) them on each
+// hover change — killing the 200ms transitions and dropping keyboard focus.
+function Marker({
+	n,
+	s,
+	onEnter,
+	onPin,
+	onBlur,
+	style,
+}: {
+	n: number;
+	s: DecisionStyle;
+	onEnter: () => void;
+	onPin: () => void;
+	onBlur: () => void;
+	style?: React.CSSProperties;
+}) {
+	return (
+		<button
+			type="button"
+			onMouseEnter={onEnter}
+			onFocus={onEnter}
+			onBlur={onBlur}
+			onClick={onPin}
+			aria-label={`Decision ${n}`}
+			data-mk={n}
+			className="box-border inline-flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black p-0 text-[11px] transition-[background,color] duration-200"
+			style={{ ...MONO, background: s.b, color: s.t, ...style }}
+		>
+			{n}
+		</button>
+	);
+}
+
+function Lead({ line, style }: { line: string; style?: React.CSSProperties }) {
+	return (
+		<span
+			aria-hidden
+			className="h-0 min-w-[8px] flex-[1_1_8px] transition-[border-color] duration-200"
+			style={{ borderTop: `1px solid ${line}`, ...style }}
+		/>
+	);
+}
+
+function Bubble({ color, children }: { color: string; children: ReactNode }) {
+	return (
+		<div
+			className="max-w-[82%] rounded-[16px_16px_16px_4px] bg-[#efece4] p-[10px_12px] text-[14px] leading-[20px] transition-colors duration-200 [text-wrap:pretty]"
+			style={{ ...BODY, color }}
+		>
+			{children}
+		</div>
+	);
+}
+
+function Reply({ opacity, children }: { opacity: number; children: ReactNode }) {
+	return (
+		<div
+			className="rounded-[16px_16px_4px_16px] bg-confetti-black p-[10px_12px] text-[14px] leading-[20px] transition-opacity duration-200"
+			style={{ ...BODY, color: PAPER, opacity }}
+		>
+			{children}
+		</div>
+	);
+}
+
 export default function AnatomyOfATextMessage() {
 	const figRef = useRef<HTMLElement>(null);
 	const rafRef = useRef(0);
@@ -163,8 +233,14 @@ export default function AnatomyOfATextMessage() {
 	};
 	const pin = (n: number, from: 'L' | 'R') => () => {
 		setPinned((p) => (p === n ? 0 : n));
+		// Clear hover alongside, or a touch tap-to-unpin (and the synthetic
+		// mouseenter it fires) leaves the figure permanently dimmed.
+		setHover(0);
 		setSide(from);
 	};
+	// Keyboard: focus leaving a marker must clear the highlight — there is
+	// no mouseleave for Tab navigation.
+	const clearHover = () => setHover(0);
 
 	const sOf = (n: number) => {
 		const on = active === n;
@@ -180,63 +256,14 @@ export default function AnatomyOfATextMessage() {
 		};
 	};
 
-	function Marker({ n, style }: { n: number; style?: React.CSSProperties }) {
-		const s = sOf(n);
-		return (
-			<button
-				type="button"
-				onMouseEnter={enter(n, 'L')}
-				onFocus={enter(n, 'L')}
-				onClick={pin(n, 'L')}
-				aria-label={`Decision ${n}`}
-				data-mk={n}
-				className="box-border inline-flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black p-0 text-[11px] transition-[background,color] duration-200"
-				style={{ ...MONO, background: s.b, color: s.t, ...style }}
-			>
-				{n}
-			</button>
-		);
-	}
-
-	function Lead({ n, style }: { n: number; style?: React.CSSProperties }) {
-		return (
-			<span
-				aria-hidden
-				className="h-0 min-w-[8px] flex-[1_1_8px] transition-[border-color] duration-200"
-				style={{ borderTop: `1px solid ${sOf(n).l}`, ...style }}
-			/>
-		);
-	}
-
-	function Bubble({
+	// Shorthand props for the hoisted decision elements.
+	const mk = (n: number, from: 'L' | 'R' = 'L') => ({
 		n,
-		children,
-		dimKey,
-	}: {
-		n?: number;
-		children: ReactNode;
-		dimKey: number;
-	}) {
-		return (
-			<div
-				className="max-w-[82%] rounded-[16px_16px_16px_4px] bg-[#efece4] p-[10px_12px] text-[14px] leading-[20px] transition-colors duration-200 [text-wrap:pretty]"
-				style={{ ...BODY, color: sOf(dimKey).c }}
-			>
-				{children}
-			</div>
-		);
-	}
-
-	function Reply({ children }: { children: ReactNode }) {
-		return (
-			<div
-				className="rounded-[16px_16px_4px_16px] bg-confetti-black p-[10px_12px] text-[14px] leading-[20px] transition-opacity duration-200"
-				style={{ ...BODY, color: PAPER, opacity: sOf(6).o }}
-			>
-				{children}
-			</div>
-		);
-	}
+		s: sOf(n),
+		onEnter: enter(n, from),
+		onPin: pin(n, from),
+		onBlur: clearHover,
+	});
 
 	return (
 		<figure
@@ -307,9 +334,9 @@ export default function AnatomyOfATextMessage() {
 							<span className="text-center">
 								Thursday 7:30 AM · patient’s time zone
 							</span>
-							<Lead n={3} style={{ margin: '0 -15px 0 6px' }} />
+							<Lead line={sOf(3).l} style={{ margin: '0 -15px 0 6px' }} />
 							<Marker
-								n={3}
+								{...mk(3)}
 								style={{
 									position: 'absolute',
 									right: -25,
@@ -319,29 +346,29 @@ export default function AnatomyOfATextMessage() {
 							/>
 						</div>
 						<div className="relative flex items-start">
-							<Bubble n={1} dimKey={1}>
+							<Bubble color={sOf(1).c}>
 								What is your weight today? <br />
 								<br />
 								Please enter it in lbs. If the scale shows 153.76 lbs, reply
 								153.
 							</Bubble>
-							<Lead n={1} style={{ margin: '19px -15px 0 6px' }} />
-							<Marker n={1} style={{ position: 'absolute', right: -25, top: 10 }} />
+							<Lead line={sOf(1).l} style={{ margin: '19px -15px 0 6px' }} />
+							<Marker {...mk(1)} style={{ position: 'absolute', right: -25, top: 10 }} />
 						</div>
 						<div className="relative flex items-start justify-end">
-							<Reply>187</Reply>
-							<Marker n={6} style={{ position: 'absolute', right: -25, top: 10 }} />
+							<Reply opacity={sOf(6).o}>187</Reply>
+							<Marker {...mk(6)} style={{ position: 'absolute', right: -25, top: 10 }} />
 						</div>
-						<Bubble dimKey={1}>
+						<Bubble color={sOf(1).c}>
 							You entered a weight of 187 lbs. Is this correct? <br />
 							<br />
 							Reply YES or NO.
 						</Bubble>
 						<div className="flex justify-end">
-							<Reply>Yes</Reply>
+							<Reply opacity={sOf(6).o}>Yes</Reply>
 						</div>
 						<div className="relative flex items-start">
-							<Bubble n={4} dimKey={4}>
+							<Bubble color={sOf(4).c}>
 								Is the breathing or swelling in your legs better, worse, or
 								the same compared to normal?
 								<br />
@@ -355,11 +382,11 @@ export default function AnatomyOfATextMessage() {
 								<br />
 								Reply 1, 2, or 3.
 							</Bubble>
-							<Lead n={4} style={{ margin: '19px -15px 0 6px' }} />
-							<Marker n={4} style={{ position: 'absolute', right: -25, top: 10 }} />
+							<Lead line={sOf(4).l} style={{ margin: '19px -15px 0 6px' }} />
+							<Marker {...mk(4)} style={{ position: 'absolute', right: -25, top: 10 }} />
 						</div>
 						<div className="flex justify-end">
-							<Reply>2</Reply>
+							<Reply opacity={sOf(6).o}>2</Reply>
 						</div>
 					</div>
 
@@ -381,14 +408,14 @@ export default function AnatomyOfATextMessage() {
 									Weight alert · Pat
 								</span>
 							</div>
-							<Marker n={2} style={{ marginRight: -30 }} />
+							<Marker {...mk(2)} style={{ marginRight: -30 }} />
 							<span
 								className="text-[12px] leading-[16px] tracking-[.04em] transition-colors duration-200"
 								style={{ ...MONO, color: sOf(5).c }}
 							>
 								187 lb · +3 lb over baseline 184 lb · symptoms worse
 							</span>
-							<Marker n={5} style={{ marginRight: -30 }} />
+							<Marker {...mk(5)} style={{ marginRight: -30 }} />
 						</div>
 					</div>
 				</div>

@@ -4,6 +4,7 @@ import {
 	type ChangeEvent,
 	type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import Button from '../../../../components/Button';
 
@@ -340,7 +341,10 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 		const go = () => { this.hlT = setTimeout(() => { this.hlReady = true; this.syncEb(); }, 500); }; if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
 	}
 	componentDidUpdate(prev: Readonly<CareTeamOrbitProps>) { const p = this.props; if (!!p.colorblind !== !!prev.colorblind && this.built) this.makeWash(); if (p.model !== prev.model || p.patients !== prev.patients || p.nurses !== prev.nurses || !!p.colorblind !== !!prev.colorblind || p.motion !== prev.motion || p.tilt !== prev.tilt) { this.still = this.isReduced(); this.restart(); } this.applyFocus(); this.drawStrips(); this.syncEb(); if (this.built && (this.paused || this.still)) { this.camStep(); this.avStep(); this.drawDots(); } }
-	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy(); }
+	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy();
+		// Remove the imperatively appended stage layers, or a StrictMode dev
+		// remount stacks a second orphaned set under the live sim.
+		for (const el of [this.washHost, this.svgU, this.cv, this.svgO]) el && el.remove(); }
 	syncEb() { if (!this.hlReady || this.dead || !this.rootRef.current) return; this.eb = this.eb || {}; const f = this.focusCols();
 		this.roles().forEach((r, i) => { const k = String(i), on = !f || f.includes(i), el = this.rootRef.current!.querySelector<HTMLElement>('[data-eb="' + k + '"]'), cur = this.eb![k];
 			if (on && el && el.offsetParent && (!cur || cur.el !== el)) { if (cur) cur.destroy(); this.eb![k] = WashHighlightFX.attach(el, { pigment: this.props.highlightPigment ?? 'hansa', trigger: 'view', threshold: 1, delay: 64, duration: this.isReduced() ? 1 : 650, mark: 'highlight', instantDry: true, instant: this.isReduced() }); if (this.eb![k]) this.eb![k].el = el; }
@@ -573,7 +577,10 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 					</div>
 				</figure>
 
-				{v.assumOpen ? (
+				{/* Portaled to <body>: the sheet overlay's transform would otherwise
+				    make the sheet the fixed containing block, confining the
+				    backdrop and clipping the panel. */}
+				{v.assumOpen ? createPortal(
 					<div
 						role="dialog"
 						aria-modal="true"
@@ -610,7 +617,8 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 								</div>
 							</div>
 						</div>
-					</div>
+					</div>,
+					document.body,
 				) : null}
 			</div>
 		);

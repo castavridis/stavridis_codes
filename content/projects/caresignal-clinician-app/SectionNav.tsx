@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { findScrollport } from '../../../src/features/projects/components/figures/scrollport';
+
 // Desktop-only sticky section nav, per the reference: a card pinned at
 // 96px in the left column, mono labels with a 6px dot, the active section
 // highlighted on scroll. Collapsed it shows the first four sections; the
@@ -35,15 +37,8 @@ export function SectionNav() {
 			// The line sits 145px into the scrollport (anchors land at 132 via
 			// scroll-margin-top); the scrollport is the sheet's inner scroller,
 			// not the viewport, so offset by its top.
-			let portTop = 0;
-			for (let n = cardRef.current?.parentElement ?? null; n; n = n.parentElement) {
-				const cs = getComputedStyle(n);
-				if (/(auto|scroll|overlay)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight) {
-					portTop = Math.max(0, n.getBoundingClientRect().top);
-					break;
-				}
-			}
-			const line = portTop + 145;
+			const sp = findScrollport(cardRef.current);
+			const line = Math.max(0, sp?.getBoundingClientRect().top ?? 0) + 145;
 			let current = ITEMS[0].key;
 			for (const it of ITEMS) {
 				const el = document.getElementById(it.key);

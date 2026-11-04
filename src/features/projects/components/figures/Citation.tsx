@@ -32,7 +32,7 @@ export default function Citation({ title, source, href, citeKey }: CitationProps
 	const [pos, setPos] = useState({ x: 0, y: 0 });
 
 	const key = citeKey || href || `${title}|${source}`;
-	const n = useDomOrderNumber(anchorRef, 'data-cite', true);
+	const { n } = useDomOrderNumber(anchorRef, 'data-cite', true);
 
 	// A happy little wag while it fades in, pivoting on the citation link —
 	// new amplitude, count and damping each time.

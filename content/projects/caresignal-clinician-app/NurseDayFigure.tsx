@@ -374,9 +374,18 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 		return () => ro.disconnect();
 	}, []);
 
+	// A pending end-of-day skip() must not fire into a freshly started run.
+	const clearEndTimer = () => {
+		if (endTimerRef.current != null) {
+			clearTimeout(endTimerRef.current);
+			endTimerRef.current = null;
+		}
+	};
+
 	const playFromPhase = (at: 'before' | 'tuesday') => {
 		const fx = fxRef.current;
 		if (!fx) return;
+		clearEndTimer();
 		fx.setPaused(false);
 		fx.playFrom(at);
 	};
@@ -390,6 +399,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 	const playAct = () => {
 		const fx = fxRef.current;
 		if (!fx) return;
+		clearEndTimer();
 		fx.setPaused(false);
 		if (view.done) fx.restart();
 		else if (view.phase === 'before') fx.playFrom('tuesday');
@@ -399,6 +409,7 @@ export function NurseDayFigure({ onAssumptions }: { onAssumptions?: () => void }
 	const skipAct = () => {
 		const fx = fxRef.current;
 		if (!fx) return;
+		clearEndTimer();
 		fx.setPaused(false);
 		if (view.done) fx.restart();
 		else fx.skip();

@@ -11,15 +11,17 @@ export function notifyRenumber() {
 }
 
 // Returns this element's 1-based number among all `[attr]` elements in DOM
-// order. With `dedupeByValue`, elements sharing the same attribute value
-// share a number (repeat citations of one source), and numbers count unique
-// values instead of elements.
+// order, plus a `ready` flag that stays false until the first real count —
+// before that every element reports 1, so id/anchor derivation must wait.
+// With `dedupeByValue`, elements sharing the same attribute value share a
+// number (repeat citations of one source), and numbers count unique values
+// instead of elements.
 export function useDomOrderNumber(
 	ref: RefObject<Element | null>,
 	attr: string,
 	dedupeByValue = false,
 ) {
-	const [n, setN] = useState(1);
+	const [state, setState] = useState({ n: 1, ready: false });
 
 	useEffect(() => {
 		const sync = () => {
@@ -37,7 +39,10 @@ export function useDomOrderNumber(
 			} else {
 				next = els.indexOf(el) + 1;
 			}
-			if (next > 0) setN(next);
+			if (next > 0)
+				setState((prev) =>
+					prev.n !== next || !prev.ready ? { n: next, ready: true } : prev,
+				);
 		};
 		window.addEventListener(EVT, sync);
 		notifyRenumber();
@@ -50,5 +55,5 @@ export function useDomOrderNumber(
 		};
 	}, [ref, attr, dedupeByValue]);
 
-	return n;
+	return state;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import Button from '../../../src/components/Button';
 
@@ -64,7 +65,10 @@ export function AssumptionsModal() {
 
 	if (!open) return null;
 
-	return (
+	// Portaled to <body>: the sheet overlay's transform would otherwise make
+	// the sheet the fixed-position containing block, confining the backdrop
+	// to the sheet box and clipping the panel.
+	return createPortal(
 		<div
 			role="dialog"
 			aria-modal="true"
@@ -136,6 +140,7 @@ export function AssumptionsModal() {
 					</div>
 				</div>
 			</div>
-		</div>
+		</div>,
+		document.body,
 	);
 }
