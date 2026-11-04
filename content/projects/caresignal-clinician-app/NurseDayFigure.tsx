@@ -259,6 +259,14 @@ const PlayIcon = () => (
 		<path d="M1 1.2v7.6a.6.6 0 0 0 .9.5l6.3-3.8a.6.6 0 0 0 0-1L1.9.7a.6.6 0 0 0-.9.5z" fill="currentColor" />
 	</svg>
 );
+const SkipIcon = () => (
+	<svg aria-hidden="true" width="14" height="10" viewBox="0 0 14 10" className="block flex-none">
+		<path
+			d="M.5 1.2v7.6a.6.6 0 0 0 .9.5L7 5.5a.6.6 0 0 0 0-1L1.4.7a.6.6 0 0 0-.9.5zM6.8 1.2v7.6a.6.6 0 0 0 .9.5l5.6-3.8a.6.6 0 0 0 0-1L7.7.7a.6.6 0 0 0-.9.5z"
+			fill="currentColor"
+		/>
+	</svg>
+);
 const FinishIcon = () => (
 	<svg aria-hidden="true" width="12" height="10" viewBox="0 0 12 10" className="block flex-none">
 		<path d="M.8 1.2v7.6a.6.6 0 0 0 .9.5l6.3-3.8a.6.6 0 0 0 0-1L1.7.7a.6.6 0 0 0-.9.5z" fill="currentColor" />
@@ -359,6 +367,9 @@ export function NurseDayFigure({
 	const pbRef = useRef<HTMLImageElement>(null); // resting portrait, before face
 	const paRef = useRef<HTMLImageElement>(null); // resting portrait, after face
 	const viewRef = useRef<HTMLDivElement>(null); // clipping viewport around the grid
+	const descRef = useRef<HTMLDivElement>(null); // before/after blurb block (feeds --dsc)
+	const statsBRef = useRef<HTMLDivElement>(null); // "Before stats" column (last row feeds --hts)
+	const legendRef = useRef<HTMLDivElement>(null); // footer legend (feeds --lg)
 
 	const [idp] = useState(() => `ndf${uid++}`);
 	const [playingS, setPlayingS] = useState(false);
@@ -1236,6 +1247,42 @@ export function NurseDayFigure({
 		return () => ro.disconnect();
 	}, []);
 
+	// Seam-line / centre-button geometry (dc placePlay): --mid is the figure
+	// box's vertical centre (+ offsetY), --dsc the top of the before/after
+	// blurb, --hts the top of the last "Before stats" row ("Calls answered"),
+	// --lg the footer legend's reserved height. Re-measured on resize, once
+	// fonts land, and whenever play state flips so the rules/button animate.
+	useEffect(() => {
+		const card = cardRef.current;
+		if (!card) return;
+		const measure = () => {
+			const cr = card.getBoundingClientRect();
+			const view = viewRef.current;
+			if (view) {
+				const vr = view.getBoundingClientRect();
+				card.style.setProperty('--mid', `${Math.round(vr.top - cr.top + vr.height / 2 + offsetY)}px`);
+			}
+			const desc = descRef.current;
+			if (desc) {
+				card.style.setProperty('--dsc', `${Math.round(desc.getBoundingClientRect().top - cr.top + 8)}px`);
+			}
+			const lastStat = statsBRef.current?.lastElementChild;
+			if (lastStat) {
+				card.style.setProperty('--hts', `${Math.round(lastStat.getBoundingClientRect().top - cr.top)}px`);
+			}
+			const legend = legendRef.current;
+			if (legend) {
+				card.style.setProperty('--lg', `${24 + legend.offsetHeight + 12}px`);
+			}
+		};
+		requestAnimationFrame(measure);
+		const ro = new ResizeObserver(() => requestAnimationFrame(measure));
+		for (const el of [viewRef.current, hdRef.current, ftRef.current, statsBRef.current, legendRef.current, descRef.current])
+			if (el) ro.observe(el);
+		document.fonts?.ready.then(measure).catch(() => {});
+		return () => ro.disconnect();
+	}, [playingS, stacked, offsetY]);
+
 	const onDaySec = (v: number) => {
 		setDaySec(v);
 		M.daySec = v;
@@ -1289,7 +1336,18 @@ export function NurseDayFigure({
 		? afterStats(M.aLive ? { ...(sa ?? {}), phase: 'after' } : sb?.phase === 'after' ? sb : null)
 		: afterStats(sa);
 	const canSkip = playingS && sb?.phase !== 'after';
-	const playLabel = playingS ? 'Show the finished day' : 'Play the day';
+	// Centre button (dc playVals): Play Simulation (pill) → Next → Finish. The
+	// seam's gap hosts whichever label is live; Finish goes inert while the day
+	// closes (dc finHold).
+	const btnState: 'play' | 'skip' | 'fin' = !playingS ? 'play' : bAfterish ? 'fin' : 'skip';
+	const btnLabel = { play: 'Play Simulation', skip: 'Next', fin: 'Finish' }[btnState];
+	const btnPill = btnState === 'play';
+	const finHold = btnState === 'fin' && M.seqRunning;
+	const btnTop = stacked
+		? 'calc(100% - var(--ft, 0px) - 40px)'
+		: playingS
+			? 'var(--hts, 50%)'
+			: 'var(--mid, 50%)';
 	// Phones: one half at a time — a replay always runs in the before cell.
 	const visHalf: 'b' | 'a' = playingS ? (sb?.phase === 'after' ? 'a' : 'b') : pick;
 	const showBCol = !stacked || (playingS ? true : visHalf === 'b');
@@ -1433,6 +1491,7 @@ export function NurseDayFigure({
 				    the live half, the other column dimmed. */}
 				{showBCol ? (
 					<div
+						ref={statsBRef}
 						aria-label="Before stats"
 						className="pointer-events-none absolute left-[24px] z-[6] flex flex-col items-start gap-[24px] text-left"
 						style={{
@@ -1462,24 +1521,70 @@ export function NurseDayFigure({
 					</div>
 				) : null}
 
-				{/* Play the day ↔ Show the finished day. Sits low so it never
-				    covers the portraits. */}
+				{/* Seam rule through the centre button (dc §1b): an upper soft
+				    segment from the blurb down to 38px above the seam, and a lower
+				    solid segment from 30px below the seam down to the legend. While
+				    playing the upper collapses and the lower rises to the "Calls
+				    answered" stat. Desktop only. */}
+				<div
+					aria-hidden="true"
+					style={{
+						display: stacked ? 'none' : 'block',
+						position: 'absolute',
+						left: 'calc(50% - 0.625px)',
+						top: 'var(--dsc, 0px)',
+						height: playingS ? '0px' : 'calc(var(--mid, 50%) - 38px - var(--dsc, 0px))',
+						width: '1.25px',
+						zIndex: 6,
+						pointerEvents: 'none',
+						background: INK,
+						opacity: 0.3,
+						transition: 'height 400ms cubic-bezier(.4,0,.2,1)',
+					}}
+				/>
+				<div
+					aria-hidden="true"
+					style={{
+						display: stacked ? 'none' : 'block',
+						position: 'absolute',
+						left: 'calc(50% - 0.625px)',
+						top: playingS ? 'var(--hts, 50%)' : 'calc(var(--mid, 50%) + 30px)',
+						bottom: 'var(--lg, 72px)',
+						width: '1.25px',
+						zIndex: 6,
+						pointerEvents: 'none',
+						background: INK,
+						opacity: 1,
+						transition: 'top 400ms cubic-bezier(.4,0,.2,1)',
+					}}
+				/>
+
+				{/* Centre button on the seam: Play Simulation (pill, idle) → Next
+				    (link, before phase) → Finish (link, after phase; inert while the
+				    day closes). Rises to the "Calls answered" stat while playing; on
+				    phones it keeps the low placement. */}
 				<button
 					type="button"
-					onClick={() => (M.playingS ? stop() : play())}
-					aria-label={playLabel}
-					className={`absolute left-1/2 z-[8] inline-flex min-h-[44px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-[8px] whitespace-nowrap rounded-full border-[1.25px] text-[12px] leading-[16px] tracking-[0.04em] text-confetti-black transition-colors duration-200 ${
-						playingS
-							? 'border-transparent bg-transparent px-[8px] underline underline-offset-[3px] hover:[text-decoration-thickness:2px]'
-							: 'border-confetti-black bg-[#fdfbf5] px-[20px] shadow-[0_2px_8px_rgba(57,31,0,0.08)] hover:bg-confetti-black hover:text-[#fdfbf5]'
+					disabled={finHold}
+					aria-disabled={finHold || undefined}
+					onClick={finHold ? () => {} : btnState === 'play' ? play : btnState === 'skip' ? playAfter : stop}
+					aria-label={btnLabel}
+					className={`absolute left-1/2 z-[8] inline-flex min-h-[44px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-[8px] whitespace-nowrap rounded-full border-[1.25px] text-[12px] leading-[16px] tracking-[0.04em] text-confetti-black ${
+						btnPill
+							? 'border-confetti-black bg-[#fdfbf5] px-[20px] shadow-[0_2px_8px_rgba(57,31,0,0.08)] hover:bg-confetti-black hover:text-[#fdfbf5]'
+							: 'border-transparent bg-transparent px-[8px] underline underline-offset-[3px] hover:[text-decoration-thickness:2px]'
 					}`}
 					style={{
-						top: 'calc(100% - var(--ft, 0px) - 40px)',
+						top: btnTop,
 						fontFamily: 'var(--font-mono)',
+						opacity: finHold ? 0.4 : 1,
+						cursor: finHold ? 'default' : 'pointer',
+						transition:
+							'opacity 200ms ease, background-color 300ms ease, color 200ms ease, border-color 300ms ease, box-shadow 300ms ease, padding 300ms ease, top 400ms cubic-bezier(.4,0,.2,1)',
 					}}
 				>
-					{playingS ? <FinishIcon /> : <PlayIcon />}
-					{playLabel}
+					{btnState === 'play' ? <PlayIcon /> : btnState === 'skip' ? <SkipIcon /> : <FinishIcon />}
+					{btnLabel}
 				</button>
 
 				{/* Header: chip row, heading with the before/after pills, blurbs. */}
@@ -1526,7 +1631,10 @@ export function NurseDayFigure({
 						</PillButton>{' '}
 						CareSignal
 					</Text>
-					<div className="pointer-events-auto mt-[8px] grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px] md:gap-y-[8px]">
+					<div
+						ref={descRef}
+						className="pointer-events-auto mt-[8px] grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px] md:gap-y-[8px]"
+					>
 						<div
 							className="flex min-w-0 flex-col gap-[6px]"
 							style={{ opacity: opB, transition: 'opacity 400ms ease' }}
@@ -1573,6 +1681,7 @@ export function NurseDayFigure({
 				>
 					<div className="flex flex-wrap items-center justify-between gap-x-[24px] gap-y-[12px]">
 						<div
+							ref={legendRef}
 							aria-label="Legend"
 							className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[16px] gap-y-[8px] text-[12px] leading-[16px] tracking-[0.04em]"
 							style={{ fontFamily: 'var(--font-mono)', color: INK_75 }}
