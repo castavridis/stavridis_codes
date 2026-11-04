@@ -1,22 +1,11 @@
 import type { ReactNode } from 'react';
 
-import type { CitationSource } from './citations';
+import Figure from '../../../src/features/projects/components/figures/Figure';
+
+export { default as Citation } from '../../../src/features/projects/components/figures/Citation';
+export { default as Figure } from '../../../src/features/projects/components/figures/Figure';
 
 export const IMG = '/images/projects/caresignal-clinician-app';
-
-// Interim superscript source marker. Will be replaced by the auto-numbered
-// Citation popover component (shared library) — keeping explicit numbers
-// until then so every marker stays anchored to its sentence.
-export function Cite({ n, cite }: { n: number; cite: CitationSource }) {
-	return (
-		<sup
-			title={`${cite.title}: ${cite.source}`}
-			className="type-callout-meta cursor-help text-confetti-black/60"
-		>
-			{n}
-		</sup>
-	);
-}
 
 // Interim stand-in for the animated watercolour figures (nurse orbit, care
 // team orbits, design-principle swipes, text-message anatomy). Figure panel
@@ -42,7 +31,27 @@ export function FigPlaceholder({
 	);
 }
 
-export function FigCaption({ children }: { children: ReactNode }) {
+export function FigCaption({
+	children,
+	fig = false,
+}: {
+	children: ReactNode;
+	// Lead the caption with the auto-numbered "figure N" chip.
+	fig?: boolean;
+}) {
+	if (fig) {
+		return (
+			<figcaption className="flex flex-wrap items-baseline justify-center gap-[10px] text-center">
+				<Figure />
+				<span
+					className="text-[14px] leading-[20px] tracking-[0.02em] text-confetti-black"
+					style={{ fontFamily: 'var(--font-mono)' }}
+				>
+					{children}
+				</span>
+			</figcaption>
+		);
+	}
 	return (
 		<p className="type-callout-meta m-0 text-center text-confetti-black/70">
 			{children}

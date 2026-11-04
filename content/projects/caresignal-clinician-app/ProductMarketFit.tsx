@@ -2,7 +2,7 @@ import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
 import {
-	Cite,
+	Citation,
 	FigCaption,
 	FigPlaceholder,
 	IMG,
@@ -25,7 +25,7 @@ export function ProductMarketFit() {
 						When we started commercializing CareSignal, we sold to
 						organizations of different sizes. We had enterprise contracts in
 						our pipeline but the average time to close was 18 months.
-						<Cite n={13} cite={CITATIONS.salesCycle} /> We bet we could
+						<Citation {...CITATIONS.salesCycle} /> We bet we could
 						acquire small practices faster at a lower cost with fewer updates
 						to our current product.
 					</p>
@@ -45,7 +45,7 @@ export function ProductMarketFit() {
 						alt="A Chronic Care Management activity log report for a patient, listing call logs and call notes with durations, beside the Time Tracker modal with minute and second fields, optional notes and a Change Patient button."
 						className="block w-full rounded-[16px]"
 					/>
-					<FigCaption>Chronic Care Management Report and Timer</FigCaption>
+					<FigCaption fig>Chronic Care Management Report and Timer</FigCaption>
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">

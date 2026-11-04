@@ -1,6 +1,6 @@
 import Section from '../../../src/features/projects/components/Section';
 
-import { FigPlaceholder } from './shared';
+import { FigPlaceholder, Figure } from './shared';
 
 // Figure 1 — "A centralized nurse care manager's shift before and after
 // CareSignal". The real figure is the nurse-orbit R3F simulation
@@ -10,6 +10,7 @@ export function HeroFigure() {
 	return (
 		<Section>
 			<figure className="m-0 flex w-full flex-col gap-[16px]">
+				<Figure />
 				<h2 className="type-headline-small m-0 text-confetti-black [text-wrap:balance]">
 					A centralized nurse care manager’s shift before and after CareSignal
 				</h2>

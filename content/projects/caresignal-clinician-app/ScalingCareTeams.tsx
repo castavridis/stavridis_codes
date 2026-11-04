@@ -43,7 +43,7 @@ export function ScalingCareTeams() {
 						alt="The redesigned dashboard: an overview row of totals — 1500 patients, 9 active alerts, 226 less-engaged, 1262 engaged, 11 paused, 21 snoozed — above a Patients list with high, medium and low risk badges and Snooze and Resolve actions, and an Alerts list sorted newest first."
 						className="block w-full rounded-[16px]"
 					/>
-					<FigCaption>
+					<FigCaption fig>
 						A dashboard with patients stratified by risk and alerts sorted by
 						recency.
 					</FigCaption>
@@ -66,7 +66,7 @@ export function ScalingCareTeams() {
 						alt="The risk dashboard with a grey placeholder panel labelled Patient View over the centre."
 						className="block w-full rounded-[16px]"
 					/>
-					<FigCaption>Patient view (placeholder)</FigCaption>
+					<FigCaption fig>Patient view (placeholder)</FigCaption>
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
@@ -87,7 +87,7 @@ export function ScalingCareTeams() {
 						alt="The risk dashboard with two grey placeholder panels labelled Tags / Patient Groups and Snooze / Resolve."
 						className="block w-full rounded-[16px]"
 					/>
-					<FigCaption>
+					<FigCaption fig>
 						Tags, patient groups, snooze and resolve (placeholders)
 					</FigCaption>
 				</figure>

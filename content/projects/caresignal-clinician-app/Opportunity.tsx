@@ -1,7 +1,7 @@
 import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
-import { Cite, SectionHeading } from './shared';
+import { Citation, SectionHeading } from './shared';
 
 const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 	{
@@ -16,7 +16,7 @@ const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 		lead: 'Patient panels were created using historical data.',
 		rest: (
 			<>
-				<Cite n={5} cite={CITATIONS.historicalData} /> Providers normally did
+				<Citation {...CITATIONS.historicalData} /> Providers normally did
 				not have up-to-date data about their patients. Nurses had to manually
 				update patients’ current medical statuses during calls.
 			</>
@@ -55,9 +55,9 @@ export function Opportunity() {
 						Nurse care managers were able to manage 30 to 100 patients
 					</strong>{' '}
 					in a standard implementation.
-					<Cite n={6} cite={CITATIONS.standardCaseload} />
+					<Citation {...CITATIONS.standardCaseload} />
 					<sup className="type-callout-meta text-confetti-black/60">,</sup>
-					<Cite n={7} cite={CITATIONS.standardCaseload2} />
+					<Citation {...CITATIONS.standardCaseload2} />
 				</p>
 			</div>
 		</Section>

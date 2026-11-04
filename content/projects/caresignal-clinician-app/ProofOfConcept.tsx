@@ -1,11 +1,13 @@
 import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
+import { DialysisFlowChart } from './DialysisFlowChart';
 import {
 	BackdropShot,
-	Cite,
+	Citation,
 	FigCaption,
 	FigPlaceholder,
+	Figure,
 	IMG,
 	NumBadge,
 	SectionHeading,
@@ -26,35 +28,30 @@ export function ProofOfConcept() {
 						an approach to improving access to health care and achieving better
 						health outcomes: automate routine outreach and trigger an alert if
 						a patient reports an urgent or emergent need.
-						<Cite n={8} cite={CITATIONS.dialysisProgram} />
+						<Citation {...CITATIONS.dialysisProgram} />
 					</p>
 				</div>
 
-				{/* Dialysis alert-workflow flow chart. The reference keeps this as
-				    DOM (role="img" + aria-label), not an image — DOM port is the
-				    next pass on this section. */}
-				<figure className="m-0 flex w-full flex-col gap-[12px]">
+				<figure className="m-0 flex w-full flex-col items-start gap-[16px] rounded-[16px] bg-[#f7f6f5] p-[24px] md:p-[40px]">
+					<Figure />
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						The dialysis program’s alert-based workflow: the template for
 						CareSignal’s patient-facing programs
 					</h3>
-					<FigPlaceholder
-						label="dialysis alert-workflow flow chart (to be rebuilt as DOM)"
-						height={480}
-					/>
-					<FigCaption>
+					<DialysisFlowChart />
+					<figcaption className="w-full max-w-[1070px] text-left text-[17px] leading-[1.45] text-confetti-black [text-wrap:pretty]">
 						Our programs were created using human-centered design to build
 						this prototype with patients and providers. It sent automated
 						phone calls and text messages to collect data from patients. It
 						sent alerts to the dialysis team when necessary.
-					</FigCaption>
+					</figcaption>
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
 						The prototype worked! It reduced hospitalizations, connected
 						patients to needed resources, and had an ROI of ____.
-						<Cite n={9} cite={CITATIONS.prototypeRoi} /> The success prompted
+						<Citation {...CITATIONS.prototypeRoi} /> The success prompted
 						our CMO to create programs for a broad range of conditions and
 						establish a research center to study them.
 					</p>
@@ -95,7 +92,7 @@ export function ProofOfConcept() {
 						src={`${IMG}/fig3-alert-dashboard.webp`}
 						alt="The alert-based dashboard in a browser window: a blue navigation bar with Dashboard, Patients, Programs and Alerts; tiles for Enrolled Patients (525) and Prescribed Patients (9); Hide PHI, Enroll Patient and Prescribe Patient actions; and a list of rows below, shown on a blurred sky-and-field backdrop."
 					/>
-					<FigCaption>An alert-based dashboard</FigCaption>
+					<FigCaption fig>An alert-based dashboard</FigCaption>
 				</figure>
 
 				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
@@ -122,9 +119,9 @@ export function ProofOfConcept() {
 					<p className="type-copy m-0 text-confetti-black/80">
 						The alert-based dashboard supported several trials, including one
 						for the Dialysis program in a randomized controlled trial.
-						<Cite n={10} cite={CITATIONS.dialysisRct} /> The trial showed
+						<Citation {...CITATIONS.dialysisRct} /> The trial showed
 						positive results
-						<Cite n={11} cite={CITATIONS.dialysisResults} /> and the automated
+						<Citation {...CITATIONS.dialysisResults} /> and the automated
 						workflow tested became the template for our other programs.
 					</p>
 					<p className="type-copy m-0 text-confetti-black/80">
@@ -132,7 +129,7 @@ export function ProofOfConcept() {
 						about the efficacy of our programs designed for different quality
 						measures. Ultimately, they’d publish 13 papers in peer-reviewed
 						publications.
-						<Cite n={12} cite={CITATIONS.publications} /> This allowed
+						<Citation {...CITATIONS.publications} /> This allowed
 						CareSignal to be in a great position to sell a product clinicians
 						would want to buy and adopt.
 					</p>
