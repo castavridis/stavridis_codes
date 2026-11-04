@@ -25,7 +25,7 @@ const TEAMS = [
 export function TeamAndTools() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 				<SectionHeading id="team-and-tools">Team and Tools</SectionHeading>
 				<p className="type-copy m-0 text-confetti-black/80">
 					<strong className="text-confetti-black">Tools</strong> Sketch,

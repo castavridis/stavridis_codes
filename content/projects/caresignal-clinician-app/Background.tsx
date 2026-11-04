@@ -7,7 +7,7 @@ import { Citation, SectionHeading } from './shared';
 export function Background() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 				<SectionHeading id="background">Background</SectionHeading>
 				<p className="type-copy m-0 text-confetti-black/80">
 					In a perfect world, providers would be able to deliver the right care

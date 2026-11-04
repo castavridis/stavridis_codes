@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const reducedMotion = () =>
 	!!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -18,7 +19,8 @@ type BackToTopProps = {
 // Wags when it appears.
 export default function BackToTop({
 	label = 'Back to top',
-	stickySelector = 'nav[aria-label="Sections"]',
+	// The sticky element is the card inside the nav, not the nav itself.
+	stickySelector = 'nav[aria-label="Sections"] > div',
 	alignSelector = 'nav[aria-label="Sections"]',
 }: BackToTopProps) {
 	const btnRef = useRef<HTMLButtonElement>(null);
@@ -65,12 +67,14 @@ export default function BackToTop({
 			const el = document.querySelector(stickySelector);
 			let nextShown: boolean;
 			if (el) {
+				// Container-relative: sticky has engaged once the element has
+				// separated from the top of its parent. (The case study scrolls
+				// inside the sheet overlay, so a viewport comparison against the
+				// sticky `top` offset would never match.)
 				const cs = getComputedStyle(el);
-				const top = parseFloat(cs.top) || 0;
 				const r = el.getBoundingClientRect();
 				const pr = el.parentElement?.getBoundingClientRect() ?? r;
-				nextShown =
-					cs.position === 'sticky' && Math.abs(r.top - top) < 1 && pr.top < top - 1;
+				nextShown = cs.position === 'sticky' && r.top - pr.top > 2;
 			} else {
 				nextShown = window.scrollY > window.innerHeight;
 			}
@@ -93,29 +97,76 @@ export default function BackToTop({
 		const onScroll = () => {
 			if (!raf) raf = requestAnimationFrame(tick);
 		};
-		window.addEventListener('scroll', onScroll, { passive: true });
+		// capture: scroll events from the sheet overlay's inner scroller don't
+		// bubble to window; only the capture phase sees them.
+		window.addEventListener('scroll', onScroll, { passive: true, capture: true });
 		window.addEventListener('resize', onScroll);
 		const poll = setInterval(onScroll, 1000);
 		onScroll();
 		return () => {
 			clearTimeout(wagT);
-			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('scroll', onScroll, { capture: true });
 			window.removeEventListener('resize', onScroll);
 			clearInterval(poll);
 			cancelAnimationFrame(raf);
 		};
 	}, [stickySelector, alignSelector]);
 
-	return (
+	const toTop = () => {
+		const behavior: ScrollBehavior = reducedMotion() ? 'auto' : 'smooth';
+		// The page may scroll in an inner container (sheet overlay) — send
+		// both it and the window home.
+		let scroller: Element | null = null;
+		let n = document.querySelector(stickySelector)?.parentElement ?? null;
+		for (; n; n = n.parentElement) {
+			const cs = getComputedStyle(n);
+			if (/(auto|scroll|overlay)/.test(cs.overflowY) && n.scrollHeight > n.clientHeight) {
+				scroller = n;
+				n.scrollTo({ top: 0, behavior });
+				break;
+			}
+		}
+		window.scrollTo({ top: 0, behavior });
+		// Lazy figures re-mounting on the way up shift layout: they cancel a
+		// smooth scroll mid-flight, and scroll anchoring drags a finished
+		// scroll back down. Disable anchoring for the trip and keep snapping
+		// until the position holds at 0.
+		if (scroller && behavior === 'smooth') {
+			const sc = scroller as HTMLElement;
+			const prevAnchor = sc.style.overflowAnchor;
+			sc.style.overflowAnchor = 'none';
+			let ticks = 0;
+			let zeros = 0;
+			const done = () => {
+				clearInterval(iv);
+				sc.style.overflowAnchor = prevAnchor;
+			};
+			const iv = setInterval(() => {
+				const v = sc.scrollTop;
+				if (v <= 1) {
+					if (++zeros >= 2) done();
+					return;
+				}
+				zeros = 0;
+				// One grace tick for the smooth animation, then force the rest
+				// instantly — figure mounts starve/cancel long smooth scrolls.
+				if (++ticks >= 2) sc.scrollTop = 0;
+			}, 400);
+			setTimeout(done, 8000);
+		}
+	};
+
+	// Portaled to <body>: an ancestor with a transform (the sheet overlay)
+	// would otherwise become the fixed-position containing block and shift
+	// the button by the sheet's offset.
+	return createPortal(
 		<button
 			ref={btnRef}
 			type="button"
-			onClick={() =>
-				window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' })
-			}
+			onClick={toTop}
 			aria-hidden={!shown}
 			tabIndex={shown ? 0 : -1}
-			className="fixed bottom-[32px] z-40 inline-flex h-[40px] items-center gap-[8px] rounded-full border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
+			className="fixed bottom-[32px] z-[150] inline-flex h-[40px] items-center gap-[8px] rounded-full border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
 			style={{
 				left,
 				fontFamily: 'var(--font-kyoto)',
@@ -128,6 +179,7 @@ export default function BackToTop({
 			<span aria-hidden className="text-[15px] not-italic">
 				⇡
 			</span>
-		</button>
+		</button>,
+		document.body,
 	);
 }

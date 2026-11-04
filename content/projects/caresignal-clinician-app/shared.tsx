@@ -95,6 +95,8 @@ export function NumBadge({ n }: { n: number }) {
 	);
 }
 
+// Section headings are small mono labels in the reference (the big serif
+// statements inside sections are pull quotes, not headings).
 export function SectionHeading({
 	id,
 	children,
@@ -105,7 +107,9 @@ export function SectionHeading({
 	return (
 		<h2
 			id={id}
-			className="type-headline-small m-0 scroll-mt-[132px] text-confetti-black"
+			data-sec=""
+			className="m-0 scroll-mt-[132px] text-[14px] font-bold leading-[20px] tracking-[0.02em] text-confetti-black/65"
+			style={{ fontFamily: 'var(--font-mono)' }}
 		>
 			{children}
 		</h2>

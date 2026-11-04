@@ -15,6 +15,7 @@ color: '#201E1F'
 import BackToTop from '../../../src/features/projects/components/figures/BackToTop.tsx'
 import { AssumptionsModal } from './AssumptionsModal.tsx'
 import { FrontMatterWashes } from './FrontMatterWashes.tsx'
+import { SectionNav } from './SectionNav.tsx'
 import { HeroFigure } from './HeroFigure.tsx'
 import { Background } from './Background.tsx'
 import { Opportunity } from './Opportunity.tsx'
@@ -28,27 +29,36 @@ import { TeamAndTools } from './TeamAndTools.tsx'
 {/* Wash underlines on the frontmatter headline + intro phrases */}
 <FrontMatterWashes />
 
-{/* Figure 1 — nurse-orbit simulation (placeholder until the R3F engine lands) */}
-<HeroFigure />
+<div className="relative">
+	<SectionNav />
 
-<Background />
+	{/* Nav anchors for the front-matter region */}
+	<div id="introduction" className="absolute top-0 h-0" aria-hidden="true" />
 
-<Opportunity />
+	{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
+	<HeroFigure />
 
-{/* Proof of Concept: principles 1–2, flow chart, alert dashboard, design principles */}
-<ProofOfConcept />
+	<div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
 
-<ProductMarketFit />
+	<Background />
 
-{/* Principle 3 + risk dashboard, patient view, tags/snooze, text-message anatomy */}
-<ScalingCareTeams />
+	<Opportunity />
 
-{/* Panel-size stats + the two Care Team Orbit figures */}
-<Outcomes />
+	{/* Proof of Concept: principles 1–2, flow chart, alert dashboard, design principles */}
+	<ProofOfConcept />
 
-<KeyLearnings />
+	<ProductMarketFit />
 
-<TeamAndTools />
+	{/* Principle 3 + risk dashboard, patient view, tags/snooze, text-message anatomy */}
+	<ScalingCareTeams />
+
+	{/* Panel-size stats + the two Care Team Orbit figures */}
+	<Outcomes />
+
+	<KeyLearnings />
+
+	<TeamAndTools />
+</div>
 
 <AssumptionsModal />
 

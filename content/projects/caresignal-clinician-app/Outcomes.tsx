@@ -73,7 +73,7 @@ export function Outcomes() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						Centralized Care Management Nurse Panel Size
@@ -84,7 +84,7 @@ export function Outcomes() {
 					</div>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						Acute Patient Panel
 					</h3>
@@ -104,7 +104,7 @@ export function Outcomes() {
 					{...TEAM}
 				/>
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						Hub and Spoke Model
 					</h3>

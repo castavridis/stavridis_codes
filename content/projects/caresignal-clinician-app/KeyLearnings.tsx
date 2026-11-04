@@ -17,7 +17,7 @@ const LESSONS = [
 export function KeyLearnings() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col gap-[20px]">
+			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
 				<SectionHeading id="conclusion">Key Learnings</SectionHeading>
 				<div className="flex flex-col gap-[8px]">
 					<h3 className="type-callout-title m-0 text-confetti-black">

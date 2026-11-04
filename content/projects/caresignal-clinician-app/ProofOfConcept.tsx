@@ -18,7 +18,7 @@ export function ProofOfConcept() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<SectionHeading id="starting-point">Proof of Concept</SectionHeading>
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						<NumBadge n={1} />
@@ -48,7 +48,7 @@ export function ProofOfConcept() {
 					</figcaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
 						The prototype worked! It reduced hospitalizations, connected
 						patients to needed resources, and had an ROI of ____.
@@ -65,7 +65,7 @@ export function ProofOfConcept() {
 
 				<hr className="w-full border-confetti-black/15" />
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<h3 className="type-callout-title m-0 text-confetti-black">
 						<NumBadge n={2} />
 						Surface urgent and emergent needs
@@ -96,7 +96,7 @@ export function ProofOfConcept() {
 					<FigCaption fig>An alert-based dashboard</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
 						I owned it from concept to production and I was proud of the
 						dashboard. It featured crisp typography, a mobile-first design,
@@ -134,7 +134,7 @@ export function ProofOfConcept() {
 					/>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
 					<p className="type-copy m-0 text-confetti-black/80">
 						The alert-based dashboard supported several trials, including one
 						for the Dialysis program in a randomized controlled trial.
