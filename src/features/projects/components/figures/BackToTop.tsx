@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { prefersReducedMotion, wag } from './motion';
 import { findScrollport } from './scrollport';
-
-const reducedMotion = () =>
-	!!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 type BackToTopProps = {
 	label?: string;
@@ -34,33 +32,12 @@ export default function BackToTop({
 		let wagT: ReturnType<typeof setTimeout>;
 		let wasShown = false;
 
-		const wag = () => {
+		const doWag = () => {
 			const b = btnRef.current;
-			if (!b || !b.animate || reducedMotion()) return;
+			if (!b) return;
 			clearTimeout(wagT);
-			// After the fade-in lands: a happy little wag, pivoting from the
-			// bottom-left corner — a new wag each time.
-			wagT = setTimeout(() => {
-				b.style.transformOrigin = '18px 100%';
-				const R = (a: number, c: number) => a + Math.random() * (c - a);
-				const n = Math.random() < 0.35 ? 5 : 4;
-				const amp = R(3.5, 6.5);
-				const dir = Math.random() < 0.5 ? -1 : 1;
-				const decay = R(0.5, 0.68);
-				const kf: Keyframe[] = [{ rotate: '0deg' }];
-				for (let i = 0; i < n; i++) {
-					kf.push({
-						rotate:
-							(dir * (i % 2 ? -1 : 1) * amp * Math.pow(decay, i) * R(0.85, 1.15)).toFixed(2) +
-							'deg',
-					});
-				}
-				kf.push({ rotate: '0deg' });
-				b.animate(kf, {
-					duration: Math.round(R(160, 200) * (n + 1) / 1.25),
-					easing: 'ease-in-out',
-				});
-			}, 160 + Math.random() * 100);
+			// After the fade-in lands: pivot from the bottom-left corner.
+			wagT = setTimeout(() => wag(b, { origin: '18px 100%' }), 160 + Math.random() * 100);
 		};
 
 		const tick = () => {
@@ -94,7 +71,7 @@ export default function BackToTop({
 				}
 			}
 
-			if (nextShown && !wasShown) wag();
+			if (nextShown && !wasShown) doWag();
 			wasShown = nextShown;
 			setShown(nextShown);
 			setLeft(nextLeft);
@@ -119,7 +96,7 @@ export default function BackToTop({
 	}, [stickySelector, alignSelector]);
 
 	const toTop = () => {
-		const behavior: ScrollBehavior = reducedMotion() ? 'auto' : 'smooth';
+		const behavior: ScrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
 		// The page may scroll in an inner container (sheet overlay) — send
 		// both it and the window home.
 		const scroller = findScrollport(document.querySelector(stickySelector));

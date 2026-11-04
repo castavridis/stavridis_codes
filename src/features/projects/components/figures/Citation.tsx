@@ -7,6 +7,7 @@ import {
 import { createPortal } from 'react-dom';
 
 import { useDomOrderNumber } from './dom-order';
+import { prefersReducedMotion, wag } from './motion';
 
 type CitationProps = {
 	title: string;
@@ -16,9 +17,6 @@ type CitationProps = {
 	// href, falling back to title+source.
 	citeKey?: string;
 };
-
-const reducedMotion = () =>
-	!!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Auto-numbered superscript source marker with a hover/focus tooltip.
 // Numbered in DOM order; citations sharing a source share a number.
@@ -38,7 +36,7 @@ export default function Citation({ title, source, href, citeKey }: CitationProps
 	// new amplitude, count and damping each time.
 	const popIn = useCallback((t: HTMLElement) => {
 		if (!t.animate) return;
-		const still = reducedMotion();
+		const still = prefersReducedMotion();
 		t.animate(
 			still
 				? [{ opacity: 0 }, { opacity: 1 }]
@@ -49,24 +47,7 @@ export default function Citation({ title, source, href, citeKey }: CitationProps
 			{ duration: still ? 120 : 220, easing: 'cubic-bezier(.2,.8,.2,1)' },
 		);
 		if (still) return;
-		const R = (a: number, b: number) => a + Math.random() * (b - a);
-		const count = Math.random() < 0.35 ? 5 : 4;
-		const amp = R(2.5, 4.5);
-		const dir = Math.random() < 0.5 ? -1 : 1;
-		const decay = R(0.5, 0.68);
-		const kf: Keyframe[] = [{ rotate: '0deg' }];
-		for (let i = 0; i < count; i++) {
-			kf.push({
-				rotate:
-					(dir * (i % 2 ? -1 : 1) * amp * Math.pow(decay, i) * R(0.85, 1.15)).toFixed(2) +
-					'deg',
-			});
-		}
-		kf.push({ rotate: '0deg' });
-		t.animate(kf, {
-			duration: Math.round(R(160, 200) * (count + 1) / 1.25),
-			easing: 'ease-in-out',
-		});
+		wag(t, { amp: [2.5, 4.5] });
 	}, []);
 
 	const place = useCallback(() => {
@@ -143,7 +124,7 @@ export default function Citation({ title, source, href, citeKey }: CitationProps
 			setPlaced(false);
 		};
 		if (!t || !t.animate || !placed) return done();
-		const still = reducedMotion();
+		const still = prefersReducedMotion();
 		outAnim.current?.cancel();
 		// Shrinks a little back toward where it came from as it fades.
 		const anim = t.animate(

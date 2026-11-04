@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import WashHighlightFX, { type WashPigment } from './wash-highlight';
+import { prefersReducedMotion } from './motion';
 
 type DesignPrincipleProps = {
 	number: number;
@@ -66,7 +67,7 @@ export default function DesignPrinciple({
 		if (!el) return;
 		const r = el.getBoundingClientRect();
 		const aspect = r.height > 0 ? r.width / r.height : 6;
-		const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const reduce = prefersReducedMotion();
 		const handle = WashHighlightFX.swipe(el, {
 			pigment,
 			path: [jitter(0, startY, aspect), jitter(1, endY, aspect)],

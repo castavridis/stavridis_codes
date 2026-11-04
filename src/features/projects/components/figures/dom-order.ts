@@ -6,7 +6,7 @@ import { useEffect, useState, type RefObject } from 'react';
 // mount/unmount of any of them fires it.
 const EVT = 'stavridis-renumber';
 
-export function notifyRenumber() {
+function notifyRenumber() {
 	window.dispatchEvent(new Event(EVT));
 }
 

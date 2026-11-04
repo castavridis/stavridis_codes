@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import WashHighlightFX, {
 	type WashHandle,
 } from '../../../src/features/projects/components/figures/wash-highlight';
+import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 
 // The reference draws wash underlines on two phrases inside the front
 // matter, which MDXLayout renders from frontmatter strings — so (as the
@@ -35,7 +36,7 @@ function wrapPhrase(root: HTMLElement, phrase: string): HTMLElement | null {
 
 export function FrontMatterWashes() {
 	useEffect(() => {
-		const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const reduce = prefersReducedMotion();
 		const handles: WashHandle[] = [];
 		// The front matter is painted by the time the MDX body mounts, but a
 		// frame of settling avoids racing MDXLayout's own layout effects.
@@ -44,8 +45,13 @@ export function FrontMatterWashes() {
 				const el = [...document.querySelectorAll<HTMLElement>(t.selector)].find(
 					(n) => n.textContent?.includes(t.text),
 				);
-				if (!el || el.querySelector('[data-wash-underline]')) continue;
-				const span = wrapPhrase(el, t.text);
+				if (!el) continue;
+				// Reuse a span left by a previous mount (the wrap survives this
+				// component's unmount) — skipping attach entirely would leave
+				// the underline undrawn after HMR or a re-reveal.
+				const span =
+					el.querySelector<HTMLElement>('[data-wash-underline]') ??
+					wrapPhrase(el, t.text);
 				if (!span) continue;
 				span.setAttribute('data-wash-underline', '');
 				handles.push(

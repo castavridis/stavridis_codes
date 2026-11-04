@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 import { findScrollport } from '../../../src/features/projects/components/figures/scrollport';
 
 // Desktop-only sticky section nav, per the reference: a card pinned at
@@ -31,14 +32,17 @@ export function SectionNav() {
 
 	useEffect(() => {
 		let raf = 0;
+		// The scrollport can't change while mounted — resolve once (and again
+		// on resize, where layout may legitimately have changed).
+		let port: HTMLElement | null | undefined;
 		const tick = () => {
 			raf = 0;
 			// Active = the last section whose anchor is above the reading line.
 			// The line sits 145px into the scrollport (anchors land at 132 via
 			// scroll-margin-top); the scrollport is the sheet's inner scroller,
 			// not the viewport, so offset by its top.
-			const sp = findScrollport(cardRef.current);
-			const line = Math.max(0, sp?.getBoundingClientRect().top ?? 0) + 145;
+			if (port === undefined) port = findScrollport(cardRef.current);
+			const line = Math.max(0, port?.getBoundingClientRect().top ?? 0) + 145;
 			let current = ITEMS[0].key;
 			for (const it of ITEMS) {
 				const el = document.getElementById(it.key);
@@ -62,11 +66,15 @@ export function SectionNav() {
 		// capture: the case study scrolls inside the sheet overlay, and scroll
 		// events don't bubble — only the capture phase sees them on window.
 		window.addEventListener('scroll', onScroll, { passive: true, capture: true });
-		window.addEventListener('resize', onScroll);
+		const onResize = () => {
+			port = undefined;
+			onScroll();
+		};
+		window.addEventListener('resize', onResize);
 		onScroll();
 		return () => {
 			window.removeEventListener('scroll', onScroll, { capture: true });
-			window.removeEventListener('resize', onScroll);
+			window.removeEventListener('resize', onResize);
 			cancelAnimationFrame(raf);
 		};
 	}, []);
@@ -87,7 +95,6 @@ export function SectionNav() {
 					border: `1.25px solid ${stuck ? 'color-mix(in srgb, var(--color-confetti-black) 15%, transparent)' : 'transparent'}`,
 					background: stuck ? 'var(--color-washes-paper, #fbf6ea)' : 'transparent',
 					boxShadow: stuck ? '0 10px 30px rgba(57,31,0,0.08)' : 'none',
-					position: 'sticky',
 				}}
 			>
 				<p
@@ -111,10 +118,7 @@ export function SectionNav() {
 								if (!el) return;
 								e.preventDefault();
 								el.scrollIntoView({
-									behavior: matchMedia('(prefers-reduced-motion: reduce)')
-										.matches
-										? 'auto'
-										: 'smooth',
+									behavior: prefersReducedMotion() ? 'auto' : 'smooth',
 								});
 								history.replaceState(null, '', `#${it.key}`);
 							}}

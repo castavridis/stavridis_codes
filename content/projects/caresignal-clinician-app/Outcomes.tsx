@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
 import Section from '../../../src/features/projects/components/Section';
 import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
+import { useInView } from '../../../src/features/projects/components/figures/useInView';
 
 import { FigPlaceholder, SectionHeading } from './shared';
 
@@ -25,33 +26,6 @@ const TEAM = {
 	avatarSmall: 100,
 	daySeconds: 30,
 } satisfies Partial<CareTeamOrbitProps>;
-
-// Mount-once in-view gate so the orbit chunk (simulation + watercolour
-// engine) only loads as the figure approaches the viewport.
-function useInView(rootMargin = '400px') {
-	const ref = useRef<HTMLDivElement>(null);
-	const [inView, setInView] = useState(false);
-	useEffect(() => {
-		if (inView) return;
-		const el = ref.current;
-		if (!el || typeof IntersectionObserver === 'undefined') {
-			setInView(true);
-			return;
-		}
-		const io = new IntersectionObserver(
-			(es) => {
-				if (es.some((e) => e.isIntersecting)) {
-					setInView(true);
-					io.disconnect();
-				}
-			},
-			{ rootMargin },
-		);
-		io.observe(el);
-		return () => io.disconnect();
-	}, [rootMargin, inView]);
-	return { ref, inView };
-}
 
 function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) {
 	const { ref, inView } = useInView();

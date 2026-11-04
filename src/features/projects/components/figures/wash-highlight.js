@@ -10,7 +10,7 @@ const WashHighlightFX = (() => {
 let lib = null, v2 = null;
 const loadWashes = () => v2 ? Promise.resolve(v2) : (lib ||= new Promise((res, rej) => {
   const prevW = window.Washes, prevC = window.Watercolor;
-  const s = document.createElement('script'); s.src = '/vendor/washes.standalone.js';
+  const s = document.createElement('script'); s.src = (import.meta.env?.BASE_URL ?? '/') + 'vendor/washes.standalone.js';
   s.onload = () => { v2 = window.Washes; window.Washes = prevW; window.Watercolor = prevC; res(v2); };
   s.onerror = () => { lib = null; rej(new Error('washes failed to load')); }; document.head.appendChild(s); }));
 const rgba = (() => { let ctx; return css => { if (!css) return null; ctx ||= document.createElement('canvas').getContext('2d', { willReadFrequently: true });

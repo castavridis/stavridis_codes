@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import WashHighlightFX, { type WashHighlightOptions } from './wash-highlight';
+import { prefersReducedMotion } from './motion';
 
 type WashHighlightProps = WashHighlightOptions & {
 	children: React.ReactNode;
@@ -25,7 +26,7 @@ export default function WashHighlight({
 	useEffect(() => {
 		const el = ref.current;
 		if (!el) return;
-		const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const reduce = prefersReducedMotion();
 		const handle = WashHighlightFX.attach(el, {
 			...optsRef.current,
 			...(reduce ? { instant: true } : null),

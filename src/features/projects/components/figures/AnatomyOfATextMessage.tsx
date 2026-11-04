@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 import Figure from './Figure';
+import { prefersReducedMotion } from './motion';
 
 // "Anatomy of a text message" — one SMS check-in annotated with the six
 // decisions behind it. Hovering or pinning a numbered marker (on the message
@@ -185,7 +186,7 @@ export default function AnatomyOfATextMessage() {
 				setConn((c) => (d !== c.d ? { d, off: 0, t: 'none' } : c));
 				return;
 			}
-			const rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+			const rm = prefersReducedMotion();
 			cancelAnimationFrame(rafRef.current);
 			setConn({ d, off: rm ? 0 : 1, t: 'none' });
 			if (!rm && d) {
