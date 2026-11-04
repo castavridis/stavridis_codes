@@ -158,7 +158,7 @@ function engineParams(daySeconds: number, mobile: boolean, reduced: boolean): Nu
 		sealTone: 'light',
 		dark: false,
 		wetness: 'wetOnWet',
-		quality: 'high',
+		quality: 'auto',
 		...(mobile
 			? {
 					view: 'birdseye',
@@ -1375,8 +1375,10 @@ export function NurseDayFigure({
 					background: PAPER,
 					paddingTop: 'var(--hd, 0px)',
 					paddingBottom: 'var(--ft, 0px)',
-					transform: 'rotate(-0.8deg) skew(0.6deg, -0.3deg)',
-					transformOrigin: '50% 50%',
+					// Paper is flat: TWEAKS §1 saves paperRotate/SkewX/SkewY = 0
+					// (the -0.8°/0.6°/-0.3° tilt was the engine's unset-fallback,
+					// not the host's passed value). No transform also keeps
+					// position:fixed citation/modal portals viewport-relative.
 				}}
 			>
 				{/* Viewport: clips the dual-cell grid (which doubles in height on
