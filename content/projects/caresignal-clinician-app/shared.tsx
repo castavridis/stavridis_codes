@@ -1,7 +1,9 @@
-import Text from '../../../src/components/Text';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 
+import Text from '../../../src/components/Text';
 import Figure from '../../../src/features/projects/components/figures/Figure';
+import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 
 export { default as Citation } from '../../../src/features/projects/components/figures/Citation';
 export { default as Figure } from '../../../src/features/projects/components/figures/Figure';
@@ -64,37 +66,101 @@ export function FigCaption({
 	);
 }
 
-// Screenshot presented on the blurred sky-and-field backdrop, as in the
-// design reference.
+// A product screenshot, full-bleed in an aspect-locked 16px frame that fades
+// up over a blurred sky-and-field backdrop once it has loaded and scrolled
+// into view (the design's `data-fade`). `width`/`height` are the shot's
+// natural pixels, used to lock the frame's aspect ratio.
 export function BackdropShot({
 	src,
 	alt,
+	width,
+	height,
 }: {
 	src: string;
 	alt: string;
+	width: number;
+	height: number;
 }) {
 	return (
 		<div
-			className="w-full overflow-clip rounded-[16px] p-[24px] md:p-[40px]"
+			className="block w-full overflow-hidden rounded-[16px]"
 			style={{
-				backgroundImage: `url(${IMG}/fig-backdrop.webp)`,
-				backgroundSize: 'cover',
-				backgroundPosition: 'center',
+				aspectRatio: `${width} / ${height}`,
+				background: `#9fb6e8 url(${IMG}/fig-backdrop.webp) center / cover no-repeat`,
 			}}
 		>
-			<img
-				src={src}
-				alt={alt}
-				className="block w-full rounded-[8px] shadow-[0_12px_32px_rgba(0,0,0,0.18)]"
-			/>
+			<FadeImg src={src} alt={alt} width={width} height={height} />
 		</div>
 	);
 }
 
-// Numbered sub-principle badge (the green numbered chips on the h4s).
+// Fade an image up from transparent once it is both loaded and on screen;
+// reduced motion shows it immediately.
+function FadeImg({
+	src,
+	alt,
+	width,
+	height,
+}: {
+	src: string;
+	alt: string;
+	width: number;
+	height: number;
+}) {
+	const ref = useRef<HTMLImageElement>(null);
+	useEffect(() => {
+		const img = ref.current;
+		if (!img) return;
+		const show = () => {
+			img.style.opacity = '1';
+		};
+		if (prefersReducedMotion()) {
+			img.style.transition = 'none';
+			show();
+			return;
+		}
+		let io: IntersectionObserver | null = new IntersectionObserver(
+			(entries) => {
+				for (const e of entries) {
+					if (!e.isIntersecting) continue;
+					io?.disconnect();
+					io = null;
+					if (img.complete && img.naturalWidth) requestAnimationFrame(show);
+					else
+						img.addEventListener('load', () => requestAnimationFrame(show), {
+							once: true,
+						});
+				}
+			},
+			{ threshold: 0.15 },
+		);
+		io.observe(img);
+		return () => io?.disconnect();
+	}, []);
+	return (
+		<img
+			ref={ref}
+			src={src}
+			alt={alt}
+			width={width}
+			height={height}
+			loading="lazy"
+			decoding="async"
+			className="block w-full"
+			style={{ opacity: 0, transition: 'opacity 450ms ease' }}
+		/>
+	);
+}
+
+// The pillar numeral on the goal h4s: a 32px solid-green disc with a white
+// numeral (decorative — the heading text carries the meaning).
 export function NumBadge({ n }: { n: number }) {
 	return (
-		<span className="mr-[10px] inline-flex size-[28px] items-center justify-center rounded-full bg-[#b2d07f] align-middle font-bold text-[#5f8a2e] type-callout-meta">
+		<span
+			aria-hidden="true"
+			className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full bg-[#6f9e17] font-bold text-white"
+			style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: 1 }}
+		>
 			{n}
 		</span>
 	);

@@ -19,13 +19,21 @@ export function ProofOfConcept() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
 					<SectionHeading id="starting-point">Proof of Concept</SectionHeading>
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
+					<h3
+						className="m-0 flex items-center gap-[14px] text-confetti-black"
+						style={{
+							fontFamily: 'var(--font-kyoto)',
+							fontWeight: 500,
+							fontSize: 28,
+							lineHeight: 1.2,
+						}}
+					>
 						<NumBadge n={1} />
 						Automate nurses’ routine calls
-					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					</h3>
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Observing a dialysis clinic, our Chief Medical Officer identified
 						an approach to improving access to health care and achieving better
 						health outcomes: automate routine outreach and trigger an alert if
@@ -34,12 +42,18 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col items-start gap-[16px] rounded-[16px] bg-[#f7f6f5] p-[24px] md:p-[40px]">
-					<Figure />
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
-						The dialysis program’s alert-based workflow: the template for
-						CareSignal’s patient-facing programs
-					</Text>
+				<figure className="m-0 flex w-full flex-col items-center gap-[32px] rounded-[16px] bg-[#f7f6f5] p-[24px] md:p-[40px]">
+					<div className="flex flex-col items-center gap-[8px] text-center">
+						<Figure />
+						<Text
+							variant="headline-small"
+							as="h3"
+							className="m-0 max-w-[760px] text-confetti-black [text-wrap:balance]"
+						>
+							The dialysis program’s alert-based workflow: the template for
+							CareSignal’s patient-facing programs
+						</Text>
+					</div>
 					<DialysisFlowChart />
 					<figcaption className="w-full max-w-[1070px] text-left text-[17px] leading-[1.45] text-confetti-black [text-wrap:pretty]">
 						Our programs were created using human-centered design to build
@@ -49,15 +63,15 @@ export function ProofOfConcept() {
 					</figcaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The prototype worked! It reduced hospitalizations, connected
 						patients to needed resources, and had an ROI of ____.
 						<Citation {...CITATIONS.prototypeRoi} /> The success prompted
 						our CMO to create programs for a broad range of conditions and
 						establish a research center to study them.
 					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						When I joined the founding team to lead product design and brand,
 						my first goal was to design the web application for our
 						researchers.
@@ -66,22 +80,38 @@ export function ProofOfConcept() {
 
 				<hr className="w-full border-confetti-black/15" />
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<h3
+						className="m-0 flex items-center gap-[14px] text-confetti-black"
+						style={{
+							fontFamily: 'var(--font-kyoto)',
+							fontWeight: 500,
+							fontSize: 28,
+							lineHeight: 1.2,
+						}}
+					>
 						<NumBadge n={2} />
 						Surface urgent and emergent needs
-					</Text>
-					<Text variant="headline-small" className="m-0 text-confetti-black">
+					</h3>
+					<p
+						className="m-0 text-confetti-black [text-wrap:balance]"
+						style={{
+							fontFamily: 'var(--font-kyoto)',
+							fontWeight: 500,
+							fontSize: 'clamp(28px,3vw,36px)',
+							lineHeight: 1.22,
+						}}
+					>
 						I designed the web application that allowed researchers to
 						complete alert-based workflows.
-					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					</p>
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Alerts were the most important signal for clinicians participating
 						in our studies. They indicated if a patient reported that they had
 						an urgent or emergent need. Clinicians would respond to the alert
 						by contacting the patient and intervening if necessary.
 					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I designed an alert-based dashboard with the researchers studying
 						different programs. After alerts, they were concerned about how
 						many participants were enrolled in the program and of those
@@ -89,16 +119,18 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col gap-[12px]">
+				<figure className="m-0 mx-auto flex w-full max-w-[1104px] flex-col items-center gap-[16px]">
 					<BackdropShot
 						src={`${IMG}/fig3-alert-dashboard.webp`}
+						width={1507}
+						height={958}
 						alt="The alert-based dashboard in a browser window: a blue navigation bar with Dashboard, Patients, Programs and Alerts; tiles for Enrolled Patients (525) and Prescribed Patients (9); Hide PHI, Enroll Patient and Prescribe Patient actions; and a list of rows below, shown on a blurred sky-and-field backdrop."
 					/>
 					<FigCaption fig>An alert-based dashboard</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I owned it from concept to production and I was proud of the
 						dashboard. It featured crisp typography, a mobile-first design,
 						and responsive layout. But the process showed me that I held
@@ -138,8 +170,8 @@ export function ProofOfConcept() {
 					/>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The alert-based dashboard supported several trials, including one
 						for the Dialysis program in a randomized controlled trial.
 						<Citation {...CITATIONS.dialysisRct} /> The trial showed
@@ -147,7 +179,7 @@ export function ProofOfConcept() {
 						<Citation {...CITATIONS.dialysisResults} /> and the automated
 						workflow tested became the template for our other programs.
 					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The research center would continue to generate compelling evidence
 						about the efficacy of our programs designed for different quality
 						measures. Ultimately, they’d publish 13 papers in peer-reviewed
