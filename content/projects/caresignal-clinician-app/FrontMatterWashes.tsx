@@ -38,9 +38,11 @@ export function FrontMatterWashes() {
 	useEffect(() => {
 		const reduce = prefersReducedMotion();
 		const handles: WashHandle[] = [];
-		// The front matter is painted by the time the MDX body mounts, but a
-		// frame of settling avoids racing MDXLayout's own layout effects.
-		const raf = requestAnimationFrame(() => {
+		// Defer the underlines until the browser is idle so they don't paint
+		// during the project sheet's open transition (bounded by the timeout).
+		let cancelled = false;
+		const draw = () => {
+			if (cancelled) return;
 			for (const t of TARGETS) {
 				const el = [...document.querySelectorAll<HTMLElement>(t.selector)].find(
 					(n) => n.textContent?.includes(t.text),
@@ -64,9 +66,17 @@ export function FrontMatterWashes() {
 					}),
 				);
 			}
-		});
+		};
+		const w = window as typeof window & {
+			requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+			cancelIdleCallback?: (id: number) => void;
+		};
+		const idleId = w.requestIdleCallback?.(draw, { timeout: 600 });
+		const rafId = idleId === undefined ? requestAnimationFrame(draw) : undefined;
 		return () => {
-			cancelAnimationFrame(raf);
+			cancelled = true;
+			if (idleId !== undefined) w.cancelIdleCallback?.(idleId);
+			if (rafId !== undefined) cancelAnimationFrame(rafId);
 			handles.forEach((h) => h.destroy());
 		};
 	}, []);

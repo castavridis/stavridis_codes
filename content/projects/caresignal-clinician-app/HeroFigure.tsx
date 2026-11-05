@@ -1,10 +1,34 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import Section from '../../../src/features/projects/components/Section';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
 
 import { openAssumptions } from './AssumptionsModal';
 import { FigPlaceholder } from './shared';
+
+// Hold the heavy WebGL mount until the browser is idle, so the three.js
+// chunk + canvas don't contend with the project sheet's open transition
+// (the figure sits near the top, so it would otherwise mount mid-animation).
+// requestIdleCallback with a timeout bounds the wait; a plain timeout is the
+// fallback where it's unavailable.
+function useIdleReady(timeout = 500) {
+	const [ready, setReady] = useState(false);
+	useEffect(() => {
+		const ric = (
+			window as typeof window & {
+				requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+				cancelIdleCallback?: (id: number) => void;
+			}
+		);
+		if (ric.requestIdleCallback) {
+			const id = ric.requestIdleCallback(() => setReady(true), { timeout });
+			return () => ric.cancelIdleCallback?.(id);
+		}
+		const id = window.setTimeout(() => setReady(true), timeout);
+		return () => clearTimeout(id);
+	}, [timeout]);
+	return ready;
+}
 
 // Figure 1 — "A centralized nurse care manager's shift before and after
 // CareSignal": the nurse-orbit R3F simulation, lazy-mounted so the three.js
@@ -19,11 +43,12 @@ const PLACEHOLDER_LABEL =
 
 export function HeroFigure() {
 	const { ref, inView } = useInView();
+	const idle = useIdleReady();
 	const fallback = <FigPlaceholder label={PLACEHOLDER_LABEL} height={520} />;
 	return (
 		<Section>
 			<div ref={ref}>
-				{inView ? (
+				{inView && idle ? (
 					<Suspense fallback={fallback}>
 						<NurseDaySim onAssumptions={openAssumptions} />
 					</Suspense>
