@@ -70,7 +70,13 @@ const HoverSandbox = import.meta.env.DEV
 
 export function App() {
   const [, navigate] = useLocation();
-  const [matchForCompany, params] = useRoute(routes.forCompany.path);
+  const [matchForCompanyBare, paramsBare] = useRoute(routes.forCompany.path);
+  const [matchForCompanyVia, paramsVia] = useRoute(routes.forCompanyVia.path);
+  // /for/:company and /for/:company/via/:source are the same page — the
+  // source segment is only an analytics tag, so it is never persisted or
+  // shown in the bookmark URL.
+  const matchForCompany = matchForCompanyBare || matchForCompanyVia;
+  const params = matchForCompanyBare ? paramsBare : matchForCompanyVia ? paramsVia : null;
   const [matchProject, projectParams] = useRoute(routes.project.path);
   const [matchBlogPost, blogPostParams] = useRoute(routes.blogPost.path);
   const [matchBlogIndex] = useRoute(routes.blogIndex.path);
