@@ -2,6 +2,11 @@ import Text from '../../../src/components/Text';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import Figure from '../../../src/features/projects/components/figures/Figure';
+import {
+	drawDayStrip,
+	drawStatusGrid,
+	fmtClock,
+} from '../../../src/features/projects/components/figures/hud-canvas';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 import WashHighlightFX, {
 	type WashHandle,
@@ -103,147 +108,6 @@ function afterStats(s: StatsSource): Stat[] {
 
 // liveStats() in the reference uses the same formulas, picked by phase.
 const statsFor = (s: StatsSource): Stat[] => (s?.phase === 'after' ? afterStats(s) : beforeStats(s));
-
-// --- Figure 1 HUD visualizations (2D canvas): "How Time is Spent" draws the
-// 9-to-5 shift as a strip of status dots over time; "Patient Statuses" draws
-// every patient as a dot coloured by status (before = his 100 in call order,
-// after = all 1,600 sorted by status). Both read the engine's per-emit stats.
-const VIZ_FILL: Record<string, string> = {
-	a: '#108ba0',
-	r: '#e5562e',
-	y: '#f9ac31',
-	g: '#b2d07f',
-	G: '#b2d07f',
-	d: '#e5562e',
-	w: '#f9ac31',
-	u: 'rgba(57,31,0,0.35)',
-	'-': '#e4ded2',
-};
-function inkHex() {
-	return (
-		getComputedStyle(document.documentElement)
-			.getPropertyValue('--color-confetti-black')
-			.trim() || '#391f00'
-	);
-}
-function prepCanvas(cv: HTMLCanvasElement) {
-	const W = cv.clientWidth;
-	const H = cv.clientHeight;
-	const dpr = Math.min(2, window.devicePixelRatio || 1);
-	if (!W || !H) return null;
-	if (cv.width !== Math.round(W * dpr)) {
-		cv.width = Math.round(W * dpr);
-		cv.height = Math.round(H * dpr);
-	}
-	const g = cv.getContext('2d');
-	if (!g) return null;
-	g.setTransform(dpr, 0, 0, dpr, 0, 0);
-	g.clearRect(0, 0, W, H);
-	return { g, W, H };
-}
-function dotFill(c: string, ink: string) {
-	return c === 'k' ? ink : (VIZ_FILL[c] ?? VIZ_FILL.u);
-}
-
-function drawDayStrip(
-	cv: HTMLCanvasElement | null,
-	spans?: string,
-	minute?: number | null,
-) {
-	if (!cv) return;
-	const p = prepCanvas(cv);
-	if (!p) return;
-	const { g, W, H } = p;
-	const n = 50;
-	const step = 480 / n;
-	const px = W / n;
-	const r = Math.max(1.5, Math.min(px * 0.4, H * 0.4));
-	const ink = inkHex();
-	const sp = (typeof spans === 'string' ? spans : '')
-		.split(' ')
-		.map((t) => t.match(/^(\d+),(\d+)(\w)$/))
-		.filter((m): m is RegExpMatchArray => !!m)
-		.map((m) => [+m[1], +m[2], m[3]] as [number, number, string]);
-	for (let k = 0; k < n; k++) {
-		const t = (k + 0.5) * step;
-		const x = (k + 0.5) * px;
-		const y = H / 2;
-		const hit = sp.find((s) => t >= s[0] && t < Math.max(s[1], s[0] + step));
-		const past = minute != null && minute >= 0 && t < minute;
-		let fill = '#e4ded2';
-		let a = 0.18;
-		if (hit) {
-			fill = VIZ_FILL[hit[2]] ?? VIZ_FILL.u;
-			a = 1;
-		} else if (past) {
-			// inked where he was working; faded over lunch (12:30–1:30)
-			fill = ink;
-			a = t >= 210 && t < 270 ? 0.06 : 0.16;
-		}
-		g.globalAlpha = a;
-		g.fillStyle = fill;
-		g.beginPath();
-		g.arc(x, y, r, 0, 6.2832);
-		g.fill();
-	}
-	g.globalAlpha = 1;
-}
-
-function drawStatusGrid(cv: HTMLCanvasElement | null, stats: StatsSource) {
-	if (!cv || !stats) return;
-	const p = prepCanvas(cv);
-	if (!p) return;
-	const { g, W, H } = p;
-	const cols = 50;
-	const ink = inkHex();
-	if (stats.phase === 'after' && stats.all) {
-		const all = stats.all;
-		const rows = 32;
-		const px = W / cols;
-		const py = H / rows;
-		const r = Math.max(1, Math.min(px, py) * 0.36);
-		const RANK: Record<string, number> = { a: 0, r: 1, y: 2, g: 3, k: 4, u: 5, '-': 6, G: 7, d: 8, w: 8 };
-		const order = [...all]
-			.map((_, i) => i)
-			.sort((pIdx, qIdx) => (RANK[all[pIdx]] ?? 5) - (RANK[all[qIdx]] ?? 5) || pIdx - qIdx);
-		for (let k = 0; k < order.length; k++) {
-			const i = order[k];
-			const c = all[i];
-			const x = ((k % cols) + 0.5) * px;
-			const y = (Math.floor(k / cols) + 0.5) * py;
-			g.globalAlpha = c === 'd' || c === 'w' ? 0.3 : 1;
-			g.fillStyle = dotFill(c, ink);
-			g.beginPath();
-			g.arc(x, y, r, 0, 6.2832);
-			g.fill();
-		}
-		g.globalAlpha = 1;
-	} else {
-		const log = stats.log ?? '';
-		const rows = 2;
-		const px = W / cols;
-		const py = H / rows;
-		const r = Math.max(1, Math.min(px * 0.36, py * 0.4));
-		for (let k = 0; k < 100; k++) {
-			const c = log[k];
-			const x = ((k % 50) + 0.5) * px;
-			const y = (Math.floor(k / 50) + 0.5) * py;
-			g.fillStyle = c ? dotFill(c, ink) : VIZ_FILL.u;
-			g.beginPath();
-			g.arc(x, y, r, 0, 6.2832);
-			g.fill();
-		}
-	}
-}
-
-function fmtClock(minute?: number | null) {
-	if (minute == null || minute < 0) return '';
-	const t = 9 * 60 + Math.floor(minute);
-	const hh = Math.floor(t / 60);
-	const mm = t % 60;
-	const h12 = ((hh + 11) % 12) + 1;
-	return `${h12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'am' : 'pm'}`;
-}
 
 // One HUD canvas (a day strip or a status grid) that redraws when its stats
 // change, on resize, and once fonts settle.

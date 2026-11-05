@@ -83,6 +83,10 @@ Each takes a host element + data and owns its canvas/DOM, like the orbit engine'
   cancel. The card reads `--nav-border` / `--nav-shadow` so the host's static
   style can't clobber the animation. `SectionNav.tsx` lost ~120 lines; its effect
   is now four `gum.*` calls.
+- `figures/hud-canvas.js` — Figure 1's footer canvases: `drawDayStrip(cv, spans,
+  minute)`, `drawStatusGrid(cv, stats)`, `fmtClock(minute)` (both `day-strip` and
+  `status-grid` rows folded into one module). `NurseDayFigure`'s `VizCanvas` is a
+  thin redraw wrapper; the dc page drops `drawDay`/`drawBefore`/`drawBar`.
 
 Either way the dc page imports the same module and drops the matching methods
 (`syncDrops`/`paintDrop`, `gumPeel`/`gumPress`/`navGum`) from its Component class
