@@ -3,6 +3,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import Figure from '../../../src/features/projects/components/figures/Figure';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
+import WashHighlightFX, {
+	type WashHandle,
+} from '../../../src/features/projects/components/figures/wash-highlight';
 import {
 	mount,
 	type NurseOrbitHandle,
@@ -1245,6 +1248,31 @@ export function NurseDayFigure({
 		ro.observe(ft);
 		document.fonts?.ready.then(measure).catch(() => {});
 		return () => ro.disconnect();
+	}, []);
+
+	// Hansa wash underlines on the "before"/"after" blurb eyebrows
+	// (TWEAKS §1 highlightPigment 'hansa', highlightHand 'left'; the dc's
+	// Nurse Day Complete attaches these on mount, left staggered 64ms / right
+	// 200ms). Queried off descRef so they ride the eyebrows' opacity dim.
+	useEffect(() => {
+		const desc = descRef.current;
+		if (!desc) return;
+		const reduced = prefersReducedMotion();
+		const ebs = [...desc.querySelectorAll<HTMLElement>('.type-eyebrow')];
+		const handles: WashHandle[] = ebs.slice(0, 2).map((el, i) =>
+			WashHighlightFX.attach(el, {
+				pigment: 'hansa',
+				mark: 'underline',
+				hand: 'left',
+				trigger: 'view',
+				threshold: 1,
+				delay: i === 1 ? 200 : 64,
+				duration: reduced ? 1 : 650,
+				instantDry: true,
+				instant: reduced,
+			}),
+		);
+		return () => handles.forEach((h) => h.destroy());
 	}, []);
 
 	// Seam-line / centre-button geometry (dc placePlay): --mid is the figure
