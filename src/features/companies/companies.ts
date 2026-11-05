@@ -60,6 +60,10 @@ export type CompanyConfig = {
   // company's context is active (e.g. a tailored résumé). When unset the
   // link falls back to the role-specific PDF (see role-context.ROLE_RESUME).
   resume?: string;
+  // `cover_letter` — URL of a custom cover letter for this company (e.g.
+  // '/cover-letters/C-Stavridis_{Company}_Cover-Letter.pdf'). Optional;
+  // nothing renders it yet, so for now it only records the file.
+  cover_letter?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
@@ -77,7 +81,8 @@ export const companies: Record<string, CompanyConfig> = {
   mayo_clinic: {
     name: 'Mayo Clinic',
     role: 'pd',
-    resume: '/resumes/C-Stavridis_Resume_Mayo-Clinic.pdf',
+    cover_letter: 'cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
+    resume: '/resumes/C-Stavridis_Mayo-Clinic_Resume.pdf',
     featuredSlugs: ['caresignal-clinician-app', 'fracta', 'sqshbook'],
     featuredProjects: ['caresignal-clinician-app'],
     salutation_colors: {
