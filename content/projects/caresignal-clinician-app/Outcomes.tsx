@@ -1,7 +1,5 @@
-import Text from '../../../src/components/Text';
 import { lazy, Suspense } from 'react';
 
-import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
 import Section from '../../../src/features/projects/components/Section';
 import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
@@ -28,6 +26,38 @@ const TEAM = {
 	daySeconds: 30,
 } satisfies Partial<CareTeamOrbitProps>;
 
+// The panel titles (Kyoto 500 28px) and their labelled stat lists (20px body),
+// matching the design's plain labelled lists rather than big stat tiles.
+const panelTitle = {
+	fontFamily: 'var(--font-kyoto)',
+	fontWeight: 500,
+	fontSize: 28,
+	lineHeight: 1.2,
+} as const;
+const statList = {
+	fontFamily: 'var(--font-body)',
+	fontSize: 20,
+	lineHeight: 1.5,
+} as const;
+
+function StatPanel({ title, stats }: { title: string; stats: string[] }) {
+	return (
+		<div className="flex w-full max-w-[705px] flex-col gap-[20px] xl:ml-auto">
+			<h3 className="m-0 text-confetti-black" style={panelTitle}>
+				{title}
+			</h3>
+			<ul
+				className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+				style={statList}
+			>
+				{stats.map((s) => (
+					<li key={s}>{s}</li>
+				))}
+			</ul>
+		</div>
+	);
+}
+
 function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) {
 	const { ref, inView } = useInView();
 	const fallback = <FigPlaceholder label={label} height={520} />;
@@ -48,26 +78,24 @@ export function Outcomes() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col gap-[20px] xl:ml-auto">
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
+					<h3 className="m-0 text-confetti-black" style={panelTitle}>
 						Centralized Care Management Nurse Panel Size
-					</Text>
-					<div className="flex flex-wrap gap-[24px]">
-						<OutcomeStat stat="100" caption="Patients per nurse, before" />
-						<OutcomeStat stat="1,500" caption="Patients per nurse, after" />
-					</div>
+					</h3>
+					<ul
+						className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+						style={statList}
+					>
+						<li>Before: 100</li>
+						<li>After: 1,500</li>
+					</ul>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
-						Acute Patient Panel
-					</Text>
-					<div className="flex flex-wrap gap-[24px]">
-						<OutcomeStat stat="3" caption="Providers" />
-						<OutcomeStat stat="3,500" caption="Patients" />
-					</div>
-				</div>
+				<StatPanel
+					title="Acute Patient Panel"
+					stats={['Providers: 3', 'Patients: 3,500']}
+				/>
 
 				{/* Care Team Orbit, model="acute" */}
 				<OrbitSlot
@@ -79,15 +107,10 @@ export function Outcomes() {
 					{...TEAM}
 				/>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
-						Hub and Spoke Model
-					</Text>
-					<div className="flex flex-wrap gap-[24px]">
-						<OutcomeStat stat="2" caption="Providers" />
-						<OutcomeStat stat="330" caption="Patients" />
-					</div>
-				</div>
+				<StatPanel
+					title="Hub and Spoke Model"
+					stats={['Providers: 2', 'Patients: 330']}
+				/>
 
 				{/* Care Team Orbit, model="hub" */}
 				<OrbitSlot
