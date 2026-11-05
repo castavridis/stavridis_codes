@@ -7,6 +7,7 @@ preview: true
 headline: I designed a clinician web application that helped nurses in centralized care teams safely manage 15 to 20× as many patients.
 introduction: |
   As CareSignal’s sole Product Designer through acquisition, our clinician web application was my responsibility. I combined my skills in product design, engineering, branding, and service design to take our app from a clinically‑proven proof of concept to a commercial product.
+introBelowHero: true
 tags: ['Product Strategy', 'Product Design', 'Service Design', 'Design Engineering']
 background: '#fdfbf5'
 color: '#201E1F'
@@ -18,6 +19,7 @@ import { CaseStudyStyle } from './CaseStudyStyle.tsx'
 import { FrontMatterWashes } from './FrontMatterWashes.tsx'
 import { SectionNav } from './SectionNav.tsx'
 import { HeroFigure } from './HeroFigure.tsx'
+import { Introduction } from './Introduction.tsx'
 import { Background } from './Background.tsx'
 import { Opportunity } from './Opportunity.tsx'
 import { ProofOfConcept } from './ProofOfConcept.tsx'
@@ -41,6 +43,9 @@ import { TeamAndTools } from './TeamAndTools.tsx'
 <HeroFigure />
 
 <div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
+
+{/* Introduction — the design places it below Figure 1, larger than body copy */}
+<Introduction />
 
 <div className="relative">
 	<SectionNav />

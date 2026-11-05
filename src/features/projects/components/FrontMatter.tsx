@@ -13,6 +13,10 @@ type FrontMatterProps = {
   // Authors / non-overlay hosts can still render FrontMatter standalone
   // (e.g. preview pages) and the navigation will appear by default.
   hideTopNavigation?: boolean;
+  // When true, the introduction paragraphs are not rendered here — the case
+  // study places the intro elsewhere (e.g. below the hero figure). The
+  // headline + credits still render.
+  hideIntroduction?: boolean;
   // When true, a "Preview Only" tag renders above the headline — for case
   // studies still in draft/preview. Driven by the project's `preview` flag.
   previewOnly?: boolean;
@@ -48,6 +52,7 @@ export default function FrontMatter({
   tags,
   onClose,
   hideTopNavigation = false,
+  hideIntroduction = false,
   previewOnly = false,
   roles,
   team,
@@ -78,14 +83,16 @@ export default function FrontMatter({
         >
           {headline}
         </Text>
-        <div className="flex w-full max-w-[704px] flex-col gap-[16px]">
-          {paragraphs.map((paragraph, index) => (
-            // Copy Small — Funnel Sans 16/24 (type-copy), per Figma front matter.
-            <Text key={index} variant="copy" className="m-0 w-full">
-              {paragraph}
-            </Text>
-          ))}
-        </div>
+        {hideIntroduction ? null : (
+          <div className="flex w-full max-w-[704px] flex-col gap-[16px]">
+            {paragraphs.map((paragraph, index) => (
+              // Copy Small — Funnel Sans 16/24 (type-copy), per Figma front matter.
+              <Text key={index} variant="copy" className="m-0 w-full">
+                {paragraph}
+              </Text>
+            ))}
+          </div>
+        )}
         {hasCredits ? (
           // Roles / Team / Tools credits block — Figma "Roles" frame. A hair
           // rule then labelled lines in the mono tag style.

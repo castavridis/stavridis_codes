@@ -29,6 +29,9 @@ type MDXLayoutProps = {
   // case study can ship scoped style overrides (e.g. the design's
   // `#nurse-case` front-matter tweaks) without touching this shared layout.
   scopeId?: string;
+  // When true, FrontMatter omits the introduction (the case study renders it
+  // elsewhere, e.g. below the hero figure).
+  hideIntroduction?: boolean;
   // When set, renders a rotating "Featured Project" seal above the
   // FrontMatter, slightly overlapping the headline. Driven by the
   // active /for/:company context — see ProjectSheetContent in app.tsx.
@@ -272,7 +275,7 @@ function ChromeRow({
   );
 }
 
-export default function MDXLayout({ front, onClose, children, stampCompanyName, stampSeal, scopeId }: MDXLayoutProps) {
+export default function MDXLayout({ front, onClose, children, stampCompanyName, stampSeal, scopeId, hideIntroduction }: MDXLayoutProps) {
   // Anchor used by ChromeRow to find the nearest scrollable ancestor
   // at mount. The project SheetOverlay's `ProjectSheetContent` wraps
   // content with `position: absolute; inset: 0; overflow: auto` (in
@@ -325,6 +328,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
               team={front.team}
               tools={front.tools}
               hideTopNavigation
+              hideIntroduction={hideIntroduction}
             />
           </div>
           <div className="pt-[72px] pb-[264px]">{children}</div>

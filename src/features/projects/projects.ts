@@ -18,6 +18,9 @@ export type ProjectFrontmatter = {
   // legacy gradient-header chrome.
   headline?: string;
   introduction?: string;
+  // When true, FrontMatter omits the introduction and the case study renders
+  // it in the MDX body instead (e.g. below the hero figure).
+  introBelowHero?: boolean;
   // Optional front-matter credits block (v2). Rendered below the
   // introduction as a labelled Roles / Team / Tools list. Each is a plain
   // string; absent fields are skipped.

@@ -35,18 +35,6 @@ ${SCOPE} p.type-headline-meta.absolute {
 	}
 }
 
-/* Introduction ("As CareSignal's sole Product Designer…") reads larger than
-   body copy — Funnel Sans 24/32, light. */
-${SCOPE} h1 + div {
-	max-width: none !important;
-}
-${SCOPE} h1 + div > * {
-	font-family: var(--font-body);
-	font-weight: 300;
-	font-size: 24px;
-	line-height: 32px;
-}
-
 /* Figure 1 "shift length" slider: thin rule track + a small round paper
    thumb, matching the workflow diagrams rather than the native control. */
 ${SCOPE} input[data-day-slider] {
