@@ -34,6 +34,7 @@ import {
 } from "../lib/weather.js";
 
 import { usePaintStore } from "../../../lib/paint-store.js";
+import { BRUSH_SIZE } from "./paint-brush";
 
 import type { PigmentOption } from "../../../../lib/washes/washes.js";
 
@@ -159,18 +160,19 @@ export function WashesCanvas({
       wash.paperWetness("damp");
       wash.paintLoad(0.15);
       wash.waterLoad(8.0);
-      wash.evaporation(2.5);
-      // v2 units: brushSize is a fraction of the canvas's smaller side.
-      // 160px matched the legacy hero (BRUSH_DEFAULT) — convert at init so
-      // the stroke feel stays identical.
+      wash.evaporation(3.125); // +25% drying speed
+      // v2's brushSize is a RADIUS as a fraction of the smaller display
+      // side (internal diameter = 2 × fraction × minSide). Match the painted
+      // diameter to the BRUSH_SIZE preview disc so the stroke lands the same
+      // size the cursor circle shows.
       {
         const r = host.getBoundingClientRect();
         const side = Math.min(r.width, r.height) || 620;
-        wash.brushSize(160 / side);
+        wash.brushSize(BRUSH_SIZE / 2 / side);
       }
       wash.edgeMode("gravity");
       wash.gravityDirection("down");
-      wash.gravityStrength(0.075);
+      wash.gravityStrength(0.1125); // +50% gravity
       wash.fadeHalfLife(10000);
       wash.fadePainting(0.05);
       // Smooth strokes on touch devices where pointermove is sparse.

@@ -34,7 +34,7 @@ export type PaintBrushProps = {
   excludeRef?: React.RefObject<HTMLElement | null>;
 };
 
-const BRUSH_SIZE = 88;
+export const BRUSH_SIZE = 88;
 
 export function PaintBrush({
   targetRef,
