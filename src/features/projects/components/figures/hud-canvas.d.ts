@@ -15,6 +15,13 @@ export function drawDayStrip(
 	minute?: number | null,
 ): void;
 
+/** "Impact over time": impactful work as an equalizer (one 0–5 bar per 9.6 min). */
+export function drawImpactStrip(
+	cv: HTMLCanvasElement | null,
+	spans?: string,
+	minute?: number | null,
+): void;
+
 /** "Patient Statuses": every patient as a dot (before = 100 from `log`, after = 1,600 from `all`). */
 export function drawStatusGrid(cv: HTMLCanvasElement | null, stats: HudStats): void;
 
@@ -23,6 +30,7 @@ export function fmtClock(minute?: number | null): string;
 
 declare const HudCanvas: {
 	drawDayStrip: typeof drawDayStrip;
+	drawImpactStrip: typeof drawImpactStrip;
 	drawStatusGrid: typeof drawStatusGrid;
 	fmtClock: typeof fmtClock;
 };

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Figure from '../../../src/features/projects/components/figures/Figure';
 import {
 	drawDayStrip,
+	drawImpactStrip,
 	drawStatusGrid,
 	fmtClock,
 } from '../../../src/features/projects/components/figures/hud-canvas';
@@ -116,7 +117,7 @@ function VizCanvas({
 	stats,
 	height,
 }: {
-	kind: 'day' | 'status';
+	kind: 'day' | 'impact' | 'status';
 	stats: StatsSource;
 	height: number;
 }) {
@@ -126,6 +127,7 @@ function VizCanvas({
 		if (!cv) return;
 		const draw = () => {
 			if (kind === 'day') drawDayStrip(cv, stats?.spans, stats?.minute);
+			else if (kind === 'impact') drawImpactStrip(cv, stats?.spans, stats?.minute);
 			else drawStatusGrid(cv, stats);
 		};
 		draw();
@@ -139,9 +141,9 @@ function VizCanvas({
 	);
 }
 
-// The per-half HUD column: How Time is Spent (a day strip + clock) over
-// Patient Statuses (a status grid). `tall` gives the after grid its 1,600
-// rows room; the before grid is just two rows.
+// The per-half HUD column: How Time is Spent (a day strip + clock), Impact
+// over time (an equalizer), then Patient Statuses (a status grid). `tall`
+// gives the after grid its 1,600 rows room; the before grid is just two rows.
 function HudViz({
 	stats,
 	align,
@@ -165,6 +167,19 @@ function HudViz({
 					</span>
 				</div>
 				<VizCanvas kind="day" stats={stats} height={10} />
+			</div>
+			<div className="flex flex-col gap-[4px]">
+				<span
+					className={labelCls}
+					style={{
+						fontFamily: 'var(--font-mono)',
+						color: INK_75,
+						textAlign: align === 'end' ? 'right' : 'left',
+					}}
+				>
+					Impact over time
+				</span>
+				<VizCanvas kind="impact" stats={stats} height={28} />
 			</div>
 			<div className="flex flex-col gap-[4px]">
 				<span

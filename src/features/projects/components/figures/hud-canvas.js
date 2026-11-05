@@ -138,6 +138,59 @@ export function drawStatusGrid(cv, stats) {
 	}
 }
 
+// "Impact over time": impactful work as an equalizer — one bar per 9.6 min,
+// 0–5 segments lit (alert 5, high 4, medium 3, low 1; no-answer / unknown /
+// idle 0), in that stretch's status colour. A stretch still under way only
+// lights what's been done so far (bounded by `minute`).
+export function drawImpactStrip(cv, spans, minute) {
+	if (!cv) return;
+	const p = prepCanvas(cv);
+	if (!p) return;
+	const { g, W, H } = p;
+	const BK = 9.6;
+	const NB = 50;
+	const end = Number.isFinite(minute) && minute > 0 ? Math.min(480, minute) : 0;
+	const ink = inkHex().slice(0, 7);
+	const V = { a: 5, r: 4, y: 3, g: 1 };
+	const col = (v) =>
+		v >= 4.5 ? VIZ_FILL.a : v >= 3.5 ? VIZ_FILL.r : v >= 2 ? VIZ_FILL.y : VIZ_FILL.g;
+	const sp = (typeof spans === 'string' ? spans : '')
+		.split(' ')
+		.map((t) => t.match(/^(\d+),(\d+)(\w)$/))
+		.filter(Boolean)
+		.map((m) => [+m[1], Math.max(+m[2], +m[1] + 1), V[m[3]] || 0]);
+	const slot = W / NB;
+	const bw = 2 * Math.max(1.5, Math.min((W / 50) * 0.4, 4));
+	const gap = 1.5;
+	const sh = (H - gap * 4) / 5;
+	for (let i = 0; i < NB; i++) {
+		const b0 = i * BK;
+		const b1 = Math.min(b0 + BK, end);
+		const cx = (i + 0.5) * slot - bw / 2;
+		let v = 0;
+		let sum = 0;
+		if (b1 > b0) {
+			for (const [s0, s1, val] of sp) {
+				const o = Math.min(s1, b1) - Math.max(s0, b0);
+				if (o > 0) sum += o * val;
+			}
+			v = sum / BK;
+		}
+		const lit = Math.min(5, Math.round(v));
+		const c = col(v);
+		for (let k = 0; k < 5; k++) {
+			const y = H - (k + 1) * sh - k * gap;
+			g.globalAlpha = k < lit ? 1 : 0.07;
+			g.fillStyle = k < lit ? c : ink;
+			g.beginPath();
+			if (g.roundRect) g.roundRect(cx, y, bw, sh, 1);
+			else g.rect(cx, y, bw, sh);
+			g.fill();
+		}
+	}
+	g.globalAlpha = 1;
+}
+
 export function fmtClock(minute) {
 	if (minute == null || minute < 0) return '';
 	const t = 9 * 60 + Math.floor(minute);
@@ -147,4 +200,4 @@ export function fmtClock(minute) {
 	return `${h12}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'am' : 'pm'}`;
 }
 
-export default { drawDayStrip, drawStatusGrid, fmtClock };
+export default { drawDayStrip, drawImpactStrip, drawStatusGrid, fmtClock };
