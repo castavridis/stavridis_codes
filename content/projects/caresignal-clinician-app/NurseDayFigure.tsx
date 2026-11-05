@@ -1250,16 +1250,20 @@ export function NurseDayFigure({
 		return () => ro.disconnect();
 	}, []);
 
-	// Hansa wash underlines on the "before"/"after" blurb eyebrows
-	// (TWEAKS §1 highlightPigment 'hansa', highlightHand 'left'; the dc's
-	// Nurse Day Complete attaches these on mount, left staggered 64ms / right
-	// 200ms). Queried off descRef so they ride the eyebrows' opacity dim.
+	// Hansa wash underlines on the "before"/"after" blurb eyebrows (TWEAKS §1
+	// highlightPigment 'hansa', highlightHand 'left'). The design draws these
+	// only once a scene starts playing — not on view — and sizes them to the
+	// label text (the eyebrow is self-start), not the whole blurb column.
+	const ebHandles = useRef<WashHandle[]>([]);
+	const ebDone = useRef(false);
 	useEffect(() => {
+		if (ebDone.current || !playingS) return;
 		const desc = descRef.current;
 		if (!desc) return;
+		ebDone.current = true;
 		const reduced = prefersReducedMotion();
 		const ebs = [...desc.querySelectorAll<HTMLElement>('.type-eyebrow')];
-		const handles: WashHandle[] = ebs.slice(0, 2).map((el, i) =>
+		ebHandles.current = ebs.slice(0, 2).map((el, i) =>
 			WashHighlightFX.attach(el, {
 				pigment: 'hansa',
 				mark: 'underline',
@@ -1272,8 +1276,8 @@ export function NurseDayFigure({
 				instant: reduced,
 			}),
 		);
-		return () => handles.forEach((h) => h.destroy());
-	}, []);
+	}, [playingS]);
+	useEffect(() => () => ebHandles.current.forEach((h) => h.destroy()), []);
 
 	// Seam-line / centre-button geometry (dc placePlay): --mid is the figure
 	// box's vertical centre (+ offsetY), --dsc the top of the before/after
@@ -1624,21 +1628,20 @@ export function NurseDayFigure({
 				>
 					<div className="flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[8px]">
 						<Figure />
-						<button
-							type="button"
-							onClick={() => {
-								if (M.playingS) {
-									if (!M.seqRunning) skipAfter();
-								} else play();
-							}}
-							className="pointer-events-auto cursor-pointer border-0 bg-transparent p-0 text-[12px] leading-[16px] tracking-[0.04em] whitespace-nowrap text-confetti-black underline underline-offset-[3px] hover:[text-decoration-thickness:2px]"
-							style={{
-								fontFamily: 'var(--font-mono)',
-								visibility: playingS && !canSkip ? 'hidden' : 'visible',
-							}}
-						>
-							{playingS ? 'Skip animation' : 'Replay'}
-						</button>
+						{/* The design shows a Skip only while a scene plays — no idle
+						    "Replay" (the seam's Play Simulation button is the replay). */}
+						{playingS && canSkip ? (
+							<button
+								type="button"
+								onClick={() => {
+									if (M.playingS && !M.seqRunning) skipAfter();
+								}}
+								className="pointer-events-auto cursor-pointer border-0 bg-transparent p-0 text-[12px] leading-[16px] tracking-[0.04em] whitespace-nowrap text-confetti-black underline underline-offset-[3px] hover:[text-decoration-thickness:2px]"
+								style={{ fontFamily: 'var(--font-mono)' }}
+							>
+								Skip animation
+							</button>
+						) : null}
 						<button
 							type="button"
 							onClick={onAssumptions}
@@ -1669,7 +1672,7 @@ export function NurseDayFigure({
 							className="flex min-w-0 flex-col gap-[6px]"
 							style={{ opacity: opB, transition: 'opacity 400ms ease' }}
 						>
-							<Text variant="eyebrow" as="span" className="block text-confetti-black">before</Text>
+							<Text variant="eyebrow" as="span" className="inline-block self-start text-confetti-black">before</Text>
 							<p
 								className="m-0 text-left text-[15px] leading-[22px] text-confetti-black [text-wrap:pretty]"
 								style={{ fontFamily: 'var(--font-body)' }}
@@ -1683,7 +1686,7 @@ export function NurseDayFigure({
 							className="flex min-w-0 flex-col gap-[6px]"
 							style={{ opacity: opA, transition: 'opacity 400ms ease' }}
 						>
-							<Text variant="eyebrow" as="span" className="block text-confetti-black">after</Text>
+							<Text variant="eyebrow" as="span" className="inline-block self-start text-confetti-black">after</Text>
 							<p
 								className="m-0 text-left text-[15px] leading-[22px] [text-wrap:pretty]"
 								style={{
@@ -1733,14 +1736,14 @@ export function NurseDayFigure({
 							Shift length
 							<input
 								type="range"
+								data-day-slider=""
 								min={15}
 								max={30}
 								step={5}
 								value={daySec}
 								onChange={(e) => onDaySec(+e.target.value)}
 								aria-label="Seconds per simulated shift"
-								className="m-0 h-[24px] w-[96px] min-w-0 flex-none cursor-pointer bg-transparent"
-								style={{ accentColor: 'var(--color-confetti-black)' }}
+								className="m-0 w-[96px] min-w-0 flex-none cursor-pointer bg-transparent"
 							/>
 							<span
 								className="min-w-[32px] text-right [font-variant-numeric:tabular-nums]"
