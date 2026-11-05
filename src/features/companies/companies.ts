@@ -60,6 +60,10 @@ export type CompanyConfig = {
   // company's context is active (e.g. a tailored résumé). When unset the
   // link falls back to the role-specific PDF (see role-context.ROLE_RESUME).
   resume?: string;
+  // `cover_letter` — URL of a custom cover letter for this company (e.g.
+  // '/cover-letters/C-Stavridis_{Company}_Cover-Letter.pdf'). Optional;
+  // nothing renders it yet, so for now it only records the file.
+  cover_letter?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
