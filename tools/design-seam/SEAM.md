@@ -73,6 +73,14 @@ side**, factor each into a standalone module the dc page imports (exactly like
 Each takes a host element + data and owns its canvas/DOM, like the orbit engine's
 `mount(el, {...}) → handle`. The React side becomes a thin `useEffect` wrapper.
 
+**Worked example — the rose drop (done).** `figures/wash-drop.js` is the first
+one factored out: `mount(el, { index, reduced, FX }) → { destroy() }`, no React,
+reads the washes helpers off `opts.FX` (default `window.WashHighlightFX`). The
+repo's `DropNumber.tsx` is now ~40 lines — the resting badge plus a
+mount/destroy. The dc page can `import { mount } from './wash-drop.js'` and drop
+`syncDrops`/`paintDrop` from its Component class, so neither side re-implements
+it. Copy this shape for the rest of the table.
+
 ## Verify instead of eyeball
 
 `tools/design-seam/visual-check.mjs` screenshots the live case study per section
