@@ -86,7 +86,7 @@ export function BackdropShot({
 			className="block w-full overflow-hidden rounded-[16px]"
 			style={{
 				aspectRatio: `${width} / ${height}`,
-				background: `#9fb6e8 url(${IMG}/fig-backdrop.webp) center / cover no-repeat`,
+				background: `var(--color-screenshot-sky) url(${IMG}/fig-backdrop.webp) center / cover no-repeat`,
 			}}
 		>
 			<FadeImg src={src} alt={alt} width={width} height={height} />
@@ -158,7 +158,7 @@ export function NumBadge({ n }: { n: number }) {
 	return (
 		<span
 			aria-hidden="true"
-			className="inline-flex size-[32px] shrink-0 items-center justify-center rounded-full bg-[#6f9e17] font-bold text-white"
+			className="bg-care-green inline-flex size-[32px] shrink-0 items-center justify-center rounded-full font-bold text-white"
 			style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: 1 }}
 		>
 			{n}

@@ -50,6 +50,10 @@
   --color-washes-cerulean-blue: #108ba0;
   --color-washes-paper: #fbf6ea;
 
+  /* Case-study accents (were hardcoded in components; tokenised per SEAM.md). */
+  --color-care-green: #6f9e17;
+  --color-screenshot-sky: #9fb6e8;
+
   --color-grad-danger-start: #e5562e40;
   --color-grad-warning-start: #f9ac3140;
   --color-grad-success-start: #b2d07f40;
