@@ -25,6 +25,10 @@ type MDXLayoutProps = {
   front: Front;
   onClose?: () => void;
   children: ReactNode;
+  // Optional per-case-study scope. Applied as `data-case` on the root so a
+  // case study can ship scoped style overrides (e.g. the design's
+  // `#nurse-case` front-matter tweaks) without touching this shared layout.
+  scopeId?: string;
   // When set, renders a rotating "Featured Project" seal above the
   // FrontMatter, slightly overlapping the headline. Driven by the
   // active /for/:company context — see ProjectSheetContent in app.tsx.
@@ -268,7 +272,7 @@ function ChromeRow({
   );
 }
 
-export default function MDXLayout({ front, onClose, children, stampCompanyName, stampSeal }: MDXLayoutProps) {
+export default function MDXLayout({ front, onClose, children, stampCompanyName, stampSeal, scopeId }: MDXLayoutProps) {
   // Anchor used by ChromeRow to find the nearest scrollable ancestor
   // at mount. The project SheetOverlay's `ProjectSheetContent` wraps
   // content with `position: absolute; inset: 0; overflow: auto` (in
@@ -282,7 +286,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
     // case study chrome sits on. Restored after the brief experiment
     // with a transparent backdrop made the body text unreadable over
     // the wash strip showing through.
-    <div ref={anchorRef} className="min-h-full w-full bg-white">
+    <div ref={anchorRef} data-case={scopeId} className="min-h-full w-full bg-white">
       <ChromeRow
         tags={front.tags}
         headline={front.headline}

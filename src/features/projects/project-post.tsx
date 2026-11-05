@@ -88,7 +88,7 @@ function V2ProjectPost({
     tools: project.tools,
   };
   return (
-    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal}>
+    <MDXLayout front={front} onClose={onBack} stampCompanyName={stampCompanyName} stampSeal={stampSeal} scopeId={project.slug}>
       <Suspense fallback={<p className="text-sm text-gray-500">Loading project...</p>}>
         <ProjectContent project={project} components={v2MdxComponents} />
       </Suspense>

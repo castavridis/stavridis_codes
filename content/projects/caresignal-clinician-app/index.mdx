@@ -14,6 +14,7 @@ color: '#201E1F'
 
 import BackToTop from '../../../src/features/projects/components/figures/BackToTop.tsx'
 import { AssumptionsModal } from './AssumptionsModal.tsx'
+import { CaseStudyStyle } from './CaseStudyStyle.tsx'
 import { FrontMatterWashes } from './FrontMatterWashes.tsx'
 import { SectionNav } from './SectionNav.tsx'
 import { HeroFigure } from './HeroFigure.tsx'
@@ -25,6 +26,9 @@ import { ScalingCareTeams } from './ScalingCareTeams.tsx'
 import { Outcomes } from './Outcomes.tsx'
 import { KeyLearnings } from './KeyLearnings.tsx'
 import { TeamAndTools } from './TeamAndTools.tsx'
+
+{/* Case-study-scoped style overrides (the design's #nurse-case tweaks) */}
+<CaseStudyStyle />
 
 {/* Wash underlines on the frontmatter headline + intro phrases */}
 <FrontMatterWashes />
