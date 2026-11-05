@@ -1,4 +1,3 @@
-import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { SectionHeading } from './shared';
@@ -23,24 +22,34 @@ const TEAMS = [
 	},
 ];
 
+// A full-width mono colophon under a top rule, per the design.
 export function TeamAndTools() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
+			<div className="w-full border-t border-confetti-black/12 pt-[32px]">
 				<SectionHeading id="team-and-tools">Team and Tools</SectionHeading>
-				<Text variant="copy" className="m-0 text-confetti-black/80">
-					<strong className="text-confetti-black">Tools</strong> Sketch,
-					Figma, React, TypeScript, CoffeeScript, Pug, SCSS, Blueprint.js,
-					Storybook, axe-core, Node.js, Sequelize
-				</Text>
-				<div className="flex flex-col gap-[8px]">
-					<Text variant="copy" className="m-0 font-bold text-confetti-black">Teams</Text>
-					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
+				<div
+					className="mt-[16px] flex flex-col gap-[4px] text-confetti-black"
+					style={{
+						fontFamily: 'var(--font-mono)',
+						fontSize: 14,
+						lineHeight: 1.6,
+						letterSpacing: '0.01em',
+					}}
+				>
+					<p className="m-0">
+						<strong className="font-bold">Tools</strong> Sketch, Figma, React,
+						TypeScript, CoffeeScript, Pug, SCSS, Blueprint.js, Storybook,
+						axe-core, Node.js, Sequelize
+					</p>
+					<p className="m-0">
+						<strong className="font-bold">Teams</strong>
+					</p>
+					<ul className="m-0" style={{ padding: '0 0 0 18px', listStyleType: "'· '" }}>
 						{TEAMS.map((team) => (
-							<Text variant="copy" as="li" key={team.label} className="text-confetti-black/80">
-								<strong className="text-confetti-black">{team.label}:</strong>{' '}
-								{team.people}
-							</Text>
+							<li key={team.label}>
+								{team.label}: {team.people}
+							</li>
 						))}
 					</ul>
 				</div>

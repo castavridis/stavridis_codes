@@ -1,4 +1,3 @@
-import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { SectionHeading } from './shared';
@@ -15,35 +14,44 @@ const LESSONS = [
 	'Build governance and decision-making into the product, not just the UI.',
 ];
 
+const groupTitle = {
+	fontFamily: 'var(--font-kyoto)',
+	fontWeight: 500,
+	fontSize: 28,
+	lineHeight: 1.2,
+} as const;
+const listStyle = {
+	fontFamily: 'var(--font-body)',
+	fontSize: 20,
+	lineHeight: 1.5,
+} as const;
+
+function LearnList({ items }: { items: string[] }) {
+	return (
+		<ul
+			className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+			style={listStyle}
+		>
+			{items.map((it) => (
+				<li key={it}>{it}</li>
+			))}
+		</ul>
+	);
+}
+
 export function KeyLearnings() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+			<div className="flex w-full max-w-[705px] flex-col gap-[20px] xl:ml-auto">
 				<SectionHeading id="conclusion">Key Learnings</SectionHeading>
-				<div className="flex flex-col gap-[8px]">
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
-						Challenges
-					</Text>
-					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
-						{CHALLENGES.map((item) => (
-							<Text variant="copy" as="li" key={item} className="text-confetti-black/80">
-								{item}
-							</Text>
-						))}
-					</ul>
-				</div>
-				<div className="flex flex-col gap-[8px]">
-					<Text variant="callout-title" as="h3" className="m-0 text-confetti-black">
-						Lessons Learned
-					</Text>
-					<ul className="m-0 flex flex-col gap-[8px] pl-[20px]">
-						{LESSONS.map((item) => (
-							<Text variant="copy" as="li" key={item} className="text-confetti-black/80">
-								{item}
-							</Text>
-						))}
-					</ul>
-				</div>
+				<h3 className="m-0 text-confetti-black" style={groupTitle}>
+					Challenges
+				</h3>
+				<LearnList items={CHALLENGES} />
+				<h3 className="m-0 text-confetti-black" style={groupTitle}>
+					Lessons Learned
+				</h3>
+				<LearnList items={LESSONS} />
 			</div>
 		</Section>
 	);
