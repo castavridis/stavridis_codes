@@ -61,9 +61,24 @@ export type WashHandle = {
 	destroy(): void;
 };
 
+export type WashesStatic = import('../../../../../lib/washes/washes.js').WashesStatic;
+export type WashesInstance = import('../../../../../lib/washes/washes.js').WashesInstance;
+
 declare const WashHighlightFX: {
 	attach(el: HTMLElement, opts?: WashHighlightOptions): WashHandle;
 	swipe(el: HTMLElement, opts?: WashSwipeOptions): WashHandle;
+	/** Lazily load the shared washes engine (one cached promise). */
+	loadWashes(): Promise<WashesStatic>;
+	/** Effective paper colour behind an element, as a `#rrggbb` string. */
+	backdrop(el: HTMLElement): string;
+	/** `#rrggbb` → normalized {r,g,b} in 0..1. */
+	h01(hex: string): { r: number; g: number; b: number };
+	/** Named pigment → its ink `#rrggbb`. */
+	inkOf(name: string): string;
+	/** Build a Kubelka–Munk pigment for an ink over a paper colour. */
+	kmPigment(inkHex: string, paperHex: string, dye?: number): unknown;
+	/** Freeze a finished wash to a still image inside `host`; returns success. */
+	freeze(wc: WashesInstance, host: HTMLElement): boolean;
 };
 
 export default WashHighlightFX;

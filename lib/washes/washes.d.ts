@@ -384,6 +384,14 @@ export interface Preset {
  * are computed from the target element's size and the user's viewport.
  */
 export interface CreateOptions {
+  /** Transparent paper: composite over whatever is behind the canvas instead of filling with the paper colour. */
+  transparent?: boolean;
+  /** Deterministic RNG seed for paper grain and pigment scatter. */
+  seed?: number;
+  /** Fixed logical canvas size, in px, instead of measuring the host. */
+  size?: { width: number; height: number };
+  /** Pre-built pigment slots (e.g. from a Kubelka–Munk helper). */
+  pigments?: unknown[];
   /** Pixels per simulation cell. Higher = lower-res, faster. Default = 1.75. URL `?scale=` also accepted. */
   scale?: number;
   /** Canvas DPI scale factor. Default = window.devicePixelRatio. */
@@ -438,8 +446,11 @@ export interface WashesInstance {
   /** List of named splash presets (e.g. `'default'`, `'bigSplash'`, `'fineSpritz'`). */
   splashPresets(): string[];
 
-  /** Soak the entire canvas in water — reactivates any deposited pigment. */
-  rewet(): WashesInstance;
+  /**
+   * Soak the canvas in water, reactivating deposited pigment. With no args,
+   * the whole canvas; with normalized (x, y, radius) in 0..1, a local spot.
+   */
+  rewet(x?: number, y?: number, radius?: number): WashesInstance;
 
   /** Force-evaporate all wetness. Pigment stays where it is. */
   dry(): WashesInstance;
@@ -448,10 +459,20 @@ export interface WashesInstance {
   reset(): WashesInstance;
 
   /**
+   * Programmatic paint stamp at normalized display coordinates (0..1), where
+   * (0,0) is the top-left of the canvas and `radius` is a fraction of the
+   * smaller display side. Use `paintAt` for grid coordinates.
+   */
+  paint(x: number, y: number, radius: number, pigment?: PigmentOption, strength?: number): WashesInstance;
+
+  /**
    * Programmatic paint stamp at grid coordinates (not display coordinates).
    * Use `toGrid(displayX, displayY)` to convert if you have display coords.
    */
   paintAt(gx: number, gy: number, gridRadius: number, pigment?: PigmentOption, strength?: number): WashesInstance;
+
+  /** Lift the brush, ending the current continuous stroke. */
+  penUp(): WashesInstance;
 
   /** Stamp text using the active brush. */
   paintText(text: string, opts?: PaintTextOptions): Promise<void>;
