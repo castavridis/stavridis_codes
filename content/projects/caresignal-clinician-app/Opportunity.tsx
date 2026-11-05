@@ -28,9 +28,9 @@ const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 export function Opportunity() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
+			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[24px]">
 				<SectionHeading id="opportunity">Opportunity</SectionHeading>
-				<Text variant="copy" className="m-0 text-confetti-black/80">
+				<Text variant="copy-large" className="m-0 text-confetti-black">
 					Centralized care management was created to address that gap. These
 					care teams could follow up and render necessary care between visits,
 					gaining more insight into their patients’ health. However, a standard
@@ -38,26 +38,42 @@ export function Opportunity() {
 				</Text>
 				{/* Watercolour drop numerals come with the wash engine; plain
 				    numbered badges until then */}
-				<ol className="m-0 flex list-none flex-col gap-[16px] p-0">
+				<ol className="m-0 flex list-none flex-col gap-[24px] pl-[24px]">
 					{DOWNSIDES.map((item, i) => (
-						<li key={item.lead} className="flex gap-[14px]">
-							<Text variant="callout-title" as="span" className="mt-[2px] flex size-[32px] shrink-0 items-center justify-center rounded-full bg-[#a50e53]/10 font-bold text-[#a50e53]">
-								{i + 1}
-							</Text>
-							<Text variant="copy" className="m-0 text-confetti-black/80">
-								<strong className="text-confetti-black">{item.lead}</strong>
+						<li
+							key={item.lead}
+							className="grid grid-cols-[28px_minmax(0,1fr)] items-start gap-[16px]"
+						>
+							<span
+								aria-hidden="true"
+								className="relative mt-[2px] inline-flex size-[28px] items-center justify-center rounded-full font-bold text-confetti-black"
+								style={{
+									isolation: 'isolate',
+									background: 'transparent',
+									boxShadow: 'inset 0 0 0 1.5px #a50e53',
+									fontFamily: 'var(--font-body)',
+									fontSize: 14,
+									lineHeight: 1,
+								}}
+							>
+								<span className="relative z-[1]">{i + 1}</span>
+							</span>
+							<Text variant="copy-large" className="m-0 text-confetti-black">
+								<strong className="font-semibold text-confetti-black">
+									{item.lead}
+								</strong>
 								{item.rest}
 							</Text>
 						</li>
 					))}
 				</ol>
-				<Text variant="copy" className="m-0 text-confetti-black/80">
-					<strong className="text-confetti-black">
+				<Text variant="copy-large" className="m-0 text-confetti-black">
+					<strong className="font-semibold text-confetti-black">
 						Nurse care managers were able to manage 30 to 100 patients
 					</strong>{' '}
 					in a standard implementation.
 					<Citation {...CITATIONS.standardCaseload} />
-					<sup className="type-callout-meta text-confetti-black/60">,</sup>
+					<sup className="type-callout-meta text-confetti-black">,</sup>
 					<Citation {...CITATIONS.standardCaseload2} />
 				</Text>
 			</div>
