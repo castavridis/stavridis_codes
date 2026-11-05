@@ -125,7 +125,9 @@ function VizCanvas({
 	useEffect(() => {
 		const cv = ref.current;
 		if (!cv) return;
+		let cancelled = false;
 		const draw = () => {
+			if (cancelled) return;
 			if (kind === 'day') drawDayStrip(cv, stats?.spans, stats?.minute);
 			else if (kind === 'impact') drawImpactStrip(cv, stats?.spans, stats?.minute);
 			else drawStatusGrid(cv, stats);
@@ -134,7 +136,10 @@ function VizCanvas({
 		const ro = new ResizeObserver(draw);
 		ro.observe(cv);
 		document.fonts?.ready.then(draw).catch(() => {});
-		return () => ro.disconnect();
+		return () => {
+			cancelled = true;
+			ro.disconnect();
+		};
 	}, [kind, stats]);
 	return (
 		<canvas ref={ref} aria-hidden="true" className="block w-full" style={{ height }} />
@@ -1461,6 +1466,17 @@ export function NurseDayFigure({
 	const statsA = playingS
 		? afterStats(M.aLive ? { ...(sa ?? {}), phase: 'after' } : sb?.phase === 'after' ? sb : null)
 		: afterStats(sa);
+	// The HUD canvases read the SAME source the numeric columns derive from (not
+	// the raw sb/sa), so the strips/grids stay in sync with the numbers through
+	// the before->after morph and at rest.
+	const hudB: StatsSource = playingS ? (bAfterish ? (M.bLast ?? null) : sb) : sb;
+	const hudA: StatsSource = playingS
+		? M.aLive
+			? { ...(sa ?? {}), phase: 'after' }
+			: sb?.phase === 'after'
+				? sb
+				: null
+		: sa;
 	const canSkip = playingS && sb?.phase !== 'after';
 	// Centre button (dc playVals): Play Simulation (pill) → Next → Finish. The
 	// seam's gap hosts whichever label is live; Finish goes inert while the day
@@ -1806,23 +1822,28 @@ export function NurseDayFigure({
 					ref={ftRef}
 					className="absolute bottom-[24px] left-[24px] right-[24px] z-[7] flex flex-col gap-[20px]"
 				>
-					{/* Per-half HUD: How Time is Spent + Patient Statuses (the
-					    design's footer visualizations). Two-up on desktop; the
-					    inactive half dims while the other plays. */}
+					{/* Per-half HUD: How Time is Spent + Impact over time + Patient
+					    Statuses. Two-up on desktop (the inactive half dims while the
+					    other plays); on phones only the visible half shows, like the
+					    stat columns (showBCol/showACol). */}
 					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px]">
-						<div style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}>
-							<HudViz stats={sb} align="start" />
-						</div>
+						{showBCol ? (
+							<div style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}>
+								<HudViz stats={hudB} align="start" />
+							</div>
+						) : null}
 						<div
 							aria-hidden="true"
 							className="hidden md:block"
 							style={{ background: INK_35 }}
 						/>
-						<div style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}>
-							<HudViz stats={sa} align="end" />
-						</div>
+						{showACol ? (
+							<div style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}>
+								<HudViz stats={hudA} align="end" />
+							</div>
+						) : null}
 					</div>
-					<div className="flex flex-wrap items-center justify-between gap-x-[24px] gap-y-[12px]">
+					<div className="flex flex-col gap-[12px] md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-[24px]">
 						<div
 							ref={legendRef}
 							aria-label="Legend"

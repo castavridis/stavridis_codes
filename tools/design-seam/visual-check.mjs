@@ -76,9 +76,11 @@ async function diffFraction(a, b) {
 				new Promise((res) => {
 					const img = new Image();
 					img.onload = () => res(img);
+					img.onerror = () => res(null); // a corrupt PNG must not hang the check
 					img.src = 'data:image/png;base64,' + b64;
 				});
 			const [ia, ib] = await Promise.all([load(aB64), load(bB64)]);
+			if (!ia || !ib) return 1; // couldn't decode one side -> treat as fully changed
 			const w = Math.min(ia.width, ib.width);
 			const h = Math.min(ia.height, ib.height);
 			if (!w || !h) return 1;

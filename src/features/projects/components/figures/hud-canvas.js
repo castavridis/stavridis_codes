@@ -36,7 +36,9 @@ function prepCanvas(cv) {
 	const H = cv.clientHeight;
 	const dpr = Math.min(2, window.devicePixelRatio || 1);
 	if (!W || !H) return null;
-	if (cv.width !== Math.round(W * dpr)) {
+	// Resize the backing store on a width OR height change — a status canvas
+	// grows 14 -> 80px on the before->after morph with its width unchanged.
+	if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
 		cv.width = Math.round(W * dpr);
 		cv.height = Math.round(H * dpr);
 	}
