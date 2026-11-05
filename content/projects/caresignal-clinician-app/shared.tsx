@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 
 import Text from '../../../src/components/Text';
 import Figure from '../../../src/features/projects/components/figures/Figure';
+import { observe as fadeInObserve } from '../../../src/features/projects/components/fade-in';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 
 export { default as Citation } from '../../../src/features/projects/components/figures/Citation';
@@ -109,33 +110,10 @@ function FadeImg({
 }) {
 	const ref = useRef<HTMLImageElement>(null);
 	useEffect(() => {
-		const img = ref.current;
-		if (!img) return;
-		const show = () => {
-			img.style.opacity = '1';
-		};
-		if (prefersReducedMotion()) {
-			img.style.transition = 'none';
-			show();
-			return;
-		}
-		let io: IntersectionObserver | null = new IntersectionObserver(
-			(entries) => {
-				for (const e of entries) {
-					if (!e.isIntersecting) continue;
-					io?.disconnect();
-					io = null;
-					if (img.complete && img.naturalWidth) requestAnimationFrame(show);
-					else
-						img.addEventListener('load', () => requestAnimationFrame(show), {
-							once: true,
-						});
-				}
-			},
-			{ threshold: 0.15 },
-		);
-		io.observe(img);
-		return () => io?.disconnect();
+		const handle = fadeInObserve(ref.current, {
+			reduced: prefersReducedMotion(),
+		});
+		return () => handle.destroy();
 	}, []);
 	return (
 		<img

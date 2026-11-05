@@ -87,10 +87,16 @@ Each takes a host element + data and owns its canvas/DOM, like the orbit engine'
   minute)`, `drawStatusGrid(cv, stats)`, `fmtClock(minute)` (both `day-strip` and
   `status-grid` rows folded into one module). `NurseDayFigure`'s `VizCanvas` is a
   thin redraw wrapper; the dc page drops `drawDay`/`drawBefore`/`drawBar`.
+- `components/fade-in.js` — `observe(el, { reduced }) → { destroy() }`: fade an
+  element up once it has loaded (if an `<img>`) and scrolled into view. `shared`'s
+  `FadeImg` is a one-line wrapper; the dc page drops `fadeImgs`.
 
-Either way the dc page imports the same module and drops the matching methods
-(`syncDrops`/`paintDrop`, `gumPeel`/`gumPress`/`navGum`) from its Component class
-— neither side re-implements it. Copy this shape for the rest of the table.
+**The whole table is now extracted.** The dc page imports each module and drops
+the matching Component-class methods (`syncDrops`/`paintDrop`,
+`gumPeel`/`gumPress`/`navGum`, `drawDay`/`drawBefore`/`drawBar`, `fadeImgs`) —
+neither side re-implements an interaction. That's the pattern for every future
+case study: a bespoke interaction is a shared module from the start, not
+something each side hand-ports.
 
 ## Verify instead of eyeball
 
