@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import * as gum from '../../../src/features/projects/components/nav-gum';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 import { findScrollport } from '../../../src/features/projects/components/figures/scrollport';
 
@@ -26,127 +27,6 @@ const ITEMS = [
 // "Proof of Concept"; before that the whole list is shown.
 const COLLAPSE_FROM = ITEMS.findIndex((it) => it.key === 'starting-point');
 const INK = 'var(--color-confetti-black)';
-const STUCK_SHADOW = '0 4px 14px rgba(57,31,0,0.10)';
-const CLEAR_SHADOW = '0 4px 14px rgba(57,31,0,0)';
-const GUM_TRANSITION =
-	'border-color 260ms ease, background-color 260ms ease, box-shadow 260ms ease';
-
-// ---- the gum-peel: the card strains up on invisible strands that snap one
-// by one (border + shadow building in), then springs free; un-sticking plays
-// a squish back down. State is keyed off the card element via a WeakMap so it
-// survives React re-renders; border/shadow ride CSS vars so React's static
-// style never clobbers the running animation.
-type GumState = {
-	raf: number;
-	lift: number;
-	kick: number;
-	last: number;
-	t0: number;
-	sprung: boolean;
-	done: () => void;
-};
-const gums = new WeakMap<HTMLElement, GumState>();
-
-function setChrome(card: HTMLElement, border: string, shadow: string) {
-	card.style.setProperty('--nav-border', border);
-	card.style.setProperty('--nav-shadow', shadow);
-}
-
-function gumEnd(card: HTMLElement) {
-	const g = gums.get(card);
-	if (!g) return;
-	cancelAnimationFrame(g.raf);
-	gums.delete(card);
-}
-
-function gumPeel(card: HTMLElement, scroller: HTMLElement | null) {
-	if (gums.has(card)) return;
-	const n = 3 + Math.floor(Math.random() * 2);
-	const strands = Array.from({ length: n }, () => ({
-		snap: 34 + Math.random() * 70,
-		at: 0,
-	}));
-	const sy0 = scroller ? scroller.scrollTop : window.scrollY;
-	card.style.transition = 'none';
-	const look = (lift: number, k: number) => {
-		const L = Math.max(0, Math.min(1.15, lift));
-		setChrome(
-			card,
-			`color-mix(in srgb, var(--color-confetti-black) ${Math.round(Math.min(1, L) * 100)}%, transparent)`,
-			`0 ${(1 + 3 * L + 3 * k).toFixed(1)}px ${(4 + 10 * L + 8 * k).toFixed(1)}px rgba(57,31,0,${(0.1 * L + 0.04 * k).toFixed(3)})`,
-		);
-	};
-	const done = () => {
-		card.style.transition = GUM_TRANSITION;
-		setChrome(card, INK, STUCK_SHADOW);
-		card.style.transform = '';
-		card.style.transformOrigin = '';
-	};
-	const g: GumState = { raf: 0, lift: 0, kick: 0, last: 0, t0: 0, sprung: false, done };
-	gums.set(card, g);
-	const tick = (now: number) => {
-		if (gums.get(card) !== g) return;
-		if (!g.t0) g.t0 = now;
-		const cur = scroller ? scroller.scrollTop : window.scrollY;
-		const Lp = Math.max(0, cur - sy0);
-		const age = now - g.t0;
-		const dt = Math.min(0.05, (now - (g.last || now)) / 1000);
-		g.last = now;
-		let held = 0;
-		let k = 0;
-		for (const s of strands) {
-			if (!s.at && (Lp >= s.snap || age > 1100 + s.snap * 6 || cur < sy0 - 4)) {
-				s.at = now;
-				g.kick += 0.35;
-			}
-			if (!s.at) {
-				held++;
-				k = Math.max(k, Math.min(1, Lp / s.snap));
-			}
-		}
-		const target = (n - held) / n;
-		g.lift += (target + g.kick - g.lift) * (1 - Math.exp(-dt * 14));
-		g.kick *= Math.exp(-dt * 9);
-		look(g.lift, held ? k : 0);
-		if (held) {
-			card.style.transformOrigin = '50% 100%';
-			card.style.transform = `translateY(${(-k * 6).toFixed(2)}px) scaleY(${(1 + k * 0.025).toFixed(4)})`;
-		} else if (!g.sprung) {
-			g.sprung = true;
-			card.style.transform = '';
-			card.animate?.(
-				[
-					{ transform: `translateY(${-k * 6}px)`, transformOrigin: '50% 100%' },
-					{ transform: 'translateY(3px) scaleY(0.985)', transformOrigin: '50% 100%', offset: 0.45 },
-					{ transform: 'translateY(-1px) scaleY(1.004)', transformOrigin: '50% 100%', offset: 0.75 },
-					{ transform: 'none', transformOrigin: '50% 100%' },
-				],
-				{ duration: 480, easing: 'cubic-bezier(.2,.7,.3,1)' },
-			);
-		}
-		if (!held && Math.abs(g.lift - 1) < 0.01 && g.kick < 0.01) {
-			gums.delete(card);
-			done();
-			return;
-		}
-		g.raf = requestAnimationFrame(tick);
-	};
-	g.raf = requestAnimationFrame(tick);
-}
-
-function gumPress(card: HTMLElement) {
-	gumEnd(card);
-	card.style.transition = GUM_TRANSITION;
-	setChrome(card, 'transparent', CLEAR_SHADOW);
-	card.animate?.(
-		[
-			{ transform: 'scaleY(1)', transformOrigin: '50% 0' },
-			{ transform: 'scaleY(0.975) scaleX(1.01)', transformOrigin: '50% 0', offset: 0.4 },
-			{ transform: 'none', transformOrigin: '50% 0' },
-		],
-		{ duration: 320, easing: 'ease-out' },
-	);
-}
 
 export function SectionNav() {
 	const cardRef = useRef<HTMLDivElement>(null);
@@ -204,23 +84,22 @@ export function SectionNav() {
 		if (!card) return;
 		if (firstStuck.current) {
 			firstStuck.current = false;
-			setChrome(card, stuck ? INK : 'transparent', stuck ? STUCK_SHADOW : CLEAR_SHADOW);
+			gum.set(card, stuck);
 			return;
 		}
 		if (prefersReducedMotion()) {
-			card.style.transition = GUM_TRANSITION;
-			setChrome(card, stuck ? INK : 'transparent', stuck ? STUCK_SHADOW : CLEAR_SHADOW);
+			gum.set(card, stuck, { animate: true });
 			return;
 		}
-		if (stuck) gumPeel(card, findScrollport(card) ?? null);
-		else gumPress(card);
+		if (stuck) gum.peel(card, findScrollport(card) ?? null);
+		else gum.press(card);
 	}, [stuck]);
 
 	// Stop any running gum animation on unmount.
 	useEffect(() => {
 		const card = cardRef.current;
 		return () => {
-			if (card) gumEnd(card);
+			if (card) gum.end(card);
 		};
 	}, []);
 
