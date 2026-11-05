@@ -3,9 +3,9 @@ import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
 import {
+	BackdropShot,
 	Citation,
 	FigCaption,
-	FigPlaceholder,
 	IMG,
 	SectionHeading,
 } from './shared';
@@ -14,15 +14,23 @@ export function ProductMarketFit() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
 					<SectionHeading id="product-market-fit">
 						Finding Product-Market Fit
 					</SectionHeading>
-					<Text variant="headline-small" className="m-0 text-confetti-black">
+					<p
+						className="m-0 text-confetti-black [text-wrap:balance]"
+						style={{
+							fontFamily: 'var(--font-kyoto)',
+							fontWeight: 500,
+							fontSize: 'clamp(28px,3vw,36px)',
+							lineHeight: 1.22,
+						}}
+					>
 						I transitioned our clinician application from a research project
 						to a commercial product.
-					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					</p>
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						When we started commercializing CareSignal, we sold to
 						organizations of different sizes. We had enterprise contracts in
 						our pipeline but the average time to close was 18 months.
@@ -30,7 +38,7 @@ export function ProductMarketFit() {
 						acquire small practices faster at a lower cost with fewer updates
 						to our current product.
 					</Text>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Part of the motivation to target small practices was that we
 						assumed that the doctors could control their budgets and were
 						motivated to increase their upside through MACRA, MIPS, and CCM.
@@ -40,17 +48,18 @@ export function ProductMarketFit() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col gap-[12px]">
-					<img
+				<figure className="m-0 flex w-full flex-col items-center gap-[16px]">
+					<BackdropShot
 						src={`${IMG}/fig-ccm-report-timer.webp`}
+						width={1506}
+						height={722}
 						alt="A Chronic Care Management activity log report for a patient, listing call logs and call notes with durations, beside the Time Tracker modal with minute and second fields, optional notes and a Change Patient button."
-						className="block w-full rounded-[16px]"
 					/>
 					<FigCaption fig>Chronic Care Management Report and Timer</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I also designed ways for our doctors to enroll patients without
 						logging into the system. One of our early pricing models charged
 						per patient, similar to other SaaS models. The small practices
@@ -60,32 +69,49 @@ export function ProductMarketFit() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col gap-[12px]">
-					<FigPlaceholder
-						label="“Prescription pads and Excel sheets” — ways to input patient data without logging in (imagery to come)"
-						height={280}
-					/>
-				</figure>
+				<div
+					className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[#f7f6f5]"
+					style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,5vw,72px)' }}
+				>
+					<p
+						className="m-0 text-confetti-black"
+						style={{ fontFamily: 'var(--font-body)', fontSize: 20, lineHeight: 1.5 }}
+					>
+						<strong className="font-semibold">
+							Prescription pads and Excel sheets
+						</strong>{' '}
+						Ways to input patient data without logging in.
+					</p>
+					<span
+						className="tracking-[0.04em] text-confetti-black/55"
+						style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}
+					>
+						Placeholder — imagery to come
+					</span>
+				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[16px]">
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						We were able to successfully close a few small practices before
 						our enterprise contracts closed. However it became clear they
 						could not be our target customer.
 					</Text>
-					<ol className="m-0 flex flex-col gap-[12px] pl-[24px]">
-						<Text variant="copy" as="li" className="text-confetti-black/80">
+					<ol
+						className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+						style={{ fontFamily: 'var(--font-body)', fontSize: 20, lineHeight: 1.5 }}
+					>
+						<li>
 							The perception of organizational updates needed to adopt new
 							technology cooled prospects to buying CareSignal, despite the
 							potential upside.
-						</Text>
-						<Text variant="copy" as="li" className="text-confetti-black/80">
+						</li>
+						<li>
 							Small practices that did adopt CareSignal needed the same amount
 							of account management time to periodically train and support
 							staff as our enterprise customers.
-						</Text>
+						</li>
 					</ol>
-					<Text variant="copy" className="m-0 text-confetti-black/80">
+					<Text variant="copy-large" className="m-0 text-confetti-black">
 						After we closed our enterprise clients, we quickly found they were
 						a better fit and I started to design our application for scale.
 					</Text>
