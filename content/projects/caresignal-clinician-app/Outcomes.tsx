@@ -40,14 +40,16 @@ const statList = {
 	lineHeight: 1.5,
 } as const;
 
+// A stat panel card, shaped like the Design Principle cards (paper, 12px
+// radius, same padding) so the three panels read as one row of three.
 function StatPanel({ title, stats }: { title: string; stats: string[] }) {
 	return (
-		<div className="flex w-full max-w-[704px] flex-col gap-[20px] ml-auto">
-			<h3 className="m-0 text-confetti-black" style={panelTitle}>
+		<div className="box-border flex h-full w-full flex-col gap-[16px] rounded-[12px] bg-washes-paper py-[24px] px-[clamp(20px,3vw,36px)]">
+			<h3 className="m-0 text-confetti-black [text-wrap:pretty]" style={panelTitle}>
 				{title}
 			</h3>
 			<ul
-				className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+				className="m-0 flex list-none flex-col gap-[8px] p-0 text-confetti-black [text-wrap:pretty]"
 				style={statList}
 			>
 				{stats.map((s) => (
@@ -78,24 +80,27 @@ export function Outcomes() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[704px] flex-col gap-[20px] ml-auto">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto">
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
-					<h3 className="m-0 text-confetti-black" style={panelTitle}>
-						Centralized Care Management Nurse Panel Size
-					</h3>
-					<ul
-						className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
-						style={statList}
-					>
-						<li>Before: 100</li>
-						<li>After: 1,500</li>
-					</ul>
 				</div>
 
-				<StatPanel
-					title="Acute Patient Panel"
-					stats={['Providers: 3', 'Patients: 3,250']}
-				/>
+				{/* The three panels: full width, three across (stacked on
+				    phones), like the design principles; the cards share a row
+				    height. The orbits follow in panel order. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
+					<StatPanel
+						title="Centralized Care Management Nurse Panel Size"
+						stats={['Before: 100', 'After: 1,500']}
+					/>
+					<StatPanel
+						title="Acute Patient Panel"
+						stats={['Providers: 3', 'Patients: 3,250']}
+					/>
+					<StatPanel
+						title="Hub and Spoke Model"
+						stats={['Providers: 2', 'Patients: 300']}
+					/>
+				</div>
 
 				{/* Care Team Orbit, model="acute" */}
 				<OrbitSlot
@@ -105,11 +110,6 @@ export function Outcomes() {
 					alertRate={0.5}
 					escalateRate={15}
 					{...TEAM}
-				/>
-
-				<StatPanel
-					title="Hub and Spoke Model"
-					stats={['Providers: 2', 'Patients: 300']}
 				/>
 
 				{/* Care Team Orbit, model="hub" */}

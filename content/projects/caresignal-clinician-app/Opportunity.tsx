@@ -29,7 +29,7 @@ const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 export function Opportunity() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[24px]">
+			<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 				<SectionHeading id="opportunity">Opportunity</SectionHeading>
 				<Text variant="copy-large" className="m-0 text-confetti-black">
 					Centralized care management was created to address that gap. These
@@ -39,7 +39,7 @@ export function Opportunity() {
 				</Text>
 				{/* Watercolour drop numerals: a rose drop pools into each badge as
 				    it scrolls in, drying with a darkened rim (DropNumber). */}
-				<ol className="m-0 flex list-none flex-col gap-[24px] pl-[24px]">
+				<ol className="m-0 flex list-none flex-col gap-[16px] pl-[24px]">
 					{DOWNSIDES.map((item, i) => (
 						<li
 							key={item.lead}
