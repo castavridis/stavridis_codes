@@ -206,7 +206,14 @@ function HudViz({
 // The page data-props defaults run through the reference params0() builder
 // (CareSignal Application Case Study.dc.html); day-complete shift length is
 // 15 s. Mobile swaps to the bird's-eye tune, as the reference does.
-function engineParams(daySeconds: number, mobile: boolean, reduced: boolean): NurseOrbitParams {
+type QualityTier = 'high' | 'medium' | 'low';
+
+function engineParams(
+	daySeconds: number,
+	mobile: boolean,
+	reduced: boolean,
+	quality: QualityTier = 'high',
+): NurseOrbitParams {
 	const p: NurseOrbitParams = {
 		greyMix: 0.64,
 		arrangement: 'organic',
@@ -260,7 +267,9 @@ function engineParams(daySeconds: number, mobile: boolean, reduced: boolean): Nu
 		sealTone: 'light',
 		dark: false,
 		wetness: 'wetOnWet',
-		quality: 'auto',
+		// The engine only understands concrete tiers ('auto' would read as
+		// low); the host resolves 'auto' with the FPS governor below.
+		quality,
 		...(mobile
 			? {
 					view: 'birdseye',
@@ -382,6 +391,7 @@ type Machine = {
 	dead: boolean;
 	fx: { before?: NurseOrbitHandle; after?: NurseOrbitHandle };
 	env: { mobile: boolean; reduced: boolean };
+	qTier: QualityTier; // resolved 'auto' quality (dc state.qTier)
 	p0: NurseOrbitParams;
 	daySec: number;
 	ribbon: 'infinity day done' | 'before and after';
@@ -486,6 +496,7 @@ export function NurseDayFigure({
 		dead: false,
 		fx: {},
 		env: { mobile: false, reduced: false },
+		qTier: 'high',
 		p0: {},
 		daySec: 15,
 		ribbon,
@@ -983,7 +994,7 @@ export function NurseDayFigure({
 		const mqMobile = window.matchMedia('(max-width: 700px)');
 		const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 		M.env = { mobile: mqMobile.matches, reduced: mqReduced.matches };
-		M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced);
+		M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced, M.qTier);
 
 		const onStats = (key: 'b' | 'a') => (s: NurseOrbitStats) => {
 			if (key === 'a') {
@@ -1289,16 +1300,54 @@ export function NurseDayFigure({
 
 		const retune = () => {
 			M.env = { mobile: mqMobile.matches, reduced: mqReduced.matches };
-			M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced);
+			M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced, M.qTier);
 			M.fx.before?.setParams({ ...M.p0, startAt: 'before' });
 			M.fx.after?.setParams({ ...M.p0, startAt: 'tuesday' });
 		};
 		mqMobile.addEventListener('change', retune);
 		mqReduced.addEventListener('change', retune);
 
+		// Quality governor (dc governor()): start high, step down a tier after
+		// 2 s under 35 fps, back up after 5 s over 55 fps; idle while hidden.
+		const TIERS: QualityTier[] = ['high', 'medium', 'low'];
+		let govRaf = 0,
+			frames = 0,
+			t0 = performance.now(),
+			lowN = 0,
+			highN = 0;
+		const govern = (now: number) => {
+			govRaf = requestAnimationFrame(govern);
+			frames++;
+			if (now - t0 < 1000) return;
+			const fps = (frames * 1000) / (now - t0);
+			frames = 0;
+			t0 = now;
+			if (document.hidden) {
+				lowN = highN = 0;
+				return;
+			}
+			if (fps < 35) {
+				lowN++;
+				highN = 0;
+			} else if (fps > 55) {
+				highN++;
+				lowN = 0;
+			} else lowN = highN = 0;
+			const i = TIERS.indexOf(M.qTier);
+			let next: QualityTier | null = null;
+			if (lowN >= 2 && i < 2) next = TIERS[i + 1];
+			else if (highN >= 5 && i > 0) next = TIERS[i - 1];
+			if (!next) return;
+			lowN = highN = 0;
+			M.qTier = next;
+			retune();
+		};
+		govRaf = requestAnimationFrame(govern);
+
 		return () => {
 			M.dead = true;
 			cancelAnimationFrame(M.infRaf);
+			cancelAnimationFrame(govRaf);
 			clearTimeout(rsT);
 			if (M.liveT != null) clearTimeout(M.liveT);
 			clearEnding();
@@ -1417,7 +1466,7 @@ export function NurseDayFigure({
 	const onDaySec = (v: number) => {
 		setDaySec(v);
 		M.daySec = v;
-		M.p0 = engineParams(v, M.env.mobile, M.env.reduced);
+		M.p0 = engineParams(v, M.env.mobile, M.env.reduced, M.qTier);
 		M.fx.before?.setParams({ ...M.p0, startAt: 'before' });
 		M.fx.after?.setParams({ ...M.p0, startAt: 'tuesday' });
 	};
