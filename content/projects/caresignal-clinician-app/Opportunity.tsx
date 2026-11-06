@@ -2,7 +2,6 @@ import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
-import { DropNumber } from './DropNumber';
 import { Citation, isPlaceholderCitation, SectionHeading } from './shared';
 
 const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
@@ -37,15 +36,19 @@ export function Opportunity() {
 					gaining more insight into their patients’ health. However, a standard
 					implementation of this approach has downsides:
 				</Text>
-				{/* Watercolour drop numerals: a rose drop pools into each badge as
-				    it scrolls in, drying with a darkened rim (DropNumber). */}
 				<ol className="m-0 flex list-none flex-col gap-[16px] pl-[24px]">
 					{DOWNSIDES.map((item, i) => (
 						<li
 							key={item.lead}
 							className="grid grid-cols-[28px_minmax(0,1fr)] items-start gap-[16px]"
 						>
-							<DropNumber n={i + 1} index={i} />
+							<span
+								aria-hidden="true"
+								className="bg-cs-red mt-[2px] inline-flex size-[28px] items-center justify-center rounded-full font-bold text-white"
+								style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: 1 }}
+							>
+								{i + 1}
+							</span>
 							<Text variant="copy-large" className="m-0 text-confetti-black">
 								<strong className="font-semibold text-confetti-black">
 									{item.lead}

@@ -48,6 +48,8 @@
   --color-cs-purple: #cf9fc5;
   --color-cs-green: #b2d07f;
   --color-cs-orange: #f9ac31;
+  /* High risk in the product (and the risk figures' red). */
+  --color-cs-red: #e5562e;
 
   --color-confetti-black: #391f00;
 

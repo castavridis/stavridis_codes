@@ -3,10 +3,9 @@
 // then fades the element's ring out.
 //
 // Framework-agnostic on purpose: `mount(el, opts) -> { destroy }`, the same
-// shape as the orbit engine. This is the shared module both sides import — the
-// repo's React `DropNumber` wraps it, and the design's dc page can import it
-// instead of carrying `syncDrops`/`paintDrop` on its Component class. Extract
-// interactions into modules like this and they stop needing to be re-ported.
+// shape as the orbit engine. No repo component mounts it now (the Opportunity
+// numerals became solid badges); the design's dc page can import it instead of
+// carrying `syncDrops`/`paintDrop` on its Component class.
 //
 // Needs the washes helpers (loadWashes / backdrop / h01 / inkOf / kmPigment /
 // freeze). Pass them as `opts.FX`, or they default to window.WashHighlightFX

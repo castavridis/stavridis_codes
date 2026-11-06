@@ -18,7 +18,7 @@ export function LazyBlocks() {
 				// measures those on every scroll, which would force the skipped
 				// subtree back through layout (the design's anchors are the
 				// blocks themselves, so it doesn't hit this).
-				if (b.dataset.cv || b.querySelector('canvas,figure,[data-dropwash],[data-sec]')) return;
+				if (b.dataset.cv || b.querySelector('canvas,figure,[data-sec]')) return;
 				if (!b.offsetHeight) return;
 				b.dataset.cv = '';
 				// Measure while still visible, then contain.
