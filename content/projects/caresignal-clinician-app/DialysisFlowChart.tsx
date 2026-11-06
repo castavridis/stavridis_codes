@@ -241,10 +241,19 @@ export function DialysisFlowChart() {
 						talk to someone sooner! If emergency, call 911.
 					</MsgCard>
 				</div>
-				<div style={{ gridColumn: 3, gridRow: 7 }}>
+				{/* The step stays vertically centred in its row (equal flex space
+				    above and below); the space below carries the first part of the
+				    nurse -> patient elbow down to the row's bottom edge. */}
+				<div className="flex flex-col self-stretch" style={{ gridColumn: 3, gridRow: 7 }}>
+					<span aria-hidden className="flex-1" />
 					<Pill tone={NURSE} avatar={`${IMG}/fig2-avatar-nurse.png`}>
 						Nurse calls patient
 					</Pill>
+					<span
+						aria-hidden
+						className="mx-auto flex-1"
+						style={{ borderLeft: `1.5px solid ${NURSE}` }}
+					/>
 				</div>
 
 				<div
@@ -261,11 +270,12 @@ export function DialysisFlowChart() {
 							className="size-[40px] flex-none rounded-full object-cover"
 						/>
 					</div>
-					<div
-						className="flex flex-row-reverse items-center pr-[40%]"
-						style={{ gridColumn: '2 / span 2' }}
-					>
-						<span className="flex-1" style={{ borderTop: `1.5px solid ${NURSE}` }} />
+					{/* Nurse -> patient: an elbow. Across the middle column to the
+					    patient (arrowhead left), then in the right column along to
+					    its centre and up to the bottom of "Nurse calls patient"
+					    (the -18px reaches across this row's top margin). Anchored
+					    to the column centre, so it lines up at any width. */}
+					<div aria-hidden className="flex items-center" style={{ gridColumn: 2 }}>
 						<span
 							className="size-0"
 							style={{
@@ -273,6 +283,17 @@ export function DialysisFlowChart() {
 								borderBottom: '5px solid transparent',
 								borderRight: `7px solid ${NURSE}`,
 							}}
+						/>
+						<span className="flex-1" style={{ borderTop: `1.5px solid ${NURSE}` }} />
+					</div>
+					<div aria-hidden className="relative self-stretch" style={{ gridColumn: 3 }}>
+						<span
+							className="absolute left-0 top-1/2 w-1/2"
+							style={{ borderTop: `1.5px solid ${NURSE}`, marginTop: -0.75 }}
+						/>
+						<span
+							className="absolute left-1/2 top-[-18px] bottom-1/2"
+							style={{ borderLeft: `1.5px solid ${NURSE}`, marginLeft: -0.75, marginBottom: -0.75 }}
 						/>
 					</div>
 				</div>
