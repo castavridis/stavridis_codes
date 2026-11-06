@@ -106,6 +106,50 @@ export function BackdropShot({
 	);
 }
 
+// A whole app window (an exported PNG with its own chrome and transparent
+// rounded corners) inset on the sky-and-field backdrop, with the figure
+// caption set in white on the field below it — the "Dashboard Mockup" layout.
+// Insets are % of the frame's width (padding % resolves against width), so
+// the composition scales as one piece; the caption band grows if it wraps.
+export function BackdropWindowShot({
+	src,
+	alt,
+	width,
+	height,
+	children,
+}: {
+	src: string;
+	alt: string;
+	width: number;
+	height: number;
+	// Caption text, led by the auto-numbered figure chip.
+	children: ReactNode;
+}) {
+	return (
+		<figure
+			className="m-0 flex w-full flex-col overflow-hidden rounded-[16px]"
+			style={{
+				padding: '5.1% 5.6% 0',
+				background: `var(--color-screenshot-sky) url(${IMG}/fig-backdrop.jpeg) center / cover no-repeat`,
+			}}
+		>
+			<FadeImg src={src} alt={alt} width={width} height={height} />
+			<figcaption
+				className="flex flex-wrap items-baseline justify-center gap-x-[10px] text-center text-white [&_[data-figure-chip]]:text-white"
+				style={{ padding: '2.1% 0 3.8%', textShadow: '0 1px 6px rgb(0 0 0 / 0.25)' }}
+			>
+				<Figure />
+				<span
+					className="text-[14px] leading-[20px] tracking-[0.02em]"
+					style={{ fontFamily: 'var(--font-mono)' }}
+				>
+					{children}
+				</span>
+			</figcaption>
+		</figure>
+	);
+}
+
 // Fade an image up from transparent once it is both loaded and on screen;
 // reduced motion shows it immediately.
 function FadeImg({
