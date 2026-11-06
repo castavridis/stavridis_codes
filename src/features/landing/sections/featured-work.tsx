@@ -7,6 +7,7 @@
 // ---------------------------------------------------------------------------
 
 import FadeDown from '../../../components/anim/FadeDown.js';
+import Button from '../../../components/Button.js';
 import RotatingSeal from '../../../components/RotatingSeal.js';
 import Text from '../../../components/Text.js';
 import type { SealColors } from '../../companies/companies.js';
@@ -118,6 +119,16 @@ function ProjectOverview({
           {headline}
         </Text>
         <Text variant="tag" className="text-caresignal-none">{tags}</Text>
+        {/* An explicit way in besides the thumbnail: filled on the hero
+            (the primary action), outline on grid cards. */}
+        <Button
+          variant={hero ? 'default' : 'outline'}
+          onClick={() => onClick?.(slug)}
+          aria-label={`View case study: ${typeof headline === 'string' ? headline : slug}`}
+          className={`self-start ${hero ? 'mt-[12px]' : 'mt-[8px]'}`}
+        >
+          View case study
+        </Button>
       </div>
     </div>
   );
