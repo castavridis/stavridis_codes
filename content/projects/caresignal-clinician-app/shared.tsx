@@ -116,12 +116,16 @@ export function BackdropWindowShot({
 	alt,
 	width,
 	height,
+	insetX = '5.6%',
 	children,
 }: {
 	src: string;
 	alt: string;
 	width: number;
 	height: number;
+	// Side inset, as a % of the frame width. Default fits a single app
+	// window; edge-to-edge composites (e.g. overlapping pages) go tighter.
+	insetX?: string;
 	// Caption text, led by the auto-numbered figure chip.
 	children: ReactNode;
 }) {
@@ -129,7 +133,7 @@ export function BackdropWindowShot({
 		<figure
 			className="m-0 flex w-full flex-col overflow-hidden rounded-[16px]"
 			style={{
-				padding: '5.1% 5.6% 0',
+				padding: `5.1% ${insetX} 0`,
 				background: `var(--color-screenshot-sky) url(${IMG}/fig-backdrop.jpeg) center / cover no-repeat`,
 			}}
 		>

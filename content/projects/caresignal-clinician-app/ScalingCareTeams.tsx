@@ -78,15 +78,15 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				{/* <figure className="m-0 flex w-full flex-col items-center gap-[16px]">
-					<BackdropShot
-						src={`${IMG}/fig-patient-view.webp`}
-						width={1492}
-						height={940}
-						alt="The risk dashboard with a grey placeholder panel labelled Patient View over the centre."
-					/>
-					<FigCaption fig>Patient view (placeholder)</FigCaption>
-				</figure> */}
+				<BackdropWindowShot
+					src={`${IMG}/fig-patient-data-formats.png`}
+					width={3562}
+					height={2244}
+					insetX="3.35%"
+					alt="Two patient-data exports overlapping. In front, a CareSignal PDF for one patient: a two-week summary table of pre- and post-prandial readings, an EpxDiabetes response graph of blood sugar with out-of-range readings highlighted in orange, and a table of raw text-message responses. Behind it, a black-and-white faxed EpxDiabetes report for a physician listing patients' average fasting blood glucose as bar gauges against high- and rising-risk thresholds."
+				>
+					Sample PDF and fax representations of CareSignal data.
+				</BackdropWindowShot>
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
