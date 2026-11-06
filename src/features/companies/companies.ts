@@ -78,6 +78,22 @@ export type CompanyConfig = {
 // these, so their seals currently fall back to the Hansa Yellow default.
 // `seal` is intentionally unset everywhere for now — see RotatingSeal.
 export const companies: Record<string, CompanyConfig> = {
+  honor_health: {
+    name: 'Honor Health',
+    role: 'pd',
+    cover_letter: '',
+    resume: '',
+    featuredSlugs: ['caresignal-clinician-app', 'sqshbook', 'fracta'],
+    featuredProjects: ['caresignal-clinician-app'],
+    seal: {
+      foreground_color: 'rgb(253,253,252)',
+      background_color: 'rgb(79,193,171)',
+    },
+    salutation_colors: {
+      foreground_color: 'rgb(253,253,252)',
+      background_color: 'rgb(231,97,36)',
+    },
+  },
   mayo_clinic: {
     name: 'Mayo Clinic',
     role: 'pd',
