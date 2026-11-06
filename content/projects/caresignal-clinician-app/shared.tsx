@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 import Text from '../../../src/components/Text';
 import Figure from '../../../src/features/projects/components/figures/Figure';
 import { observe as fadeInObserve } from '../../../src/features/projects/components/fade-in';
+import { onRenumber } from '../../../src/features/projects/components/figures/dom-order';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 
 export {
@@ -21,6 +22,9 @@ export const IMG = '/images/projects/caresignal-clinician-app';
 // say what the panel stands for; nothing is prepended. Visible content is
 // `children` when given, otherwise the label. `loading` marks the panel
 // aria-busy so assistive tech knows the real figure is on its way.
+// `figure` adds a visually hidden figure chip, so a lazy figure holds its
+// number (and its #figure-N anchor) before it mounts, and the figures after
+// it don't renumber when it does.
 // Deliberately NOT IllustrationPlaceholder
 // (src/features/projects/components/Illustration.tsx): that one is a dashed
 // slot for a missing exported image.
@@ -28,11 +32,13 @@ export function FigEmptyState({
 	label,
 	children,
 	loading = false,
+	figure = false,
 	height = 420,
 }: {
 	label: string;
 	children?: ReactNode;
 	loading?: boolean;
+	figure?: boolean;
 	height?: number;
 }) {
 	return (
@@ -43,6 +49,11 @@ export function FigEmptyState({
 			className="flex w-full items-center justify-center rounded-[16px] bg-washes-paper"
 			style={{ height }}
 		>
+			{figure && (
+				<span className="sr-only">
+					<Figure />
+				</span>
+			)}
 			<Text variant="callout-meta" className="m-0 px-[24px] text-center text-confetti-black/50">
 				{children ?? label}
 			</Text>
@@ -221,5 +232,56 @@ export function SectionHeading({
 		>
 			{children}
 		</h2>
+	);
+}
+
+// "View Figure N Above/Below": a link to the figure inside the element marked
+// `data-figure-anchor={anchor}`. Figures are numbered in DOM order, so the
+// number and the direction are read off the page and re-synced whenever the
+// figures renumber. Hidden until the target figure's chip is numbered.
+export function FigureLink({ anchor }: { anchor: string }) {
+	const ref = useRef<HTMLAnchorElement>(null);
+	const [target, setTarget] = useState<{ id: string; above: boolean } | null>(null);
+
+	useEffect(() => {
+		const sync = () => {
+			const self = ref.current;
+			const chip = document.querySelector(
+				`[data-figure-anchor="${anchor}"] [data-figure-chip][id]`,
+			);
+			if (!self || !chip) return setTarget(null);
+			const above = !!(self.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_PRECEDING);
+			setTarget((prev) =>
+				prev?.id === chip.id && prev.above === above ? prev : { id: chip.id, above },
+			);
+		};
+		// Chips set their ids in the frame after a renumber, so read a frame later.
+		let raf = requestAnimationFrame(sync);
+		const off = onRenumber(() => {
+			cancelAnimationFrame(raf);
+			raf = requestAnimationFrame(() => requestAnimationFrame(sync));
+		});
+		return () => {
+			off();
+			cancelAnimationFrame(raf);
+		};
+	}, [anchor]);
+
+	return (
+		<a
+			ref={ref}
+			href={target ? `#${target.id}` : undefined}
+			hidden={!target}
+			onClick={(e) => {
+				const el = target && document.getElementById(target.id);
+				if (!el) return;
+				e.preventDefault();
+				el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+			}}
+			className="mt-auto self-start text-[14px] leading-[20px] tracking-[0.02em] text-confetti-black underline underline-offset-[3px] hover:decoration-2"
+			style={{ fontFamily: 'var(--font-mono)' }}
+		>
+			{target && `View Figure ${target.id.replace('figure-', '')} ${target.above ? 'Above' : 'Below'}`}
+		</a>
 	);
 }

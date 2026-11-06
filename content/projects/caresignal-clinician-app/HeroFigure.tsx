@@ -44,12 +44,12 @@ const FIGURE_LABEL =
 export function HeroFigure() {
 	const { ref, inView } = useInView();
 	const idle = useIdleReady();
-	const fallback = <FigEmptyState label={FIGURE_LABEL} height={520} loading />;
+	const fallback = <FigEmptyState label={FIGURE_LABEL} height={520} loading figure />;
 
-	{/* FIXME: This margin-top should not have to be forced. Need to update components. */}	
+	{/* FIXME: This margin-top should not have to be forced. Need to update components. */}
 	return (
 		<Section className="!mt-[36px]">
-			<div ref={ref}>
+			<div ref={ref} data-figure-anchor="nurse-day">
 				{inView && idle ? (
 					<Suspense fallback={fallback}>
 						<NurseDaySim onAssumptions={openAssumptions} />

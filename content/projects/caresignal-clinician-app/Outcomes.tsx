@@ -1,12 +1,11 @@
 import { lazy, Suspense } from 'react';
 
-import { Illustration } from '../../../src/features/projects/components/Illustration';
-import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
+import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
 import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
 
-import { FigEmptyState, SectionHeading } from './shared';
+import { FigEmptyState, FigureLink, SectionHeading } from './shared';
 
 const CareTeamOrbit = lazy(
 	() => import('../../../src/features/projects/components/figures/CareTeamOrbit'),
@@ -28,45 +27,42 @@ const TEAM = {
 	daySeconds: 30,
 } satisfies Partial<CareTeamOrbitProps>;
 
-// The panel titles (Kyoto 500 28px) and their labelled stat lists (20px body),
-// matching the design's plain labelled lists rather than big stat tiles.
-const panelTitle = {
-	fontFamily: 'var(--font-kyoto)',
-	fontWeight: 500,
-	fontSize: 28,
-	lineHeight: 1.2,
-} as const;
+// Labelled stat lists (20px body), matching the design's plain labelled
+// lists rather than big stat tiles.
 const statList = {
 	fontFamily: 'var(--font-body)',
 	fontSize: 20,
 	lineHeight: 1.5,
 } as const;
 
-// A stat panel card, shaped like the Design Principle cards (paper, 12px
-// radius, same padding) so the three panels read as one row of three.
-function StatPanel({ title, stats }: { title: string; stats: string[] }) {
+// Every Outcomes card: the case study's figure paper, 12px radius, the
+// Design Principle cards' padding, so all the cards read as one family.
+const card =
+	'box-border flex h-full w-full flex-col gap-[16px] rounded-[12px] bg-washes-paper py-[24px] px-[clamp(20px,3vw,36px)] text-confetti-black';
+
+// A workflow outcome card. The title is set like the figure headings
+// (headline-small), and `figure` links to the figure that shows the workflow.
+function StatPanel({ title, stats, figure }: { title: string; stats: string[]; figure: string }) {
 	return (
-		<div className="box-border flex h-full w-full flex-col gap-[16px] rounded-[12px] bg-washes-paper py-[24px] px-[clamp(20px,3vw,36px)]">
-			<h3 className="m-0 text-confetti-black [text-wrap:pretty]" style={panelTitle}>
+		<div className={card}>
+			<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
 				{title}
-			</h3>
-			<ul
-				className="m-0 flex list-none flex-col gap-[8px] p-0 text-confetti-black [text-wrap:pretty]"
-				style={statList}
-			>
+			</Text>
+			<ul className="m-0 flex list-none flex-col gap-[8px] p-0 [text-wrap:pretty]" style={statList}>
 				{stats.map((s) => (
 					<li key={s}>{s}</li>
 				))}
 			</ul>
+			<FigureLink anchor={figure} />
 		</div>
 	);
 }
 
-function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) {
+function OrbitSlot({ label, anchor, ...props }: CareTeamOrbitProps & { label: string; anchor: string }) {
 	const { ref, inView } = useInView();
-	const fallback = <FigEmptyState label={label} height={520} loading />;
+	const fallback = <FigEmptyState label={label} height={520} loading figure />;
 	return (
-		<div ref={ref} className="w-full">
+		<div ref={ref} className="w-full" data-figure-anchor={anchor}>
 			{inView ? (
 				<Suspense fallback={fallback}>
 					<CareTeamOrbit {...props} />
@@ -78,6 +74,8 @@ function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) 
 	);
 }
 
+const KLAS = '/images/projects/caresignal-platform/KLAS.png';
+
 export function Outcomes() {
 	return (
 		<Section>
@@ -86,26 +84,57 @@ export function Outcomes() {
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
 				</div>
 
-				{/* The three panels: full width, three across (stacked on
+				{/* Business outcomes, ported from the CareSignal Platform case
+				    study: NRR stat + Best in KLAS awards, on the same paper and
+				    ink as the workflow cards below. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] sm:grid-cols-2">
+					<div className={`${card} justify-between`}>
+						<Text variant="outcome" className="m-0">
+							144%
+						</Text>
+						<Text variant="copy-large" className="m-0">
+							Net recurring revenue year over year
+						</Text>
+					</div>
+					<div className={`${card} items-center justify-center`}>
+						{/* The award marks, recoloured to the page ink: the PNG's
+						    alpha is a mask over confetti-black. */}
+						<div
+							role="img"
+							aria-label="Best in KLAS 2024 and Best in KLAS 2025"
+							className="aspect-[606/352] w-full max-w-[280px] bg-confetti-black"
+							style={{
+								mask: `url(${KLAS}) center / contain no-repeat`,
+								WebkitMask: `url(${KLAS}) center / contain no-repeat`,
+							}}
+						/>
+					</div>
+				</div>
+
+				{/* The workflow outcomes: full width, three across (stacked on
 				    phones), like the design principles; the cards share a row
-				    height. The orbits follow in panel order. */}
+				    height. Each links to its figure. */}
 				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
-					<StatPanel
-						title="Centralized Care Management Nurse Panel Size"
-						stats={['Before: 100', 'After: 1,500']}
-					/>
 					<StatPanel
 						title="Acute Patient Panel"
 						stats={['Providers: 3', 'Patients: 3,250']}
+						figure="acute-team"
 					/>
 					<StatPanel
 						title="Hub and Spoke Model"
 						stats={['Providers: 2', 'Patients: 300']}
+						figure="hub-team"
+					/>
+					<StatPanel
+						title="Centralized Care Management Nurse Panel Size"
+						stats={['Before: 100', 'After: 1,500']}
+						figure="nurse-day"
 					/>
 				</div>
 
 				{/* Care Team Orbit, model="acute" */}
 				<OrbitSlot
+					anchor="acute-team"
 					label="Care Team Orbit (acute): a team of three — an assistant, a nurse and a physician — covers 3,250 patients around the clock. About 80% answer a check-in, and alerts are called first."
 					model="acute"
 					patients={3250}
@@ -116,26 +145,13 @@ export function Outcomes() {
 
 				{/* Care Team Orbit, model="hub" */}
 				<OrbitSlot
+					anchor="hub-team"
 					label="Care Team Orbit (hub and spoke): an assistant (the hub) and a nurse (the spoke) share 300 patients. About 80% answer a check-in, and the assistant routes each critical patient to the nurse."
 					model="hub"
 					patients={300}
 					nurses={1}
 					{...TEAM}
 				/>
-
-				{/* Business outcomes, ported from the CareSignal Platform case
-				    study's Outcomes row: NRR stat + Best in KLAS awards. */}
-				<div className="grid w-full grid-cols-1 gap-[16px] sm:grid-cols-2">
-					<OutcomeStat stat="144%" caption="Net recurring revenue year over year" />
-					<Illustration
-						src="/images/projects/caresignal-platform/KLAS.png"
-						alt="Best in KLAS 2024 and Best in KLAS 2025"
-						width="100%"
-						height={176}
-						background="#f0eeeb"
-						className="text-left md:text-center"
-					/>
-				</div>
 			</div>
 		</Section>
 	);
