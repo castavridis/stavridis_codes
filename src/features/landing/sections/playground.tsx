@@ -89,9 +89,9 @@ const CELLS: Cell[] = [
   },
 
   // Row 5 — Nathan Draws (logo + English + Spanish)
-  { id: 'nathan-draws-logo', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-logo.png', 'Nathan Draws logo') }] },
-  { id: 'nathan-draws-english-title', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-english-title.png', 'Nathan Draws — English') }] },
-  { id: 'nathan-draws-spanish-title', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-spanish-title.png', 'Nathan Draws — Spanish') }] },
+  //{ id: 'nathan-draws-logo', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-logo.png', 'Nathan Draws logo') }] },
+  // { id: 'nathan-draws-english-title', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-english-title.png', 'Nathan Draws — English') }] },
+  // { id: 'nathan-draws-spanish-title', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/171]', media: img('nathan-draws-spanish-title.png', 'Nathan Draws — Spanish') }] },
 
   // Row 6 — three rain-check screens
   { id: 'rain-check-1', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('rain-check-1-form-elements.png', 'Rain Check — form elements') }] },
@@ -99,8 +99,8 @@ const CELLS: Cell[] = [
   { id: 'rain-check-3', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('rain-check-3-potential-rain-check.png', 'Rain Check — potential rain check') }] },
 
   // Row 7 — confetti UI (⅓) + confetti start screen (⅔)
-  { id: 'confetti-ui', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/316]', media: img('confetti-ui.png', 'Confetti UI') }] },
-  { id: 'confetti-start-screen', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/316]', media: img('confetti-start-screen.png', 'Confetti start screen') }] },
+  // { id: 'confetti-ui', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/316]', media: img('confetti-ui.png', 'Confetti UI') }] },
+  // { id: 'confetti-start-screen', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/316]', media: img('confetti-start-screen.png', 'Confetti start screen') }] },
 
   // Row 8 — pocket pikatama (⅔) + codepen fortune (⅓)
   { id: 'pocket-pika-tama', span: 'md:col-span-4', slots: [{ aspect: 'aspect-[624/304]', media: img('pocket-pika-tama.png', 'Pocket Pikatama — 3D render') }] },
