@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { animated, useSpring } from '@react-spring/web';
 import Button from '../../../components/Button.js';
 import Callout from './Callout.js';
 import FrontMatter from './FrontMatter.js';
@@ -200,6 +201,18 @@ function ChromeRow({
     ),
   );
 
+  // Once the user has scrolled at all, the chrome row tightens: its
+  // inline padding (md+) springs from 72px to 24px and the tags/title
+  // slot dims to 75%. Mobile keeps its 16px gutter — already tighter
+  // than 24. Driven by a spring rather than scroll progress so the
+  // settle reads physical.
+  const scrolled = scrollTop > 0;
+  const chromeSpring = useSpring({
+    padX: scrolled ? 24 : 72,
+    dim: scrolled ? 0.75 : 1,
+    config: { tension: 260, friction: 24 },
+  });
+
   return (
     // Sticky so it pins to the top of the scroll container as the user
     // scrolls past the FrontMatter title. z-10 keeps it above the
@@ -215,7 +228,10 @@ function ChromeRow({
         // explicit `relative`.
       }}
     >
-      <div className="relative mx-auto w-full max-w-[1110px] px-[16px] md:px-[72px]">
+      <animated.div
+        className="relative mx-auto w-full max-w-[1110px] px-[16px] md:px-(--chrome-px)"
+        style={{ '--chrome-px': chromeSpring.padX.to((v) => `${v}px`) } as unknown as React.CSSProperties}
+      >
         <div className="mx-auto w-full max-w-[1104px]">
           {/* The two-mode chrome row. Two children share the left slot
               via absolute overlap: the tags paragraph and the
@@ -223,7 +239,10 @@ function ChromeRow({
               opacity-controlled. The Close button stays put on the
               right at full opacity at all times. */}
           <div className="flex w-full max-w-[944px] items-center gap-[24px] overflow-clip py-[32px]">
-            <div className="relative min-w-0 flex-1">
+            <animated.div
+              className="relative min-w-0 flex-1"
+              style={{ opacity: chromeSpring.dim }}
+            >
               <p
                 className="type-tag text-confetti-black m-0 truncate"
                 style={{
@@ -249,7 +268,7 @@ function ChromeRow({
               >
                 {headline}
               </p>
-            </div>
+            </animated.div>
             {/* Close button — same outline Button as the previous
                 TopNavigation inside FrontMatter. */}
             <div className="flex shrink-0 items-center">
@@ -257,7 +276,7 @@ function ChromeRow({
             </div>
           </div>
         </div>
-      </div>
+      </animated.div>
       {/* Gradient mask — the soft fade that pulls scrolling content
           into the cream backdrop as it crosses the chrome row's
           bottom edge (frames 03/04). Sits OUTSIDE the centered
