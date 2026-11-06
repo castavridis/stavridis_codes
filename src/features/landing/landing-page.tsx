@@ -980,16 +980,13 @@ export default function LandingPage({
                     then
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    {"I love turning ambiguous, complex ideas into warm, approachable experiences. I co-founded CareSignal, "}
-                    <br aria-hidden className="hidden md:inline" />
-                    {"an enterprise digital health company (acquired "}
-                    <br aria-hidden className="hidden md:inline" />
-                    {"by Lightbeam), where I led Product and Brand."}
+                    I’ve turned complex, high-stakes systems into warm, approachable products. I co-founded
+                    CareSignal, a Best in KLAS remote patient monitoring company (acquired by Lightbeam), where I
+                    designed the tools that let one nurse care for 1,500 patients instead of 100.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
                   <Text variant="copy">
-                    In 2024, I decided to step away to be with my young family. I
-                    spent the time learning and building, too.
+                    In 2024, I stepped away to be with my young family, but kept learning and building.
                   </Text>
                 </div>
                 <div className="w-full max-w-[385px]">
@@ -997,17 +994,13 @@ export default function LandingPage({
                     now
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    {"I’ve finished two batches at the Recurse Center,"}
-                    <br aria-hidden className="hidden md:inline" />
-                    {"built AI-native tooling, and I’m currently building"}
-                    <br aria-hidden className="hidden md:inline" />
-                    {"a design system for Poimandres, the open-source collective behind react-three-fiber and zustand."}
+                    I’m deep in design-engineering: building AI-native design tools and exploring shader-based
+                    design systems, after two batches at the Recurse Center.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
                   <Text variant="copy">
-                    {"I am looking to join a dynamic team that values"}
-                    <br aria-hidden className="hidden md:inline" />
-                    {"high-craft design and engineering."}
+                    I’m looking for a team that cares about craft in both design and code, where I can take hard
+                    problems from zero to shipped.
                   </Text>
                 </div>
               </div>
