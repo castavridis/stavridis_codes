@@ -16,7 +16,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   pd: 'Product Designer',
 };
 
-// Browser-tab title suffix ("C Stavridis — {ROLE_TITLE}").
+// Browser-tab title suffix ("C Stavridis: {ROLE_TITLE}").
 export const ROLE_TITLE: Record<Role, string> = {
   de: 'Design Engineer',
   pd: 'Product Designer',

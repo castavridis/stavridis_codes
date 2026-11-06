@@ -170,10 +170,6 @@ export function App() {
   const resumeHref =
     company?.resume ?? (role ? ROLE_RESUME[role] : DEFAULT_ROLE_RESUME);
 
-  useEffect(() => {
-    document.title = `C Stavridis — ${documentTitleSuffix}`;
-  }, [documentTitleSuffix]);
-
   // The FeaturedWork cards pass v2 project slugs directly (`caresignal-
   // platform`, `fracta`, `sqshbook`, `caresignal-ai`), so we route on the
   // slug verbatim. No id → slug map needed in v2.
@@ -219,6 +215,14 @@ export function App() {
   );
 
   const projectSlug = matchProject ? projectParams?.slug ?? null : null;
+
+  // Browser-tab title: "C Stavridis: {project title}" while a case study is
+  // open, otherwise "C Stavridis: {role}".
+  const projectTitle = projectSlug ? getProject(projectSlug)?.title ?? null : null;
+  useEffect(() => {
+    document.title = `C Stavridis: ${projectTitle ?? documentTitleSuffix}`;
+  }, [projectTitle, documentTitleSuffix]);
+
   const projectOpen = projectSlug !== null;
   const paintActive = usePaintStore((s) => s.paintActive);
   // The project sheet is visually open ONLY when there's a project
