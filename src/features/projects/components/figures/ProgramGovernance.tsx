@@ -89,7 +89,7 @@ export default function ProgramGovernance() {
 	return (
 		<figure
 			data-screen-label="Program governance"
-			className="m-0 flex flex-col gap-[20px] rounded-[16px] p-[24px] text-confetti-black shadow-[0_4px_6px_-1px_rgb(0_0_0/.1),0_2px_4px_-2px_rgb(0_0_0/.1)]"
+			className="m-0 flex flex-col gap-[20px] rounded-[16px] p-[24px] text-confetti-black"
 			style={{ background: 'var(--color-washes-paper)' }}
 		>
 			<div className="flex flex-col gap-[8px]">
