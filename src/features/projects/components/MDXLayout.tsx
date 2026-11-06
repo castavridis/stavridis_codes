@@ -201,14 +201,15 @@ function ChromeRow({
     ),
   );
 
-  // Once the user has scrolled at all, the chrome row tightens: its
-  // inline padding (md+) springs from 72px to 24px and the tags/title
-  // slot dims to 75%. Mobile keeps its 16px gutter — already tighter
-  // than 24. Driven by a spring rather than scroll progress so the
-  // settle reads physical.
-  const scrolled = scrollTop > 0;
+  // Once the user has scrolled half a viewport, the chrome row tightens:
+  // its inline padding (md+) springs from 72px to 36px — so the Close
+  // button sits 36px off the right edge — and the tags/title slot dims
+  // to 75%. Mobile keeps its 16px gutter, already tighter than 36.
+  // Driven by a spring rather than scroll progress so the settle reads
+  // physical.
+  const scrolled = scrollTop > window.innerHeight * 0.5;
   const chromeSpring = useSpring({
-    padX: scrolled ? 24 : 72,
+    padX: scrolled ? 36 : 72,
     dim: scrolled ? 0.75 : 1,
     config: { tension: 260, friction: 24 },
   });
@@ -238,7 +239,7 @@ function ChromeRow({
               truncated title sit in the same grid cell, each
               opacity-controlled. The Close button stays put on the
               right at full opacity at all times. */}
-          <div className="flex w-full max-w-[944px] items-center gap-[24px] overflow-clip py-[32px]">
+          <div className="flex w-full items-center gap-[24px] overflow-clip py-[32px]">
             <animated.div
               className="relative min-w-0 flex-1"
               style={{ opacity: chromeSpring.dim }}
