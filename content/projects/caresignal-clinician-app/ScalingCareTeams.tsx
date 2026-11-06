@@ -14,9 +14,10 @@ export function ScalingCareTeams() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<hr className="w-full border-confetti-black/15" />
-
 				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
+					{/* Rule sits inside the reading column (design: 24px above,
+					    36px below, 12% ink). */}
+					<hr className="m-0 w-full border-0 border-t border-confetti-black/12 mt-[24px] mb-[16px]" />
 					<SectionHeading id="scaling-care-teams">
 						Scaling Care Teams
 					</SectionHeading>

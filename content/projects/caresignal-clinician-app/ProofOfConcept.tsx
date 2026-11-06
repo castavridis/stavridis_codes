@@ -78,9 +78,10 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<hr className="w-full border-confetti-black/15" />
-
 				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
+					{/* Rule sits inside the reading column (design: 28px above,
+					    36px below, 12% ink). */}
+					<hr className="m-0 w-full border-0 border-t border-confetti-black/12 mt-[20px] mb-[16px]" />
 					<h3
 						className="m-0 flex items-center gap-[14px] text-confetti-black"
 						style={{
