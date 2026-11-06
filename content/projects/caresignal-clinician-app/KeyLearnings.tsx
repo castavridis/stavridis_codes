@@ -29,7 +29,7 @@ const listStyle = {
 function LearnList({ items }: { items: string[] }) {
 	return (
 		<ul
-			className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+			className="m-0 flex list-disc flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty] marker:text-confetti-black"
 			style={listStyle}
 		>
 			{items.map((it) => (
