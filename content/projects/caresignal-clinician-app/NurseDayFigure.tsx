@@ -117,11 +117,13 @@ function VizCanvas({
 	kind,
 	stats,
 	height,
+	aspect,
 	dotGrid,
 }: {
 	kind: 'day' | 'impact' | 'status';
 	stats: StatsSource;
-	height: number;
+	height?: number; // fixed CSS height, or…
+	aspect?: number; // …width:height, so grid cells stay square as it resizes
 	dotGrid?: boolean; // the after day's 1,600-dot grid: orbit dots match its radius
 }) {
 	const ref = useRef<HTMLCanvasElement>(null);
@@ -150,63 +152,60 @@ function VizCanvas({
 			aria-hidden="true"
 			data-dot-grid={dotGrid ? '' : undefined}
 			className="block w-full"
-			style={{ height }}
+			style={aspect ? { aspectRatio: String(aspect) } : { height }}
 		/>
 	);
 }
 
-// The per-half HUD column: How Time is Spent (a day strip + clock), Impact
-// over time (an equalizer), then Patient Statuses (a status grid). `tall`
-// gives the after grid its 1,600 rows room; the before grid is just two rows.
+// The per-half HUD column, as the design lays it out: How Time is Spent (a
+// day strip + clock), then Patient Statuses (a status grid), every label
+// left-aligned on both halves. Impact over time (an equalizer) only shows
+// with `showImpact` — the design saves it off. The before grid is two rows of
+// 50 (aspect 25); the after grid is all 1,600 in 50 × 32 square cells
+// (aspect 50/32), so its dots stay round at any width.
+const BEFORE_GRID_ASPECT = 25;
+const AFTER_GRID_ASPECT = 50 / 32;
+
 function HudViz({
 	stats,
-	align,
+	showImpact = false,
 }: {
 	stats: StatsSource;
-	align: 'start' | 'end';
+	showImpact?: boolean;
 }) {
 	const labelCls =
 		'text-[12px] leading-[16px] tracking-[0.04em] whitespace-nowrap';
+	const labelStyle = { fontFamily: 'var(--font-mono)', color: INK_75 };
 	const tall = stats?.phase === 'after';
 	return (
 		<div className="flex min-w-0 flex-col gap-[10px]">
-			<div className="flex flex-col gap-[4px]">
-				<div
-					className="flex items-baseline justify-between gap-[8px]"
-					style={{ fontFamily: 'var(--font-mono)', color: INK_75 }}
-				>
+			<div className="-mt-[2px] flex flex-col gap-[6px]">
+				<div className="flex items-baseline justify-between gap-[12px]" style={labelStyle}>
 					<span className={labelCls}>How Time is Spent</span>
-					<span className={`${labelCls} [font-variant-numeric:tabular-nums]`}>
+					<span className={`${labelCls} flex-none [font-variant-numeric:tabular-nums]`}>
 						{fmtClock(stats?.minute)}
 					</span>
 				</div>
 				<VizCanvas kind="day" stats={stats} height={10} />
 			</div>
-			<div className="flex flex-col gap-[4px]">
-				<span
-					className={labelCls}
-					style={{
-						fontFamily: 'var(--font-mono)',
-						color: INK_75,
-						textAlign: align === 'end' ? 'right' : 'left',
-					}}
-				>
-					Impact over time
-				</span>
-				<VizCanvas kind="impact" stats={stats} height={28} />
-			</div>
-			<div className="flex flex-col gap-[4px]">
-				<span
-					className={labelCls}
-					style={{
-						fontFamily: 'var(--font-mono)',
-						color: INK_75,
-						textAlign: align === 'end' ? 'right' : 'left',
-					}}
-				>
+			{showImpact ? (
+				<div className="mt-[8px] flex flex-col gap-[6px]">
+					<span className={labelCls} style={labelStyle}>
+						Impact over time
+					</span>
+					<VizCanvas kind="impact" stats={stats} height={32} />
+				</div>
+			) : null}
+			<div className="mt-[16px] flex flex-col gap-[6px]">
+				<span className={labelCls} style={labelStyle}>
 					Patient Statuses
 				</span>
-				<VizCanvas kind="status" stats={stats} height={tall ? 80 : 14} dotGrid={tall} />
+				<VizCanvas
+					kind="status"
+					stats={stats}
+					aspect={tall ? AFTER_GRID_ASPECT : BEFORE_GRID_ASPECT}
+					dotGrid={tall}
+				/>
 			</div>
 		</div>
 	);
@@ -1909,14 +1908,14 @@ export function NurseDayFigure({
 					ref={ftRef}
 					className="absolute bottom-[24px] left-[24px] right-[24px] z-[7] flex flex-col gap-[20px]"
 				>
-					{/* Per-half HUD: How Time is Spent + Impact over time + Patient
-					    Statuses. Two-up on desktop (the inactive half dims while the
+					{/* Per-half HUD: How Time is Spent + Patient Statuses (Impact
+					    over time behind showImpact, off as in the design). Two-up on desktop (the inactive half dims while the
 					    other plays); on phones only the visible half shows, like the
 					    stat columns (showBCol/showACol). */}
 					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px]">
 						{showBCol ? (
 							<div style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}>
-								<HudViz stats={hudB} align="start" />
+								<HudViz stats={hudB} />
 							</div>
 						) : null}
 						<div
@@ -1926,7 +1925,7 @@ export function NurseDayFigure({
 						/>
 						{showACol ? (
 							<div style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}>
-								<HudViz stats={hudA} align="end" />
+								<HudViz stats={hudA} />
 							</div>
 						) : null}
 					</div>
