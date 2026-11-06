@@ -58,7 +58,8 @@ function ProjectOverview({
     <div
       className={
         hero
-          ? 'relative grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center md:gap-x-[40px]'
+          ? // A white card at the system's card radius (16px) and inset (24px).
+            'relative grid grid-cols-1 gap-[16px] rounded-[16px] bg-white p-[24px] md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center md:gap-x-[40px]'
           : 'relative flex flex-col gap-[16px]'
       }
     >
@@ -96,7 +97,9 @@ function ProjectOverview({
           turns it into the containing block and clips the seal. */}
       {stampCompanyName ? (
         <span
-          className="pointer-events-none absolute left-[-16px] top-[24px] z-10"
+          // Same spot relative to the thumbnail on both layouts: the hero's
+          // 24px card inset shifts it in by that much.
+          className={`pointer-events-none absolute z-10 ${hero ? 'left-[8px] top-[48px]' : 'left-[-16px] top-[24px]'}`}
           style={{ isolation: 'isolate' }}
         >
           <RotatingSeal
