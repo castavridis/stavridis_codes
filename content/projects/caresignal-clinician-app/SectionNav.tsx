@@ -27,6 +27,11 @@ const ITEMS = [
 // "Proof of Concept"; before that the whole list is shown.
 const COLLAPSE_FROM = ITEMS.findIndex((it) => it.key === 'starting-point');
 const INK = 'var(--color-confetti-black)';
+// The card's left padding + border. The card hangs this far left of the nav
+// column so its text (the "section" eyebrow, the dots) sits on the content
+// column's left edge, while the card's border — visible once it peels —
+// lines up with BackToTop's pill, which tracks the card's left edge.
+const CARD_INSET = 18 + 1.25;
 
 export function SectionNav() {
 	const cardRef = useRef<HTMLDivElement>(null);
@@ -103,24 +108,14 @@ export function SectionNav() {
 		return () => document.removeEventListener('pointerdown', onDown);
 	}, [navOpen]);
 
-	// dc alignNav(): hang the card so its link text lines up with the chrome
-	// row's title, and — while resting, not stuck — sit the "section" eyebrow
-	// on the Background heading's baseline. Re-run on resize and as fonts and
-	// the hero settle.
+	// dc alignNav(): while resting, not stuck, sit the "section" eyebrow on
+	// the Background heading's baseline. (Horizontal alignment is static —
+	// see CARD_INSET.) Re-run on resize and as fonts and the hero settle.
 	useEffect(() => {
 		const align = () => {
 			const card = cardRef.current;
 			const nav = card?.parentElement;
-			const tag = document.querySelector<HTMLElement>(
-				'[data-case="caresignal-clinician-app"] p.type-tag',
-			);
-			if (!card || !nav || !tag || getComputedStyle(nav).display === 'none') return;
-			const ml = Math.round(
-				tag.getBoundingClientRect().left - nav.getBoundingClientRect().left - 34,
-			);
-			if (Math.abs(ml) > 400) return;
-			card.style.marginLeft = `${ml}px`;
-			card.style.width = `calc(100% - ${ml}px)`;
+			if (!card || !nav || getComputedStyle(nav).display === 'none') return;
 			const eb = card.querySelector<HTMLElement>('[data-nav-eb]');
 			const bh = document.getElementById('background');
 			if (!eb || !bh || stuckRef.current) return;
@@ -221,8 +216,13 @@ export function SectionNav() {
 				ref={cardRef}
 				className="pointer-events-auto sticky top-[96px] box-border flex flex-col rounded-[16px] px-[18px] py-[16px]"
 				style={{
-					width: 'calc(100% + 16px)',
-					marginLeft: -16,
+					width: `calc(100% + ${CARD_INSET}px)`,
+					// Never narrower than its longest label: at narrow desktop
+					// widths the nav column is tighter than "Scaling Care Teams",
+					// and the links' overflow-hidden would clip it. The card grows
+					// into the 48px gutter instead.
+					minWidth: 'max-content',
+					marginLeft: -CARD_INSET,
 					marginTop: -29,
 					background: '#fff',
 					borderWidth: '1.25px',
