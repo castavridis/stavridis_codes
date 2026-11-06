@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import WashHighlightFX, {
 	type WashHandle,
 } from '../../../src/features/projects/components/figures/wash-highlight';
-import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
+import {
+	afterPageLoad,
+	prefersReducedMotion,
+} from '../../../src/features/projects/components/figures/motion';
 
 // The reference draws wash underlines on two phrases inside the front
 // matter, which MDXLayout renders from frontmatter strings — so (as the
@@ -74,8 +77,15 @@ export function FrontMatterWashes() {
 			requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
 			cancelIdleCallback?: (id: number) => void;
 		};
-		const idleId = w.requestIdleCallback?.(draw, { timeout: 600 });
-		const rafId = idleId === undefined ? requestAnimationFrame(draw) : undefined;
+		// Wait until 500 ms after page load (as the design does), then an idle
+		// moment so nothing paints during the sheet's open transition.
+		let idleId: number | undefined;
+		let rafId: number | undefined;
+		afterPageLoad(500).then(() => {
+			if (cancelled) return;
+			idleId = w.requestIdleCallback?.(draw, { timeout: 600 });
+			if (idleId === undefined) rafId = requestAnimationFrame(draw);
+		});
 		return () => {
 			cancelled = true;
 			if (idleId !== undefined) w.cancelIdleCallback?.(idleId);

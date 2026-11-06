@@ -2,7 +2,10 @@ import { useEffect, useRef } from 'react';
 
 import WashHighlightFX from '../../../src/features/projects/components/figures/wash-highlight';
 import { mount as mountDrop } from '../../../src/features/projects/components/figures/wash-drop';
-import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
+import {
+	afterPageLoad,
+	prefersReducedMotion,
+} from '../../../src/features/projects/components/figures/motion';
 
 // A numbered badge whose rose watercolour drop lives in the shared, framework-
 // agnostic wash-drop module (the same module the dc page can import, instead of
@@ -15,18 +18,28 @@ export function DropNumber({ n, index }: { n: number; index: number }) {
 	useEffect(() => {
 		const el = ref.current;
 		if (!el) return;
-		const handle = mountDrop(el, {
-			index,
-			reduced: prefersReducedMotion(),
-			FX: WashHighlightFX,
+		// Drops wait until 500 ms after page load, as the design's do.
+		let handle: { destroy(): void } | null = null;
+		let dead = false;
+		afterPageLoad(500).then(() => {
+			if (dead) return;
+			handle = mountDrop(el, {
+				index,
+				reduced: prefersReducedMotion(),
+				FX: WashHighlightFX,
+			});
 		});
-		return () => handle.destroy();
+		return () => {
+			dead = true;
+			handle?.destroy();
+		};
 	}, [index]);
 
 	return (
 		<span
 			ref={ref}
 			aria-hidden="true"
+			data-dropwash=""
 			className="relative mt-[2px] inline-flex size-[28px] items-center justify-center rounded-full font-bold text-confetti-black"
 			style={{
 				isolation: 'isolate',

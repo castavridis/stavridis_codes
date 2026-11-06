@@ -2,6 +2,19 @@ export const prefersReducedMotion = () =>
 	typeof matchMedia !== 'undefined' &&
 	matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Resolves `delay` ms after the window's load event (immediately-ish if the
+// page has already loaded). The case-study design holds its wash highlights
+// and drops until 500 ms after load so they don't compete with first paint.
+let loaded: Promise<void> | null = null;
+export function afterPageLoad(delay = 500): Promise<void> {
+	if (typeof window === 'undefined') return Promise.resolve();
+	loaded ??= new Promise<void>((res) => {
+		if (document.readyState === 'complete') res();
+		else window.addEventListener('load', () => res(), { once: true });
+	});
+	return loaded.then(() => new Promise<void>((res) => setTimeout(res, delay)));
+}
+
 // A happy little wag: a randomized decaying alternating rotation — new
 // amplitude, swing count, damping and tempo each time. Shared by the
 // citation tooltip and the back-to-top pill.

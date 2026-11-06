@@ -24,6 +24,7 @@ export function mount(el, opts = {}) {
 	let dead = false;
 	let wc = null;
 	let raf = 0;
+	let gateIO = null;
 	const timers = [];
 	const i = index % 3;
 
@@ -70,6 +71,21 @@ export function mount(el, opts = {}) {
 					/* older engine surface */
 				}
 				wc.run('until-dry');
+				// Pause the sim while the drop is 120px+ off-screen (dc gate());
+				// it resumes in place on return. Dropped once it's frozen.
+				gateIO = new IntersectionObserver(
+					(es) => {
+						for (const e of es) {
+							try {
+								e.isIntersecting ? wc.resume() : wc.pause();
+							} catch (x) {
+								/* noop */
+							}
+						}
+					},
+					{ rootMargin: '120px' },
+				);
+				gateIO.observe(el);
 
 				// Only fade the fallback ring once rose pigment is confirmed on the
 				// canvas; otherwise keep the static ring.
@@ -109,7 +125,11 @@ export function mount(el, opts = {}) {
 							}
 							timers.push(
 								setTimeout(() => {
-									if (!dead && overlay.isConnected && wc) FX.freeze(wc, host);
+									if (!dead && overlay.isConnected && wc) {
+										gateIO?.disconnect();
+										gateIO = null;
+										FX.freeze(wc, host);
+									}
 								}, 400),
 							);
 						}, 2500),
@@ -167,6 +187,7 @@ export function mount(el, opts = {}) {
 		destroy() {
 			dead = true;
 			io.disconnect();
+			gateIO?.disconnect();
 			cancelAnimationFrame(raf);
 			timers.forEach(clearTimeout);
 			if (wc) {

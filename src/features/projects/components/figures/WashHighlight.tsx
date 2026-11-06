@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 import WashHighlightFX, { type WashHighlightOptions } from './wash-highlight';
-import { prefersReducedMotion } from './motion';
+import { afterPageLoad, prefersReducedMotion } from './motion';
 
 type WashHighlightProps = WashHighlightOptions & {
 	children: React.ReactNode;
@@ -27,11 +27,21 @@ export default function WashHighlight({
 		const el = ref.current;
 		if (!el) return;
 		const reduce = prefersReducedMotion();
-		const handle = WashHighlightFX.attach(el, {
-			...optsRef.current,
-			...(reduce ? { instant: true } : null),
+		// Highlights wait until 500 ms after page load (design / figure style
+		// recipe §5), then fire when fully in view.
+		let handle: ReturnType<typeof WashHighlightFX.attach> | null = null;
+		let dead = false;
+		afterPageLoad(500).then(() => {
+			if (dead) return;
+			handle = WashHighlightFX.attach(el, {
+				...optsRef.current,
+				...(reduce ? { instant: true } : null),
+			});
 		});
-		return () => handle.destroy();
+		return () => {
+			dead = true;
+			handle?.destroy();
+		};
 	}, []);
 
 	return (
