@@ -42,7 +42,7 @@ function LearnList({ items }: { items: string[] }) {
 export function KeyLearnings() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col gap-[20px] xl:ml-auto">
+			<div className="flex w-full max-w-[705px] flex-col gap-[20px] ml-auto">
 				<SectionHeading id="conclusion">Key Learnings</SectionHeading>
 				<h3 className="m-0 text-confetti-black" style={groupTitle}>
 					Challenges

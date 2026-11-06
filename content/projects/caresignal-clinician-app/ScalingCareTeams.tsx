@@ -16,7 +16,7 @@ export function ScalingCareTeams() {
 			<div className="flex w-full flex-col gap-[28px]">
 				<hr className="w-full border-confetti-black/15" />
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<SectionHeading id="scaling-care-teams">
 						Scaling Care Teams
 					</SectionHeading>
@@ -68,7 +68,7 @@ export function ScalingCareTeams() {
 					</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I collaborated with our research team to understand how risk was
 						communicated in a clinical setting. This visualization itself was
@@ -89,7 +89,7 @@ export function ScalingCareTeams() {
 					<FigCaption fig>Patient view (placeholder)</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Knowing which patients were low-risk turned out to be as
 						important as understanding patients who were high-risk,
@@ -113,7 +113,7 @@ export function ScalingCareTeams() {
 					</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I designed additional ways for nurses to manage their tasks.
 					</Text>
@@ -130,7 +130,7 @@ export function ScalingCareTeams() {
 
 				<AnatomyOfATextMessage />
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Our analytics showed that users usually searched for patients and
 						then viewed their detailed data. Users could click in to view
@@ -157,7 +157,7 @@ export function ScalingCareTeams() {
 					</span>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Data was shared to downstream providers using the channels most
 						convenient for them. I designed multiple ways to get patient data

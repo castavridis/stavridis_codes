@@ -14,7 +14,7 @@ export function ProductMarketFit() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<SectionHeading id="product-market-fit">
 						Finding Product-Market Fit
 					</SectionHeading>
@@ -58,7 +58,7 @@ export function ProductMarketFit() {
 					<FigCaption fig>Chronic Care Management Report and Timer</FigCaption>
 				</figure>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I also designed ways for our doctors to enroll patients without
 						logging into the system. One of our early pricing models charged
@@ -90,7 +90,7 @@ export function ProductMarketFit() {
 					</span>
 				</div>
 
-				<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						We were able to successfully close a few small practices before
 						our enterprise contracts closed. However it became clear they

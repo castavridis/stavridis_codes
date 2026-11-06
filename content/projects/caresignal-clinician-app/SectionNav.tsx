@@ -33,6 +33,8 @@ export function SectionNav() {
 	const [active, setActive] = useState('introduction');
 	const [navOpen, setNavOpen] = useState(false);
 	const [stuck, setStuck] = useState(false);
+	const stuckRef = useRef(false);
+	stuckRef.current = stuck;
 
 	useEffect(() => {
 		let raf = 0;
@@ -40,7 +42,12 @@ export function SectionNav() {
 		const tick = () => {
 			raf = 0;
 			if (port === undefined) port = findScrollport(cardRef.current);
-			const line = Math.max(0, port?.getBoundingClientRect().top ?? 0) + 145;
+			// A section is current once its top passes 40% down the visible
+			// scroll area (dc onSecScan: scrollY + innerHeight × 0.4).
+			const pr = port?.getBoundingClientRect();
+			const visTop = Math.max(0, pr?.top ?? 0);
+			const visBottom = Math.min(window.innerHeight, pr?.bottom ?? window.innerHeight);
+			const line = visTop + (visBottom - visTop) * 0.4;
 			let current = ITEMS[0].key;
 			for (const it of ITEMS) {
 				const el = document.getElementById(it.key);
@@ -73,6 +80,75 @@ export function SectionNav() {
 		return () => {
 			window.removeEventListener('scroll', onScroll, { capture: true });
 			window.removeEventListener('resize', onResize);
+			cancelAnimationFrame(raf);
+		};
+	}, []);
+
+	// Expanding the list before the card has stuck still draws its border +
+	// shadow, so the open list reads as a card (dc navCard: stuck || open).
+	useEffect(() => {
+		const card = cardRef.current;
+		if (!card || stuck) return;
+		gum.set(card, navOpen, { animate: true });
+	}, [navOpen, stuck]);
+
+	// A pointer down anywhere outside the nav closes the expanded list.
+	useEffect(() => {
+		if (!navOpen) return;
+		const onDown = (e: PointerEvent) => {
+			const t = e.target as Element | null;
+			if (!t?.closest?.('nav[aria-label="Sections"]')) setNavOpen(false);
+		};
+		document.addEventListener('pointerdown', onDown);
+		return () => document.removeEventListener('pointerdown', onDown);
+	}, [navOpen]);
+
+	// dc alignNav(): hang the card so its link text lines up with the chrome
+	// row's title, and — while resting, not stuck — sit the "section" eyebrow
+	// on the Background heading's baseline. Re-run on resize and as fonts and
+	// the hero settle.
+	useEffect(() => {
+		const align = () => {
+			const card = cardRef.current;
+			const nav = card?.parentElement;
+			const tag = document.querySelector<HTMLElement>(
+				'[data-case="caresignal-clinician-app"] p.type-tag',
+			);
+			if (!card || !nav || !tag || getComputedStyle(nav).display === 'none') return;
+			const ml = Math.round(
+				tag.getBoundingClientRect().left - nav.getBoundingClientRect().left - 34,
+			);
+			if (Math.abs(ml) > 400) return;
+			card.style.marginLeft = `${ml}px`;
+			card.style.width = `calc(100% - ${ml}px)`;
+			const eb = card.querySelector<HTMLElement>('[data-nav-eb]');
+			const bh = document.getElementById('background');
+			if (!eb || !bh || stuckRef.current) return;
+			const base = (el: HTMLElement) => {
+				const probe = document.createElement('span');
+				probe.style.cssText =
+					'display:inline-block;width:0;height:0;vertical-align:baseline';
+				el.appendChild(probe);
+				const y = probe.getBoundingClientRect().top;
+				probe.remove();
+				return y;
+			};
+			const d = base(bh) - base(eb);
+			if (Math.abs(d) > 0.5 && Math.abs(d) < 200) {
+				card.style.marginTop = `${((parseFloat(card.style.marginTop) || 0) + d).toFixed(1)}px`;
+			}
+		};
+		let raf = 0;
+		const onAlign = () => {
+			cancelAnimationFrame(raf);
+			raf = requestAnimationFrame(align);
+		};
+		window.addEventListener('resize', onAlign);
+		const timers = [0, 300, 1200].map((d) => window.setTimeout(onAlign, d));
+		document.fonts?.ready.then(onAlign).catch(() => {});
+		return () => {
+			window.removeEventListener('resize', onAlign);
+			timers.forEach(clearTimeout);
 			cancelAnimationFrame(raf);
 		};
 	}, []);
@@ -120,23 +196,34 @@ export function SectionNav() {
 			return;
 		}
 		if (navOpen) setNavOpen(false);
-		const el = document.getElementById(id);
-		if (el) {
-			el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+		const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+		// "Impact" is the top of the page (dc href '#').
+		if (id === ITEMS[0].key) {
+			const port = findScrollport(cardRef.current);
+			(port ?? window).scrollTo({ top: 0, behavior });
+			history.replaceState(null, '', location.pathname + location.search);
+			return;
 		}
+		const el = document.getElementById(id);
+		if (el) el.scrollIntoView({ behavior });
 		history.replaceState(null, '', `#${id}`);
 	};
 
 	return (
 		<nav
 			aria-label="Sections"
-			className="pointer-events-none absolute bottom-0 left-0 top-0 z-20 hidden w-[228px] xl:block"
-			style={{ contain: 'size' }}
+			// The design's left grid column: minmax(140px, 1fr) beside the 704px
+			// reading column with a 48px gap, shown from 1100px wide.
+			className="pointer-events-none absolute bottom-0 left-0 top-0 z-20 hidden min-[1100px]:block"
+			style={{ contain: 'size', width: 'max(140px, calc(100% - 704px - 48px))' }}
 		>
 			<div
 				ref={cardRef}
 				className="pointer-events-auto sticky top-[96px] box-border flex flex-col rounded-[16px] px-[18px] py-[16px]"
 				style={{
+					width: 'calc(100% + 16px)',
+					marginLeft: -16,
+					marginTop: -29,
 					background: '#fff',
 					borderWidth: '1.25px',
 					borderStyle: 'solid',
@@ -145,6 +232,7 @@ export function SectionNav() {
 				}}
 			>
 				<p
+					data-nav-eb=""
 					className="m-0 mb-[12px] text-[15px] font-bold italic leading-[20px] text-confetti-black/65"
 					style={{ fontFamily: 'var(--font-kyoto)' }}
 				>
@@ -157,7 +245,7 @@ export function SectionNav() {
 					return (
 						<a
 							key={it.key}
-							href={`#${it.key}`}
+							href={i === 0 ? '#' : `#${it.key}`}
 							aria-current={isActive ? 'true' : undefined}
 							aria-hidden={hide || undefined}
 							tabIndex={hide ? -1 : 0}

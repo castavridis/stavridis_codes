@@ -29,7 +29,7 @@ const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 export function Opportunity() {
 	return (
 		<Section>
-			<div className="flex w-full max-w-[705px] flex-col xl:ml-auto gap-[24px]">
+			<div className="flex w-full max-w-[705px] flex-col ml-auto gap-[24px]">
 				<SectionHeading id="opportunity">Opportunity</SectionHeading>
 				<Text variant="copy-large" className="m-0 text-confetti-black">
 					Centralized care management was created to address that gap. These
