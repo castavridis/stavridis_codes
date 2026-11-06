@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react';
 
+import { Illustration } from '../../../src/features/projects/components/Illustration';
+import OutcomeStat from '../../../src/features/projects/components/OutcomeStat';
 import Section from '../../../src/features/projects/components/Section';
 import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
@@ -120,6 +122,20 @@ export function Outcomes() {
 					nurses={1}
 					{...TEAM}
 				/>
+
+				{/* Business outcomes, ported from the CareSignal Platform case
+				    study's Outcomes row: NRR stat + Best in KLAS awards. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] sm:grid-cols-2">
+					<OutcomeStat stat="144%" caption="Net recurring revenue year over year" />
+					<Illustration
+						src="/images/projects/caresignal-platform/KLAS.png"
+						alt="Best in KLAS 2024 and Best in KLAS 2025"
+						width="100%"
+						height={176}
+						background="#f0eeeb"
+						className="text-left md:text-center"
+					/>
+				</div>
 			</div>
 		</Section>
 	);
