@@ -98,7 +98,7 @@ export function BackdropShot({
 			className="block w-full overflow-hidden rounded-[16px]"
 			style={{
 				aspectRatio: `${width} / ${height}`,
-				background: `var(--color-screenshot-sky) url(${IMG}/fig-backdrop.webp) center / cover no-repeat`,
+				background: `var(--color-screenshot-sky) url(${IMG}/fig-backdrop.jpeg) center / cover no-repeat`,
 			}}
 		>
 			<FadeImg src={src} alt={alt} width={width} height={height} />
