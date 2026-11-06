@@ -13,7 +13,7 @@ type TopNavigationProps = {
 // `project-overlay-sticky-headers` for context.
 export default function TopNavigation({ tags, onClose }: TopNavigationProps) {
   return (
-    <div className="flex w-[944px] items-center gap-[24px] overflow-clip">
+    <div className="flex z-10 w-[944px] items-center gap-[24px] overflow-clip">
       <Text variant="tag" className="flex-1 min-w-0 text-confetti-black opacity-50">
         {tags ?? ''}
       </Text>

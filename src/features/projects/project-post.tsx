@@ -127,7 +127,7 @@ function V1ProjectPost({ project, onBack }: { project: Project; onBack?: () => v
               {project.preview ? (
                 <div className="mt-14">
                   <span className="inline-flex items-center rounded-[6px] border border-current/40 px-[12px] py-[8px] font-mono text-[12px] font-medium italic leading-[12px]">
-                    Preview Only
+                    Preview
                   </span>
                 </div>
               ) : null}

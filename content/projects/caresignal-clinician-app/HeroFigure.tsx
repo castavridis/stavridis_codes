@@ -45,8 +45,10 @@ export function HeroFigure() {
 	const { ref, inView } = useInView();
 	const idle = useIdleReady();
 	const fallback = <FigPlaceholder label={PLACEHOLDER_LABEL} height={520} />;
+
+	{/* FIXME: This margin-top should not have to be forced. Need to update components. */}	
 	return (
-		<Section>
+		<Section className="!mt-[36px]">
 			<div ref={ref}>
 				{inView && idle ? (
 					<Suspense fallback={fallback}>

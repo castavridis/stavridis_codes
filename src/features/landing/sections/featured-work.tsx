@@ -73,7 +73,7 @@ function ProjectOverview({
           // the thumbnail's top-left.
           <span className="border-washes-paper bg-washes-paper/90 pointer-events-none absolute left-[12px] top-[12px] z-10 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
             <span className="text-confetti-black/75 font-mono text-[12px] font-medium italic leading-[12px]">
-              Preview Only
+              Preview
             </span>
           </span>
         ) : null}
@@ -130,24 +130,6 @@ const PROJECTS: Project[] = [
     thumbnailClassName: 'bg-washes-cerulean-blue',
     image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
     imageAlt: 'CareSignal AI thumbnail.',
-  },
-  {
-    // Matches the MDX file at content/projects/caresignal-platform.mdx so
-    // clicking the card routes to /project/caresignal-platform cleanly.
-    slug: 'caresignal-platform',
-    headline: 'Building a friendly and flexible enterprise healthcare platform',
-    tags: 'Product Design · Strategy · User Research',
-    thumbnailClassName: 'bg-washes-hansa-yellow',
-    image: '/images/projects/CareSignal%20Thumbnail.png',
-    imageAlt: 'CareSignal Platform thumbnail.',
-  },
-  {
-    slug: 'caresignal-brand',
-    headline: 'Finding the right name for a growing digital health company',
-    tags: 'Brand Design · Brand Strategy · Front-end Engineering',
-    thumbnailClassName: 'bg-cs-black',
-    image: '/images/projects/CareSignal%20Brand%20Thumbnail.png',
-    imageAlt: 'CareSignal logo'
   },
   {
     slug: 'sqshbook',

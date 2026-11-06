@@ -14,7 +14,7 @@ export function Introduction() {
 					lineHeight: '32px',
 				}}
 			>
-				As CareSignal’s sole Product Designer through acquisition, our clinician
+				<strong style={{ fontWeight: 600 }}>As CareSignal’s sole Product Designer through acquisition</strong>, our clinician
 				web application was my responsibility. I combined my skills in product
 				design, engineering, branding, and service design to take our app from a
 				clinically‑proven proof of concept to a commercial product.

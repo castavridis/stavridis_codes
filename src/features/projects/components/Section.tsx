@@ -16,7 +16,7 @@ type SectionProps = {
 // without adding a second gap.
 export default function Section({ children, className }: SectionProps) {
   return (
-    <section className={`mt-[120px] first:mt-0 ${className ?? ''}`}>
+    <section className={`mt-[60px] first:mt-0 ${className ?? ''}`}>
       {children}
     </section>
   );

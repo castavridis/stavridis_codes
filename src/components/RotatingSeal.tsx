@@ -116,7 +116,7 @@ export default function RotatingSeal({
   return (
     <div
       ref={wrapperRef}
-      className={`relative inline-block rounded-full shadow-md ${className ?? ''}`}
+      className={`relative mt-[12px] inline-block rounded-full shadow-md ${className ?? ''}`}
       style={{
         width: size,
         height: size,

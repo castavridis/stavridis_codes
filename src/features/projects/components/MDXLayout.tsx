@@ -206,7 +206,7 @@ function ChromeRow({
     // body content; the gradient mask below extends downward from the
     // bottom edge of this row across the full overlay width.
     <div
-      className="sticky top-0 z-10 bg-white"
+      className="sticky top-0 z-15 bg-white"
       style={{
         // Cream backdrop so content that scrolls UNDER the row reads
         // cleanly. `position: sticky`
@@ -305,7 +305,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
             FrontMatter source-of-truth without a second Close
             button). */}
         <div className="relative mx-auto w-full max-w-[1104px]">
-          <div className="relative pt-[84px]">
+          <div className="relative">
             {stampCompanyName ? (
               // Featured-project stamp. Sits above the headline with a
               // small negative bottom margin so the seal's lower edge
@@ -331,7 +331,7 @@ export default function MDXLayout({ front, onClose, children, stampCompanyName, 
               hideIntroduction={hideIntroduction}
             />
           </div>
-          <div className="pt-[72px] pb-[264px]">{children}</div>
+          <div className="pb-[264px]">{children}</div>
         </div>
       </div>
     </div>

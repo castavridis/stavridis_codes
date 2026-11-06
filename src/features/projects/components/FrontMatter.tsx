@@ -70,16 +70,16 @@ export default function FrontMatter({
         {previewOnly ? (
           // "Preview Only" tag — Figma node 4014:46487 (4140:10325). Light
           // tinted pill above the headline.
-          <span className="border-confetti-black/25 bg-confetti-black/5 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
+          <span className="mt-[12px] border-confetti-black/25 bg-confetti-black/5 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
             <span className="text-confetti-black font-mono text-[12px] font-medium italic leading-[12px]">
-              Preview Only
+              Preview
             </span>
           </span>
         ) : null}
         <Text
           variant="headline"
           as="h1"
-          className="m-0 w-full !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
+          className="m-0 w-full !text-[28px] !leading-[36px] md:!text-[44px] md:!leading-[1.2]"
         >
           {headline}
         </Text>

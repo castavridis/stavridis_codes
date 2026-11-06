@@ -3,7 +3,7 @@ title: CareSignal Clinician Application
 date: 2026-11-03
 time: 00:00
 summary: Scaling Care Teams
-preview: true
+preview: false
 headline: I designed a clinician web application that helped nurses in centralized care teams safely manage 15 to 20× as many patients.
 introduction: |
   As CareSignal’s sole Product Designer through acquisition, our clinician web application was my responsibility. I combined my skills in product design, engineering, branding, and service design to take our app from a clinically‑proven proof of concept to a commercial product.
@@ -15,6 +15,8 @@ color: '#201E1F'
 
 import BackToTop from '../../../src/features/projects/components/figures/BackToTop.tsx'
 import { AssumptionsModal } from './AssumptionsModal.tsx'
+
+{/* FIXME: Dangerously setting styles with this component seems like a brittle workaround. Many of these styles should propogate to other case studies.  */}
 import { CaseStudyStyle } from './CaseStudyStyle.tsx'
 import { FrontMatterWashes } from './FrontMatterWashes.tsx'
 import { SectionNav } from './SectionNav.tsx'
