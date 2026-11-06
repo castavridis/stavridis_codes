@@ -203,15 +203,21 @@ function ChromeRow({
 
   // Once the user has scrolled half a viewport, the chrome row tightens:
   // its inline padding (md+) springs from 72px to 36px — so the Close
-  // button sits 36px off the right edge — and the tags/title slot dims
-  // to 75%. Mobile keeps its 16px gutter, already tighter than 36.
-  // Driven by a spring rather than scroll progress so the settle reads
-  // physical.
+  // button sits 36px off the right edge — the tags/title slot dims to
+  // 50% and the Close button to 75%. Hovering the row (or focusing into
+  // it) brings both back to full. Mobile keeps its 16px gutter, already
+  // tighter than 36. Driven by a spring rather than scroll progress so
+  // the settle reads physical; friction is at/above critical damping
+  // (2·√tension) so it eases in without overshoot.
   const scrolled = scrollTop > window.innerHeight * 0.5;
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const quiet = scrolled && !hovered && !focused;
   const chromeSpring = useSpring({
     padX: scrolled ? 36 : 72,
-    dim: scrolled ? 0.75 : 1,
-    config: { tension: 260, friction: 24 },
+    textDim: quiet ? 0.5 : 1,
+    buttonDim: quiet ? 0.75 : 1,
+    config: { tension: 260, friction: 34 },
   });
 
   return (
@@ -221,6 +227,12 @@ function ChromeRow({
     // bottom edge of this row across the full overlay width.
     <div
       className="sticky top-0 z-15 bg-white"
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
+      }}
       style={{
         // Cream backdrop so content that scrolls UNDER the row reads
         // cleanly. `position: sticky`
@@ -238,11 +250,12 @@ function ChromeRow({
               via absolute overlap: the tags paragraph and the
               truncated title sit in the same grid cell, each
               opacity-controlled. The Close button stays put on the
-              right at full opacity at all times. */}
+              right; it dims with the row once scrolled (see
+              chromeSpring). */}
           <div className="flex w-full items-center gap-[24px] overflow-clip py-[32px]">
             <animated.div
               className="relative min-w-0 flex-1"
-              style={{ opacity: chromeSpring.dim }}
+              style={{ opacity: chromeSpring.textDim }}
             >
               <p
                 className="type-tag text-confetti-black m-0 truncate"
@@ -272,9 +285,12 @@ function ChromeRow({
             </animated.div>
             {/* Close button — same outline Button as the previous
                 TopNavigation inside FrontMatter. */}
-            <div className="flex shrink-0 items-center">
+            <animated.div
+              className="flex shrink-0 items-center"
+              style={{ opacity: chromeSpring.buttonDim }}
+            >
               <Button variant="outline" label="Close" onClick={onClose} />
-            </div>
+            </animated.div>
           </div>
         </div>
       </animated.div>
