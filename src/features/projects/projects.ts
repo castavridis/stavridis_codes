@@ -13,6 +13,11 @@ export type ProjectFrontmatter = {
   // for case studies that are still drafts/previews. The project controls
   // this itself via its `.mdx` frontmatter.
   preview?: boolean;
+  // When true, the case study asks search engines not to index it: the
+  // project page sets <meta name="robots" content="noindex"> while open.
+  // Pair it with an X-Robots-Tag header for the route in vercel.json, which
+  // crawlers see before any JavaScript runs.
+  noindex?: boolean;
   // v2-only fields. Their presence is the discriminator that tells
   // project-post.tsx to render with the v2 MDXLayout chrome instead of the
   // legacy gradient-header chrome.

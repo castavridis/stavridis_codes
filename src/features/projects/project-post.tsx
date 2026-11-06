@@ -1,5 +1,5 @@
 import type { MDXComponents, MDXContent } from 'mdx/types';
-import { createElement, Suspense, use } from 'react';
+import { createElement, Suspense, use, useEffect } from 'react';
 import { Link } from 'wouter';
 import { MDXColumn, MDXWrapper } from '../../components/mdx/Layout.js';
 import { routes } from '../../routes.js';
@@ -43,6 +43,28 @@ function isV2Project(project: Project): boolean {
   return Boolean(project.headline && project.introduction);
 }
 
+// While `enabled`, the document carries <meta name="robots" content="noindex">.
+// Restores whatever robots tag was there before (or removes ours) on close,
+// so leaving a noindex case study never leaves the rest of the site noindexed.
+function useNoindex(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    let tag = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const created = !tag;
+    const previous = tag?.getAttribute('content') ?? null;
+    if (!tag) {
+      tag = document.createElement('meta');
+      tag.setAttribute('name', 'robots');
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute('content', 'noindex');
+    return () => {
+      if (created) tag?.remove();
+      else if (previous !== null) tag?.setAttribute('content', previous);
+    };
+  }, [enabled]);
+}
+
 export function ProjectPost({
   slug,
   onBack,
@@ -55,6 +77,7 @@ export function ProjectPost({
   stampSeal?: SealColors;
 }) {
   const project = getProject(slug);
+  useNoindex(Boolean(project?.noindex));
 
   if (!project) {
     return <ProjectNotFound />;
