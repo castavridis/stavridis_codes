@@ -8,7 +8,6 @@ import {
 	BackdropShot,
 	Citation,
 	FigCaption,
-	FigPlaceholder,
 	Figure,
 	IMG,
 	NumBadge,

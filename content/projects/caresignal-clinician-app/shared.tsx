@@ -14,29 +14,37 @@ export { default as Figure } from '../../../src/features/projects/components/fig
 
 export const IMG = '/images/projects/caresignal-clinician-app';
 
-// Interim stand-in for the animated watercolour figures (nurse orbit, care
-// team orbits, design-principle swipes, text-message anatomy). Figure panel
-// background per the handoff token sheet. Deliberately NOT
-// IllustrationPlaceholder (src/features/projects/components/Illustration.tsx):
-// that one is a dashed slot for a missing exported image; this is an
-// accessible role="img" stand-in for an interactive figure, described by its
-// label while the real figure is pending or lazy-loading.
-export function FigPlaceholder({
+// A figure-shaped empty panel on the figure-card paper. Used both as the
+// Suspense / lazy-mount fallback while an interactive figure (nurse orbit,
+// care team orbits…) loads, and as a plain empty state where a figure has
+// nothing to show. `label` is the accessible name, used verbatim — callers
+// say what the panel stands for; nothing is prepended. Visible content is
+// `children` when given, otherwise the label. `loading` marks the panel
+// aria-busy so assistive tech knows the real figure is on its way.
+// Deliberately NOT IllustrationPlaceholder
+// (src/features/projects/components/Illustration.tsx): that one is a dashed
+// slot for a missing exported image.
+export function FigEmptyState({
 	label,
+	children,
+	loading = false,
 	height = 420,
 }: {
 	label: string;
+	children?: ReactNode;
+	loading?: boolean;
 	height?: number;
 }) {
 	return (
 		<div
 			role="img"
-			aria-label={`Placeholder for figure: ${label}`}
+			aria-label={label}
+			aria-busy={loading || undefined}
 			className="flex w-full items-center justify-center rounded-[16px] bg-washes-paper"
 			style={{ height }}
 		>
 			<Text variant="callout-meta" className="m-0 px-[24px] text-center text-confetti-black/50">
-				Placeholder — {label}
+				{children ?? label}
 			</Text>
 		</div>
 	);

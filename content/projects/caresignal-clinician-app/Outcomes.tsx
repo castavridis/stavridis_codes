@@ -4,7 +4,7 @@ import Section from '../../../src/features/projects/components/Section';
 import type { CareTeamOrbitProps } from '../../../src/features/projects/components/figures/CareTeamOrbit';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
 
-import { FigPlaceholder, SectionHeading } from './shared';
+import { FigEmptyState, SectionHeading } from './shared';
 
 const CareTeamOrbit = lazy(
 	() => import('../../../src/features/projects/components/figures/CareTeamOrbit'),
@@ -60,7 +60,7 @@ function StatPanel({ title, stats }: { title: string; stats: string[] }) {
 
 function OrbitSlot({ label, ...props }: CareTeamOrbitProps & { label: string }) {
 	const { ref, inView } = useInView();
-	const fallback = <FigPlaceholder label={label} height={520} />;
+	const fallback = <FigEmptyState label={label} height={520} loading />;
 	return (
 		<div ref={ref} className="w-full">
 			{inView ? (
