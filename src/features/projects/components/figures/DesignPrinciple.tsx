@@ -12,14 +12,15 @@ type DesignPrincipleProps = {
 	endY?: number;
 	arc?: number;
 	// Stroke parameters. A light ink load (the case study's sw.* default is
-	// 2.6); the brush lands wide (0.75 card heights) and narrows to `width`
-	// along the stroke.
+	// 2.6); the brush lands at `startSize` px across and lerps to
+	// `width` along the stroke.
 	load?: number;
 	// Brush water load (flow); the swipe default is 1.3.
 	water?: number;
 	width?: number;
-	// Brush width on landing; lerps to `width` as the swipe progresses.
-	startWidth?: number;
+	// Brush diameter on landing, in px; lerps to `width` as the swipe
+	// progresses.
+	startSize?: number;
 	pressure?: number;
 	variation?: number;
 	landing?: number;
@@ -57,7 +58,7 @@ export default function DesignPrinciple({
 	load = 0.00625,
 	water = 0.65,
 	width = 0.33,
-	startWidth = 0.75,
+	startSize = 100,
 	pressure = 1,
 	variation = 0.35,
 	landing = 0.3,
@@ -76,6 +77,11 @@ export default function DesignPrinciple({
 		const r = el.getBoundingClientRect();
 		const aspect = r.height > 0 ? r.width / r.height : 6;
 		const reduce = prefersReducedMotion();
+		// The swipe's paint radius comes out as width / aspect × the card's short
+		// side px (the engine scales by the short side, the swipe divides by
+		// aspect), so solve for the width that gives a startSize-px diameter.
+		const short = Math.min(r.width, r.height);
+		const startWidth = short > 0 ? ((startSize / 2) * aspect) / short : width;
 		const handle = WashHighlightFX.swipe(el, {
 			pigment,
 			path: [jitter(0, startY, aspect), jitter(1, endY, aspect)],
