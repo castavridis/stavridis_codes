@@ -102,10 +102,9 @@ export function ScalingCareTeams() {
 					</FigCaption>
 				</figure> */}
 
+				<ProgramGovernance />
+
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
-					<Text variant="copy-large" className="m-0 text-confetti-black">
-						I designed additional ways for nurses to manage their tasks.
-					</Text>
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The layers that controlled task management could be customized at
 						different levels, allowing for governance that could be set at
@@ -116,8 +115,6 @@ export function ScalingCareTeams() {
 						activity if they wanted to.
 					</Text>
 				</div>
-
-				<ProgramGovernance />
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
