@@ -159,7 +159,10 @@ export function WashesCanvas({
 
       wash.gouacheMode("auto");
       wash.paperWetness("damp");
-      wash.paintLoad(0.225); // +50% pigment (was 0.15)
+      // Pigment per stamp. 0.45 (3× the original 0.15) restores a rich line
+      // at the 88px brush: measured headlessly it lays down ~1.5× the total
+      // colour of the old 160px brush at 0.15, with a deeper core.
+      wash.paintLoad(0.45);
       wash.waterLoad(8.0);
       wash.evaporation(3.125); // +25% drying speed
       // v2's brushSize is a RADIUS as a fraction of the smaller display
