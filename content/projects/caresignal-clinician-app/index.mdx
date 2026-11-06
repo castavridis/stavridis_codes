@@ -30,6 +30,7 @@ import { ScalingCareTeams } from './ScalingCareTeams.tsx'
 import { Outcomes } from './Outcomes.tsx'
 import { KeyLearnings } from './KeyLearnings.tsx'
 import { TeamAndTools } from './TeamAndTools.tsx'
+import { LazyBlocks } from './LazyBlocks.tsx'
 
 {/* Case-study-scoped style overrides (the design's #nurse-case tweaks) */}
 <CaseStudyStyle />
@@ -71,6 +72,9 @@ import { TeamAndTools } from './TeamAndTools.tsx'
 
 	<TeamAndTools />
 </div>
+
+{/* Off-screen prose skips rendering (design lazyBlocks) */}
+<LazyBlocks />
 
 <AssumptionsModal />
 
