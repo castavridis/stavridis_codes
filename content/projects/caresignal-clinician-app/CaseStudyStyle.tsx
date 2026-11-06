@@ -14,6 +14,13 @@ ${SCOPE} {
 	--color-washes-paper: #fdfbf5;
 }
 
+/* Body copy: 20px / 1.15 here (the site-wide type-copy-large stays 24/32).
+   Paragraph gaps are 16px on the prose columns themselves. */
+${SCOPE} .type-copy-large {
+	font-size: 20px;
+	line-height: 1.15;
+}
+
 /* Title line above the tag row in the sticky chrome (design adds it via a
    ::before on the tag paragraph). !important beats MDXLayout's inline
    scroll-linked opacity, as in the design. */

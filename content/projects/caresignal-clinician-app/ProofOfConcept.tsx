@@ -18,7 +18,7 @@ export function ProofOfConcept() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<SectionHeading id="starting-point">Proof of Concept</SectionHeading>
 					<h3
 						className="m-0 flex items-center gap-[14px] text-confetti-black"
@@ -62,7 +62,7 @@ export function ProofOfConcept() {
 					</figcaption>
 				</figure>
 
-				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The prototype worked! In a randomized pilot, patients using it missed far fewer dialysis sessions, spent fewer days in the hospital, and recovered $36 in treatment revenue for every $1 the system cost.
 						<Citation {...CITATIONS.prototypeRoi} /> The success prompted
@@ -76,7 +76,7 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					{/* Rule sits inside the reading column (design: 28px above,
 					    36px below, 12% ink). */}
 					<hr className="m-0 w-full border-0 border-t border-confetti-black/12 mt-[20px] mb-[16px]" />
@@ -128,7 +128,7 @@ export function ProofOfConcept() {
 					<FigCaption fig>An alert-based dashboard</FigCaption>
 				</figure> */}
 
-				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I owned it from concept to production and I was proud of the
 						dashboard. It featured crisp typography, a mobile-first design,
@@ -168,7 +168,7 @@ export function ProofOfConcept() {
 					/>
 				</div>
 
-				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						The alert-based dashboard supported several trials, including one
 						for the Dialysis program in a randomized controlled trial.
