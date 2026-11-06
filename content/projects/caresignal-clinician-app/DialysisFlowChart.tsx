@@ -9,8 +9,9 @@ import { IMG } from './shared';
 
 const INK45 = 'color-mix(in srgb, var(--color-confetti-black) 45%, transparent)';
 const HANSA = 'var(--color-washes-hansa-yellow, #f6c445)';
-const CERULEAN = 'var(--color-washes-cerulean-blue, #108ba0)';
-const GREEN = 'var(--color-grad-success-start, #b2d07f)';
+// Who's who: the patient in CareSignal purple, the nurse in CareSignal green.
+const PATIENT = 'var(--color-cs-purple, #cf9fc5)';
+const NURSE = 'var(--color-cs-green, #b2d07f)';
 const ROSE = '#a50e53';
 
 const ARIA_LABEL =
@@ -113,10 +114,10 @@ function MsgCard({
 function PressRow() {
 	return (
 		<div className="flex items-center justify-end gap-[10px] pr-[8px]">
-			<ChipLabel dot={CERULEAN}>Patient presses</ChipLabel>
+			<ChipLabel dot={PATIENT}>Patient presses</ChipLabel>
 			<span
 				className="flex size-[34px] items-center justify-center rounded-[6px] bg-white text-[15px] text-confetti-black"
-				style={{ fontFamily: 'var(--font-mono)', border: `1.5px solid ${CERULEAN}` }}
+				style={{ fontFamily: 'var(--font-mono)', border: `1.5px solid ${PATIENT}` }}
 			>
 				2
 			</span>
@@ -124,11 +125,11 @@ function PressRow() {
 	);
 }
 
-// Dashed connector arrows (purely decorative).
+// Solid connector arrows (purely decorative).
 function ArrowRight() {
 	return (
 		<div aria-hidden className="flex w-full items-center">
-			<span className="flex-1" style={{ borderTop: `1.5px dashed ${INK45}` }} />
+			<span className="flex-1" style={{ borderTop: `1.5px solid ${INK45}` }} />
 			<span
 				className="size-0"
 				style={{
@@ -148,7 +149,7 @@ function ArrowDown({ height, stretch }: { height?: number; stretch?: boolean }) 
 			className="flex flex-col items-center"
 			style={stretch ? { flex: '1px', height: 'auto' } : { height: height ?? 24 }}
 		>
-			<span className="flex-1" style={{ borderLeft: `1.5px dashed ${INK45}` }} />
+			<span className="flex-1" style={{ borderLeft: `1.5px solid ${INK45}` }} />
 			<span
 				className="size-0"
 				style={{
@@ -175,7 +176,7 @@ export function DialysisFlowChart() {
 		>
 			<div aria-hidden className="grid min-w-[600px] items-center" style={COLS}>
 				<div style={{ gridColumn: 1, gridRow: 1 }}>
-					<Pill tone={HANSA} avatar={`${IMG}/fig2-avatar-phone.png`}>
+					<Pill tone={HANSA}>
 						CareSignal messages patient
 					</Pill>
 				</div>
@@ -241,7 +242,7 @@ export function DialysisFlowChart() {
 					</MsgCard>
 				</div>
 				<div style={{ gridColumn: 3, gridRow: 7 }}>
-					<Pill tone={GREEN} avatar={`${IMG}/fig2-avatar-nurse.png`}>
+					<Pill tone={NURSE} avatar={`${IMG}/fig2-avatar-nurse.png`}>
 						Nurse calls patient
 					</Pill>
 				</div>
@@ -251,7 +252,7 @@ export function DialysisFlowChart() {
 					style={{ gridColumn: '1 / span 3', gridRow: 8, ...COLS }}
 				>
 					<div className="flex items-center justify-end gap-[10px] pr-[8px]">
-						<ChipLabel dot={CERULEAN}>Patient</ChipLabel>
+						<ChipLabel dot={PATIENT}>Patient</ChipLabel>
 						<img
 							src={`${IMG}/fig2-avatar-patient.png`}
 							alt=""
@@ -264,13 +265,13 @@ export function DialysisFlowChart() {
 						className="flex flex-row-reverse items-center pr-[40%]"
 						style={{ gridColumn: '2 / span 2' }}
 					>
-						<span className="flex-1" style={{ borderTop: `1.5px dashed ${GREEN}` }} />
+						<span className="flex-1" style={{ borderTop: `1.5px solid ${NURSE}` }} />
 						<span
 							className="size-0"
 							style={{
 								borderTop: '5px solid transparent',
 								borderBottom: '5px solid transparent',
-								borderRight: `7px solid ${GREEN}`,
+								borderRight: `7px solid ${NURSE}`,
 							}}
 						/>
 					</div>

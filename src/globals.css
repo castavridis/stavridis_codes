@@ -43,6 +43,10 @@
      (CareSignal / Washes / Confetti / status gradients). */
   --color-caresignal-white: #fffbf0;
   --color-caresignal-none: #706c69;
+  /* CareSignal product palette (design handoff caresignal/cs.css): purple
+     marks the patient (their message bubbles), green the care team. */
+  --color-cs-purple: #cf9fc5;
+  --color-cs-green: #b2d07f;
 
   --color-confetti-black: #391f00;
 
