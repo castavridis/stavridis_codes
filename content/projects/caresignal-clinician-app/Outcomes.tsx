@@ -42,7 +42,7 @@ const statList = {
 
 function StatPanel({ title, stats }: { title: string; stats: string[] }) {
 	return (
-		<div className="flex w-full max-w-[705px] flex-col gap-[20px] ml-auto">
+		<div className="flex w-full max-w-[704px] flex-col gap-[20px] ml-auto">
 			<h3 className="m-0 text-confetti-black" style={panelTitle}>
 				{title}
 			</h3>
@@ -78,7 +78,7 @@ export function Outcomes() {
 	return (
 		<Section>
 			<div className="flex w-full flex-col gap-[28px]">
-				<div className="flex w-full max-w-[705px] flex-col gap-[20px] ml-auto">
+				<div className="flex w-full max-w-[704px] flex-col gap-[20px] ml-auto">
 					<SectionHeading id="outcomes">Outcomes</SectionHeading>
 					<h3 className="m-0 text-confetti-black" style={panelTitle}>
 						Centralized Care Management Nurse Panel Size
