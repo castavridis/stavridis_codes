@@ -60,6 +60,10 @@ export type CompanyConfig = {
   // company's context is active (e.g. a tailored résumé). When unset the
   // link falls back to the role-specific PDF (see role-context.ROLE_RESUME).
   resume?: string;
+  // `cover_letter` — URL of a custom cover letter for this company (e.g.
+  // '/cover-letters/C-Stavridis_{Company}_Cover-Letter.pdf'). Optional;
+  // nothing renders it yet, so for now it only records the file.
+  cover_letter?: string;
   featuredSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
@@ -74,10 +78,27 @@ export type CompanyConfig = {
 // these, so their seals currently fall back to the Hansa Yellow default.
 // `seal` is intentionally unset everywhere for now — see RotatingSeal.
 export const companies: Record<string, CompanyConfig> = {
+  honor_health: {
+    name: 'Honor Health',
+    role: 'pd',
+    cover_letter: '',
+    resume: '',
+    featuredSlugs: ['caresignal-clinician-app', 'sqshbook', 'fracta'],
+    featuredProjects: ['caresignal-clinician-app'],
+    seal: {
+      foreground_color: 'rgb(253,253,252)',
+      background_color: 'rgb(79,193,171)',
+    },
+    salutation_colors: {
+      foreground_color: 'rgb(253,253,252)',
+      background_color: 'rgb(231,97,36)',
+    },
+  },
   mayo_clinic: {
     name: 'Mayo Clinic',
     role: 'pd',
-    resume: '/resumes/C-Stavridis_Resume_Mayo-Clinic.pdf',
+    cover_letter: 'cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
+    resume: '/resumes/C-Stavridis_Mayo-Clinic_Resume.pdf',
     featuredSlugs: ['caresignal-clinician-app', 'fracta', 'sqshbook'],
     featuredProjects: ['caresignal-clinician-app'],
     salutation_colors: {
