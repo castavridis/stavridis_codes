@@ -982,7 +982,7 @@ export default function LandingPage({
                   <Text variant="copy" className="mb-0">
                     I’ve turned complex, high-stakes systems into warm, approachable products. I co-founded
                     CareSignal, a Best in KLAS remote patient monitoring company (acquired by Lightbeam), where I
-                    designed the tools that let one nurse care for 1,500 patients instead of 100.
+                    designed the tools that transformed care delivery and patient outcomes.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
                   <Text variant="copy">
@@ -994,7 +994,7 @@ export default function LandingPage({
                     now
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    I’m deep in design-engineering: building AI-native design tools and exploring shader-based
+                    I’m returning to design craft through product design and design-engineering: building AI-native design tools and exploring shader-based
                     design systems, after two batches at the Recurse Center.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
