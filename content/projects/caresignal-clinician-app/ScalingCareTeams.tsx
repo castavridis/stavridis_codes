@@ -1,6 +1,6 @@
 import Text from '../../../src/components/Text';
 import Section from '../../../src/features/projects/components/Section';
-import AnatomyOfATextMessage from '../../../src/features/projects/components/figures/AnatomyOfATextMessage';
+import ProgramGovernance from '../../../src/features/projects/components/figures/ProgramGovernance';
 
 import {
 	BackdropShot,
@@ -129,7 +129,7 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<AnatomyOfATextMessage />
+				<ProgramGovernance />
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
