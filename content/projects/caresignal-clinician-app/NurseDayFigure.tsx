@@ -20,6 +20,7 @@ import {
 } from '../../../src/features/projects/components/figures/orbit/nurse-orbit.js';
 
 import { Citation, IMG } from './shared';
+import { ASSUMPTIONS_STATE_EVT } from './AssumptionsModal';
 
 // Figure 1 — "A centralized nurse care manager's shift before and after
 // CareSignal", ported from the design handoff's "Nurse Day Complete.dc.html"
@@ -1117,18 +1118,29 @@ export function NurseDayFigure({
 		}
 
 		// Pause whichever half scrolls out of view (or is clipped away by the
-		// stacked viewport), so each day resumes where it stopped.
+		// stacked viewport), so each day resumes where it stopped — and hold
+		// both while the Assumptions dialog covers them (dc holdFx).
+		const inView = { before: true, after: true };
+		let assumOpen = false;
+		const hold = (k: 'before' | 'after') => M.fx[k]?.setPaused(!inView[k] || assumOpen);
 		const io =
 			'IntersectionObserver' in window
 				? new IntersectionObserver(
 						(es) =>
 							es.forEach((e) => {
 								const k = e.target === b ? 'before' : 'after';
-								M.fx[k]?.setPaused(!e.isIntersecting);
+								inView[k] = e.isIntersecting;
+								hold(k);
 							}),
 						{ threshold: 0.05 },
 					)
 				: null;
+		const onAssumptions = (e: Event) => {
+			assumOpen = !!(e as CustomEvent<boolean>).detail;
+			hold('before');
+			hold('after');
+		};
+		window.addEventListener(ASSUMPTIONS_STATE_EVT, onAssumptions);
 		if (io) {
 			io.observe(b);
 			io.observe(a);
@@ -1384,6 +1396,7 @@ export function NurseDayFigure({
 			mqReduced.removeEventListener('change', retune);
 			ioInf?.disconnect();
 			io?.disconnect();
+			window.removeEventListener(ASSUMPTIONS_STATE_EVT, onAssumptions);
 			ro.disconnect();
 			for (const k of ['before', 'after'] as const) {
 				try {

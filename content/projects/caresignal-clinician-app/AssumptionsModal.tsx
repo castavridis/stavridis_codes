@@ -15,6 +15,10 @@ export function openAssumptions() {
 	window.dispatchEvent(new Event(OPEN_EVT));
 }
 
+// Broadcast while the dialog is up so figures can hold their simulations
+// behind it (dc holdFx). detail: true on open, false on close.
+export const ASSUMPTIONS_STATE_EVT = 'cs-assumptions-state';
+
 const EYEBROW =
 	'text-[12px] leading-[16px] tracking-[0.04em] text-confetti-black/75';
 
@@ -49,6 +53,10 @@ export function AssumptionsModal() {
 		window.addEventListener(OPEN_EVT, onOpen);
 		return () => window.removeEventListener(OPEN_EVT, onOpen);
 	}, []);
+
+	useEffect(() => {
+		window.dispatchEvent(new CustomEvent(ASSUMPTIONS_STATE_EVT, { detail: open }));
+	}, [open]);
 
 	useEffect(() => {
 		if (!open) return;
