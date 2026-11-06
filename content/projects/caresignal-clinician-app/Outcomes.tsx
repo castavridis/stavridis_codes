@@ -98,7 +98,7 @@ function KlasLockup({ year, half }: { year: number; half: 'left' | 'right' }) {
 		<div
 			role="img"
 			aria-label={`Best in KLAS ${year}`}
-			className="w-full max-w-[200px] bg-confetti-black"
+			className="w-full max-w-[120px] bg-confetti-black"
 			style={{ aspectRatio: `${w} / ${h}`, mask, WebkitMask: mask }}
 		/>
 	);
@@ -131,7 +131,7 @@ export function Outcomes() {
 					</div>
 					<div className={`${card} md:col-span-2`}>
 						<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
-							Best in KLAS
+							Select Accolades
 						</Text>
 						<div className="grid grid-cols-2 gap-[16px]">
 							<KlasLockup year={2024} half="left" />
