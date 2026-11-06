@@ -6,7 +6,6 @@ import { Analytics } from '@vercel/analytics/react';
 import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
 import GpuPausePill from './components/GpuPausePill.js';
-import GpuToggle from './components/GpuToggle.js';
 import { getCompany, type CompanyConfig, type SealColors } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
 import {
@@ -385,7 +384,8 @@ export function App() {
       </SheetOverlay>
 
       <GpuPausePill />
-      <GpuToggle />
+      {/* GpuToggle (bottom-right GPU play/pause) is hidden for now — re-add
+          <GpuToggle /> to show it. Shift+Alt+P and the pill still work. */}
       <Analytics />
     </main>
   );
