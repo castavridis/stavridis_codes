@@ -4,7 +4,7 @@ import Section from '../../../src/features/projects/components/Section';
 import { useInView } from '../../../src/features/projects/components/figures/useInView';
 
 import { openAssumptions } from './AssumptionsModal';
-import { FigPlaceholder } from './shared';
+import { FigEmptyState } from './shared';
 
 // Hold the heavy WebGL mount until the browser is idle, so the three.js
 // chunk + canvas don't contend with the project sheet's open transition
@@ -38,13 +38,13 @@ const NurseDaySim = lazy(() =>
 	import('./NurseDayFigure').then((m) => ({ default: m.NurseDayFigure })),
 );
 
-const PLACEHOLDER_LABEL =
-	'animated figure: one nurse’s 7-hour day. Before: he phones down a list of 100 patients whose status is unknown; most calls go unanswered. After CareSignal: 1,600 patients check in by text, about 80% reply, and he starts with alerts and high-risk patients.';
+const FIGURE_LABEL =
+	'Animated figure: one nurse’s 7-hour day. Before: he phones down a list of 100 patients whose status is unknown; most calls go unanswered. After CareSignal: 1,600 patients check in by text, about 80% reply, and he starts with alerts and high-risk patients.';
 
 export function HeroFigure() {
 	const { ref, inView } = useInView();
 	const idle = useIdleReady();
-	const fallback = <FigPlaceholder label={PLACEHOLDER_LABEL} height={520} />;
+	const fallback = <FigEmptyState label={FIGURE_LABEL} height={520} loading />;
 
 	{/* FIXME: This margin-top should not have to be forced. Need to update components. */}	
 	return (
