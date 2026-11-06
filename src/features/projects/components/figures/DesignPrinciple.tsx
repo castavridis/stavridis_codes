@@ -15,6 +15,8 @@ type DesignPrincipleProps = {
 	// 2.6); the brush lands wide (0.75 card heights) and narrows to `width`
 	// along the stroke.
 	load?: number;
+	// Brush water load (flow); the swipe default is 1.3.
+	water?: number;
 	width?: number;
 	// Brush width on landing; lerps to `width` as the swipe progresses.
 	startWidth?: number;
@@ -52,7 +54,8 @@ export default function DesignPrinciple({
 	startY = 0.62,
 	endY = 0.43,
 	arc = 0.12,
-	load = 0.0125,
+	load = 0.00625,
+	water = 0.65,
 	width = 0.33,
 	startWidth = 0.75,
 	pressure = 1,
@@ -78,6 +81,7 @@ export default function DesignPrinciple({
 			path: [jitter(0, startY, aspect), jitter(1, endY, aspect)],
 			arc,
 			load,
+			water,
 			width,
 			startWidth,
 			pressure,

@@ -106,8 +106,8 @@ class WashHighlight {
 }
 
 // Wash swipe → WashHighlightFX.swipe(el, opts): one loaded brush stroke dragged across el (left to right), clipped to it; pressure shapes both the width and the pigment laid down.
-// opts: startWidth (brush size on landing, × el height; lerps to width along the stroke) · gravity (0–0.25) · gravityAngle (deg, 0 = right, 90 = down) · pigment · load · width (brush, × el height) · duration ms · pressure · variation · landing (blot) · lift (taper share) · runOut (pigment fading along the stroke) · x0 y0 s0 / x1 y1 s1 (start/end zones: centre in card fractions, spread in card heights) · arc · spatter · trigger 'view'|'load'|'hover' · delay · threshold · dryAfter ms · paper
-const SW_DEF = { pigment: 'rose', load: 2.6, width: 0.42, duration: 750, pressure: 1, variation: 0.35, landing: 0.3, lift: 0.2, runOut: 0.3, arc: 0.1, rise: -0.12, y: 0.55, spatter: true, trigger: 'view', delay: 0, threshold: 0.5, dryAfter: 3500, passes: 16, gravity: 0.08, gravityAngle: 0 };
+// opts: water (brush water load / flow, ≥ 0.2) · startWidth (brush size on landing, × el height; lerps to width along the stroke) · gravity (0–0.25) · gravityAngle (deg, 0 = right, 90 = down) · pigment · load · width (brush, × el height) · duration ms · pressure · variation · landing (blot) · lift (taper share) · runOut (pigment fading along the stroke) · x0 y0 s0 / x1 y1 s1 (start/end zones: centre in card fractions, spread in card heights) · arc · spatter · trigger 'view'|'load'|'hover' · delay · threshold · dryAfter ms · paper
+const SW_DEF = { pigment: 'rose', load: 2.6, water: 1.3, width: 0.42, duration: 750, pressure: 1, variation: 0.35, landing: 0.3, lift: 0.2, runOut: 0.3, arc: 0.1, rise: -0.12, y: 0.55, spatter: true, trigger: 'view', delay: 0, threshold: 0.5, dryAfter: 3500, passes: 16, gravity: 0.08, gravityAngle: 0 };
 class WashSwipe {
   constructor(el, o) { this.el = el; this.o = Object.assign({}, SW_DEF, o); this.seq = 0; }
   start() { const O = this.o, tgt = this.el.parentElement || this.el; if (getComputedStyle(this.el).position === 'static') this.el.style.position = 'relative';
@@ -131,7 +131,7 @@ class WashSwipe {
     const press = u => { const land = 1 + O.landing * Math.max(0, 1 - u / 0.07), wav = 1 + O.variation * 0.5 * (0.6 * Math.sin(u * 7 + ph[0]) + 0.4 * Math.sin(u * 17 + ph[1])), run = 1 - O.runOut * u, L = Math.max(0.01, O.lift), lift = u > 1 - L ? Math.max(0.12, 1 - Math.pow((u - (1 - L)) / L, 1.3)) : 1; return Math.max(0.05, O.pressure * land * wav * run * lift); };
     let done = 0, extra = 0;
     const tick = now => { if (this.dead || this.wc !== wc) return; const f = Math.max(0, Math.min(1, (now - t0) / dur)), e = 1 - Math.pow(1 - f, 1.8), upto = Math.round(e * N);
-      try { wc.pigment(0); wc.paintLoad(O.load); wc.waterLoad(1.3);
+      try { wc.pigment(0); wc.paintLoad(O.load); wc.waterLoad(O.water);
         for (let s = 0; s < upto; s++) { const u = s / N, p = at(u), pr = press(u), hy = (O.startWidth == null ? O.width : O.startWidth + (O.width - O.startWidth) * u) * Math.pow(pr, 0.7) * (0.92 + Math.random() * 0.16), rx = hy / asp; wc.pressure(Math.min(1, pr)); if (s >= done) wc.rewet(p.x, p.y, rx * 1.6); wc.paint(p.x, p.y, rx, 0, Math.min(1, pr)); } } catch (e) {}
       done = upto; if (f < 1 || ++extra < O.passes) { this.raf = requestAnimationFrame(tick); return; }
       try { if (O.spatter) { const p = at(0.97); wc.splash([{ x: p.x - 0.03 * dir2, y: p.y, radius: 0.5 / asp, velocity: 5 }], 'bigSplash'); } wc.penUp(); } catch (e) {}

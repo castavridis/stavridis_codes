@@ -24,6 +24,8 @@ export type WashHighlightOptions = {
 export type WashSwipeOptions = {
 	pigment?: WashPigment;
 	load?: number;
+	/** Brush water load (flow); default 1.3, engine floor 0.2. */
+	water?: number;
 	/** Brush width × element height. */
 	width?: number;
 	/** Brush width on landing (× element height); lerps to `width` along the stroke. */
