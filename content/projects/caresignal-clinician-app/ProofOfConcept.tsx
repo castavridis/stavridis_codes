@@ -140,10 +140,9 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				{/* Principle cards live in the reading column (the reference
-				    right-aligns them; centered full-width they'd underlap the
-				    sticky nav) */}
-				<div className="flex w-full max-w-[704px] flex-col gap-[16px] ml-auto">
+				{/* Design principles: full width, three across (stacked on
+				    phones); the cards share a row height. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
 					<DesignPrinciple
 						number={1}
 						pigment="rose"
