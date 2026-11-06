@@ -5,9 +5,8 @@ import DesignPrinciple from '../../../src/features/projects/components/figures/D
 import { CITATIONS } from './citations';
 import { DialysisFlowChart } from './DialysisFlowChart';
 import {
-	BackdropShot,
+	BackdropWindowShot,
 	Citation,
-	FigCaption,
 	Figure,
 	IMG,
 	NumBadge,
@@ -110,6 +109,19 @@ export function ProofOfConcept() {
 						an urgent or emergent need. Clinicians would respond to the alert
 						by contacting the patient and intervening if necessary.
 					</Text>
+				</div>
+
+				<BackdropWindowShot
+					src={`${IMG}/fig-alert-dashboard.png`}
+					width={3404}
+					height={2188}
+					alt="The Epharmix dashboard before the CareSignal rebrand: a blue header with enrolled and prescribed patient counts and Enroll Patient and Prescribe Patient buttons, above a Notification Center whose Unaddressed Alerts tab lists patients with their alert (blood pressure readings over threshold, or Unresponsive), the intervention, and a Mark as Addressed checkbox; Patient-Initiated Calls and Unresponsive Patients tabs sit beside it."
+				>
+					Alert-based dashboard designed for our researchers before I re-branded
+					us to CareSignal.
+				</BackdropWindowShot>
+
+				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						I designed an alert-based dashboard with the researchers studying
 						different programs. After alerts, they were concerned about how
@@ -117,16 +129,6 @@ export function ProofOfConcept() {
 						enrolled, how many were responding.
 					</Text>
 				</div>
-
-				{/* <figure className="m-0 mx-auto flex w-full max-w-[1104px] flex-col items-center gap-[16px]">
-					<BackdropShot
-						src={`${IMG}/fig3-alert-dashboard.webp`}
-						width={1507}
-						height={958}
-						alt="The alert-based dashboard in a browser window: a blue navigation bar with Dashboard, Patients, Programs and Alerts; tiles for Enrolled Patients (525) and Prescribed Patients (9); Hide PHI, Enroll Patient and Prescribe Patient actions; and a list of rows below, shown on a blurred sky-and-field backdrop."
-					/>
-					<FigCaption fig>An alert-based dashboard</FigCaption>
-				</figure> */}
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">

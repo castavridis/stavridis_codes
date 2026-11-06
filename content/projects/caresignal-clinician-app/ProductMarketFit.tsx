@@ -3,9 +3,7 @@ import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
 import {
-	BackdropWindowShot,
 	Citation,
-	IMG,
 	SectionHeading,
 } from './shared';
 
@@ -46,16 +44,6 @@ export function ProductMarketFit() {
 						Chronic Care Management.
 					</Text>
 				</div>
-
-				<BackdropWindowShot
-					src={`${IMG}/fig-alert-dashboard.png`}
-					width={3404}
-					height={2188}
-					alt="The Epharmix dashboard before the CareSignal rebrand: a blue header with enrolled and prescribed patient counts and Enroll Patient and Prescribe Patient buttons, above a Notification Center whose Unaddressed Alerts tab lists patients with their alert (blood pressure readings over threshold, or Unresponsive), the intervention, and a Mark as Addressed checkbox; Patient-Initiated Calls and Unresponsive Patients tabs sit beside it."
-				>
-					Alert-based dashboard designed for our researchers before I re-branded
-					us to CareSignal.
-				</BackdropWindowShot>
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
