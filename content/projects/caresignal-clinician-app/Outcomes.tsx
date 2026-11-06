@@ -74,7 +74,35 @@ function OrbitSlot({ label, anchor, ...props }: CareTeamOrbitProps & { label: st
 	);
 }
 
+// The NRR figure: the outcome size and weight (type-outcome, 64/64 500), in
+// the body sans, upright.
+const nrrFigure = {
+	fontFamily: 'var(--font-body)',
+	fontWeight: 500,
+	fontSize: 64,
+	lineHeight: '64px',
+} as const;
+
+// KLAS.png (606×352) holds both award lockups side by side; each is a
+// 234×197 box at (35, 87) and (313, 87). A lockup shows its half by
+// sizing/positioning the PNG as a mask over the page ink, which also
+// recolours the marks to confetti-black.
 const KLAS = '/images/projects/caresignal-platform/KLAS.png';
+const KLAS_CROP = { w: 234, h: 197, y: 87, x: { left: 35, right: 313 } };
+
+function KlasLockup({ year, half }: { year: number; half: 'left' | 'right' }) {
+	const { w, h, y, x } = KLAS_CROP;
+	const pct = (offset: number, box: number, img: number) => `${(offset / (img - box)) * 100}%`;
+	const mask = `url(${KLAS}) ${pct(x[half], w, 606)} ${pct(y, h, 352)} / ${(606 / w) * 100}% ${(352 / h) * 100}% no-repeat`;
+	return (
+		<div
+			role="img"
+			aria-label={`Best in KLAS ${year}`}
+			className="w-full max-w-[200px] bg-confetti-black"
+			style={{ aspectRatio: `${w} / ${h}`, mask, WebkitMask: mask }}
+		/>
+	);
+}
 
 export function Outcomes() {
 	return (
@@ -87,27 +115,28 @@ export function Outcomes() {
 				{/* Business outcomes, ported from the CareSignal Platform case
 				    study: NRR stat + Best in KLAS awards, on the same paper and
 				    ink as the workflow cards below. */}
-				<div className="grid w-full grid-cols-1 gap-[16px] sm:grid-cols-2">
-					<div className={`${card} justify-between`}>
-						<Text variant="outcome" className="m-0">
+				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
+					{/* Set like the workflow cards: title, then the figure in
+					    the body sans at the outcome size and weight. */}
+					<div className={card}>
+						<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
+							Net Recurring Revenue
+						</Text>
+						<p className="m-0" style={nrrFigure}>
 							144%
-						</Text>
-						<Text variant="copy-large" className="m-0">
-							Net recurring revenue year over year
-						</Text>
+						</p>
+						<p className="m-0" style={statList}>
+							Year over year
+						</p>
 					</div>
-					<div className={`${card} items-center justify-center`}>
-						{/* The award marks, recoloured to the page ink: the PNG's
-						    alpha is a mask over confetti-black. */}
-						<div
-							role="img"
-							aria-label="Best in KLAS 2024 and Best in KLAS 2025"
-							className="aspect-[606/352] w-full max-w-[280px] bg-confetti-black"
-							style={{
-								mask: `url(${KLAS}) center / contain no-repeat`,
-								WebkitMask: `url(${KLAS}) center / contain no-repeat`,
-							}}
-						/>
+					<div className={`${card} md:col-span-2`}>
+						<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
+							Best in KLAS
+						</Text>
+						<div className="grid grid-cols-2 gap-[16px]">
+							<KlasLockup year={2024} half="left" />
+							<KlasLockup year={2025} half="right" />
+						</div>
 					</div>
 				</div>
 
