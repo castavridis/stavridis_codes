@@ -54,7 +54,8 @@ export function ProductMarketFit() {
 					insetX="17%"
 					alt="Two paper enrollment forms overlapping. In front, an EpxDiabetes prescription pad: an internal-use half with message type, start date and frequency checkboxes, a verbal-consent box and the physician's signature, beside step-by-step admin instructions for enrolling the patient online; and a tear-off patient half explaining the text and phone service and how to opt out. Behind it, an Epharmix batch enrollment sheet with repeating rows for a patient's name, phone, MRN, delivery method, language, dialysis-day messaging schedule and start and end dates."
 				>
-					Ways to enroll patients without a screen.
+					Ways to enroll patients without a screen. (before we re-branded as
+					CareSignal).
 				</BackdropWindowShot>
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
