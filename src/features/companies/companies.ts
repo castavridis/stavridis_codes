@@ -107,6 +107,7 @@ export const companies: Record<string, CompanyConfig> = {
     role: 'pd',
     cover_letter: 'cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
     resume: '/resumes/C-Stavridis_Mayo-Clinic_Resume.pdf',
+    heroSlug: 'caresignal-clinician-app',
     featuredSlugs: ['caresignal-clinician-app', 'fracta', 'sqshbook'],
     featuredProjects: ['caresignal-clinician-app'],
     salutation_colors: {
