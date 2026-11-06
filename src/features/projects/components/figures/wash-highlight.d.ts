@@ -26,6 +26,8 @@ export type WashSwipeOptions = {
 	load?: number;
 	/** Brush width × element height. */
 	width?: number;
+	/** Brush width on landing (× element height); lerps to `width` along the stroke. */
+	startWidth?: number;
 	duration?: number;
 	delay?: number;
 	pressure?: number;
