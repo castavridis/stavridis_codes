@@ -48,7 +48,7 @@ function StatPanel({ title, stats, figure }: { title: string; stats: string[]; f
 			<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
 				{title}
 			</Text>
-			<ul className="m-0 flex list-none flex-col gap-[8px] p-0 [text-wrap:pretty]" style={statList}>
+			<ul className="m-0 flex list-disc flex-col gap-[8px] pl-[1.25em] [text-wrap:pretty]" style={statList}>
 				{stats.map((s) => (
 					<li key={s}>{s}</li>
 				))}
@@ -122,12 +122,16 @@ export function Outcomes() {
 						<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
 							Net Recurring Revenue
 						</Text>
-						<p className="m-0" style={nrrFigure}>
-							144%
-						</p>
-						<p className="m-0" style={statList}>
-							Year over year
-						</p>
+						{/* Figure and its qualifier as one unit: tighter than the
+						    card's 16px gap. */}
+						<div className="flex flex-col gap-[4px]">
+							<p className="m-0" style={nrrFigure}>
+								144%
+							</p>
+							<p className="m-0" style={statList}>
+								Year over year
+							</p>
+						</div>
 					</div>
 					<div className={`${card} md:col-span-2`}>
 						<Text variant="headline-small" as="h3" className="m-0 text-confetti-black [text-wrap:pretty]">
@@ -155,8 +159,8 @@ export function Outcomes() {
 						figure="hub-team"
 					/>
 					<StatPanel
-						title="Centralized Care Management Nurse Panel Size"
-						stats={['Before: 100', 'After: 1,500']}
+						title="Centralized Care Management"
+						stats={['Before: 100 pts/RN', 'After: 1,500 pts/RN']}
 						figure="nurse-day"
 					/>
 				</div>
