@@ -159,7 +159,7 @@ export function WashesCanvas({
 
       wash.gouacheMode("auto");
       wash.paperWetness("damp");
-      wash.paintLoad(0.15);
+      wash.paintLoad(0.225); // +50% pigment (was 0.15)
       wash.waterLoad(8.0);
       wash.evaporation(3.125); // +25% drying speed
       // v2's brushSize is a RADIUS as a fraction of the smaller display
