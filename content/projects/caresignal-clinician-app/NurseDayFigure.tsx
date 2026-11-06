@@ -116,10 +116,12 @@ function VizCanvas({
 	kind,
 	stats,
 	height,
+	dotGrid,
 }: {
 	kind: 'day' | 'impact' | 'status';
 	stats: StatsSource;
 	height: number;
+	dotGrid?: boolean; // the after day's 1,600-dot grid: orbit dots match its radius
 }) {
 	const ref = useRef<HTMLCanvasElement>(null);
 	useEffect(() => {
@@ -142,7 +144,13 @@ function VizCanvas({
 		};
 	}, [kind, stats]);
 	return (
-		<canvas ref={ref} aria-hidden="true" className="block w-full" style={{ height }} />
+		<canvas
+			ref={ref}
+			aria-hidden="true"
+			data-dot-grid={dotGrid ? '' : undefined}
+			className="block w-full"
+			style={{ height }}
+		/>
 	);
 }
 
@@ -197,7 +205,7 @@ function HudViz({
 				>
 					Patient Statuses
 				</span>
-				<VizCanvas kind="status" stats={stats} height={tall ? 80 : 14} />
+				<VizCanvas kind="status" stats={stats} height={tall ? 80 : 14} dotGrid={tall} />
 			</div>
 		</div>
 	);
@@ -392,6 +400,7 @@ type Machine = {
 	fx: { before?: NurseOrbitHandle; after?: NurseOrbitHandle };
 	env: { mobile: boolean; reduced: boolean };
 	qTier: QualityTier; // resolved 'auto' quality (dc state.qTier)
+	dotPx: number; // orbit dot radius matched to the status grid (dc dotR)
 	p0: NurseOrbitParams;
 	daySec: number;
 	ribbon: 'infinity day done' | 'before and after';
@@ -497,6 +506,7 @@ export function NurseDayFigure({
 		fx: {},
 		env: { mobile: false, reduced: false },
 		qTier: 'high',
+		dotPx: 0,
 		p0: {},
 		daySec: 15,
 		ribbon,
@@ -996,7 +1006,21 @@ export function NurseDayFigure({
 		M.env = { mobile: mqMobile.matches, reduced: mqReduced.matches };
 		M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced, M.qTier);
 
+		// Orbit dots match the status grid's dots (dc drawBar → setDotPx):
+		// R = max(1, min(W/50, H/32) × 0.31), sent as min(R × 0.7, 1.35).
+		const syncDot = () => {
+			const g = cardRef.current?.querySelector<HTMLElement>('[data-dot-grid]');
+			if (!g || !g.clientWidth || !M.fx.before || !M.fx.after) return;
+			const R = Math.max(1, Math.min(g.clientWidth / 50, g.clientHeight / 32) * 0.31);
+			const px = Math.min(R * 0.7, 1.35);
+			if (px === M.dotPx) return;
+			M.dotPx = px;
+			M.fx.before?.setDotPx(px);
+			M.fx.after?.setDotPx(px);
+		};
+
 		const onStats = (key: 'b' | 'a') => (s: NurseOrbitStats) => {
+			if (!M.dotPx) syncDot();
 			if (key === 'a') {
 				M.la = s;
 				if (M.aLive && M.playing && !M.seqRunning) {
@@ -1293,6 +1317,7 @@ export function NurseDayFigure({
 			const w = es[0]?.contentRect.width ?? viewport.clientWidth;
 			setStacked(w < 800);
 			M.sp = 0;
+			syncDot();
 			clearTimeout(rsT);
 			rsT = window.setTimeout(() => !M.dead && api.current.spread(), 300);
 		});
