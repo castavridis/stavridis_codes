@@ -94,14 +94,14 @@ export function Outcomes() {
 
 				<StatPanel
 					title="Acute Patient Panel"
-					stats={['Providers: 3', 'Patients: 3,500']}
+					stats={['Providers: 3', 'Patients: 3,250']}
 				/>
 
 				{/* Care Team Orbit, model="acute" */}
 				<OrbitSlot
-					label="Care Team Orbit (acute): a team of three — an assistant, a nurse and a physician — covers 3,500 patients around the clock. About 80% answer a check-in, and alerts are called first."
+					label="Care Team Orbit (acute): a team of three — an assistant, a nurse and a physician — covers 3,250 patients around the clock. About 80% answer a check-in, and alerts are called first."
 					model="acute"
-					patients={3500}
+					patients={3250}
 					alertRate={0.5}
 					escalateRate={15}
 					{...TEAM}
@@ -109,14 +109,14 @@ export function Outcomes() {
 
 				<StatPanel
 					title="Hub and Spoke Model"
-					stats={['Providers: 2', 'Patients: 330']}
+					stats={['Providers: 2', 'Patients: 300']}
 				/>
 
 				{/* Care Team Orbit, model="hub" */}
 				<OrbitSlot
-					label="Care Team Orbit (hub and spoke): an assistant (the hub) and a nurse (the spoke) share 330 patients. About 80% answer a check-in, and the assistant routes each critical patient to the nurse."
+					label="Care Team Orbit (hub and spoke): an assistant (the hub) and a nurse (the spoke) share 300 patients. About 80% answer a check-in, and the assistant routes each critical patient to the nurse."
 					model="hub"
-					patients={330}
+					patients={300}
 					nurses={1}
 					{...TEAM}
 				/>

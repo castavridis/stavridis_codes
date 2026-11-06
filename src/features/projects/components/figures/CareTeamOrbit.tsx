@@ -184,8 +184,8 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 	model() { return this.props.model === 'hub' ? 'hub' : 'acute'; }
 	pal() { return this.props.colorblind ? PAL.cb : PAL.std; }
 	cfg() { const P = this.props; return this.model() === 'hub'
-		? { N: Math.max(50, +(P.patients ?? 330)), nurses: Math.min(3, Math.max(1, Math.round(+(P.nurses ?? 1)))), dayMin: 480, startMin: 540, crit: 9, resolveP: 0.25, newPerNurse: 4.5, alertPct: 0, escPct: 0 }
-		: { N: Math.max(200, +(P.patients ?? 3500)), alertPct: +(P.alertRate ?? 0.5), escPct: +(P.escalateRate ?? 15), dayMin: 1440, startMin: 0, crit: 0, resolveP: 0, newPerNurse: 0, nurses: 1 }; }
+		? { N: Math.max(50, +(P.patients ?? 300)), nurses: Math.min(3, Math.max(1, Math.round(+(P.nurses ?? 1)))), dayMin: 480, startMin: 540, crit: 9, resolveP: 0.25, newPerNurse: 4.5, alertPct: 0, escPct: 0 }
+		: { N: Math.max(200, +(P.patients ?? 3250)), alertPct: +(P.alertRate ?? 0.5), escPct: +(P.escalateRate ?? 15), dayMin: 1440, startMin: 0, crit: 0, resolveP: 0, newPerNurse: 0, nurses: 1 }; }
 	roles() { const C = this.cfg(); return this.model() === 'hub' ? ['ma'].concat(Array.from({ length: C.nurses }, () => 'rn')) : ['ma', 'rn', 'md']; }
 	daySec() { return +(this.state.daySec ?? this.props.daySeconds ?? 30); }
 	mps() { return this.cfg().dayMin / this.daySec(); } // simulated minutes per real second
