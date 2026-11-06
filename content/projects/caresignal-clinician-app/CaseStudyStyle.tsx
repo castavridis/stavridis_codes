@@ -8,9 +8,10 @@ const SCOPE = '[data-case="caresignal-clinician-app"]';
 
 const CSS = `
 /* Title line above the tag row in the sticky chrome (design adds it via a
-   ::before on the tag paragraph). */
+   ::before on the tag paragraph). !important beats MDXLayout's inline
+   scroll-linked opacity, as in the design. */
 ${SCOPE} p.type-tag {
-	opacity: 1;
+	opacity: 1 !important;
 	color: var(--color-confetti-black);
 }
 ${SCOPE} p.type-tag::before {
@@ -29,12 +30,21 @@ ${SCOPE} p.type-headline-meta.absolute {
 	display: none;
 }
 
-/* Opening headline: slightly smaller + tighter than the default 48/60. */
-@media (min-width: 768px) {
-	${SCOPE} h1.type-headline {
-		font-size: 42px !important;
-		line-height: 1.14 !important;
-	}
+/* Keyboard focus: a 3px ink ring, offset 3px, on every focusable control. */
+${SCOPE} :is(button, a, input, summary, [tabindex]):focus-visible {
+	outline: 3px solid var(--focus-ink, var(--color-confetti-black)) !important;
+	outline-offset: 3px !important;
+	border-radius: 4px;
+}
+
+/* In-copy links: dotted underline, solid on hover (citation markers and
+   nav links opt out with .no-underline, as the design does inline). */
+${SCOPE} section a:not(.no-underline) {
+	text-decoration: underline dotted;
+	text-underline-position: from-font;
+}
+${SCOPE} section a:not(.no-underline):hover {
+	text-decoration-style: solid;
 }
 
 /* Figure 1 "shift length" slider: thin rule track + a small round paper
