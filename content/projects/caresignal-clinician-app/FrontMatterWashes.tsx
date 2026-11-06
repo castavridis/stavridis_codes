@@ -10,7 +10,7 @@ import { prefersReducedMotion } from '../../../src/features/projects/components/
 // prototype does) the phrases are found and wrapped at runtime rather than
 // authored as spans. Renders nothing itself.
 const TARGETS = [
-	{ text: '15 to 20× as many patients', selector: 'h1' },
+	{ text: '15 to 20× as many patients', selector: 'h1', wet: 1 },
 	{ text: 'sole Product Designer', selector: 'p' },
 ];
 
@@ -62,6 +62,9 @@ export function FrontMatterWashes() {
 						pigment: 'hansa',
 						delay: 64,
 						threshold: 1,
+						duration: reduce ? 1 : 650,
+						instantDry: true,
+						...('wet' in t ? { wet: t.wet } : null),
 						...(reduce ? { instant: true } : null),
 					}),
 				);

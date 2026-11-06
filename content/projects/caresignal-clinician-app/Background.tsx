@@ -20,7 +20,14 @@ export function Background() {
 				</Text>
 				<Text variant="copy-large" className="m-0 font-semibold text-confetti-black">
 					What about care needed during the other{' '}
-					<WashHighlight mark="highlight" pigment="hansa" delay={64} threshold={1}>
+					<WashHighlight
+						mark="highlight"
+						pigment="hansa"
+						delay={64}
+						threshold={1}
+						duration={650}
+						instantDry
+					>
 						6,208 waking hours
 					</WashHighlight>
 					?

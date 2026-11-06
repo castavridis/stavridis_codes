@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 // Case-study-scoped style overrides, ported from the design's `#nurse-case`
 // helmet block. Scoped to this case study via the `data-case` attribute
 // MDXLayout sets from the project slug, so the shared FrontMatter / chrome
@@ -75,6 +77,19 @@ ${SCOPE} input[data-day-slider]:focus {
 }
 `;
 
+type HandWindow = typeof window & { WashHighlightHand?: 'left' | 'left-hook' | 'right' };
+
 export function CaseStudyStyle() {
+	// The design draws every wash highlight on this page left-handed
+	// (window.WashHighlightHand = 'left'); the engine reads it at attach time
+	// for calls that don't pass `hand`. This component is first in the MDX,
+	// so its effect runs before any later sibling's highlight attaches.
+	useEffect(() => {
+		const w = window as HandWindow;
+		w.WashHighlightHand = 'left';
+		return () => {
+			if (w.WashHighlightHand === 'left') delete w.WashHighlightHand;
+		};
+	}, []);
 	return <style dangerouslySetInnerHTML={{ __html: CSS }} />;
 }
