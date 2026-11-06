@@ -52,7 +52,7 @@ export default function DesignPrinciple({
 	startY = 0.62,
 	endY = 0.43,
 	arc = 0.12,
-	load = 0.75,
+	load = 0.125,
 	width = 0.33,
 	startWidth = 0.75,
 	pressure = 1,
