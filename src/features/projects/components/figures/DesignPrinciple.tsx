@@ -11,9 +11,13 @@ type DesignPrincipleProps = {
 	startY?: number;
 	endY?: number;
 	arc?: number;
-	// Stroke parameters (defaults match the case study's sw.* props).
+	// Stroke parameters. Load is half the case study's sw.* default (2.6) for
+	// a lighter ink; the brush lands at a third of the card height and grows
+	// to `width` along the stroke.
 	load?: number;
 	width?: number;
+	// Brush width on landing; lerps to `width` as the swipe progresses.
+	startWidth?: number;
 	pressure?: number;
 	variation?: number;
 	landing?: number;
@@ -48,8 +52,9 @@ export default function DesignPrinciple({
 	startY = 0.62,
 	endY = 0.43,
 	arc = 0.12,
-	load = 2.6,
+	load = 1.3,
 	width = 0.42,
+	startWidth = 0.33,
 	pressure = 1,
 	variation = 0.35,
 	landing = 0.3,
@@ -74,6 +79,7 @@ export default function DesignPrinciple({
 			arc,
 			load,
 			width,
+			startWidth,
 			pressure,
 			variation,
 			landing,
