@@ -57,15 +57,7 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<BackdropWindowShot
-					src={`${IMG}/fig-risk-dashboard.png`}
-					width={3404}
-					height={2188}
-					alt="The redesigned dashboard: an overview row of totals — 1500 patients, 9 active alerts, 226 less-engaged, 1262 engaged, 11 paused, 21 snoozed — above a Patients list with high, medium and low risk badges and Snooze and Resolve actions, and an Alerts list sorted newest first."
-				>
-					A dashboard with patients stratified by risk and alerts sorted by
-					recency.
-				</BackdropWindowShot>
+				<ProgramGovernance />
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
@@ -102,7 +94,15 @@ export function ScalingCareTeams() {
 					</FigCaption>
 				</figure> */}
 
-				<ProgramGovernance />
+				<BackdropWindowShot
+					src={`${IMG}/fig-risk-dashboard.png`}
+					width={3404}
+					height={2188}
+					alt="The redesigned dashboard: an overview row of totals — 1500 patients, 9 active alerts, 226 less-engaged, 1262 engaged, 11 paused, 21 snoozed — above a Patients list with high, medium and low risk badges and Snooze and Resolve actions, and an Alerts list sorted newest first."
+				>
+					A dashboard with patients stratified by risk and alerts sorted by
+					recency.
+				</BackdropWindowShot>
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
