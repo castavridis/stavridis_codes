@@ -83,8 +83,8 @@ export function ProductMarketFit() {
 						our enterprise contracts closed. However it became clear they
 						could not be our target customer.
 					</Text>
-					<ol
-						className="m-0 flex list-none flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty]"
+					<ul
+						className="m-0 flex list-disc flex-col gap-[8px] pl-[24px] text-confetti-black [text-wrap:pretty] marker:text-confetti-black"
 						style={{ fontFamily: 'var(--font-body)', fontSize: 20, lineHeight: 1.5 }}
 					>
 						<li>
@@ -97,7 +97,7 @@ export function ProductMarketFit() {
 							of account management time to periodically train and support
 							staff as our enterprise customers.
 						</li>
-					</ol>
+					</ul>
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						After we closed our enterprise clients, we quickly found they were
 						a better fit and I started to design our application for scale.
