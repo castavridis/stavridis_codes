@@ -10,6 +10,14 @@ function notifyRenumber() {
 	window.dispatchEvent(new Event(EVT));
 }
 
+// Subscribe to renumbering (any numbered element mounting or unmounting), for
+// things that point at a numbered element rather than being one — e.g. a
+// "View Figure N" link. Returns the unsubscribe.
+export function onRenumber(cb: () => void) {
+	window.addEventListener(EVT, cb);
+	return () => window.removeEventListener(EVT, cb);
+}
+
 // Returns this element's 1-based number among all `[attr]` elements in DOM
 // order, plus a `ready` flag that stays false until the first real count —
 // before that every element reports 1, so id/anchor derivation must wait.
