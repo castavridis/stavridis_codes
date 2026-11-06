@@ -6,7 +6,10 @@ import Figure from '../../../src/features/projects/components/figures/Figure';
 import { observe as fadeInObserve } from '../../../src/features/projects/components/fade-in';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
 
-export { default as Citation } from '../../../src/features/projects/components/figures/Citation';
+export {
+	default as Citation,
+	isPlaceholderCitation,
+} from '../../../src/features/projects/components/figures/Citation';
 export { default as Figure } from '../../../src/features/projects/components/figures/Figure';
 
 export const IMG = '/images/projects/caresignal-clinician-app';

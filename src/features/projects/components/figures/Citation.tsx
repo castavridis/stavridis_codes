@@ -18,9 +18,21 @@ type CitationProps = {
 	citeKey?: string;
 };
 
+// A citation whose source is still a placeholder ("Placeholder — source and
+// details to come.") is an unfinished content item, not a real source.
+export const isPlaceholderCitation = (source?: string) =>
+	/^\s*placeholder\b/i.test(source ?? '');
+
 // Auto-numbered superscript source marker with a hover/focus tooltip.
 // Numbered in DOM order; citations sharing a source share a number.
-export default function Citation({ title, source, href, citeKey }: CitationProps) {
+// Placeholder citations render nothing, so they're hidden automatically and
+// don't take a number — real ones renumber without gaps.
+export default function Citation(props: CitationProps) {
+	if (isPlaceholderCitation(props.source)) return null;
+	return <CitationMarker {...props} />;
+}
+
+function CitationMarker({ title, source, href, citeKey }: CitationProps) {
 	const anchorRef = useRef<HTMLSpanElement>(null);
 	const tipRef = useRef<HTMLSpanElement>(null);
 	const closeTimer = useRef<ReturnType<typeof setTimeout>>(null);

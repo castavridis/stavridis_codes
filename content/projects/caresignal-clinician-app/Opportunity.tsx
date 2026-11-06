@@ -3,7 +3,7 @@ import Section from '../../../src/features/projects/components/Section';
 
 import { CITATIONS } from './citations';
 import { DropNumber } from './DropNumber';
-import { Citation, SectionHeading } from './shared';
+import { Citation, isPlaceholderCitation, SectionHeading } from './shared';
 
 const DOWNSIDES: Array<{ lead: string; rest: React.ReactNode }> = [
 	{
@@ -61,7 +61,11 @@ export function Opportunity() {
 					</strong>{' '}
 					in a standard implementation.
 					<Citation {...CITATIONS.standardCaseload} />
-					<sup className="type-callout-meta text-confetti-black">,</sup>
+					{/* The comma only separates two shown citations. */}
+					{!isPlaceholderCitation(CITATIONS.standardCaseload.source) &&
+					!isPlaceholderCitation(CITATIONS.standardCaseload2.source) ? (
+						<sup className="type-callout-meta text-confetti-black">,</sup>
+					) : null}
 					<Citation {...CITATIONS.standardCaseload2} />
 				</Text>
 			</div>
