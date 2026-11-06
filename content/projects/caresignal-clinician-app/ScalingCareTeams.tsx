@@ -78,16 +78,6 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<BackdropWindowShot
-					src={`${IMG}/fig-patient-data-formats.png`}
-					width={3562}
-					height={2244}
-					insetX="3.35%"
-					alt="Two patient-data exports overlapping. In front, a CareSignal PDF for one patient: a two-week summary table of pre- and post-prandial readings, an EpxDiabetes response graph of blood sugar with out-of-range readings highlighted in orange, and a table of raw text-message responses. Behind it, a black-and-white faxed EpxDiabetes report for a physician listing patients' average fasting blood glucose as bar gauges against high- and rising-risk thresholds."
-				>
-					Sample PDF and fax representations of CareSignal data.
-				</BackdropWindowShot>
-
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
 						Knowing which patients were low-risk turned out to be as
@@ -138,23 +128,15 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<div
-					className="flex w-full flex-col gap-[16px] rounded-[16px] bg-washes-paper"
-					style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,5vw,72px)' }}
+				<BackdropWindowShot
+					src={`${IMG}/fig-patient-data-formats.png`}
+					width={3562}
+					height={2244}
+					insetX="3.35%"
+					alt="Two patient-data exports overlapping. In front, a CareSignal PDF for one patient: a two-week summary table of pre- and post-prandial readings, an EpxDiabetes response graph of blood sugar with out-of-range readings highlighted in orange, and a table of raw text-message responses. Behind it, a black-and-white faxed EpxDiabetes report for a physician listing patients' average fasting blood glucose as bar gauges against high- and rising-risk thresholds."
 				>
-					<p
-						className="m-0 text-confetti-black"
-						style={{ fontFamily: 'var(--font-body)', fontSize: 20, lineHeight: 1.5 }}
-					>
-						Patient view complex data
-					</p>
-					<span
-						className="tracking-[0.04em] text-confetti-black/55"
-						style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}
-					>
-						Placeholder — figure to come
-					</span>
-				</div>
+					Sample PDF and fax representations of CareSignal data.
+				</BackdropWindowShot>
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[16px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
