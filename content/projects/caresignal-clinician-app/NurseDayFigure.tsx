@@ -1600,7 +1600,6 @@ export function NurseDayFigure({
 				? sb
 				: null
 		: sa;
-	const canSkip = playingS && sb?.phase !== 'after';
 	// Centre button (dc playVals): Play Simulation (pill) → Next → Finish. The
 	// seam's gap hosts whichever label is live; Finish goes inert while the day
 	// closes (dc finHold).
@@ -1889,20 +1888,8 @@ export function NurseDayFigure({
 				>
 					<div className="flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[8px]">
 						<Figure />
-						{/* The design shows a Skip only while a scene plays — no idle
-						    "Replay" (the seam's Play Simulation button is the replay). */}
-						{playingS && canSkip ? (
-							<button
-								type="button"
-								onClick={() => {
-									if (M.playingS && !M.seqRunning) skipAfter();
-								}}
-								className="pointer-events-auto cursor-pointer border-0 bg-transparent p-0 text-[12px] leading-[16px] tracking-[0.04em] whitespace-nowrap text-confetti-black underline underline-offset-[3px] hover:[text-decoration-thickness:2px]"
-								style={{ fontFamily: 'var(--font-mono)' }}
-							>
-								Skip animation
-							</button>
-						) : null}
+						{/* No header Skip link: the design's day-complete figure hides it
+						    (skipDisp 'none'); the seam's Next button does that job. */}
 						<button
 							type="button"
 							onClick={onAssumptions}
