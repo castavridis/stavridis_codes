@@ -5,6 +5,13 @@ import type { Role } from '../role/role-context.js';
 // (`caresignal-platform`, `fracta`, `sqshbook`, `caresignal-ai`). When
 // absent, FeaturedWork renders its canonical 4 in canonical order.
 //
+// `heroSlug` — one project to lead Featured Work as a full-width,
+// two-column hero card (image left, title + tags right) above the grid.
+// Must match a `PROJECTS` slug in featured-work.tsx. The hero is pulled out
+// of the grid so it never shows twice; it doesn't need to be listed in
+// `featuredSlugs`. Its seal follows `featuredProjects` like any card. Unset
+// → no hero, just the grid.
+//
 // `featuredProjects` — slugs that get a rotating "Featured Project"
 // seal stamp over the thumbnail. Supports multiple entries
 // (every matching card gets its own stamp). Use to highlight the work
@@ -65,6 +72,7 @@ export type CompanyConfig = {
   // nothing renders it yet, so for now it only records the file.
   cover_letter?: string;
   featuredSlugs?: string[];
+  heroSlug?: string;
   featuredProjects?: string[];
   role?: Role;
   colors?: CompanyColors;
