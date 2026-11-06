@@ -156,14 +156,6 @@ const PROJECTS: Project[] = [
       'CareSignal thumbnail: an Engaged Patients card (1262 patients: 63 high, 189 medium, 1011 low risk) on a sky-and-field backdrop.',
   },
   {
-    slug: 'caresignal-ai',
-    headline: 'Designing a novel marketing site  for a new predictive model',
-    tags: 'Visual Design · Copywriting · Front-End Engineering',
-    thumbnailClassName: 'bg-washes-cerulean-blue',
-    image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
-    imageAlt: 'CareSignal AI thumbnail.',
-  },
-  {
     slug: 'sqshbook',
     headline: 'Crafting a joyful experience to increase community submissions to a non-profit',
     tags: 'Design System · User Research · Front-End Engineering',
@@ -179,6 +171,14 @@ const PROJECTS: Project[] = [
     thumbnailClassName: 'bg-[#101e1e]',
     image: '/images/projects/Fracta%20Thumbnail.png',
     imageAlt: 'Fracta thumbnail.',
+  },
+  {
+    slug: 'caresignal-ai',
+    headline: 'Designing a novel marketing site  for a new predictive model',
+    tags: 'Visual Design · Copywriting · Front-End Engineering',
+    thumbnailClassName: 'bg-washes-cerulean-blue',
+    image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
+    imageAlt: 'CareSignal AI thumbnail.',
   },
 ];
 
