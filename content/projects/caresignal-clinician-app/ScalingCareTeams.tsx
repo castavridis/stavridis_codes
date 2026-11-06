@@ -141,7 +141,7 @@ export function ScalingCareTeams() {
 				</div>
 
 				<div
-					className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[#f7f6f5]"
+					className="flex w-full flex-col gap-[16px] rounded-[16px] bg-washes-paper"
 					style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,5vw,72px)' }}
 				>
 					<p

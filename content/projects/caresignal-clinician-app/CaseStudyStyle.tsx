@@ -7,6 +7,13 @@ import { useEffect } from 'react';
 const SCOPE = '[data-case="caresignal-clinician-app"]';
 
 const CSS = `
+/* Paper for every figure, placeholder and principle card: Figure 1's light
+   cream (#fdfbf5). The design overrides the washes paper token for this case
+   study; the site-wide value (#fbf6ea) stays everywhere else. */
+${SCOPE} {
+	--color-washes-paper: #fdfbf5;
+}
+
 /* Title line above the tag row in the sticky chrome (design adds it via a
    ::before on the tag paragraph). !important beats MDXLayout's inline
    scroll-linked opacity, as in the design. */

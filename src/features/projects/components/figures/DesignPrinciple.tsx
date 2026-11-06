@@ -94,7 +94,7 @@ export default function DesignPrinciple({
 	return (
 		<div className="grid h-full w-full justify-center" style={{ gridTemplateColumns: 'minmax(0, 704px)' }}>
 			<div
-				className="relative isolate box-border flex h-full w-full flex-col gap-[6px] overflow-hidden rounded-[12px] bg-[#f7f6f5] py-[24px] px-[clamp(20px,3vw,36px)]"
+				className="relative isolate box-border flex h-full w-full flex-col gap-[6px] overflow-hidden rounded-[12px] bg-washes-paper py-[24px] px-[clamp(20px,3vw,36px)]"
 			>
 				<div ref={washRef} aria-hidden className="pointer-events-none absolute inset-0 -z-10" />
 				<span

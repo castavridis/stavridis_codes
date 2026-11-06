@@ -32,7 +32,7 @@ export function FigPlaceholder({
 		<div
 			role="img"
 			aria-label={`Placeholder for figure: ${label}`}
-			className="flex w-full items-center justify-center rounded-[16px] bg-[#f7f6f5]"
+			className="flex w-full items-center justify-center rounded-[16px] bg-washes-paper"
 			style={{ height }}
 		>
 			<Text variant="callout-meta" className="m-0 px-[24px] text-center text-confetti-black/50">
