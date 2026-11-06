@@ -12,6 +12,7 @@ import Button from '../../../../components/Button';
 import Citation from './Citation';
 import Figure from './Figure';
 import WashHighlightFX from './wash-highlight';
+import { isGpuPaused, subscribeGpuPause } from '../../../../lib/gpu-pause';
 
 // Figure — "Care Team Orbit": one simulated day of a CareSignal care team.
 // Acute: assistant monitors → nurse calls → physician treats; hub-and-spoke:
@@ -158,6 +159,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 	private io: IntersectionObserver | null = null;
 	private ro: ResizeObserver | null = null;
 	private onKey: ((e: KeyboardEvent) => void) | null = null;
+	private offGpu: (() => void) | null = null;
 	// Simulation internals (ported verbatim from the prototype).
 	private washHost: HTMLDivElement | null = null;
 	private svgU: any;
@@ -298,7 +300,7 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 		this.trailT = (this.trailT || 0) + dt; if (this.trailT > 0.08) { this.trailT = 0; this.trail(); }
 		if (!this.final) { const L = this.cfg().dayMin, busy = this.model() === 'acute' && this.provs && this.provs.some(p => p.busy || p.queue.length); this.minute = Math.min(busy ? L - 1 : L, this.minute + dt * this.mps()); if (this.minute >= L) this.endDay(); } } // acute: the shift can't close on open alerts; the clock holds at its last minute until the team clears them
 	endDay() { this.final = true; this.provs.forEach(p => { if (p.cur) { p.spans.push([p.cur.s, this.minute, p.cur.c]); p.busyMin += this.minute - p.cur.s; p.cur = null; } }); this.setState({ final: true }); }
-	wake() { if (this.dead) return; if (this.started) this.paused = !this.inView || !!this.state.assumOpen; /* hold while the assumptions panel covers it */ if (this.wash) try { this.paused ? this.wash.pause() : this.wash.resume(); } catch { /* noop */ } if (!this.paused && !this.raf) this.raf = requestAnimationFrame(this.frame); }
+	wake() { if (this.dead) return; if (this.started) this.paused = !this.inView || !!this.state.assumOpen || isGpuPaused(); /* hold while the assumptions panel covers it, or while the visitor has paused the GPU (src/lib/gpu-pause.ts) */ if (this.wash) try { this.paused ? this.wash.pause() : this.wash.resume(); } catch { /* noop */ } if (!this.paused && !this.raf) this.raf = requestAnimationFrame(this.frame); }
 	frame = (now: number) => { if (this.dead) return; if (this.paused && this.started) { this.raf = 0; this.last = 0; return; } /* off screen: stop the loop entirely; wake() restarts it */ this.raf = requestAnimationFrame(this.frame); const dt = Math.min(0.05, (now - (this.last || now)) / 1000); this.last = now; if (this.paused || !this.cv || !this.built) return; this.step(dt); this.paint(now); };
 	// dots: one canvas, batched by colour and focus; drawn as true circles at their projected positions
 	drawDots() { const cv = this.cv, st = this.stageRef.current; if (!cv || !st || !this.dots) return; const W = st.clientWidth, H = st.clientHeight; if (!W || !H) return; const dpr = Math.min(1.5, window.devicePixelRatio || 1);
@@ -339,10 +341,11 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 		this.io = new IntersectionObserver(es => { this.inView = es[es.length - 1].isIntersecting; if (this.inView && !this.built) { this.built = true; this.build(); this.paint(0); if (this.still) this.fastForward(); this.makeWash(); } if (this.started) { this.paused = !this.inView; this.wake(); } }, { threshold: 0.15 }); this.io.observe(this.rootRef.current!); // nothing is built until the figure first scrolls into view
 		this.ro = new ResizeObserver(() => requestAnimationFrame(() => { if (this.dead) return; const w = this.rootRef.current ? this.rootRef.current.offsetWidth : 0, n = w > 0 && w < 700; if (n !== this.state.narrow) this.setState({ narrow: n }, () => { if (this.built) { this.camStep(); this.drawDots(); } }); this.drawStrips(); if (this.built) { this.applyCam(); this.drawDots(); } const s2 = this.stageRef.current; if (this.built && s2 && s2.clientWidth && this.washSize !== s2.clientWidth + 'x' + s2.clientHeight + (this.state.narrow ? 'n' : '')) { clearTimeout(this.washT); this.washT = setTimeout(() => this.makeWash(), 300); } })); this.ro.observe(this.rootRef.current!);
 		this.onKey = e => { if (e.key === 'Escape' && this.state.assumOpen) this.setState({ assumOpen: false }, () => this.wake()); }; window.addEventListener('keydown', this.onKey);
+		this.offGpu = subscribeGpuPause(() => this.wake());
 		const go = () => { this.hlT = setTimeout(() => { this.hlReady = true; this.syncEb(); }, 500); }; if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
 	}
 	componentDidUpdate(prev: Readonly<CareTeamOrbitProps>) { const p = this.props; if (!!p.colorblind !== !!prev.colorblind && this.built) this.makeWash(); if (p.model !== prev.model || p.patients !== prev.patients || p.nurses !== prev.nurses || !!p.colorblind !== !!prev.colorblind || p.motion !== prev.motion || p.tilt !== prev.tilt) { this.still = this.isReduced(); this.restart(); } this.applyFocus(); this.drawStrips(); this.syncEb(); if (this.built && (this.paused || this.still)) { this.camStep(); this.avStep(); this.drawDots(); } }
-	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy();
+	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey); if (this.offGpu) this.offGpu(); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy();
 		// Remove the imperatively appended stage layers, or a StrictMode dev
 		// remount stacks a second orphaned set under the live sim.
 		for (const el of [this.washHost, this.svgU, this.cv, this.svgO]) el && el.remove(); }

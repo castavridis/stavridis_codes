@@ -1,11 +1,15 @@
 /* Wash highlight → window.WashHighlightFX.attach(el, opts) · a brush of watercolour swept behind a run of text (one stroke per line), left to right; it dries in place.
    opts: pigment 'hansa'|'rose'|'cerulean'|hex · duration ms · delay ms · load 0–2 · height (fraction of line height) · trigger 'view'|'load'|'hover' · onDone */
+import { whenGpuResumed } from '../../../../lib/gpu-pause';
 const WashHighlightFX = (() => {
 // One engine since the v2 unification: the same lib/washes module the
 // landing page imports, pulled in lazily here (its own chunk) so figures
 // keep it out of the first load.
+// Every sim here starts through loadWashes, so it doubles as the GPU-pause
+// gate (src/lib/gpu-pause.ts): while paused, new highlights wait and then
+// draw on resume. The callers' seq/dead checks after the await drop stale ones.
 let lib = null;
-const loadWashes = () => (lib ||= import('../../../../../lib/washes/washes.js').then(m => m.Washes));
+const loadWashes = () => whenGpuResumed().then(() => (lib ||= import('../../../../../lib/washes/washes.js').then(m => m.Washes)));
 const rgba = (() => { let ctx; return css => { if (!css) return null; ctx ||= document.createElement('canvas').getContext('2d', { willReadFrequently: true });
   ctx.fillStyle = '#010203'; ctx.fillStyle = css; if (ctx.fillStyle === '#010203' && css !== '#010203') return null; ctx.clearRect(0, 0, 1, 1); ctx.fillRect(0, 0, 1, 1); const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data; return { r, g, b, a: a / 255 }; }; })();
 const hex = c => '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');

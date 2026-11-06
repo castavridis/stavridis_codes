@@ -34,6 +34,7 @@ import {
 } from "../lib/weather.js";
 
 import { usePaintStore } from "../../../lib/paint-store.js";
+import { useGpuPaused } from "../../../lib/gpu-pause.js";
 import { BRUSH_SIZE } from "./paint-brush";
 
 import type { PigmentOption } from "../../../../lib/washes/washes.js";
@@ -270,6 +271,8 @@ export function WashesCanvas({
   //   - `paused` prop  — a project/blog overlay is covering the wash
   //   - offscreen      — the shell has scrolled out of view (IntersectionObserver)
   //   - tab hidden     — the document is backgrounded (visibilitychange)
+  //   - GPU pause      — the visitor's manual off-switch (src/lib/gpu-pause.ts);
+  //                      overrides everything, paint mode included
   // EXCEPT while paint mode is active: entering paint mode slides the project
   // sheet away to reveal the wash (sheetOpen = projectOpen && !paintActive),
   // so `paused` is still true even though the user is now painting on a
@@ -278,6 +281,7 @@ export function WashesCanvas({
   // idempotent; the sim loop skips its work while paused. `washReady` re-runs
   // this once the instance exists (async-created canvas path).
   // ------------------------------------------------------------------------
+  const gpuPaused = useGpuPaused();
   useEffect(() => {
     let offscreen = false;
     let hidden = typeof document !== "undefined" && document.hidden;
@@ -285,7 +289,8 @@ export function WashesCanvas({
     const apply = () => {
       const wash = washRef.current;
       if (!wash) return;
-      const shouldPause = !paintActive && (paused || offscreen || hidden);
+      const shouldPause =
+        gpuPaused || (!paintActive && (paused || offscreen || hidden));
       try {
         if (shouldPause) wash.pause();
         else wash.resume();
@@ -319,7 +324,7 @@ export function WashesCanvas({
       io?.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [paused, paintActive, washReady]);
+  }, [paused, paintActive, washReady, gpuPaused]);
 
   // ------------------------------------------------------------------------
   // Gate the canvas element's pointer events + touch-action on paintActive.

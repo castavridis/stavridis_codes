@@ -5,6 +5,7 @@ import { getProject } from './features/projects/projects.js';
 import { Analytics } from '@vercel/analytics/react';
 import LandingPage from './features/landing/index.js';
 import SheetOverlay from './components/anim/SheetOverlay.js';
+import GpuPausePill from './components/GpuPausePill.js';
 import { getCompany, type CompanyConfig, type SealColors } from './features/companies/companies.js';
 import { getStoredCompany, setStoredCompany, clearStoredCompany } from './features/companies/company-context.js';
 import {
@@ -381,6 +382,7 @@ export function App() {
         />
       </SheetOverlay>
 
+      <GpuPausePill />
       <Analytics />
     </main>
   );
