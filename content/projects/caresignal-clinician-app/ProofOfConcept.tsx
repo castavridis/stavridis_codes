@@ -65,8 +65,7 @@ export function ProofOfConcept() {
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
-						The prototype worked! It reduced hospitalizations, connected
-						patients to needed resources, and had an ROI of ____.
+						The prototype worked! In a randomized pilot, patients using it missed far fewer dialysis sessions, spent fewer days in the hospital, and recovered $36 in treatment revenue for every $1 the system cost.
 						<Citation {...CITATIONS.prototypeRoi} /> The success prompted
 						our CMO to create programs for a broad range of conditions and
 						establish a research center to study them.
@@ -120,7 +119,7 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<figure className="m-0 mx-auto flex w-full max-w-[1104px] flex-col items-center gap-[16px]">
+				{/* <figure className="m-0 mx-auto flex w-full max-w-[1104px] flex-col items-center gap-[16px]">
 					<BackdropShot
 						src={`${IMG}/fig3-alert-dashboard.webp`}
 						width={1507}
@@ -128,7 +127,7 @@ export function ProofOfConcept() {
 						alt="The alert-based dashboard in a browser window: a blue navigation bar with Dashboard, Patients, Programs and Alerts; tiles for Enrolled Patients (525) and Prescribed Patients (9); Hide PHI, Enroll Patient and Prescribe Patient actions; and a list of rows below, shown on a blurred sky-and-field backdrop."
 					/>
 					<FigCaption fig>An alert-based dashboard</FigCaption>
-				</figure>
+				</figure> */}
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">

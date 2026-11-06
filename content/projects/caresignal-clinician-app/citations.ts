@@ -37,7 +37,7 @@ export const CITATIONS = {
 	},
 	dialysisProgram: { title: 'Dialysis program', source: PLACEHOLDER },
 	prototypeRoi: { title: 'Prototype ROI', source: PLACEHOLDER },
-	dialysisRct: { title: 'Dialysis RCT', source: PLACEHOLDER },
+	dialysisRct: { title: 'Dialysis RCT', source: 'Som, A., Groenendyk, J., An, T., et al. “Improving Dialysis Adherence for High Risk Patients Using Automated Messaging: Proof of Concept.” Scientific Reports 7, 4177 (2017). https://doi.org/10.1038/s41598-017-03184-z' },
 	dialysisResults: { title: 'Dialysis trial results', source: PLACEHOLDER },
 	publications: { title: 'Peer-reviewed publications', source: PLACEHOLDER },
 	salesCycle: { title: 'Enterprise sales cycle', source: PLACEHOLDER },

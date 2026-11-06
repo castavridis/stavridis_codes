@@ -69,7 +69,7 @@ export function ProductMarketFit() {
 					</Text>
 				</div>
 
-				<div
+				{/* <div
 					className="flex w-full flex-col gap-[16px] rounded-[16px] bg-[#f7f6f5]"
 					style={{ padding: 'clamp(28px,4vw,48px) clamp(20px,5vw,72px)' }}
 				>
@@ -88,7 +88,7 @@ export function ProductMarketFit() {
 					>
 						Placeholder — imagery to come
 					</span>
-				</div>
+				</div> */}
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">

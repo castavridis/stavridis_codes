@@ -80,7 +80,7 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col items-center gap-[16px]">
+				{/* <figure className="m-0 flex w-full flex-col items-center gap-[16px]">
 					<BackdropShot
 						src={`${IMG}/fig-patient-view.webp`}
 						width={1492}
@@ -88,7 +88,7 @@ export function ScalingCareTeams() {
 						alt="The risk dashboard with a grey placeholder panel labelled Patient View over the centre."
 					/>
 					<FigCaption fig>Patient view (placeholder)</FigCaption>
-				</figure>
+				</figure> */}
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
@@ -102,7 +102,7 @@ export function ScalingCareTeams() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col items-center gap-[16px]">
+				{/* <figure className="m-0 flex w-full flex-col items-center gap-[16px]">
 					<BackdropShot
 						src={`${IMG}/fig-tags-snooze.webp`}
 						width={1492}
@@ -112,7 +112,7 @@ export function ScalingCareTeams() {
 					<FigCaption fig>
 						Tags, patient groups, snooze and resolve (placeholders)
 					</FigCaption>
-				</figure>
+				</figure> */}
 
 				<div className="flex w-full max-w-[704px] flex-col ml-auto gap-[20px]">
 					<Text variant="copy-large" className="m-0 text-confetti-black">
