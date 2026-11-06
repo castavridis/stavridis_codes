@@ -23,7 +23,12 @@ export function drawImpactStrip(
 ): void;
 
 /** "Patient Statuses": every patient as a dot (before = 100 from `log`, after = 1,600 from `all`). */
-export function drawStatusGrid(cv: HTMLCanvasElement | null, stats: HudStats): void;
+export function drawStatusGrid(
+	cv: HTMLCanvasElement | null,
+	stats: HudStats,
+	/** 'after': always the 50 × 32 grid (all unknown until the after day has data). */
+	layout?: 'before' | 'after',
+): void;
 
 /** A minute offset from 9am as "h:mm am/pm" (empty for null/negative). */
 export function fmtClock(minute?: number | null): string;

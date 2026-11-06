@@ -2,7 +2,7 @@
 // drawers:
 //   drawDayStrip(cv, spans, minute) — the 9-to-5 shift as 50 status-coloured
 //     dots over time (inked where he was working, faded over lunch, faint ahead)
-//   drawStatusGrid(cv, stats) — every patient as a dot coloured by status
+//   drawStatusGrid(cv, stats, layout?) — every patient as a dot coloured by status
 //     (before = his 100 in call order from `log`; after = all 1,600 sorted from
 //     `all`)
 //   fmtClock(minute) — a minute offset from 9am as "h:mm am/pm"
@@ -93,13 +93,30 @@ export function drawDayStrip(cv, spans, minute) {
 	g.globalAlpha = 1;
 }
 
-export function drawStatusGrid(cv, stats) {
-	if (!cv || !stats) return;
+export function drawStatusGrid(cv, stats, layout) {
+	if (!cv) return;
 	const p = prepCanvas(cv);
 	if (!p) return;
 	const { g, W, H } = p;
 	const cols = 50;
 	const ink = inkHex();
+	// The after half's grid keeps its 50 × 32 shape before its day has any
+	// data: all 1,600 drawn as unknown, as the design's drawBar does, so the
+	// figure doesn't change height when a replay clears it.
+	if (layout === 'after' && !(stats?.phase === 'after' && stats.all)) {
+		const rows = 32;
+		const px = W / cols;
+		const py = H / rows;
+		const r = Math.max(1, Math.min(px, py) * 0.36);
+		g.fillStyle = VIZ_FILL.u;
+		for (let k = 0; k < 1600; k++) {
+			g.beginPath();
+			g.arc(((k % cols) + 0.5) * px, (Math.floor(k / cols) + 0.5) * py, r, 0, 6.2832);
+			g.fill();
+		}
+		return;
+	}
+	if (!stats) return;
 	if (stats.phase === 'after' && stats.all) {
 		const all = stats.all;
 		const rows = 32;

@@ -126,6 +126,7 @@ function VizCanvas({
 	aspect?: number; // …width:height, so grid cells stay square as it resizes
 	dotGrid?: boolean; // the after day's 1,600-dot grid: orbit dots match its radius
 }) {
+	const layout = dotGrid ? 'after' : 'before';
 	const ref = useRef<HTMLCanvasElement>(null);
 	useEffect(() => {
 		const cv = ref.current;
@@ -135,7 +136,7 @@ function VizCanvas({
 			if (cancelled) return;
 			if (kind === 'day') drawDayStrip(cv, stats?.spans, stats?.minute);
 			else if (kind === 'impact') drawImpactStrip(cv, stats?.spans, stats?.minute);
-			else drawStatusGrid(cv, stats);
+			else drawStatusGrid(cv, stats, layout);
 		};
 		draw();
 		const ro = new ResizeObserver(draw);
@@ -145,7 +146,7 @@ function VizCanvas({
 			cancelled = true;
 			ro.disconnect();
 		};
-	}, [kind, stats]);
+	}, [kind, stats, layout]);
 	return (
 		<canvas
 			ref={ref}
@@ -162,21 +163,25 @@ function VizCanvas({
 // left-aligned on both halves. Impact over time (an equalizer) only shows
 // with `showImpact` — the design saves it off. The before grid is two rows of
 // 50 (aspect 25); the after grid is all 1,600 in 50 × 32 square cells
-// (aspect 50/32), so its dots stay round at any width.
+// (aspect 50/32), so its dots stay round at any width. Each half keeps its
+// own grid shape whatever its stats hold (dc barBRef / barRef), so the
+// figure's height stays put through a replay.
 const BEFORE_GRID_ASPECT = 25;
 const AFTER_GRID_ASPECT = 50 / 32;
 
 function HudViz({
+	half,
 	stats,
 	showImpact = false,
 }: {
+	half: 'b' | 'a';
 	stats: StatsSource;
 	showImpact?: boolean;
 }) {
 	const labelCls =
 		'text-[12px] leading-[16px] tracking-[0.04em] whitespace-nowrap';
 	const labelStyle = { fontFamily: 'var(--font-mono)', color: INK_75 };
-	const tall = stats?.phase === 'after';
+	const tall = half === 'a';
 	return (
 		<div className="flex min-w-0 flex-col gap-[10px]">
 			<div className="-mt-[2px] flex flex-col gap-[6px]">
@@ -495,6 +500,12 @@ export function NurseDayFigure({
 	const [idp] = useState(() => `ndf${uid++}`);
 	const [playingS, setPlayingS] = useState(false);
 	const [afterCueS, setAfterCueS] = useState(false);
+	// Finish pressed: the button stays an inert "Finish" at the playing spot
+	// until the portraits have parted, then rises to centre as Play Simulation
+	// (dc finHold, 1800 ms).
+	const [finHoldS, setFinHoldS] = useState(false);
+	const finHoldT = useRef<number | undefined>(undefined);
+	useEffect(() => () => clearTimeout(finHoldT.current), []);
 	const [sb, setSb] = useState<NurseOrbitStats | null>(null);
 	const [sa, setSa] = useState<NurseOrbitStats | null>(null);
 	const [daySec, setDaySec] = useState(15);
@@ -1486,18 +1497,44 @@ export function NurseDayFigure({
 			const lastStat = statsBRef.current?.lastElementChild;
 			if (lastStat) {
 				card.style.setProperty('--hts', `${Math.round(lastStat.getBoundingClientRect().top - cr.top)}px`);
+				// dc placePlay: the link's text baseline (centre + 4.5px for 12/16
+				// mono) sits on the "Calls answered" percent's baseline.
+				const v = lastStat.lastElementChild;
+				if (v) {
+					const pr = document.createElement('span');
+					pr.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
+					v.appendChild(pr);
+					const bl = pr.getBoundingClientRect().top;
+					v.removeChild(pr);
+					card.style.setProperty('--pct', `${Math.round(bl - 4.5 - cr.top)}px`);
+				}
 			}
+			// The bottom of the nurse's seal (both portraits share one horizon;
+			// sliding to the seam only moves them sideways).
+			let nb = 0;
+			for (const el of [bRef.current, aRef.current]) {
+				const seal = el?.querySelector('svg[width]');
+				if (seal) nb = Math.max(nb, seal.getBoundingClientRect().bottom - cr.top);
+			}
+			if (nb) card.style.setProperty('--nb', `${Math.round(nb)}px`);
 			const legend = legendRef.current;
 			if (legend) {
 				card.style.setProperty('--lg', `${24 + legend.offsetHeight + 12}px`);
 			}
 		};
 		requestAnimationFrame(measure);
+		// Again once the engines have drawn their seals and any slide has landed.
+		const t1 = window.setTimeout(measure, 700);
+		const t2 = window.setTimeout(measure, 2000);
 		const ro = new ResizeObserver(() => requestAnimationFrame(measure));
 		for (const el of [viewRef.current, hdRef.current, ftRef.current, statsBRef.current, legendRef.current, descRef.current])
 			if (el) ro.observe(el);
 		document.fonts?.ready.then(measure).catch(() => {});
-		return () => ro.disconnect();
+		return () => {
+			ro.disconnect();
+			clearTimeout(t1);
+			clearTimeout(t2);
+		};
 	}, [playingS, stacked, offsetY]);
 
 	const onDaySec = (v: number) => {
@@ -1567,15 +1604,43 @@ export function NurseDayFigure({
 	// Centre button (dc playVals): Play Simulation (pill) → Next → Finish. The
 	// seam's gap hosts whichever label is live; Finish goes inert while the day
 	// closes (dc finHold).
-	const btnState: 'play' | 'skip' | 'fin' = !playingS ? 'play' : bAfterish ? 'fin' : 'skip';
+	const playG = playingS || finHoldS; // dc playVals `playing`: live, or Finish still holding
+	const btnState: 'play' | 'skip' | 'fin' = !playG ? 'play' : finHoldS || bAfterish ? 'fin' : 'skip';
 	const btnLabel = { play: 'Play Simulation', skip: 'Next', fin: 'Finish' }[btnState];
 	const btnPill = btnState === 'play';
-	const finHold = btnState === 'fin' && M.seqRunning;
+	const finHold = finHoldS;
+	// While playing, the link's baseline sits on the "Calls answered" figure's
+	// (dc _pctTop) and the solid rule rises to that stat's row (--hts) — but
+	// never onto the nurse, who slides to the seam: both stay clear of the
+	// bottom of her seal (--nb, measured).
 	const btnTop = stacked
 		? 'calc(100% - var(--ft, 0px) - 40px)'
-		: playingS
-			? 'var(--hts, 50%)'
+		: playG
+			? 'max(var(--pct, var(--hts, 50%)), calc(var(--nb, 0px) + 30px))'
 			: 'var(--mid, 50%)';
+	const ruleTop = playG
+		? 'max(var(--hts, 50%), calc(var(--nb, 0px) + 54px))'
+		: 'calc(var(--mid, 50%) + 30px)';
+	// Next: the before day jumps ahead to its after day in place (dc
+	// cue('after') → skipAfter), so the before engine is never left paused
+	// mid-day to resume under Play Simulation.
+	const onNext = () => {
+		clearCue();
+		if (!M.playingS) {
+			playAfter();
+			return;
+		}
+		if (M.seqRunning) return;
+		M.afterCue = true;
+		setAfterCueS(true);
+		skipAfter();
+	};
+	const onFinish = () => {
+		clearTimeout(finHoldT.current);
+		setFinHoldS(true);
+		finHoldT.current = window.setTimeout(() => setFinHoldS(false), prefersReducedMotion() ? 0 : 1800);
+		stop();
+	};
 	// Phones: one half at a time — a replay always runs in the before cell.
 	const visHalf: 'b' | 'a' = playingS ? (sb?.phase === 'after' ? 'a' : 'b') : pick;
 	const showBCol = !stacked || (playingS ? true : visHalf === 'b');
@@ -1763,7 +1828,7 @@ export function NurseDayFigure({
 						position: 'absolute',
 						left: 'calc(50% - 0.625px)',
 						top: 'var(--dsc, 0px)',
-						height: playingS ? '0px' : 'calc(var(--mid, 50%) - 38px - var(--dsc, 0px))',
+						height: playG ? '0px' : 'calc(var(--mid, 50%) - 38px - var(--dsc, 0px))',
 						width: '1.25px',
 						zIndex: 6,
 						pointerEvents: 'none',
@@ -1778,7 +1843,7 @@ export function NurseDayFigure({
 						display: stacked ? 'none' : 'block',
 						position: 'absolute',
 						left: 'calc(50% - 0.625px)',
-						top: playingS ? 'var(--hts, 50%)' : 'calc(var(--mid, 50%) + 30px)',
+						top: ruleTop,
 						bottom: 'var(--lg, 72px)',
 						width: '1.25px',
 						zIndex: 6,
@@ -1797,7 +1862,7 @@ export function NurseDayFigure({
 					type="button"
 					disabled={finHold}
 					aria-disabled={finHold || undefined}
-					onClick={finHold ? () => {} : btnState === 'play' ? play : btnState === 'skip' ? playAfter : stop}
+					onClick={finHold ? () => {} : btnState === 'play' ? play : btnState === 'skip' ? onNext : onFinish}
 					aria-label={btnLabel}
 					className={`absolute left-1/2 z-[8] inline-flex min-h-[44px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-[8px] whitespace-nowrap rounded-full border-[1.25px] text-[12px] leading-[16px] tracking-[0.04em] text-confetti-black ${
 						btnPill
@@ -1915,7 +1980,7 @@ export function NurseDayFigure({
 					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px]">
 						{showBCol ? (
 							<div style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}>
-								<HudViz stats={hudB} />
+								<HudViz half="b" stats={hudB} />
 							</div>
 						) : null}
 						<div
@@ -1925,7 +1990,7 @@ export function NurseDayFigure({
 						/>
 						{showACol ? (
 							<div style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}>
-								<HudViz stats={hudA} />
+								<HudViz half="a" stats={hudA} />
 							</div>
 						) : null}
 					</div>
