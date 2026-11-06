@@ -1,5 +1,6 @@
-// The case-study introduction, placed below Figure 1 (the design renders it
-// here, not in the front matter — FrontMatter omits it via hideIntroduction).
+// The case-study introduction, placed between the front matter and Figure 1
+// (rendered here rather than by FrontMatter, which omits it via
+// hideIntroduction, so it keeps the bold lead and wash underline).
 // Reads larger than body copy: Funnel Sans 28/1.35, light, full width, with
 // a break after the bold lead (as the design's intro pass sets it). FrontMatterWashes
 // finds the "sole Product Designer" phrase here and underlines it.

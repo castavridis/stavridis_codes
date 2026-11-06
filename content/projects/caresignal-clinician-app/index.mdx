@@ -42,13 +42,13 @@ import { LazyBlocks } from './LazyBlocks.tsx'
     below the hero, as in the reference) */}
 <div id="introduction" className="h-0" aria-hidden="true" />
 
-{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
-<HeroFigure />
-
 <div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
 
-{/* Introduction — the design places it below Figure 1, larger than body copy */}
+{/* Introduction — above Figure 1, larger than body copy */}
 <Introduction />
+
+{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
+<HeroFigure />
 
 <div className="relative">
 	<SectionNav />
