@@ -307,7 +307,7 @@ export function FigureLink({ anchor }: { anchor: string }) {
 				e.preventDefault();
 				el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
 			}}
-			className="mt-auto self-start text-[14px] leading-[20px] tracking-[0.02em] text-confetti-black underline underline-offset-[3px] hover:decoration-2"
+			className="mt-auto inline-flex min-h-[44px] items-center self-start text-[14px] leading-[20px] tracking-[0.02em] text-confetti-black underline underline-offset-[3px] hover:decoration-2"
 			style={{ fontFamily: 'var(--font-mono)' }}
 		>
 			{target && `View Figure ${target.id.replace('figure-', '')} ${target.above ? 'Above' : 'Below'}`}
