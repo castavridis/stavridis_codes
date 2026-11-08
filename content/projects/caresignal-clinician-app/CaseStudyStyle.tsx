@@ -99,6 +99,21 @@ ${SCOPE} input[data-day-slider]:focus-visible::-webkit-slider-thumb {
 ${SCOPE} input[data-day-slider]:focus {
 	outline: none;
 }
+/* Touch: a 44px-tall hit band and a 20px thumb; the track stays a hairline. */
+@media (pointer: coarse) {
+	${SCOPE} input[data-day-slider] {
+		height: 44px;
+	}
+	${SCOPE} input[data-day-slider]::-webkit-slider-thumb {
+		width: 20px;
+		height: 20px;
+		margin-top: -9.4px;
+	}
+	${SCOPE} input[data-day-slider]::-moz-range-thumb {
+		width: 18px;
+		height: 18px;
+	}
+}
 `;
 
 type HandWindow = typeof window & { WashHighlightHand?: 'left' | 'left-hook' | 'right' };
