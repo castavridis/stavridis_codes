@@ -49,6 +49,10 @@ ${SCOPE} [data-chrome-slot]:not(:empty) ~ p.type-tag {
 	${SCOPE} [data-chrome-row] {
 		padding-block: 12px;
 	}
+	/* Close: 44px tall to tap (was 30). */
+	${SCOPE} [data-chrome-row] > :last-child button {
+		min-height: 44px;
+	}
 }
 /* The scroll-reveal headline-meta is hidden; the chrome row keeps the title
    + tags. */
