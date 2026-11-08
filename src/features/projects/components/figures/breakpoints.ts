@@ -7,20 +7,24 @@ import { useEffect, useState } from 'react';
 // `min-[600px]:` for everything wider.
 export const NARROW_PX = 600;
 
-const query = `(max-width: ${NARROW_PX - 0.02}px)`;
+// Below this the desktop side nav is hidden (dc wideNav: innerWidth >= 1100).
+export const WIDE_NAV_PX = 1100;
 
-// True below NARROW_PX. Reads the media query on first render (so phones
-// don't paint the desktop layout first) and tracks it after that.
-export function useNarrow(): boolean {
-	const [narrow, setNarrow] = useState(
+// Tracks a media query. Reads it on first render (so phones don't paint the
+// desktop layout first) and follows changes after that.
+export function useMediaQuery(query: string): boolean {
+	const [on, setOn] = useState(
 		() => typeof matchMedia !== 'undefined' && matchMedia(query).matches,
 	);
 	useEffect(() => {
 		const mq = matchMedia(query);
-		const on = () => setNarrow(mq.matches);
-		on();
-		mq.addEventListener('change', on);
-		return () => mq.removeEventListener('change', on);
-	}, []);
-	return narrow;
+		const sync = () => setOn(mq.matches);
+		sync();
+		mq.addEventListener('change', sync);
+		return () => mq.removeEventListener('change', sync);
+	}, [query]);
+	return on;
 }
+
+// True below NARROW_PX.
+export const useNarrow = () => useMediaQuery(`(max-width: ${NARROW_PX - 0.02}px)`);

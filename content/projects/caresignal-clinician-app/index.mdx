@@ -21,6 +21,7 @@ import { AssumptionsModal } from './AssumptionsModal.tsx'
 import { CaseStudyStyle } from './CaseStudyStyle.tsx'
 import { FrontMatterWashes } from './FrontMatterWashes.tsx'
 import { SectionNav } from './SectionNav.tsx'
+import { SectionMenu } from './SectionMenu.tsx'
 import { HeroFigure } from './HeroFigure.tsx'
 import { Introduction } from './Introduction.tsx'
 import { Background } from './Background.tsx'
@@ -78,5 +79,8 @@ import { LazyBlocks } from './LazyBlocks.tsx'
 <LazyBlocks />
 
 <AssumptionsModal />
+
+{/* Phones/tablets: the sticky title opens a section list */}
+<SectionMenu />
 
 <BackToTop />

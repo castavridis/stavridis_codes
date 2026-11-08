@@ -38,6 +38,18 @@ ${SCOPE} p.type-tag::before {
 	margin-bottom: 2px;
 	color: var(--color-confetti-black);
 }
+/* Below 1100px the section menu (SectionMenu) fills the chrome slot with
+   its own title + current-section button, replacing the title/tags line. */
+${SCOPE} [data-chrome-slot]:not(:empty) ~ p.type-tag {
+	display: none;
+}
+/* Phones: the sticky chrome row is 12px top and bottom, not 32px, so it
+   takes ~70px of the screen instead of ~110px. */
+@media (max-width: 599.98px) {
+	${SCOPE} [data-chrome-row] {
+		padding-block: 12px;
+	}
+}
 /* The scroll-reveal headline-meta is hidden; the chrome row keeps the title
    + tags. */
 ${SCOPE} p.type-headline-meta.absolute {
