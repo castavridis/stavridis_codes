@@ -9,6 +9,7 @@ import {
 	fmtClock,
 } from '../../../src/features/projects/components/figures/hud-canvas';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
+import { NARROW_PX } from '../../../src/features/projects/components/figures/breakpoints';
 import WashHighlightFX, {
 	type WashHandle,
 } from '../../../src/features/projects/components/figures/wash-highlight';
@@ -344,7 +345,9 @@ function PillButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`pointer-events-auto inline-block cursor-pointer rounded-full border-[1.25px] border-confetti-black transition-colors duration-200 hover:bg-confetti-black hover:text-[#fdfbf5] ${
+			// The pseudo-element grows the tap area to ~44px tall without moving
+			// the pill in its line of text.
+			className={`pointer-events-auto relative inline-block cursor-pointer rounded-full border-[1.25px] before:absolute before:-inset-x-[2px] before:-inset-y-[7px] before:content-[''] border-confetti-black transition-colors duration-200 hover:bg-confetti-black hover:text-[#fdfbf5] ${
 				active ? 'bg-confetti-black text-[#fdfbf5]' : 'bg-transparent text-confetti-black'
 			}`}
 			style={{ font: 'inherit', lineHeight: 1.15, margin: '0 0.08em', padding: '0 0.38em 0.06em' }}
@@ -354,7 +357,21 @@ function PillButton({
 	);
 }
 
-function StatBlock({ stat, align }: { stat: Stat; align: 'start' | 'end' }) {
+// Stats set below the stage (phones and narrow figures, dc statsBelow): a
+// wrapping row, two to a line, at the design's 32px.
+function StatsRow({ stats }: { stats: Stat[] }) {
+	return (
+		<div className="flex flex-wrap" style={{ gap: '16px 24px' }}>
+			{stats.map((st) => (
+				<div key={st.label} style={{ flexBasis: 'calc(50% - 12px)' }}>
+					<StatBlock stat={st} align="start" size="32px" />
+				</div>
+			))}
+		</div>
+	);
+}
+
+function StatBlock({ stat, align, size = 'clamp(22px, 3vw, 40px)' }: { stat: Stat; align: 'start' | 'end'; size?: string }) {
 	return (
 		<div className={`flex flex-col gap-[4px] ${align === 'end' ? 'items-end' : 'items-start'}`}>
 			<span
@@ -367,7 +384,7 @@ function StatBlock({ stat, align }: { stat: Stat; align: 'start' | 'end' }) {
 				className="whitespace-nowrap leading-none [font-variant-numeric:tabular-nums]"
 				style={{
 					fontFamily: 'var(--font-kyoto)',
-					fontSize: 'clamp(22px, 3vw, 40px)',
+					fontSize: size,
 					color: stat.green ? GREEN_TEXT : INK,
 				}}
 			>
@@ -509,7 +526,18 @@ export function NurseDayFigure({
 	const [sb, setSb] = useState<NurseOrbitStats | null>(null);
 	const [sa, setSa] = useState<NurseOrbitStats | null>(null);
 	const [daySec, setDaySec] = useState(15);
-	const [stacked, setStacked] = useState(false);
+	// Phones (the figure under NARROW_PX): one half at a time, 4/3 stage,
+	// bird's-eye engines. Seeded from the window so phones don't paint the
+	// desktop layout first; the stage's ResizeObserver keeps it exact.
+	const [stacked, setStacked] = useState(
+		() => typeof window !== 'undefined' && window.innerWidth < NARROW_PX,
+	);
+	// dc hudTight: under ~760px the HUD stats leave the stage for the footer
+	// (back on above 820px, so it doesn't flicker at the edge).
+	const [tight, setTight] = useState(
+		() => typeof window !== 'undefined' && window.innerWidth < 760,
+	);
+	const below = stacked || tight;
 	const [pick, setPick] = useState<'b' | 'a'>('a'); // phones: which half shows at rest
 
 	const m = useRef<Machine>({
@@ -1012,9 +1040,11 @@ export function NurseDayFigure({
 		M.infK = null;
 		M.ribShown = null;
 		M.lblK = null;
-		const mqMobile = window.matchMedia('(max-width: 700px)');
+		// The engines take the bird's-eye phone tune when the figure itself is
+		// phone-sized (the same test as `stacked`).
+		const isPhone = () => viewport.clientWidth > 0 && viewport.clientWidth < NARROW_PX;
 		const mqReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-		M.env = { mobile: mqMobile.matches, reduced: mqReduced.matches };
+		M.env = { mobile: isPhone(), reduced: mqReduced.matches };
 		M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced, M.qTier);
 
 		// Orbit dots match the status grid's dots (dc drawBar → setDotPx):
@@ -1332,12 +1362,15 @@ export function NurseDayFigure({
 			M.infK = null; // measured letter-spacing again once the mono face is in
 		}).catch(() => {});
 
-		// Resize: re-derive the seam geometry; under ~two 400px columns the
-		// cells stack and each nurse centres in its own cell.
+		// Resize: re-derive the seam geometry; under NARROW_PX the cells stack
+		// (each nurse centres in its own cell) and the engines retune.
 		let rsT: number | undefined;
 		const ro = new ResizeObserver((es) => {
 			const w = es[0]?.contentRect.width ?? viewport.clientWidth;
-			setStacked(w < 800);
+			const phone = w < NARROW_PX;
+			setStacked(phone);
+			setTight((t) => (t ? w < 820 : w < 760));
+			if (w > 0 && phone !== M.env.mobile) retune();
 			M.sp = 0;
 			syncDot();
 			clearTimeout(rsT);
@@ -1346,12 +1379,11 @@ export function NurseDayFigure({
 		ro.observe(viewport);
 
 		const retune = () => {
-			M.env = { mobile: mqMobile.matches, reduced: mqReduced.matches };
+			M.env = { mobile: isPhone(), reduced: mqReduced.matches };
 			M.p0 = engineParams(M.daySec, M.env.mobile, M.env.reduced, M.qTier);
 			M.fx.before?.setParams({ ...M.p0, startAt: 'before' });
 			M.fx.after?.setParams({ ...M.p0, startAt: 'tuesday' });
 		};
-		mqMobile.addEventListener('change', retune);
 		mqReduced.addEventListener('change', retune);
 
 		// Quality governor (dc governor()): start high, step down a tier after
@@ -1402,7 +1434,6 @@ export function NurseDayFigure({
 			clearSeq();
 			M.revealAnim?.cancel();
 			M.fadeAnim?.cancel();
-			mqMobile.removeEventListener('change', retune);
 			mqReduced.removeEventListener('change', retune);
 			ioInf?.disconnect();
 			io?.disconnect();
@@ -1535,7 +1566,7 @@ export function NurseDayFigure({
 			clearTimeout(t1);
 			clearTimeout(t2);
 		};
-	}, [playingS, stacked, offsetY]);
+	}, [playingS, stacked, below, offsetY]);
 
 	const onDaySec = (v: number) => {
 		setDaySec(v);
@@ -1615,10 +1646,16 @@ export function NurseDayFigure({
 	const btnTop = stacked
 		? 'calc(100% - var(--ft, 0px) - 40px)'
 		: playG
-			? 'max(var(--pct, var(--hts, 50%)), calc(var(--nb, 0px) + 30px))'
+			? below
+				? 'calc(var(--nb, 0px) + 30px)'
+				: 'max(var(--pct, var(--hts, 50%)), calc(var(--nb, 0px) + 30px))'
 			: 'var(--mid, 50%)';
+	// With the stats below the stage there's no "Calls answered" row on the
+	// stage to rise to: the button and rule just clear the nurse.
 	const ruleTop = playG
-		? 'max(var(--hts, 50%), calc(var(--nb, 0px) + 54px))'
+		? below
+			? 'calc(var(--nb, 0px) + 54px)'
+			: 'max(var(--hts, 50%), calc(var(--nb, 0px) + 54px))'
 		: 'calc(var(--mid, 50%) + 30px)';
 	// Next: the before day jumps ahead to its after day in place (dc
 	// cue('after') → skipAfter), so the before engine is never left paused
@@ -1662,9 +1699,11 @@ export function NurseDayFigure({
 		<figure className="m-0 w-full">
 			<div
 				ref={cardRef}
-				className="relative box-content aspect-[4/3] min-h-[320px] w-full rounded-[16px] md:aspect-[1136/500] md:max-h-[500px]"
+				className="relative box-content min-h-[320px] w-full rounded-[16px]"
 				style={{
 					background: PAPER,
+					aspectRatio: stacked ? '4 / 3' : '1136 / 500',
+					maxHeight: stacked ? undefined : 500,
 					paddingTop: 'var(--hd, 0px)',
 					paddingBottom: 'var(--ft, 0px)',
 					// Paper is flat: TWEAKS §1 saves paperRotate/SkewX/SkewY = 0
@@ -1783,7 +1822,7 @@ export function NurseDayFigure({
 
 				{/* HUD stat columns: resting = each engine's finished day; playing =
 				    the live half, the other column dimmed. */}
-				{showBCol ? (
+				{showBCol && !below ? (
 					<div
 						ref={statsBRef}
 						aria-label="Before stats"
@@ -1799,7 +1838,7 @@ export function NurseDayFigure({
 						))}
 					</div>
 				) : null}
-				{showACol ? (
+				{showACol && !below ? (
 					<div
 						aria-label="After stats"
 						className="pointer-events-none absolute right-[24px] z-[6] flex flex-col items-end gap-[24px] text-right"
@@ -1895,7 +1934,8 @@ export function NurseDayFigure({
 							onClick={onAssumptions}
 							aria-label="Assumptions"
 							title="Assumptions"
-							className="pointer-events-auto ml-auto inline-flex size-[24px] flex-none cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent italic text-confetti-black transition-colors duration-200 hover:bg-confetti-black hover:text-[#fdfbf5]"
+							// ::after pads the 24px ring out to a 44px tap area.
+							className="pointer-events-auto relative ml-auto inline-flex size-[24px] flex-none after:absolute after:-inset-[10px] after:content-[''] cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent italic text-confetti-black transition-colors duration-200 hover:bg-confetti-black hover:text-[#fdfbf5]"
 							style={{ fontFamily: 'var(--font-kyoto)', fontSize: 13, lineHeight: 1 }}
 						>
 							i
@@ -1914,7 +1954,9 @@ export function NurseDayFigure({
 					</Text>
 					<div
 						ref={descRef}
-						className="pointer-events-auto mt-[8px] grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px] md:gap-y-[8px]"
+						className={`pointer-events-auto mt-[8px] grid ${
+							stacked ? 'grid-cols-1 gap-[16px]' : 'grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-x-[24px] gap-y-[8px]'
+						}`}
 					>
 						<div
 							className="flex min-w-0 flex-col gap-[6px]"
@@ -1929,7 +1971,7 @@ export function NurseDayFigure({
 								are. Most don’t pick up.
 							</p>
 						</div>
-						<div aria-hidden="true" className="hidden md:block" />
+						{stacked ? null : <div aria-hidden="true" />}
 						<div
 							className="flex min-w-0 flex-col gap-[6px]"
 							style={{ opacity: opA, transition: 'opacity 400ms ease' }}
@@ -1964,28 +2006,48 @@ export function NurseDayFigure({
 					    over time behind showImpact, off as in the design). Two-up on desktop (the inactive half dims while the
 					    other plays); on phones only the visible half shows, like the
 					    stat columns (showBCol/showACol). */}
-					<div className="grid grid-cols-1 gap-[16px] md:grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] md:gap-x-[24px]">
+					<div
+						className={`grid ${
+							stacked ? 'grid-cols-1 gap-[16px]' : 'grid-cols-[minmax(0,1fr)_1px_minmax(0,1fr)] gap-x-[24px]'
+						}`}
+					>
+						{/* Below the stage (dc statsBelow) each half's stats lead
+						    its HUD column. */}
 						{showBCol ? (
-							<div style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}>
+							<div
+								aria-label={below ? 'Before stats' : undefined}
+								className="flex min-w-0 flex-col gap-[20px]"
+								style={{ opacity: stacked ? 1 : opB, transition: 'opacity 400ms ease' }}
+							>
+								{below ? <StatsRow stats={statsB} /> : null}
 								<HudViz half="b" stats={hudB} />
 							</div>
 						) : null}
-						<div
-							aria-hidden="true"
-							className="hidden md:block"
-							style={{ background: INK_35 }}
-						/>
+						{stacked ? null : <div aria-hidden="true" style={{ background: INK_35 }} />}
 						{showACol ? (
-							<div style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}>
+							<div
+								aria-label={below ? 'After stats' : undefined}
+								className="flex min-w-0 flex-col gap-[20px]"
+								style={{ opacity: stacked ? 1 : opA, transition: 'opacity 400ms ease' }}
+							>
+								{below ? <StatsRow stats={statsA} /> : null}
 								<HudViz half="a" stats={hudA} />
 							</div>
 						) : null}
 					</div>
-					<div className="flex flex-col gap-[12px] md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-[24px]">
+					<div
+						className={`flex ${
+							stacked ? 'flex-col gap-[12px]' : 'flex-row flex-wrap items-center justify-between gap-x-[24px] gap-y-[12px]'
+						}`}
+					>
+						{/* Phones: the legend takes its own row, three to a line
+						    (dc legendCols); shift length wraps below. */}
 						<div
 							ref={legendRef}
 							aria-label="Legend"
-							className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[16px] gap-y-[8px] text-[12px] leading-[16px] tracking-[0.04em]"
+							className={`min-w-0 flex-1 items-center gap-y-[8px] text-[12px] leading-[16px] tracking-[0.04em] ${
+								stacked ? 'grid grid-cols-3 gap-x-[8px]' : 'flex flex-wrap gap-x-[16px]'
+							}`}
 							style={{ fontFamily: 'var(--font-mono)', color: INK_75 }}
 						>
 							{LEGEND.map(([label, color]) => (
