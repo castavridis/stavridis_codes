@@ -6,6 +6,8 @@ import Figure from '../../../src/features/projects/components/figures/Figure';
 import { observe as fadeInObserve } from '../../../src/features/projects/components/fade-in';
 import { onRenumber } from '../../../src/features/projects/components/figures/dom-order';
 import { prefersReducedMotion } from '../../../src/features/projects/components/figures/motion';
+import { useMediaQuery } from '../../../src/features/projects/components/figures/breakpoints';
+import { ShotViewer } from './ShotViewer';
 
 export {
 	default as Citation,
@@ -166,7 +168,8 @@ export function BackdropWindowShot({
 }
 
 // Fade an image up from transparent once it is both loaded and on screen;
-// reduced motion shows it immediately.
+// reduced motion shows it immediately. Below 1024px the shot is also a
+// button (with a small expand badge) that opens it full screen.
 function FadeImg({
 	src,
 	alt,
@@ -179,13 +182,15 @@ function FadeImg({
 	height: number;
 }) {
 	const ref = useRef<HTMLImageElement>(null);
+	const zoomable = useMediaQuery('(max-width: 1023.98px)');
+	const [open, setOpen] = useState(false);
 	useEffect(() => {
 		const handle = fadeInObserve(ref.current, {
 			reduced: prefersReducedMotion(),
 		});
 		return () => handle.destroy();
 	}, []);
-	return (
+	const img = (
 		<img
 			ref={ref}
 			src={src}
@@ -197,6 +202,30 @@ function FadeImg({
 			className="block w-full"
 			style={{ opacity: 0, transition: 'opacity 450ms ease' }}
 		/>
+	);
+	if (!zoomable) return img;
+	return (
+		<>
+			<button
+				type="button"
+				onClick={() => setOpen(true)}
+				aria-label={`View full size: ${alt}`}
+				className="relative block w-full cursor-zoom-in border-0 bg-transparent p-0"
+			>
+				{img}
+				<span
+					aria-hidden
+					className="absolute bottom-[8px] right-[8px] inline-flex size-[32px] items-center justify-center rounded-full bg-white/90 text-confetti-black shadow-[0_2px_8px_rgba(57,31,0,0.15)]"
+				>
+					<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+						<path d="M8.5 1.5h4v4M12.5 1.5L8 6M5.5 12.5h-4v-4M1.5 12.5L6 8" />
+					</svg>
+				</span>
+			</button>
+			{open ? (
+				<ShotViewer src={src} alt={alt} width={width} height={height} onClose={() => setOpen(false)} />
+			) : null}
+		</>
 	);
 }
 
