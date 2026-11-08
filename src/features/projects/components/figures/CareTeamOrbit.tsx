@@ -107,7 +107,9 @@ function Pill({
 			type="button"
 			onClick={onClick}
 			aria-pressed={p.on}
-			className="ct-pill mx-[0.08em] inline-block cursor-pointer rounded-full border-[1.25px] border-confetti-black"
+			// ::before pads the pill to a ~44px-tall tap area without moving it
+			// in its line of text.
+			className="ct-pill relative mx-[0.08em] inline-block cursor-pointer rounded-full border-[1.25px] border-confetti-black before:absolute before:-inset-x-[2px] before:-inset-y-[7px] before:content-['']"
 			style={{
 				padding: '0 0.38em 0.06em',
 				background: p.bg,
@@ -333,6 +335,10 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 
 	// ---------- lifecycle ----------
 	componentDidMount() {
+		// Settle narrow before the first paint (a setState here re-renders
+		// before the browser paints), so phones never draw the three-column
+		// desktop layout first; the ResizeObserver keeps it in step after.
+		{ const w0 = this.rootRef.current?.offsetWidth ?? 0; if (w0 > 0 && w0 < 700 && !this.state.narrow) this.setState({ narrow: true }); }
 		this.uid = 'ct' + Math.random().toString(36).slice(2, 8); this.still = this.isReduced();
 		const st = this.stageRef.current!; this.washHost = document.createElement('div'); this.washHost.style.cssText = 'position:absolute;left:0;top:0;z-index:0;pointer-events:none;mix-blend-mode:multiply;transform-origin:0 0'; st.appendChild(this.washHost);
 		const mkSvg = () => { const v = this.mk('svg', { viewBox: '-700 -200 1400 400', preserveAspectRatio: 'xMidYMid meet' }, st); v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;pointer-events:none'; return v; };
@@ -415,7 +421,9 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 								onClick={v.openAssum}
 								aria-label="Assumptions"
 								title="Assumptions"
-								className="inline-flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent p-0 text-[13px] italic leading-none text-confetti-black hover:bg-confetti-black hover:text-washes-paper"
+								// ::after pads the 20px ring to a 44px tap area (an outline
+								// isn't hit-tested, so L.tapOutline alone doesn't).
+								className="relative inline-flex size-[20px] flex-none cursor-pointer after:absolute after:-inset-[12px] after:content-[''] items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent p-0 text-[13px] italic leading-none text-confetti-black hover:bg-confetti-black hover:text-washes-paper"
 								style={{ outline: L.tapOutline, fontFamily: 'var(--font-kyoto)' }}
 							>
 								i
