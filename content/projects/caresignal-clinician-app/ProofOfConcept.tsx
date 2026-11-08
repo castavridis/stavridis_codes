@@ -40,7 +40,7 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col items-center gap-[32px] rounded-[16px] bg-washes-paper p-[24px] md:p-[40px]">
+				<figure className="m-0 flex w-full flex-col items-center gap-[32px] rounded-[16px] bg-washes-paper px-[20px] py-[32px] min-[600px]:p-[24px] md:p-[40px]">
 					<div className="flex flex-col items-center gap-[8px] text-center">
 						<Figure />
 						<Text
