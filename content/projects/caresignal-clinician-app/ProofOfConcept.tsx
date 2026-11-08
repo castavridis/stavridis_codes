@@ -141,9 +141,10 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				{/* Design principles: full width, three across (stacked on
-				    phones); the cards share a row height. */}
-				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
+				{/* Design principles: full width, three across from 1024px
+				    (stacked below: at tablet widths a third of the column is too
+				    narrow for the 28px text); the cards share a row height. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] lg:grid-cols-3">
 					<DesignPrinciple
 						number={1}
 						pigment="rose"
