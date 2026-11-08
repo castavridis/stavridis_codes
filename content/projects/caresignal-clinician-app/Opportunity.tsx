@@ -36,11 +36,11 @@ export function Opportunity() {
 					gaining more insight into their patients’ health. However, a standard
 					implementation of this approach has downsides:
 				</Text>
-				<ol className="m-0 flex list-none flex-col gap-[16px] pl-[24px]">
+				<ol className="m-0 flex list-none flex-col gap-[16px] pl-0 min-[600px]:pl-[24px]">
 					{DOWNSIDES.map((item, i) => (
 						<li
 							key={item.lead}
-							className="grid grid-cols-[28px_minmax(0,1fr)] items-start gap-[16px]"
+							className="grid grid-cols-[28px_minmax(0,1fr)] items-start gap-[12px] min-[600px]:gap-[16px]"
 						>
 							<span
 								aria-hidden="true"
