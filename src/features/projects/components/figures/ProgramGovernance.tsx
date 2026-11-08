@@ -106,7 +106,9 @@ export default function ProgramGovernance() {
 						settings or successful implementations. Defaults are treated as strong
 						recommendations for an organization’s settings.
 					</Tier>
-					<div className="ml-[32px] grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-[16px]">
+					{/* min(260px, 100%): at phone widths the cards take the row
+					    instead of overflowing it. */}
+					<div className="ml-[8px] grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] gap-[16px] md:ml-[32px]">
 						<Evidence outcome="Published Evidence, Literature Review">
 							<strong>Research Center</strong> develops thresholds for condition-specific programs
 							and often implements a study
@@ -171,6 +173,19 @@ export default function ProgramGovernance() {
 					<span aria-hidden className="-mt-[10px] size-0 border-x-[5px] border-b-[8px] border-x-transparent border-b-confetti-black" />
 				</div>
 			</div>
+
+			{/* Phones: the side rail's note, set across the foot instead. */}
+			<p
+				className="m-0 mt-[20px] flex items-center gap-[10px] text-[12px] leading-[16px] tracking-[.04em] text-confetti-black md:hidden"
+				style={MONO}
+			>
+				<span aria-hidden className="flex-1 border-t-[1.25px] border-dashed border-confetti-black" />
+				<span aria-hidden className="text-[18px] leading-[16px]" style={BODY_FONT}>
+					↻
+				</span>
+				Settings may be iterated on
+				<span aria-hidden className="flex-1 border-t-[1.25px] border-dashed border-confetti-black" />
+			</p>
 
 			<div
 				className="mt-[4px] flex flex-wrap items-center gap-x-[24px] gap-y-[8px] rounded-[12px] px-[24px] py-[16px]"

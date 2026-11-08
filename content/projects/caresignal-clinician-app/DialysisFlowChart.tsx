@@ -1,11 +1,15 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { IMG } from './shared';
 
 // The dialysis program's alert-based workflow, rebuilt as DOM per the
 // handoff ("keep it as DOM, not an image"). Layout and copy match the
 // reference prototype; the whole chart reads as one image to AT via the
-// aria-label, with the DOM text hidden from the tree.
+// aria-label, with the DOM text hidden from the tree. When the chart itself
+// has under 600px (its grid's minimum) it stacks into one column (the
+// patient's thread, then CareSignal → nurse → patient) instead of the
+// design's sideways scroll — on phones, and on small tablets where the
+// figure card's padding leaves less than that.
 
 const INK45 = 'color-mix(in srgb, var(--color-confetti-black) 45%, transparent)';
 const HANSA = 'var(--color-washes-hansa-yellow, #f6c445)';
@@ -142,22 +146,119 @@ function ArrowRight() {
 	);
 }
 
-function ArrowDown({ height, stretch }: { height?: number; stretch?: boolean }) {
+function ArrowDown({
+	height,
+	stretch,
+	color = INK45,
+}: {
+	height?: number;
+	stretch?: boolean;
+	color?: string;
+}) {
 	return (
 		<div
 			aria-hidden
 			className="flex flex-col items-center"
 			style={stretch ? { flex: '1px', height: 'auto' } : { height: height ?? 24 }}
 		>
-			<span className="flex-1" style={{ borderLeft: `1.5px solid ${INK45}` }} />
+			<span className="flex-1" style={{ borderLeft: `1.5px solid ${color}` }} />
 			<span
 				className="size-0"
 				style={{
 					borderLeft: '5px solid transparent',
 					borderRight: '5px solid transparent',
-					borderTop: `7px solid ${INK45}`,
+					borderTop: `7px solid ${color}`,
 				}}
 			/>
+		</div>
+	);
+}
+
+// Message copy, shared by both layouts.
+function AskCard() {
+	return (
+		<MsgCard chipDot={HANSA} chipLabel="CareSignal · call or text">
+			Will you be able to come to <Token>{'#{date}'}</Token>’s treatment?
+			Please press 1 if yes, press 2 if no, or press 3 if you are going
+			to be late.
+		</MsgCard>
+	);
+}
+function WhyCard() {
+	return (
+		<MsgCard chipDot={HANSA} chipLabel="CareSignal">
+			OK. Would you let us know why? Please press 1 if you are feeling
+			sick, press 2 if you cannot get a ride, press 3 if you are in the
+			hospital, press 4 if you cannot make it for other reasons.
+		</MsgCard>
+	);
+}
+function ThanksCard() {
+	return (
+		<MsgCard chipDot={HANSA} chipLabel="CareSignal">
+			Thanks for letting us know! We will try to contact you soon. You
+			can also call <Token>{'#{number}'}</Token> if you would like to
+			talk to someone sooner! If emergency, call 911.
+		</MsgCard>
+	);
+}
+function AlertCard() {
+	return (
+		<MsgCard
+			chipDot={ROSE}
+			chipLabel="Alert · dialysis team"
+			borderColor={`color-mix(in srgb, ${ROSE} 45%, transparent)`}
+		>
+			Patient <Token>{'#{patient.firstName}'}</Token> indicated
+			difficulty with attending the treatment.
+		</MsgCard>
+	);
+}
+function PatientBadge() {
+	return (
+		<>
+			<ChipLabel dot={PATIENT}>Patient</ChipLabel>
+			<img
+				src={`${IMG}/fig2-avatar-patient.png`}
+				alt=""
+				width={192}
+				height={192}
+				className="size-[40px] flex-none rounded-full object-cover"
+			/>
+		</>
+	);
+}
+
+// Phones: the same steps in one column, top to bottom.
+function Stacked() {
+	return (
+		<div aria-hidden className="flex flex-col">
+			<Pill tone={HANSA}>CareSignal messages patient</Pill>
+			<ArrowDown />
+			<AskCard />
+			<div className="py-[10px]">
+				<PressRow />
+			</div>
+			<WhyCard />
+			<div className="py-[10px]">
+				<PressRow />
+			</div>
+			<ThanksCard />
+			<ArrowDown />
+			<Pill tone={HANSA}>CareSignal reviews replies</Pill>
+			<ArrowDown />
+			<div className="flex flex-col gap-[10px]">
+				<Pill tone={HANSA}>CareSignal alerts nurse</Pill>
+				<AlertCard />
+			</div>
+			<ArrowDown />
+			<Pill tone={NURSE} avatar={`${IMG}/fig2-avatar-nurse.png`}>
+				Nurse calls patient
+			</Pill>
+			<ArrowDown color={NURSE} />
+			<div className="flex items-center justify-center gap-[10px]">
+				<PatientBadge />
+			</div>
 		</div>
 	);
 }
@@ -166,9 +267,43 @@ const COLS: CSSProperties = {
 	gridTemplateColumns: 'minmax(260px, 1.25fr) 72px minmax(220px, 1fr)',
 };
 
+const GRID_MIN = 600;
+
 export function DialysisFlowChart() {
+	const ref = useRef<HTMLDivElement>(null);
+	// Seeded from the window (the card is ~80px narrower than the viewport)
+	// so phones don't paint the wide grid first; then the chart's own width.
+	const [narrow, setNarrow] = useState(
+		() => typeof window !== 'undefined' && window.innerWidth < GRID_MIN + 80,
+	);
+	useLayoutEffect(() => {
+		const el = ref.current;
+		if (!el) return;
+		const sync = () => {
+			const w = el.clientWidth;
+			if (w > 0) setNarrow(w < GRID_MIN);
+		};
+		sync();
+		const ro = new ResizeObserver(sync);
+		ro.observe(el);
+		return () => ro.disconnect();
+	}, []);
+	if (narrow) {
+		return (
+			<div
+				ref={ref}
+				role="img"
+				aria-label={ARIA_LABEL}
+				className="w-full text-left text-confetti-black"
+				style={{ fontFamily: 'var(--font-body)' }}
+			>
+				<Stacked />
+			</div>
+		);
+	}
 	return (
 		<div
+			ref={ref}
 			role="img"
 			aria-label={ARIA_LABEL}
 			className="w-full max-w-[1000px] overflow-x-auto text-left text-confetti-black"
@@ -198,33 +333,18 @@ export function DialysisFlowChart() {
 				</div>
 
 				<div style={{ gridColumn: 1, gridRow: 3 }}>
-					<MsgCard chipDot={HANSA} chipLabel="CareSignal · call or text">
-						Will you be able to come to <Token>{'#{date}'}</Token>’s treatment?
-						Please press 1 if yes, press 2 if no, or press 3 if you are going
-						to be late.
-					</MsgCard>
+					<AskCard />
 				</div>
 				<div className="py-[10px]" style={{ gridColumn: 1, gridRow: 4 }}>
 					<PressRow />
 				</div>
 
 				<div style={{ gridColumn: 1, gridRow: 5 }}>
-					<MsgCard chipDot={HANSA} chipLabel="CareSignal">
-						OK. Would you let us know why? Please press 1 if you are feeling
-						sick, press 2 if you cannot get a ride, press 3 if you are in the
-						hospital, press 4 if you cannot make it for other reasons.
-					</MsgCard>
+					<WhyCard />
 				</div>
 				<div className="flex flex-col gap-[10px]" style={{ gridColumn: 3, gridRow: 5 }}>
 					<Pill tone={HANSA}>CareSignal alerts nurse</Pill>
-					<MsgCard
-						chipDot={ROSE}
-						chipLabel="Alert · dialysis team"
-						borderColor={`color-mix(in srgb, ${ROSE} 45%, transparent)`}
-					>
-						Patient <Token>{'#{patient.firstName}'}</Token> indicated
-						difficulty with attending the treatment.
-					</MsgCard>
+					<AlertCard />
 				</div>
 
 				<div className="py-[10px]" style={{ gridColumn: 1, gridRow: 6 }}>
@@ -235,11 +355,7 @@ export function DialysisFlowChart() {
 				</div>
 
 				<div style={{ gridColumn: 1, gridRow: 7 }}>
-					<MsgCard chipDot={HANSA} chipLabel="CareSignal">
-						Thanks for letting us know! We will try to contact you soon. You
-						can also call <Token>{'#{number}'}</Token> if you would like to
-						talk to someone sooner! If emergency, call 911.
-					</MsgCard>
+					<ThanksCard />
 				</div>
 				{/* The step stays vertically centred in its row (equal flex space
 				    above and below); the space below carries the first part of the
@@ -261,14 +377,7 @@ export function DialysisFlowChart() {
 					style={{ gridColumn: '1 / span 3', gridRow: 8, ...COLS }}
 				>
 					<div className="flex items-center justify-end gap-[10px] pr-[8px]">
-						<ChipLabel dot={PATIENT}>Patient</ChipLabel>
-						<img
-							src={`${IMG}/fig2-avatar-patient.png`}
-							alt=""
-							width={192}
-							height={192}
-							className="size-[40px] flex-none rounded-full object-cover"
-						/>
+						<PatientBadge />
 					</div>
 					{/* Nurse -> patient: an elbow. Across the middle column to the
 					    patient (arrowhead left), then in the right column along to

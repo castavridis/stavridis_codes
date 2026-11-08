@@ -252,11 +252,15 @@ function ChromeRow({
               opacity-controlled. The Close button stays put on the
               right; it dims with the row once scrolled (see
               chromeSpring). */}
-          <div className="flex w-full items-center gap-[24px] overflow-clip py-[32px]">
+          <div data-chrome-row className="flex w-full items-center gap-[24px] overflow-clip py-[32px]">
             <animated.div
               className="relative min-w-0 flex-1"
               style={{ opacity: chromeSpring.textDim }}
             >
+              {/* Slot a case study can portal its own control into (e.g.
+                  CareSignal's section menu). Empty by default; a case
+                  study's scoped CSS decides what it replaces. */}
+              <div data-chrome-slot />
               <p
                 className="type-tag text-confetti-black m-0 truncate"
                 style={{

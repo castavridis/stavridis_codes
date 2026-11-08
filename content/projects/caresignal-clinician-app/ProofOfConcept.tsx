@@ -40,7 +40,7 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				<figure className="m-0 flex w-full flex-col items-center gap-[32px] rounded-[16px] bg-washes-paper p-[24px] md:p-[40px]">
+				<figure className="m-0 flex w-full flex-col items-center gap-[32px] rounded-[16px] bg-washes-paper px-[20px] py-[32px] min-[600px]:p-[24px] md:p-[40px]">
 					<div className="flex flex-col items-center gap-[8px] text-center">
 						<Figure />
 						<Text
@@ -141,9 +141,10 @@ export function ProofOfConcept() {
 					</Text>
 				</div>
 
-				{/* Design principles: full width, three across (stacked on
-				    phones); the cards share a row height. */}
-				<div className="grid w-full grid-cols-1 gap-[16px] md:grid-cols-3">
+				{/* Design principles: full width, three across from 1024px
+				    (stacked below: at tablet widths a third of the column is too
+				    narrow for the 28px text); the cards share a row height. */}
+				<div className="grid w-full grid-cols-1 gap-[16px] lg:grid-cols-3">
 					<DesignPrinciple
 						number={1}
 						pigment="rose"

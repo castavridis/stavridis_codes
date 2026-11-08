@@ -38,6 +38,22 @@ ${SCOPE} p.type-tag::before {
 	margin-bottom: 2px;
 	color: var(--color-confetti-black);
 }
+/* Below 1100px the section menu (SectionMenu) fills the chrome slot with
+   its own title + current-section button, replacing the title/tags line. */
+${SCOPE} [data-chrome-slot]:not(:empty) ~ p.type-tag {
+	display: none;
+}
+/* Phones: the sticky chrome row is 12px top and bottom, not 32px, so it
+   takes ~70px of the screen instead of ~110px. */
+@media (max-width: 599.98px) {
+	${SCOPE} [data-chrome-row] {
+		padding-block: 12px;
+	}
+	/* Close: 44px tall to tap (was 30). */
+	${SCOPE} [data-chrome-row] > :last-child button {
+		min-height: 44px;
+	}
+}
 /* The scroll-reveal headline-meta is hidden; the chrome row keeps the title
    + tags. */
 ${SCOPE} p.type-headline-meta.absolute {
@@ -98,6 +114,21 @@ ${SCOPE} input[data-day-slider]:focus-visible::-webkit-slider-thumb {
 }
 ${SCOPE} input[data-day-slider]:focus {
 	outline: none;
+}
+/* Touch: a 44px-tall hit band and a 20px thumb; the track stays a hairline. */
+@media (pointer: coarse) {
+	${SCOPE} input[data-day-slider] {
+		height: 44px;
+	}
+	${SCOPE} input[data-day-slider]::-webkit-slider-thumb {
+		width: 20px;
+		height: 20px;
+		margin-top: -9.4px;
+	}
+	${SCOPE} input[data-day-slider]::-moz-range-thumb {
+		width: 18px;
+		height: 18px;
+	}
 }
 `;
 

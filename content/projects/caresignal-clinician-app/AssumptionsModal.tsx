@@ -60,13 +60,17 @@ export function AssumptionsModal() {
 
 	useEffect(() => {
 		if (!open) return;
+		// Capture + stop: the sheet overlay also closes on Escape (on window),
+		// so without this one press closed the modal AND the case study.
 		const onKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') setOpen(false);
+			if (e.key !== 'Escape') return;
+			e.stopImmediatePropagation();
+			setOpen(false);
 		};
-		window.addEventListener('keydown', onKey);
+		window.addEventListener('keydown', onKey, true);
 		closeRef.current?.querySelector('button')?.focus();
 		return () => {
-			window.removeEventListener('keydown', onKey);
+			window.removeEventListener('keydown', onKey, true);
 			returnFocus.current?.focus();
 		};
 	}, [open]);
@@ -82,7 +86,7 @@ export function AssumptionsModal() {
 			aria-modal="true"
 			aria-label="Assumptions"
 			onClick={() => setOpen(false)}
-			className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-[24px] text-confetti-black"
+			className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-[8px] text-confetti-black min-[600px]:p-[24px]"
 			style={{
 				background:
 					'color-mix(in srgb, var(--color-confetti-black) 25%, transparent)',
@@ -91,15 +95,17 @@ export function AssumptionsModal() {
 		>
 			<div
 				onClick={(e) => e.stopPropagation()}
-				className="box-border max-h-[calc(100vh-48px)] w-full max-w-[944px] overflow-auto rounded-[16px] bg-white p-[40px] shadow-[0_20px_25px_-5px_rgb(0_0_0_/_0.1),0_8px_10px_-6px_rgb(0_0_0_/_0.1)]"
+				// Phones: 8px from the screen edge, 20px inside; the header
+				// sticks so Close stays in reach while the list scrolls.
+				className="box-border max-h-[calc(100dvh-16px)] w-full max-w-[944px] overflow-auto overscroll-contain rounded-[16px] bg-white px-[20px] pb-[24px] min-[600px]:max-h-[calc(100dvh-48px)] min-[600px]:px-[40px] min-[600px]:pb-[40px] shadow-[0_20px_25px_-5px_rgb(0_0_0_/_0.1),0_8px_10px_-6px_rgb(0_0_0_/_0.1)]"
 			>
 				<div className="flex flex-col gap-[32px]">
 					<div
 						ref={closeRef}
-						className="flex items-center justify-between gap-[16px]"
+						className="sticky top-0 z-[1] -mb-[12px] flex items-center justify-between gap-[16px] bg-white pt-[20px] pb-[12px] min-[600px]:pt-[40px]"
 					>
 						<h2
-							className="m-0 text-[32px] font-normal leading-[1.1]"
+							className="m-0 text-[28px] font-normal leading-[1.1] min-[600px]:text-[32px]"
 							style={{ fontFamily: 'var(--font-kyoto)' }}
 						>
 							Assumptions
@@ -107,6 +113,7 @@ export function AssumptionsModal() {
 						<Button
 							variant="outline"
 							label="Close"
+							className="min-h-[44px]"
 							onClick={() => setOpen(false)}
 						/>
 					</div>

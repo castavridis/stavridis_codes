@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useNarrow } from './breakpoints';
 import { prefersReducedMotion, wag } from './motion';
 import { findScrollport } from './scrollport';
 
@@ -16,7 +17,9 @@ type BackToTopProps = {
 };
 
 // Fixed "Back to top" pill, bottom-left, aligned with the section nav.
-// Wags when it appears.
+// Wags when it appears. Phones get a 44px icon-only circle, bottom-right
+// above the home indicator, shown only while scrolling back up so it doesn't
+// sit on the body copy while reading down.
 export default function BackToTop({
 	label = 'Back to top',
 	// The sticky element is the card inside the nav, not the nav itself.
@@ -26,11 +29,14 @@ export default function BackToTop({
 	const btnRef = useRef<HTMLButtonElement>(null);
 	const [shown, setShown] = useState(false);
 	const [left, setLeft] = useState(24);
+	const narrow = useNarrow();
+	const [up, setUp] = useState(false);
 
 	useEffect(() => {
 		let raf = 0;
 		let wagT: ReturnType<typeof setTimeout>;
 		let wasShown = false;
+		let lastY = -1;
 
 		const doWag = () => {
 			const b = btnRef.current;
@@ -71,6 +77,15 @@ export default function BackToTop({
 				}
 			}
 
+			// Scroll direction, for phones (shown only on the way up). Moves
+			// under 8px don't flip it, so a resting thumb doesn't flicker it.
+			const y = (findScrollport(el) ?? document.scrollingElement)?.scrollTop ?? window.scrollY;
+			if (lastY < 0) lastY = y;
+			else if (Math.abs(y - lastY) >= 8) {
+				setUp(y < lastY);
+				lastY = y;
+			}
+
 			if (nextShown && !wasShown) doWag();
 			wasShown = nextShown;
 			setShown(nextShown);
@@ -94,6 +109,8 @@ export default function BackToTop({
 			cancelAnimationFrame(raf);
 		};
 	}, [stickySelector, alignSelector]);
+
+	const visible = shown && (!narrow || up);
 
 	const toTop = () => {
 		const behavior: ScrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
@@ -139,19 +156,22 @@ export default function BackToTop({
 			ref={btnRef}
 			type="button"
 			onClick={toTop}
-			aria-hidden={!shown}
-			tabIndex={shown ? 0 : -1}
-			className="fixed bottom-[32px] z-[var(--z-floating)] inline-flex h-[40px] items-center gap-[8px] rounded-full border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
+			aria-hidden={!visible}
+			aria-label={label}
+			tabIndex={visible ? 0 : -1}
+			className="fixed bottom-[32px] z-[var(--z-floating)] inline-flex h-[40px] items-center justify-center gap-[8px] rounded-full max-[599.98px]:bottom-[calc(16px+env(safe-area-inset-bottom))] max-[599.98px]:size-[44px] max-[599.98px]:px-0 border-[1.25px] border-confetti-black bg-white px-[18px] text-[16px] font-medium italic leading-none text-confetti-black shadow-[0_4px_14px_rgba(57,31,0,0.10)] transition-[opacity,transform,background,color] duration-[260ms] ease-out hover:bg-confetti-black hover:text-[#fdfbf5]"
 			style={{
-				left,
+				...(narrow ? { right: 16 } : { left }),
 				fontFamily: 'var(--font-kyoto)',
-				opacity: shown ? 1 : 0,
-				transform: `translateY(${shown ? 0 : 8}px)`,
-				pointerEvents: shown ? 'auto' : 'none',
+				opacity: visible ? 1 : 0,
+				transform: `translateY(${visible ? 0 : 8}px)`,
+				pointerEvents: visible ? 'auto' : 'none',
 			}}
 		>
-			{label}{' '}
-			<span aria-hidden className="text-[15px] not-italic">
+			<span aria-hidden className="max-[599.98px]:hidden">
+				{label}{' '}
+			</span>
+			<span aria-hidden className="text-[15px] not-italic max-[599.98px]:text-[18px]">
 				⇡
 			</span>
 		</button>,
