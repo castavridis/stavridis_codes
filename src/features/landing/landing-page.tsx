@@ -8,7 +8,7 @@ import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
 import HoverPopover from "../../components/HoverPopover.js";
-import BaileyPopover from "../../components/BaileyPopover.js";
+import FloretteSeal from "../../components/FloretteSeal.js";
 import Button from "../../components/Button.js";
 import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
@@ -44,6 +44,24 @@ import {
   SEAL_DEFAULT_FOREGROUND,
 } from "../../components/RotatingSeal.js";
 import type { SalutationColors, SealColors } from "../companies/companies.js";
+
+// Slots around the intro headline where the FloretteSeal can land; one is
+// picked at random per page load. Positions are relative to the headline
+// wrapper and chosen to sit in empty space (above/beside the text, inside
+// the glass card's padding) rather than over the copy. On phones the seal
+// is in flow above the headline, so the slot only picks a side there
+// (justify-*); the md: classes place it absolutely. Plus a small tilt so
+// it reads "stuck on".
+const FLORETTE_SLOTS: { className: string; tilt: number }[] = [
+  // Above-left of the greeting
+  { className: "justify-start md:top-[-104px] md:left-[-152px]", tilt: -8 },
+  // Past the end of the first line
+  { className: "justify-end md:top-[-80px] md:left-[580px]", tilt: 6 },
+  // Right gutter, level with the role
+  { className: "justify-end md:top-[48px] md:right-[-148px]", tilt: 10 },
+  // Left gutter, level with the role
+  { className: "justify-start md:top-[56px] md:left-[-152px]", tilt: -5 },
+];
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -261,6 +279,10 @@ export default function LandingPage({
   // toggles washesVisible) doesn't re-fire it.
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const [wagging, setWagging] = useState(false);
+  // Random per load (lazy initializer, so it's stable across re-renders).
+  const [floretteSlot] = useState(
+    () => FLORETTE_SLOTS[Math.floor(Math.random() * FLORETTE_SLOTS.length)],
+  );
   const loadWagFired = useRef(false);
   useEffect(() => {
     if (!washesVisible || loadWagFired.current) return;
@@ -590,8 +612,8 @@ export default function LandingPage({
             // the canvas. (The old chicken-and-egg deadlock — where paint
             // could ONLY start by clicking through the card — is gone now
             // that entry is handled by the catcher + toggle, not by tapping
-            // through the card.) The two HoverPopover children (Design
-            // Engineer / golden retriever energy) and the dismiss link set
+            // through the card.) The HoverPopover children (the Design
+            // Engineer phrase / FloretteSeal) and the dismiss link set
             // `pointer-events: auto` locally so they stay interactive.
             pointerEvents: paintActive ? "none" : "auto",
           }}
@@ -663,6 +685,28 @@ export default function LandingPage({
               </Text>
             </FadeDown>
           ) : null}
+          <div className="relative w-full max-w-[784px]">
+          {/* Florette seal — dropped at a random slot around the intro on
+              each load (see FLORETTE_SLOTS). Its hover opens the Bailey
+              popover the old "big Golden Retriever energy" phrase used.
+              Phones: in flow above the headline (there's no free space
+              around it there). md+: absolutely positioned. The positioning
+              lives OUTSIDE FadeDown — its transform would otherwise become
+              the containing block. */}
+          <div
+            className={`relative z-10 mb-[8px] flex md:absolute md:mb-0 md:block ${floretteSlot.className}`}
+          >
+            <FadeDown delay={240}>
+              <span className="inline-block" style={{ transform: `rotate(${floretteSlot.tilt}deg)` }}>
+                <span className="md:hidden">
+                  <FloretteSeal size={104} />
+                </span>
+                <span className="hidden md:inline">
+                  <FloretteSeal size={136} />
+                </span>
+              </span>
+            </FadeDown>
+          </div>
           <FadeDown>
             <Text
               variant="headline"
@@ -698,23 +742,15 @@ export default function LandingPage({
                 </Text>
               </HoverPopover>
               <span>
-                {/* Trailing space matters on mobile, where the <br> is
-                    hidden — without it "with" runs into "big…". */}
-                {" with "}
+                {/* Leading space matters on mobile, where the <br> is
+                    hidden — without it the role runs into "designing". */}
+                {" "}
                 <br aria-hidden className="hidden md:inline" />
+                designing healthcare products that help care teams deliver better care at scale.
               </span>
-              <HoverPopover popover={<BaileyPopover />}>
-                <Text
-                  variant="headline-italic"
-                  as="span"
-                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
-                >
-                  big Golden Retriever energy
-                </Text>
-              </HoverPopover>
-              <span>.</span>
             </Text>
           </FadeDown>
+          </div>
 
           {blurb ? (
             // Per-company blurb override. Replaces the canonical
