@@ -1,14 +1,15 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
-import { useNarrow } from '../../../src/features/projects/components/figures/breakpoints';
 import { IMG } from './shared';
 
 // The dialysis program's alert-based workflow, rebuilt as DOM per the
 // handoff ("keep it as DOM, not an image"). Layout and copy match the
 // reference prototype; the whole chart reads as one image to AT via the
-// aria-label, with the DOM text hidden from the tree. Under 600px it stacks
-// into one column (the patient's thread, then CareSignal → nurse → patient)
-// instead of the design's 600px-wide sideways scroll.
+// aria-label, with the DOM text hidden from the tree. When the chart itself
+// has under 600px (its grid's minimum) it stacks into one column (the
+// patient's thread, then CareSignal → nurse → patient) instead of the
+// design's sideways scroll — on phones, and on small tablets where the
+// figure card's padding leaves less than that.
 
 const INK45 = 'color-mix(in srgb, var(--color-confetti-black) 45%, transparent)';
 const HANSA = 'var(--color-washes-hansa-yellow, #f6c445)';
@@ -266,11 +267,31 @@ const COLS: CSSProperties = {
 	gridTemplateColumns: 'minmax(260px, 1.25fr) 72px minmax(220px, 1fr)',
 };
 
+const GRID_MIN = 600;
+
 export function DialysisFlowChart() {
-	const narrow = useNarrow();
+	const ref = useRef<HTMLDivElement>(null);
+	// Seeded from the window (the card is ~80px narrower than the viewport)
+	// so phones don't paint the wide grid first; then the chart's own width.
+	const [narrow, setNarrow] = useState(
+		() => typeof window !== 'undefined' && window.innerWidth < GRID_MIN + 80,
+	);
+	useLayoutEffect(() => {
+		const el = ref.current;
+		if (!el) return;
+		const sync = () => {
+			const w = el.clientWidth;
+			if (w > 0) setNarrow(w < GRID_MIN);
+		};
+		sync();
+		const ro = new ResizeObserver(sync);
+		ro.observe(el);
+		return () => ro.disconnect();
+	}, []);
 	if (narrow) {
 		return (
 			<div
+				ref={ref}
 				role="img"
 				aria-label={ARIA_LABEL}
 				className="w-full text-left text-confetti-black"
@@ -282,6 +303,7 @@ export function DialysisFlowChart() {
 	}
 	return (
 		<div
+			ref={ref}
 			role="img"
 			aria-label={ARIA_LABEL}
 			className="w-full max-w-[1000px] overflow-x-auto text-left text-confetti-black"
