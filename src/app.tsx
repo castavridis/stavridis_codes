@@ -49,6 +49,10 @@ const BlogPost = lazy(() =>
   import('./features/blog/index.js').then((m) => ({ default: m.BlogPost })),
 );
 
+const ExplorationsPage = lazy(() =>
+  import('./features/explorations/explorations-page.js').then((m) => ({ default: m.ExplorationsPage })),
+);
+
 // Sandbox routes — dev-only. `import.meta.env.DEV` is statically replaced by
 // Vite (true in dev, false in prod), so the dynamic imports below dead-
 // code-eliminate from the production bundle.
@@ -81,6 +85,7 @@ export function App() {
   const [matchProject, projectParams] = useRoute(routes.project.path);
   const [matchBlogPost, blogPostParams] = useRoute(routes.blogPost.path);
   const [matchBlogIndex] = useRoute(routes.blogIndex.path);
+  const [matchExplorations] = useRoute(routes.explorations.path);
   const [matchSandboxSlides] = useRoute('/sandbox/slides');
   const [matchSandboxWorkflow] = useRoute('/sandbox/workflow');
   const [matchSandboxSection] = useRoute('/sandbox/section');
@@ -274,6 +279,13 @@ export function App() {
     navigate(routes.home.href());
   }, [navigate]);
 
+  // /explorations rides the same SheetOverlay pattern as the blog.
+  const explorationsOpen = Boolean(matchExplorations);
+
+  const handleCloseExplorations = useCallback(() => {
+    navigate(routes.home.href());
+  }, [navigate]);
+
   const handleCloseBlogPost = useCallback(() => {
     navigate(routes.blogIndex.href());
   }, [navigate]);
@@ -323,7 +335,7 @@ export function App() {
       {/* Landing page — always mounted beneath the project sheet overlay. */}
       <div className="w-full">
         <LandingPage
-          paused={projectOpen || blogOpen}
+          paused={projectOpen || blogOpen || explorationsOpen}
           transitioning={projectOpen}
           onCardHover={handleCardHover}
           onCardClick={handleCardClick}
@@ -385,6 +397,23 @@ export function App() {
           postSlug={blogPostSlug}
           onBackToIndex={handleCloseBlogPost}
         />
+      </SheetOverlay>
+
+      {/* Explorations sheet — same Path A treatment as the blog sheet. */}
+      <SheetOverlay open={explorationsOpen} onClose={handleCloseExplorations} topOffset={70}>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            overflow: 'auto',
+            scrollbarGutter: 'stable',
+            backgroundColor: 'transparent',
+          }}
+        >
+          <Suspense fallback={<RoutePending />}>
+            <ExplorationsPage />
+          </Suspense>
+        </div>
       </SheetOverlay>
 
       <GpuPausePill />

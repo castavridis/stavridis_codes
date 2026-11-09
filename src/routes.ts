@@ -11,6 +11,10 @@ export const routes = {
     path: '/blog/:slug',
     href: ({ slug }: { slug: string }) => `/blog/${encodeURIComponent(slug)}`,
   },
+  explorations: {
+    path: '/explorations',
+    href: () => '/explorations',
+  },
   project: {
     path: '/project/:slug',
     href: ({ slug }: { slug: string }) => `/project/${encodeURIComponent(slug)}`,
