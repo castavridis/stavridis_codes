@@ -411,7 +411,7 @@ export function App() {
           }}
         >
           <Suspense fallback={<RoutePending />}>
-            <ExplorationsPage />
+            <ExplorationsPage onClose={handleCloseExplorations} />
           </Suspense>
         </div>
       </SheetOverlay>
