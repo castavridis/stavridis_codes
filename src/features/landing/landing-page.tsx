@@ -8,7 +8,7 @@ import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
 import HoverPopover from "../../components/HoverPopover.js";
-import FloretteSeal from "../../components/FloretteSeal.js";
+import BaileyPopover from "../../components/BaileyPopover.js";
 import Button from "../../components/Button.js";
 import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
@@ -44,26 +44,6 @@ import {
   SEAL_DEFAULT_FOREGROUND,
 } from "../../components/RotatingSeal.js";
 import type { SalutationColors, SealColors } from "../companies/companies.js";
-
-// Slots around the intro headline where the FloretteSeal can land; one is
-// picked at random per page load. Positions are relative to the headline
-// wrapper and chosen to sit in empty space (above/beside the text, inside
-// the glass card's padding) rather than over the copy. On phones the seal
-// is in flow above the headline, so the slot only picks a side there
-// (justify-*); the md: classes place it absolutely. Plus a small tilt so
-// it reads "stuck on".
-const FLORETTE_SLOTS: { className: string; tilt: number }[] = [
-  // md+ slots sit in the card's 160px side padding — the band above the
-  // headline (96px) is too short for the 136px seal.
-  // Left margin, level with the greeting
-  { className: "justify-start md:top-[-24px] md:left-[-152px]", tilt: -8 },
-  // Left margin, lower
-  { className: "justify-start md:top-[96px] md:left-[-152px]", tilt: 6 },
-  // Right margin, level with the greeting
-  { className: "justify-end md:top-[-24px] md:right-[-148px]", tilt: 10 },
-  // Right margin, lower
-  { className: "justify-end md:top-[96px] md:right-[-148px]", tilt: -5 },
-];
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
 // project view on click. Optional — the page works standalone. `paused`
@@ -281,10 +261,6 @@ export default function LandingPage({
   // toggles washesVisible) doesn't re-fire it.
   const washesVisible = usePaintStore((s) => s.washesVisible);
   const [wagging, setWagging] = useState(false);
-  // Random per load (lazy initializer, so it's stable across re-renders).
-  const [floretteSlot] = useState(
-    () => FLORETTE_SLOTS[Math.floor(Math.random() * FLORETTE_SLOTS.length)],
-  );
   const loadWagFired = useRef(false);
   useEffect(() => {
     if (!washesVisible || loadWagFired.current) return;
@@ -615,7 +591,8 @@ export default function LandingPage({
             // could ONLY start by clicking through the card — is gone now
             // that entry is handled by the catcher + toggle, not by tapping
             // through the card.) The HoverPopover children (the Design
-            // Engineer phrase / FloretteSeal) and the dismiss link set
+            // Engineer phrase / "warm, approachable experiences") and the
+            // dismiss link set
             // `pointer-events: auto` locally so they stay interactive.
             pointerEvents: paintActive ? "none" : "auto",
           }}
@@ -687,28 +664,6 @@ export default function LandingPage({
               </Text>
             </FadeDown>
           ) : null}
-          <div className="relative w-full max-w-[784px] md:max-w-none">
-          {/* Florette seal — dropped at a random slot around the intro on
-              each load (see FLORETTE_SLOTS). Its hover opens the Bailey
-              popover the old "big Golden Retriever energy" phrase used.
-              Phones: in flow above the headline (there's no free space
-              around it there). md+: absolutely positioned. The positioning
-              lives OUTSIDE FadeDown — its transform would otherwise become
-              the containing block. */}
-          <div
-            className={`relative z-10 mb-[8px] flex md:absolute md:mb-0 md:block ${floretteSlot.className}`}
-          >
-            <FadeDown delay={240}>
-              <span className="inline-block" style={{ transform: `rotate(${floretteSlot.tilt}deg)` }}>
-                <span className="md:hidden">
-                  <FloretteSeal size={104} />
-                </span>
-                <span className="hidden md:inline">
-                  <FloretteSeal size={136} />
-                </span>
-              </span>
-            </FadeDown>
-          </div>
           <FadeDown>
             <Text
               variant="headline"
@@ -748,11 +703,10 @@ export default function LandingPage({
                     hidden — without it the role runs into "designing". */}
                 {" "}
                 {/* <br aria-hidden className="hidden md:inline" /> */}
-                designing healthcare products that help care teams deliver better care at scale.
+                building healthcare products that help care teams deliver better care at scale.
               </span>
             </Text>
           </FadeDown>
-          </div>
 
           {blurb ? (
             // Per-company blurb override. Replaces the canonical
@@ -775,7 +729,15 @@ export default function LandingPage({
                     then
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    I’ve turned complex, high-stakes systems into warm, approachable products. I co-founded
+                    I’ve turned complex, high-stakes systems into{" "}
+                    {/* Bailey popover trigger — the golden retriever as the
+                        embodiment of "warm, approachable". */}
+                    <HoverPopover popover={<BaileyPopover />}>
+                      <span className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted">
+                        warm, approachable experiences
+                      </span>
+                    </HoverPopover>
+                    . I co-founded
                     CareSignal, a Best in KLAS remote patient monitoring company (acquired by Lightbeam), where I
                     designed the tools that transformed care delivery and patient outcomes.
                   </Text>
@@ -789,7 +751,7 @@ export default function LandingPage({
                     now
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    I’m returning to design craft through product design and design-engineering: building AI-native design tools and exploring shader-based
+                    I’m returning to design craft through product design and design engineering: building AI-native design tools and exploring shader-based
                     design systems, after two batches at the Recurse Center.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
