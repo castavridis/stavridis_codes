@@ -10,7 +10,7 @@ import { findScrollport } from '../../../src/features/projects/components/figure
 // on it collapses to just the current item plus a caret that expands the
 // rest. The card's border + shadow "peel" in like chewed gum once it sticks.
 // BackToTop keys off nav[aria-label="Sections"].
-const ITEMS = [
+export const ITEMS = [
 	{ key: 'introduction', label: 'Impact' },
 	{ key: 'contribution', label: 'Contribution' },
 	{ key: 'background', label: 'Background' },
@@ -27,6 +27,37 @@ const ITEMS = [
 // "Proof of Concept"; before that the whole list is shown.
 const COLLAPSE_FROM = ITEMS.findIndex((it) => it.key === 'starting-point');
 const INK = 'var(--color-confetti-black)';
+
+// The current section: the last one whose top has passed 40% down the
+// visible scroll area (dc onSecScan: scrollY + innerHeight × 0.4). Shared
+// with the phone/tablet SectionMenu.
+export function activeSection(port: HTMLElement | null | undefined): string {
+	const pr = port?.getBoundingClientRect();
+	const visTop = Math.max(0, pr?.top ?? 0);
+	const visBottom = Math.min(window.innerHeight, pr?.bottom ?? window.innerHeight);
+	const line = visTop + (visBottom - visTop) * 0.4;
+	let current = ITEMS[0].key;
+	for (const it of ITEMS) {
+		const el = document.getElementById(it.key);
+		if (el && el.getBoundingClientRect().top <= line) current = it.key;
+	}
+	return current;
+}
+
+// Scroll to a section ("Impact" is the top of the page, dc href '#') and
+// mirror it in the URL hash. `from` is any element inside the scrollport.
+export function goToSection(id: string, from: Element | null) {
+	const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+	if (id === ITEMS[0].key) {
+		const port = findScrollport(from);
+		(port ?? window).scrollTo({ top: 0, behavior });
+		history.replaceState(null, '', location.pathname + location.search);
+		return;
+	}
+	const el = document.getElementById(id);
+	if (el) el.scrollIntoView({ behavior });
+	history.replaceState(null, '', `#${id}`);
+}
 // The card's left padding + border. The card hangs this far left of the nav
 // column so its text (the "section" eyebrow, the dots) sits on the content
 // column's left edge, while the card's border — visible once it peels —
@@ -47,17 +78,7 @@ export function SectionNav() {
 		const tick = () => {
 			raf = 0;
 			if (port === undefined) port = findScrollport(cardRef.current);
-			// A section is current once its top passes 40% down the visible
-			// scroll area (dc onSecScan: scrollY + innerHeight × 0.4).
-			const pr = port?.getBoundingClientRect();
-			const visTop = Math.max(0, pr?.top ?? 0);
-			const visBottom = Math.min(window.innerHeight, pr?.bottom ?? window.innerHeight);
-			const line = visTop + (visBottom - visTop) * 0.4;
-			let current = ITEMS[0].key;
-			for (const it of ITEMS) {
-				const el = document.getElementById(it.key);
-				if (el && el.getBoundingClientRect().top <= line) current = it.key;
-			}
+			const current = activeSection(port);
 			setActive(current);
 			// Leaving the collapse range resets the expanded state.
 			if (ITEMS.findIndex((it) => it.key === current) < COLLAPSE_FROM) {
@@ -191,17 +212,7 @@ export function SectionNav() {
 			return;
 		}
 		if (navOpen) setNavOpen(false);
-		const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
-		// "Impact" is the top of the page (dc href '#').
-		if (id === ITEMS[0].key) {
-			const port = findScrollport(cardRef.current);
-			(port ?? window).scrollTo({ top: 0, behavior });
-			history.replaceState(null, '', location.pathname + location.search);
-			return;
-		}
-		const el = document.getElementById(id);
-		if (el) el.scrollIntoView({ behavior });
-		history.replaceState(null, '', `#${id}`);
+		goToSection(id, cardRef.current);
 	};
 
 	return (

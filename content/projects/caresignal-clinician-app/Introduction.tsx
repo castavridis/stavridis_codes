@@ -12,7 +12,9 @@ export function Introduction() {
 				style={{
 					fontFamily: 'var(--font-body)',
 					fontWeight: 300,
-					fontSize: 28,
+					// 22px on phones (28px from ~500px up), so the intro doesn't fill
+					// 1.5 screens before Figure 1.
+					fontSize: 'clamp(22px, 5.6vw, 28px)',
 					lineHeight: 1.35,
 				}}
 			>

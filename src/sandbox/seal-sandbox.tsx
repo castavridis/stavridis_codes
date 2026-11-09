@@ -1,3 +1,4 @@
+import FloretteSeal from '../components/FloretteSeal.js';
 import RotatingSeal from '../components/RotatingSeal.js';
 import Text from '../components/Text.js';
 import { companies } from '../features/companies/companies.js';
@@ -17,6 +18,26 @@ export default function SealSandbox() {
           Hover-pause not wired; rotation respects{' '}
           <span className="font-mono">prefers-reduced-motion</span>.
         </Text>
+
+        <section className="mb-[64px]">
+          <Text variant="headline-small" as="h2" className="mb-[24px] text-confetti-black">
+            Florette edition
+          </Text>
+          <Text variant="copy" as="p" className="mb-[24px] text-confetti-black/70">
+            ✿ silhouette with the text set along its edge and 🐶 in the middle; static. Hover or
+            focus for the Bailey popover.
+          </Text>
+          <div className="flex flex-wrap items-end gap-[48px]">
+            {[80, 112, 160, 240].map((size) => (
+              <div key={size} className="flex flex-col items-center gap-[12px]">
+                <FloretteSeal size={size} />
+                <Text variant="callout-meta" className="text-confetti-black/60">
+                  {size}px
+                </Text>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <section className="mb-[64px]">
           <Text variant="headline-small" as="h2" className="mb-[24px] text-confetti-black">

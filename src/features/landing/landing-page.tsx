@@ -7,6 +7,8 @@ import { animated, easings, useSpring, useTransition } from "@react-spring/web";
 import Header from "../../components/Header.js";
 import Colophon from "../../components/Colophon.js";
 import Popover from "../../components/Popover.js";
+import HoverPopover from "../../components/HoverPopover.js";
+import BaileyPopover from "../../components/BaileyPopover.js";
 import Button from "../../components/Button.js";
 import FadeDown from "../../components/anim/FadeDown.js";
 import DomMarker from "../../components/DomMarker.js";
@@ -87,251 +89,6 @@ type LandingPageProps = {
   // app.tsx from the active role (see role-context.ROLE_RESUME).
   resumeHref?: string;
 };
-
-// Small page-local helper. Wraps an inline phrase (e.g. an italic span) so
-// hovering or focusing it reveals an adjacent Popover. The popover floats
-// just below+left of the phrase per the Figma hover states (nodes
-// 2232:32188 and 4003:21284). A short close-delay lets the cursor cross the
-// gap between the phrase and the popover without dismissing prematurely.
-type HoverPopoverProps = {
-  // The popover JSX to render in the portal. Each phrase can supply its
-  // own custom popover layout (e.g. the Bailey popover renders a photo,
-  // the Design Engineer popover uses the standard text Popover chrome).
-  popover: ReactNode;
-  children: ReactNode;
-};
-
-// Bailey popover — Figma node 4003:21309. Differs from the standard
-// Popover chrome: narrower (228px), 12px padding, no body text, just a
-// title + a photo of Bailey. Used by the "big golden retriever energy"
-// hover affordance in the hero copy.
-function BaileyPopover(): React.ReactElement {
-  return (
-    <div className="flex w-[228px] flex-col items-start gap-[10px] rounded-[8px] bg-white p-[12px]">
-      <Text variant="headline-small-italic" className="text-black">
-        My role model,
-        <br aria-hidden />
-        Bailey
-      </Text>
-      <div className="aspect-[500/438] w-full overflow-hidden rounded-[2.128px]">
-        <img
-          src="/images/bailey.png"
-          alt="Bailey, a Golden Retriever"
-          loading="lazy"
-          decoding="async"
-          className="size-full object-cover"
-        />
-      </div>
-    </div>
-  );
-}
-
-// Small companion to HoverPopover. Drives the portal mount/unmount via
-// useTransition (keyed on `open`, NOT on `coords`) so the popover fades
-// + slides in and out smoothly, AND so cursor-tracked coords updates
-// don't re-fire the spring on every pointermove.
-function PopoverPortal({
-  open,
-  anchor,
-  children,
-}: {
-  open: boolean;
-  anchor: { x: number; y: number } | null;
-  children: ReactNode;
-}): React.ReactElement {
-  const transitions = useTransition(open, {
-    from: { opacity: 0, y: 6 },
-    enter: { opacity: 1, y: 0 },
-    leave: { opacity: 0, y: 6 },
-    config: { duration: 240, easing: easings.easeOutCubic },
-  });
-  const boxRef = useRef<HTMLDivElement | null>(null);
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
-
-  // Measure the popover and keep it inside the viewport: prefer placing it
-  // ABOVE the anchor (the tap/cursor point); flip BELOW when above would
-  // clip the top edge; clamp horizontally so it never runs off the sides.
-  // useLayoutEffect runs before paint, so the pre-measure render (which may
-  // hold a stale position) never reaches the screen. Re-runs on anchor
-  // changes too, so cursor-tracked hovers stay clamped.
-  useLayoutEffect(() => {
-    if (!open || !anchor) return;
-    const el = boxRef.current;
-    if (!el) return;
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const M = 8; // min gap to the viewport edge
-    const GAP = 8; // gap between the anchor point and the popover
-
-    const left = Math.max(M, Math.min(anchor.x - GAP, vw - w - M));
-
-    const above = anchor.y - GAP - h;
-    const below = anchor.y + GAP;
-    let top: number;
-    if (above >= M) top = above; // fits above
-    else if (below + h <= vh - M) top = below; // flip below
-    else top = Math.max(M, Math.min(above, vh - h - M)); // clamp into view
-
-    setPos({ top, left });
-  }, [open, anchor]);
-
-  return (
-    <>
-      {transitions((style, isOpen) =>
-        isOpen && anchor
-          ? createPortal(
-              // `pointer-events: none` so the cursor moving over the
-              // popover itself doesn't pull focus from the phrase (the
-              // popover is hint-only). Hidden until measured so it never
-              // flashes at the top-left corner.
-              <animated.div
-                ref={boxRef}
-                className="fixed z-50 pointer-events-none"
-                style={{
-                  top: pos?.top ?? 0,
-                  left: pos?.left ?? 0,
-                  visibility: pos ? "visible" : "hidden",
-                  opacity: style.opacity,
-                  transform: style.y.to((v) => `translateY(${v}px)`),
-                }}
-              >
-                {children}
-              </animated.div>,
-              document.body,
-            )
-          : null,
-      )}
-    </>
-  );
-}
-
-function HoverPopover({
-  popover,
-  children,
-}: HoverPopoverProps): React.ReactElement {
-  const [open, setOpen] = useState(false);
-  // The tap/cursor point the popover positions itself against. Placement
-  // (above/below + horizontal clamping) is resolved in PopoverPortal once
-  // it can measure the popover against the viewport.
-  const [anchor, setAnchor] = useState<{ x: number; y: number } | null>(null);
-  const wrapperRef = useRef<HTMLSpanElement | null>(null);
-  const closeTimer = useRef<number | null>(null);
-  // When paintActive flips true the glass card fades out + the underlying
-  // italic phrases are no longer visible — disable hover/focus so the
-  // popover doesn't open over the wash, and let pointer events pass
-  // through to the canvas for painting. Same gate applies while a
-  // project overlay is open: the card has faded, the phrases are
-  // invisible (and translated), so hovering over their would-be
-  // positions shouldn't surface popovers.
-  const paintActive = usePaintStore((s) => s.paintActive);
-  const projectOpen = usePaintStore((s) => s.projectOpen);
-  const hoverSuppressed = paintActive || projectOpen;
-
-  const cancelClose = useCallback(() => {
-    if (closeTimer.current != null) {
-      window.clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-    }
-  }, []);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimer.current = window.setTimeout(() => {
-      setOpen(false);
-      closeTimer.current = null;
-    }, 120);
-  }, [cancelClose]);
-
-  // Record the anchor point (cursor/tap). PopoverPortal turns this into a
-  // viewport-clamped position. Updates on every pointermove while open so
-  // the popover tracks the cursor on desktop.
-  const updateCoords = useCallback((clientX: number, clientY: number) => {
-    setAnchor({ x: clientX, y: clientY });
-  }, []);
-
-  const openAt = useCallback(
-    (clientX: number, clientY: number) => {
-      if (hoverSuppressed) return;
-      cancelClose();
-      updateCoords(clientX, clientY);
-      setOpen(true);
-    },
-    [cancelClose, hoverSuppressed, updateCoords],
-  );
-
-  // Bare onFocus (no pointer event) — fall back to the wrapper's rect.
-  const openFromFocus = useCallback(() => {
-    if (hoverSuppressed) return;
-    cancelClose();
-    const el = wrapperRef.current;
-    if (el) {
-      // No cursor position from a focus event — anchor to the wrapper's
-      // top-left corner instead.
-      const r = el.getBoundingClientRect();
-      setAnchor({ x: r.left, y: r.top });
-    }
-    setOpen(true);
-  }, [cancelClose, hoverSuppressed]);
-
-  useEffect(() => {
-    return () => {
-      if (closeTimer.current != null) window.clearTimeout(closeTimer.current);
-    };
-  }, []);
-
-  // Auto-close if paint mode starts OR a project overlay opens while
-  // the popover is open.
-  useEffect(() => {
-    if (hoverSuppressed) setOpen(false);
-  }, [hoverSuppressed]);
-
-  // Close on scroll while open. The popover is anchored to a fixed viewport
-  // position, so once the page scrolls (notably a touch-scroll on mobile,
-  // which `touchmove` catches as the gesture begins) it would otherwise
-  // hang detached from its phrase. Close immediately instead.
-  useEffect(() => {
-    if (!open) return;
-    const close = () => setOpen(false);
-    window.addEventListener("scroll", close, { passive: true });
-    window.addEventListener("touchmove", close, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", close);
-      window.removeEventListener("touchmove", close);
-    };
-  }, [open]);
-
-  return (
-    // The wrapper stays inline (phrasing content) — only the popover is
-    // portaled out to document.body so the hero <p> stays valid HTML. The
-    // glass card body is `pointer-events: none`; `auto` here re-enables
-    // the phrase + popover at rest. In paint mode or while the project
-    // overlay is open the phrases are invisible, so we drop back to
-    // `none` to let clicks fall through to the wash / overlay below.
-    <span
-      ref={wrapperRef}
-      // `inline` (not inline-block) so the phrase flows + wraps with the
-      // surrounding headline text instead of being forced onto its own
-      // line as a single unwrappable unit. The popover is portaled to
-      // <body>, so no positioning context is needed here.
-      className="inline"
-      style={{ pointerEvents: hoverSuppressed ? "none" : "auto" }}
-      onMouseEnter={(e) => openAt(e.clientX, e.clientY)}
-      onMouseMove={(e) => {
-        if (open) updateCoords(e.clientX, e.clientY);
-      }}
-      onMouseLeave={scheduleClose}
-      onFocus={openFromFocus}
-      onBlur={scheduleClose}
-    >
-      {children}
-      <PopoverPortal open={open} anchor={anchor}>
-        {popover}
-      </PopoverPortal>
-    </span>
-  );
-}
 
 export default function LandingPage({
   onCardClick,
@@ -816,7 +573,7 @@ export default function LandingPage({
           // grows to fit it and the "now" copy isn't cut off. At md+ it
           // returns to the fixed overlay: absolute with percentage insets +
           // overflow-clip. Mobile pt clears the absolute in-shell Header.
-          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] md:px-[16px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
+          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[96px] md:pb-0"
           style={{
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",
@@ -833,8 +590,9 @@ export default function LandingPage({
             // the canvas. (The old chicken-and-egg deadlock — where paint
             // could ONLY start by clicking through the card — is gone now
             // that entry is handled by the catcher + toggle, not by tapping
-            // through the card.) The two HoverPopover children (Design
-            // Engineer / golden retriever energy) and the dismiss link set
+            // through the card.) The HoverPopover children (the Design
+            // Engineer phrase / "warm, approachable experiences") and the
+            // dismiss link set
             // `pointer-events: auto` locally so they stay interactive.
             pointerEvents: paintActive ? "none" : "auto",
           }}
@@ -909,13 +667,13 @@ export default function LandingPage({
           <FadeDown>
             <Text
               variant="headline"
-              className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px] text-center md:text-left"
+              className="text-confetti-black w-full max-w-[784px] md:max-w-none !text-[28px] !leading-[36px] md:!text-[44px] md:!leading-[1.15] text-center md:text-left"
             >
               <span>
                 {/* Drop the "Hey!" lead-in on company endpoints — the
                     branded "Hi {company}!" chip above already greets. */}
                 {company ? "I’m C Stavridis, " : "Hey! I’m C Stavridis, "}
-                <br aria-hidden className="hidden md:inline" />
+                {/* <br aria-hidden className="hidden md:inline" /> */}
                 {"a "}
               </span>
               <HoverPopover
@@ -941,21 +699,12 @@ export default function LandingPage({
                 </Text>
               </HoverPopover>
               <span>
-                {/* Trailing space matters on mobile, where the <br> is
-                    hidden — without it "with" runs into "big…". */}
-                {" with "}
-                <br aria-hidden className="hidden md:inline" />
+                {/* Leading space matters on mobile, where the <br> is
+                    hidden — without it the role runs into "designing". */}
+                {" "}
+                {/* <br aria-hidden className="hidden md:inline" /> */}
+                building healthcare products that help care teams deliver better care at scale.
               </span>
-              <HoverPopover popover={<BaileyPopover />}>
-                <Text
-                  variant="headline-italic"
-                  as="span"
-                  className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px]"
-                >
-                  big Golden Retriever energy
-                </Text>
-              </HoverPopover>
-              <span>.</span>
             </Text>
           </FadeDown>
 
@@ -980,7 +729,15 @@ export default function LandingPage({
                     then
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    I’ve turned complex, high-stakes systems into warm, approachable products. I co-founded
+                    I’ve turned complex, high-stakes systems into{" "}
+                    {/* Bailey popover trigger — the golden retriever as the
+                        embodiment of "warm, approachable". */}
+                    <HoverPopover popover={<BaileyPopover />}>
+                      <span className="decoration-from-font [text-underline-position:from-font] underline decoration-dotted">
+                        warm, approachable experiences
+                      </span>
+                    </HoverPopover>
+                    . I co-founded
                     CareSignal, a Best in KLAS remote patient monitoring company (acquired by Lightbeam), where I
                     designed the tools that transformed care delivery and patient outcomes.
                   </Text>
@@ -994,7 +751,7 @@ export default function LandingPage({
                     now
                   </Text>
                   <Text variant="copy" className="mb-0">
-                    I’m returning to design craft through product design and design-engineering: building AI-native design tools and exploring shader-based
+                    I’m returning to design craft through product design and design engineering: building AI-native design tools and exploring shader-based
                     design systems, after two batches at the Recurse Center.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>

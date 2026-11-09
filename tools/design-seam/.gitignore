@@ -2,3 +2,4 @@ node_modules/
 baselines/
 diffs/
 package-lock.json
+mobile-shots/

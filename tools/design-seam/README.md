@@ -44,6 +44,23 @@ regression net, not the design source** — refresh them against the canvas when
 the design genuinely changes, and treat a `DRIFT` line as "did I mean to change
 this section?"
 
+## mobile-check.mjs — phone/tablet check
+
+Scrolls the whole case study at 375, 390, 600, 768 and 1024px (lazy figures
+mount on the way) and reports page-level horizontal overflow, tap areas under
+44px (counting the ::before/::after padding the case study uses to grow small
+controls) and text under 12px. Saves a viewport screenshot per screen into
+`mobile-shots/<width>/`. Same setup and server as visual-check.
+
+```sh
+node tools/design-seam/mobile-check.mjs           # all five widths
+node tools/design-seam/mobile-check.mjs 375,768   # chosen widths
+```
+
+Fails only on page overflow; tap-area and small-text lines are for review.
+The phone layout switches at 600px (`NARROW_PX` in
+`src/features/projects/components/figures/breakpoints.ts`).
+
 ## dc-to-jsx.mjs — structure scaffolder (spike)
 
 Converts one `.dc.html` section into a React scaffold — JSX from the markup,

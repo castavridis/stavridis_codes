@@ -107,7 +107,9 @@ function Pill({
 			type="button"
 			onClick={onClick}
 			aria-pressed={p.on}
-			className="ct-pill mx-[0.08em] inline-block cursor-pointer rounded-full border-[1.25px] border-confetti-black"
+			// ::before pads the pill to a ~44px-tall tap area without moving it
+			// in its line of text.
+			className="ct-pill relative mx-[0.08em] inline-block cursor-pointer rounded-full border-[1.25px] border-confetti-black before:absolute before:-inset-x-[2px] before:-inset-y-[7px] before:content-['']"
 			style={{
 				padding: '0 0.38em 0.06em',
 				background: p.bg,
@@ -333,6 +335,10 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 
 	// ---------- lifecycle ----------
 	componentDidMount() {
+		// Settle narrow before the first paint (a setState here re-renders
+		// before the browser paints), so phones never draw the three-column
+		// desktop layout first; the ResizeObserver keeps it in step after.
+		{ const w0 = this.rootRef.current?.offsetWidth ?? 0; if (w0 > 0 && w0 < 700 && !this.state.narrow) this.setState({ narrow: true }); }
 		this.uid = 'ct' + Math.random().toString(36).slice(2, 8); this.still = this.isReduced();
 		const st = this.stageRef.current!; this.washHost = document.createElement('div'); this.washHost.style.cssText = 'position:absolute;left:0;top:0;z-index:0;pointer-events:none;mix-blend-mode:multiply;transform-origin:0 0'; st.appendChild(this.washHost);
 		const mkSvg = () => { const v = this.mk('svg', { viewBox: '-700 -200 1400 400', preserveAspectRatio: 'xMidYMid meet' }, st); v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible;pointer-events:none'; return v; };
@@ -340,12 +346,12 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 		this.built = false; this.paused = true; this.startT = setTimeout(() => { this.paused = !this.inView; this.started = true; this.wake(); }, 500); this.raf = requestAnimationFrame(this.frame);
 		this.io = new IntersectionObserver(es => { this.inView = es[es.length - 1].isIntersecting; if (this.inView && !this.built) { this.built = true; this.build(); this.paint(0); if (this.still) this.fastForward(); this.makeWash(); } if (this.started) { this.paused = !this.inView; this.wake(); } }, { threshold: 0.15 }); this.io.observe(this.rootRef.current!); // nothing is built until the figure first scrolls into view
 		this.ro = new ResizeObserver(() => requestAnimationFrame(() => { if (this.dead) return; const w = this.rootRef.current ? this.rootRef.current.offsetWidth : 0, n = w > 0 && w < 700; if (n !== this.state.narrow) this.setState({ narrow: n }, () => { if (this.built) { this.camStep(); this.drawDots(); } }); this.drawStrips(); if (this.built) { this.applyCam(); this.drawDots(); } const s2 = this.stageRef.current; if (this.built && s2 && s2.clientWidth && this.washSize !== s2.clientWidth + 'x' + s2.clientHeight + (this.state.narrow ? 'n' : '')) { clearTimeout(this.washT); this.washT = setTimeout(() => this.makeWash(), 300); } })); this.ro.observe(this.rootRef.current!);
-		this.onKey = e => { if (e.key === 'Escape' && this.state.assumOpen) this.setState({ assumOpen: false }, () => this.wake()); }; window.addEventListener('keydown', this.onKey);
+		this.onKey = e => { if (e.key === 'Escape' && this.state.assumOpen) { e.stopImmediatePropagation(); this.setState({ assumOpen: false }, () => this.wake()); } }; window.addEventListener('keydown', this.onKey, true); /* capture + stop: the sheet also closes on Escape */
 		this.offGpu = subscribeGpuPause(() => this.wake());
 		const go = () => { this.hlT = setTimeout(() => { this.hlReady = true; this.syncEb(); }, 500); }; if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
 	}
 	componentDidUpdate(prev: Readonly<CareTeamOrbitProps>) { const p = this.props; if (!!p.colorblind !== !!prev.colorblind && this.built) this.makeWash(); if (p.model !== prev.model || p.patients !== prev.patients || p.nurses !== prev.nurses || !!p.colorblind !== !!prev.colorblind || p.motion !== prev.motion || p.tilt !== prev.tilt) { this.still = this.isReduced(); this.restart(); } this.applyFocus(); this.drawStrips(); this.syncEb(); if (this.built && (this.paused || this.still)) { this.camStep(); this.avStep(); this.drawDots(); } }
-	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey); if (this.offGpu) this.offGpu(); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy();
+	componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); clearTimeout(this.startT); clearTimeout(this.hlT); clearTimeout(this.washT); if (this.wash) try { this.wash.destroy(); } catch { /* noop */ } if (this.io) this.io.disconnect(); if (this.ro) this.ro.disconnect(); if (this.onKey) window.removeEventListener('keydown', this.onKey, true); if (this.offGpu) this.offGpu(); if (this.eb) for (const k in this.eb) this.eb[k] && this.eb[k].destroy();
 		// Remove the imperatively appended stage layers, or a StrictMode dev
 		// remount stacks a second orphaned set under the live sim.
 		for (const el of [this.washHost, this.svgU, this.cv, this.svgO]) el && el.remove(); }
@@ -415,7 +421,9 @@ export default class CareTeamOrbit extends ReactComponent<CareTeamOrbitProps, En
 								onClick={v.openAssum}
 								aria-label="Assumptions"
 								title="Assumptions"
-								className="inline-flex size-[20px] flex-none cursor-pointer items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent p-0 text-[13px] italic leading-none text-confetti-black hover:bg-confetti-black hover:text-washes-paper"
+								// ::after pads the 20px ring to a 44px tap area (an outline
+								// isn't hit-tested, so L.tapOutline alone doesn't).
+								className="relative inline-flex size-[20px] flex-none cursor-pointer after:absolute after:-inset-[12px] after:content-[''] items-center justify-center rounded-full border-[1.25px] border-confetti-black bg-transparent p-0 text-[13px] italic leading-none text-confetti-black hover:bg-confetti-black hover:text-washes-paper"
 								style={{ outline: L.tapOutline, fontFamily: 'var(--font-kyoto)' }}
 							>
 								i
