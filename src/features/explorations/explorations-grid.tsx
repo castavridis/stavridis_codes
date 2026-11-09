@@ -19,9 +19,7 @@ const ASSET = '/images/playground/';
 
 type Media =
   | { kind: 'image'; src: string; alt: string }
-  // Stand-in for an exploration whose artwork hasn't been exported yet — a
-  // flat tile with the label in mono so the grid keeps its shape.
-  | { kind: 'placeholder'; label: string }
+
   | { kind: 'video'; src: string; poster: string; label: string; objectClass: string; startDelayMs: number };
 
 // A single visual within a cell. `aspect` matches the Figma slot (w/h) so the
@@ -42,7 +40,6 @@ const img = (file: string, alt: string): Media => ({ kind: 'image', src: ASSET +
 // initial load and again at the top of every loop (0 = autoplay seamlessly).
 // `posterFile` overrides the poster (defaults to {name}-thumb.png) — handy as
 // a placeholder while the {name}.mp4 source is still pending.
-const placeholder = (label: string): Media => ({ kind: 'placeholder', label });
 const video = (
   name: string,
   label: string,
@@ -61,8 +58,6 @@ const video = (
 // Ordered exactly as the design reads top-to-bottom, left-to-right. Each row's
 // spans sum to 6; `aspect` values are the Figma slot dimensions.
 export const ALL_CELLS: Cell[] = [
-  // Newest — envmap ground projection. Artwork pending; placeholder for now.
-  { id: 'envmap-ground-projection', span: 'md:col-span-6', slots: [{ aspect: 'aspect-[944/400]', media: placeholder('Envmap ground projection') }] },
 
   // Row 1 — pmndrs design-system explorations (three ⅓ tiles)
   { id: 'pmndrs-type-test', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/265]', media: img('pmndrs-type-test.png', 'pmndrs type-scale test') }] },
@@ -161,13 +156,6 @@ function VideoTile({ media }: { media: Extract<Media, { kind: 'video' }> }): Rea
 
 function MediaSlot({ media }: { media: Media }): React.ReactElement {
   if (media.kind === 'video') return <VideoTile media={media} />;
-  if (media.kind === 'placeholder') {
-    return (
-      <div role="img" aria-label={media.label} className="flex size-full items-center justify-center p-[16px]">
-        <span className="font-mono text-[12px] leading-[20px] text-confetti-black opacity-50">{media.label}</span>
-      </div>
-    );
-  }
   return <img src={media.src} alt={media.alt} loading="lazy" decoding="async" className="block size-full object-cover" />;
 }
 
@@ -190,7 +178,7 @@ function TileCell({ cell }: { cell: Cell }): React.ReactElement {
 export const LANDING_CELLS: Cell[] = [
   { id: 'washes-facets-motion', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/368]', media: video('washes-facets-motion', 'Washes + facets motion study') }] },
   { id: 'facets-collector', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/368]', media: img('facets-bookmarklet.png', 'facets collector') }] },
-  { id: 'envmap-ground-projection', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: placeholder('Envmap ground projection') }] },
+  { id: 'pmndrs-hover-test', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('pmndrs-hover-test.png', 'pmndrs hover-state test') }] },
   { id: 'rain-check-1', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('rain-check-1-form-elements.png', 'Rain Check — form elements') }] },
   { id: 'pocket-pikachu', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: video('pocket-pikachu', 'Pocket Pikachu', 'object-cover', 1500, 'pocket-pikachu.png') }] },
 ];
