@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // Explorations — the bento-masonry wall of creative experiments (Figma node
-// 4213:16301), shared by the landing's curated "Recent Design Explorations"
+// 4213:16301), shared by the landing's curated "Creative Explorations"
 // section (LANDING_CELLS) and the full /explorations page (ALL_CELLS).
 //
 // Layout: a single 6-column grid (col = 144px, 16px gap → 944px content width).
@@ -173,7 +173,7 @@ function TileCell({ cell }: { cell: Cell }): React.ReactElement {
   );
 }
 
-// The landing's curated "Recent Design Explorations" set — five tiles plus
+// The landing's curated "Creative Explorations" set — five tiles plus
 // the View more button (rendered by Playground). Row 1 is two halves, row 2
 // three thirds; row-2 tiles share the rain-check aspect so heights align
 // (the square Pocket Pikachu clip is cropped by object-cover).

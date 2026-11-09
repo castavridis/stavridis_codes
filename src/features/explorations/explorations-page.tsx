@@ -3,7 +3,7 @@ import Button from '../../components/Button.js';
 import { routes } from '../../routes.js';
 import { ALL_CELLS, ExplorationGrid } from './explorations-grid.js';
 
-// /explorations — the full Recent Design Explorations wall. Rides the same
+// /explorations — the full Creative Explorations wall. Rides the same
 // SheetOverlay as the blog (landing stays mounted beneath), and mirrors the
 // BlogIndex chrome: washes-paper background, mono eyebrow + Back to home,
 // Kyoto title, then the 944px six-column grid.

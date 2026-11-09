@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Playground — the landing's "Recent Design Explorations" section. Shows the
+// Playground — the landing's "Creative Explorations" section. Shows the
 // curated LANDING_CELLS set (five tiles) followed by a View more button that
 // opens the full wall on /explorations. Tile data and renderers live in
 // features/explorations/explorations-grid.tsx.
@@ -18,7 +18,7 @@ export function Playground(): React.ReactElement {
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
       <div className="mb-[24px]">
         <Text variant="headline-small" className="text-[#251900]">
-          Recent Design Explorations
+          Creative Explorations
         </Text>
       </div>
       <ExplorationGrid cells={LANDING_CELLS} />
