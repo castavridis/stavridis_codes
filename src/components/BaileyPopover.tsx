@@ -23,7 +23,7 @@ export default function BaileyPopover(): React.ReactElement {
         />
       </div>
       <Text variant="tag" className="text-black">
-        Like Bailey, I aspire to bring Big Golden Retriever Energy™ to my collaborations.
+        Like Bailey, I aspire to bring Big Golden Retriever Energy™ to collaborations.
       </Text>
     </div>
   );
