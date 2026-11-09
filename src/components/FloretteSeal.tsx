@@ -1,13 +1,13 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import BaileyPopover from './BaileyPopover.js';
 import HoverPopover from './HoverPopover.js';
 import { SEAL_DEFAULT_BACKGROUND, SEAL_DEFAULT_FOREGROUND } from './RotatingSeal.js';
 
 // A special edition of RotatingSeal: the disc is the silhouette of a black
-// florette (✿, U+273F) and, instead of the whole seal spinning, the text
-// travels along the florette's edge while the shape and the 🐶 stay put.
-// Hovering (or focusing) it opens the Bailey popover — the same one the
+// florette (✿, U+273F) with the text set along its edge and a 🐶 in the
+// middle. Static — unlike RotatingSeal it doesn't spin. Hovering (or
+// focusing) it opens the Bailey popover — the same one the
 // hero's "big Golden Retriever energy" phrase uses.
 
 const FONT_SIZE = 9;
@@ -44,8 +44,6 @@ type FloretteSealProps = {
   centerText?: string;
   // Outer dimension in px.
   size?: number;
-  // Seconds for the text to make one full lap.
-  durationSeconds?: number;
   foregroundColor?: string;
   backgroundColor?: string;
   // Wrap in the Bailey HoverPopover. On by default.
@@ -124,10 +122,7 @@ function floretteGeometry(size: number) {
     lap += Math.hypot(b.x - a.x, b.y - a.y);
   }
 
-  // Two laps in one path, so a text run of 2 × lap can slide by one lap and
-  // land exactly where it started (seamless loop — see the <animate>).
-  const loop = pts.map((p) => `${f(p.x)} ${f(p.y)}`).join(' L ');
-  const textPath = `M ${loop} L ${loop} Z`;
+  const textPath = `M ${pts.map((p) => `${f(p.x)} ${f(p.y)}`).join(' L ')} Z`;
 
   return { shape, textPath, lap };
 }
@@ -149,24 +144,10 @@ function buildLapText(text: string, lap: number): string {
   return out;
 }
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const on = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
-  return reduced;
-}
-
 export default function FloretteSeal({
   text = 'Big Golden Retriever energy ™',
   centerText = '🐶',
   size = 120,
-  durationSeconds = 30,
   foregroundColor = SEAL_DEFAULT_FOREGROUND,
   backgroundColor = SEAL_DEFAULT_BACKGROUND,
   withPopover = true,
@@ -180,10 +161,10 @@ export default function FloretteSeal({
   // lap at the default size — small seals would otherwise overlap glyphs.
   const fontScale = Math.min(1, lap / ((text.length + MIN_GAP) * CHAR_ADVANCE));
   const lapText = useMemo(() => buildLapText(text, lap / fontScale), [text, lap, fontScale]);
-  const chars = lapText.length * 2;
+  const chars = lapText.length;
 
-  // Make one copy of lapText exactly one lap long so the loop seam doesn't
-  // jump: measure the rendered run and spread the difference across every
+  // Make lapText exactly one lap long so the closing middot gap matches
+  // the others: measure the rendered run and spread the difference across every
   // glyph's letter-spacing. Re-measures once webfonts settle.
   const textRef = useRef<SVGTextElement | null>(null);
   const [spacing, setSpacing] = useState(LETTER_SPACING * fontScale);
@@ -206,9 +187,9 @@ export default function FloretteSeal({
       // Re-runs after each spacing change (it's a dep) to refine; one pass
       // usually lands within ~1px since rendered length isn't perfectly
       // linear in spacing. Capped so it can never oscillate forever.
-      if (measured > 0 && Math.abs(2 * lap - measured) > 0.5 && fitPasses.current < 3) {
+      if (measured > 0 && Math.abs(lap - measured) > 0.5 && fitPasses.current < 3) {
         fitPasses.current += 1;
-        setSpacing(current + (2 * lap - measured) / chars);
+        setSpacing(current + (lap - measured) / chars);
       }
     };
     fit();
@@ -218,20 +199,6 @@ export default function FloretteSeal({
     };
   }, [lap, chars, lapText, spacing]);
 
-  // Pause the SMIL animation while offscreen.
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  useEffect(() => {
-    const svg = svgRef.current;
-    if (!svg || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(
-      ([entry]) => (entry.isIntersecting ? svg.unpauseAnimations() : svg.pauseAnimations()),
-      { rootMargin: '64px' },
-    );
-    io.observe(svg);
-    return () => io.disconnect();
-  }, []);
-
-  const reducedMotion = usePrefersReducedMotion();
   const label = `${text} ${centerText}`.trim();
 
   const seal = (
@@ -243,7 +210,7 @@ export default function FloretteSeal({
       // Focusable so keyboard users can open the popover too.
       tabIndex={withPopover ? 0 : undefined}
     >
-      <svg ref={svgRef} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 size-full overflow-visible" aria-hidden>
+      <svg viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 size-full overflow-visible" aria-hidden>
         <defs>
           <path id={pathId} d={textPath} fill="none" />
         </defs>
@@ -263,21 +230,7 @@ export default function FloretteSeal({
           xmlSpace="preserve"
           style={{ textTransform: 'uppercase' }}
         >
-          <textPath href={`#${pathId}`} startOffset={reducedMotion ? 0 : -lap}>
-            {lapText + lapText}
-            {/* Slide forward (clockwise) by exactly one lap, then repeat.
-                The run is 2 laps on a 2-lap path, so every glyph is always
-                on-path at least once and the loop point is identical. */}
-            {reducedMotion ? null : (
-              <animate
-                attributeName="startOffset"
-                from={-lap}
-                to={0}
-                dur={`${durationSeconds}s`}
-                repeatCount="indefinite"
-              />
-            )}
-          </textPath>
+          <textPath href={`#${pathId}`}>{lapText}</textPath>
         </text>
       </svg>
       <span

@@ -24,7 +24,7 @@ export default function SealSandbox() {
             Florette edition
           </Text>
           <Text variant="copy" as="p" className="mb-[24px] text-confetti-black/70">
-            ✿ silhouette; the text travels along the edge while the shape and 🐶 stay put. Hover or
+            ✿ silhouette with the text set along its edge and 🐶 in the middle; static. Hover or
             focus for the Bailey popover.
           </Text>
           <div className="flex flex-wrap items-end gap-[48px]">
