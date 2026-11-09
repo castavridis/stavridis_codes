@@ -18,7 +18,7 @@ import { useEffect, useRef } from 'react';
 const ASSET = '/images/playground/';
 
 type Media =
-  | { kind: 'image'; src: string; alt: string }
+  | { kind: 'image'; src: string; alt: string; objectClass: string }
 
   | { kind: 'video'; src: string; poster: string; label: string; objectClass: string; startDelayMs: number };
 
@@ -33,7 +33,9 @@ type Slot = { aspect: string; media: Media; bg?: string };
 // sized so its total height matches the taller neighbour in the same row.
 export type Cell = { id: string; span: string; slots: Slot[] };
 
-const img = (file: string, alt: string): Media => ({ kind: 'image', src: ASSET + file, alt });
+// `objectClass` works as for video below — e.g. 'object-contain' shrinks the
+// image to fit its slot (letterboxed by the slot's `bg`) instead of cropping.
+const img = (file: string, alt: string, objectClass = 'object-cover'): Media => ({ kind: 'image', src: ASSET + file, alt, objectClass });
 // `objectClass` sets the video's object-fit (defaults to object-cover; pass
 // e.g. 'object-fill' to stretch a clip to its slot instead of cropping).
 // `startDelayMs` holds the first frame that long before playing — applied on
@@ -156,7 +158,7 @@ function VideoTile({ media }: { media: Extract<Media, { kind: 'video' }> }): Rea
 
 function MediaSlot({ media }: { media: Media }): React.ReactElement {
   if (media.kind === 'video') return <VideoTile media={media} />;
-  return <img src={media.src} alt={media.alt} loading="lazy" decoding="async" className="block size-full object-cover" />;
+  return <img src={media.src} alt={media.alt} loading="lazy" decoding="async" className={`block size-full ${media.objectClass}`} />;
 }
 
 function TileCell({ cell }: { cell: Cell }): React.ReactElement {
@@ -178,7 +180,8 @@ function TileCell({ cell }: { cell: Cell }): React.ReactElement {
 export const LANDING_CELLS: Cell[] = [
   { id: 'washes-facets-motion', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/368]', media: video('washes-facets-motion', 'Washes + facets motion study') }] },
   { id: 'facets-collector', span: 'md:col-span-3', slots: [{ aspect: 'aspect-[464/368]', media: img('facets-bookmarklet.png', 'facets collector') }] },
-  { id: 'pmndrs-hover-test', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('pmndrs-hover-test.png', 'pmndrs hover-state test') }] },
+  // Shrunk to fit (the image is wider than the row's slot) on a #ebe5d9 field.
+  { id: 'pmndrs-hover-test', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', bg: 'bg-[#ebe5d9]', media: img('pmndrs-hover-test.png', 'pmndrs hover-state test', 'object-contain') }] },
   { id: 'rain-check-1', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: img('rain-check-1-form-elements.png', 'Rain Check — form elements') }] },
   { id: 'pocket-pikachu', span: 'md:col-span-2', slots: [{ aspect: 'aspect-[304/382]', media: video('pocket-pikachu', 'Pocket Pikachu', 'object-cover', 1500, 'pocket-pikachu.png') }] },
 ];
