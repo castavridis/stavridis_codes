@@ -53,14 +53,16 @@ import type { SalutationColors, SealColors } from "../companies/companies.js";
 // (justify-*); the md: classes place it absolutely. Plus a small tilt so
 // it reads "stuck on".
 const FLORETTE_SLOTS: { className: string; tilt: number }[] = [
-  // Above-left of the greeting
-  { className: "justify-start md:top-[-104px] md:left-[-152px]", tilt: -8 },
-  // Past the end of the first line
-  { className: "justify-end md:top-[-80px] md:left-[580px]", tilt: 6 },
-  // Right gutter, level with the role
-  { className: "justify-end md:top-[48px] md:right-[-148px]", tilt: 10 },
-  // Left gutter, level with the role
-  { className: "justify-start md:top-[56px] md:left-[-152px]", tilt: -5 },
+  // All md+ slots sit in the band between the card top and the headline —
+  // the first line runs nearly full width, so the sides aren't free.
+  // Above the greeting, nudged left
+  { className: "justify-start md:top-[-128px] md:left-[-48px]", tilt: -8 },
+  // Above "C Stavridis"
+  { className: "justify-end md:top-[-128px] md:left-[300px]", tilt: 6 },
+  // Above the role
+  { className: "justify-end md:top-[-128px] md:left-[640px]", tilt: 10 },
+  // Top-right corner
+  { className: "justify-start md:top-[-128px] md:right-[-24px]", tilt: -5 },
 ];
 
 // `onCardClick` is forwarded to FeaturedWork so a host wrapper can swap to a
@@ -595,7 +597,7 @@ export default function LandingPage({
           // grows to fit it and the "now" copy isn't cut off. At md+ it
           // returns to the fixed overlay: absolute with percentage insets +
           // overflow-clip. Mobile pt clears the absolute in-shell Header.
-          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] md:px-[16px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[132px] md:pb-0"
+          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[80px] md:pt-[132px] md:pb-0"
           style={{
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",
@@ -685,7 +687,7 @@ export default function LandingPage({
               </Text>
             </FadeDown>
           ) : null}
-          <div className="relative w-full max-w-[784px]">
+          <div className="relative w-full max-w-[784px] md:max-w-none">
           {/* Florette seal — dropped at a random slot around the intro on
               each load (see FLORETTE_SLOTS). Its hover opens the Bailey
               popover the old "big Golden Retriever energy" phrase used.
@@ -710,13 +712,13 @@ export default function LandingPage({
           <FadeDown>
             <Text
               variant="headline"
-              className="text-confetti-black w-full max-w-[784px] !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px] text-center md:text-left"
+              className="text-confetti-black w-full max-w-[784px] md:max-w-none !text-[28px] !leading-[36px] md:!text-[48px] md:!leading-[60px] text-center md:text-left"
             >
               <span>
                 {/* Drop the "Hey!" lead-in on company endpoints — the
                     branded "Hi {company}!" chip above already greets. */}
                 {company ? "I’m C Stavridis, " : "Hey! I’m C Stavridis, "}
-                <br aria-hidden className="hidden md:inline" />
+                {/* <br aria-hidden className="hidden md:inline" /> */}
                 {"a "}
               </span>
               <HoverPopover
@@ -759,7 +761,7 @@ export default function LandingPage({
             // copy stays comfortably readable rather than stretching
             // across both columns. See CompanyConfig.blurb.
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] w-full max-w-[385px]">
+              <div className="text-confetti-black mt-[24px] w-full max-w-[385px] md:ml-[80px]">
                 <Text variant="copy" className="mb-0">
                   {blurb}
                 </Text>
@@ -767,7 +769,7 @@ export default function LandingPage({
             </FadeDown>
           ) : (
             <FadeDown delay={120}>
-              <div className="text-confetti-black mt-[24px] flex flex-col items-start gap-[16px] md:flex-row">
+              <div className="text-confetti-black mt-[24px] flex flex-col md:px-[80px] items-start gap-[16px] md:flex-row">
                 <div className="w-full max-w-[385px]">
                   <Text variant="eyebrow" className="text-confetti-black/50 mb-0">
                     then
