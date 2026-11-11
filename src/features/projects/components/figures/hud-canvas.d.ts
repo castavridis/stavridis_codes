@@ -26,8 +26,10 @@ export function drawImpactStrip(
 export function drawStatusGrid(
 	cv: HTMLCanvasElement | null,
 	stats: HudStats,
-	/** 'after': always the 50 × 32 grid (all unknown until the after day has data). */
+	/** 'after': always the full 50-column grid (all unknown until the after day has data). */
 	layout?: 'before' | 'after',
+	/** Patients on the after grid (default 1,600 → 50 × 32). */
+	total?: number,
 ): void;
 
 /** A minute offset from 9am as "h:mm am/pm" (empty for null/negative). */

@@ -1,5 +1,5 @@
 // One nurse, before and after — react-three-fiber. Before: 100 unknown patients flock around him; he calls through the day.
-// After: the list multiplies to 1,600 known patients. ~1,520 green/yellow settle into a lower disc (or wide rings); the 80 reds float
+// After: the list multiplies to M known patients (1,600 by default). ~95% green/yellow settle into a lower disc (or wide rings); the 5% reds float
 // close around him, alerts (blue) fire through the day and are called first; each resolved red turns green and sinks into the disc.
 // Ink: a hidden 10×10 Washes.js sheet, one cell per patient (cells 80–99 shared by the green/yellow mass), mapped onto billboards.
 import React from 'react';
@@ -8,7 +8,10 @@ import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 const h = React.createElement;
-const N = 100, M = 1600, REDS = 80, YELLOWS = 320, DAY = 480, LUNCH = [210, 270], GAP = 0.5; // 9am–5pm, lunch 12:30–1:30
+// M (the after day's panel) is set per mount from the `patients` option (default 1,600);
+// REDS / YELLOWS stay 5% / 20% of it.
+const N = 100, DAY = 480, LUNCH = [210, 270], GAP = 0.5; // 9am–5pm, lunch 12:30–1:30
+let M = 1600, REDS = 80, YELLOWS = 320;
 const TILT = new THREE.Euler(0.38, 0, -0.16), CENTER = new THREE.Vector3(), TETHER = 40, DOT_R = 0.024; // 75% of the original 0.032
 const IMPA = { blue: 1, red: 0.72, yellow: 0.72, green: 0.3, black: 0.12, grey: 0.12 }; // impact: ink weight by what the call could change
 const impCol = (S, C, k) => { if (k === 'grey' || k === 'black') return C.grey3; const c = S.impC || (S.impC = {}), key = k + C.black + C.ground; return c[key] || (c[key] = new THREE.Color(C.ground).lerp(new THREE.Color(C.black), IMPA[k] ?? 0.12)); };
@@ -257,7 +260,8 @@ function Swarm({ S }) {
     h('mesh', { ref: hotRing, visible: false, renderOrder: 11, frustumCulled: false }, h('ringGeometry', { args: [DOT_R * 1.45, DOT_R * 1.75, 40] }), h('meshBasicMaterial', { color: S.C.black, transparent: true, depthTest: false, toneMapped: false })));
 }
 
-export function mount(stage, { params, onStats, photo, photoBefore, photoLunch }) {
+export function mount(stage, { params, onStats, photo, photoBefore, photoLunch, patients = 1600 }) {
+  M = Math.max(100, Math.round(patients)); REDS = Math.round(M * 0.05); YELLOWS = Math.round(M * 0.2);
   const C = palette(), bg = new THREE.Color();
   const tint = p => { // the paper and the three paints can be overridden; the 3D ground and the sheet follow
     for (const k of ['paper', 'rose', 'hansa', 'cerulean']) if (p[k] && /^#[0-9a-f]{6}$/i.test(p[k])) C[k] = p[k];

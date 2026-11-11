@@ -93,23 +93,23 @@ export function drawDayStrip(cv, spans, minute) {
 	g.globalAlpha = 1;
 }
 
-export function drawStatusGrid(cv, stats, layout) {
+export function drawStatusGrid(cv, stats, layout, total = 1600) {
 	if (!cv) return;
 	const p = prepCanvas(cv);
 	if (!p) return;
 	const { g, W, H } = p;
 	const cols = 50;
 	const ink = inkHex();
-	// The after half's grid keeps its 50 × 32 shape before its day has any
-	// data: all 1,600 drawn as unknown, as the design's drawBar does, so the
+	// The after half's grid keeps its 50-column shape (`total` patients, 1,600
+	// by default → 32 rows) before its day has any data: all drawn as unknown, as the design's drawBar does, so the
 	// figure doesn't change height when a replay clears it.
 	if (layout === 'after' && !(stats?.phase === 'after' && stats.all)) {
-		const rows = 32;
+		const rows = Math.ceil(total / cols);
 		const px = W / cols;
 		const py = H / rows;
 		const r = Math.max(1, Math.min(px, py) * 0.36);
 		g.fillStyle = VIZ_FILL.u;
-		for (let k = 0; k < 1600; k++) {
+		for (let k = 0; k < total; k++) {
 			g.beginPath();
 			g.arc(((k % cols) + 0.5) * px, (Math.floor(k / cols) + 0.5) * py, r, 0, 6.2832);
 			g.fill();
@@ -119,7 +119,7 @@ export function drawStatusGrid(cv, stats, layout) {
 	if (!stats) return;
 	if (stats.phase === 'after' && stats.all) {
 		const all = stats.all;
-		const rows = 32;
+		const rows = Math.ceil(all.length / cols);
 		const px = W / cols;
 		const py = H / rows;
 		const r = Math.max(1, Math.min(px, py) * 0.36);

@@ -57,5 +57,7 @@ export function mount(
 		photo: string;
 		photoBefore?: string;
 		photoLunch?: string;
+		/** Patients on the after day's panel (default 1,600; 5% red, 20% yellow). */
+		patients?: number;
 	},
 ): NurseOrbitHandle;
