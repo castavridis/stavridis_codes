@@ -148,6 +148,10 @@ type Project = {
   thumbnailClassName: string;
   image?: string;
   imageAlt?: string;
+  // Opt-in projects render only when a company config names them in
+  // `featuredSlugs` / `heroSlugs` — never in the default (no-company)
+  // landing. Use for preview / noindex case studies.
+  optIn?: boolean;
 };
 
 const PROJECTS: Project[] = [
@@ -161,6 +165,26 @@ const PROJECTS: Project[] = [
     image: '/images/projects/caresignal-clinician-app/thumbnail.webp',
     imageAlt:
       'CareSignal thumbnail: an Engaged Patients card (1262 patients: 63 high, 189 medium, 1011 low risk) on a sky-and-field backdrop.',
+  },
+  {
+    // v3.5 handoff of the clinician app case study
+    // (content/projects/caresignal-clinician-app-impact).
+    slug: 'caresignal-clinician-app-impact',
+    headline: 'Helping centralized care teams safely manage 15× as many patients',
+    tags: 'Product Strategy · Product Design · Service Design · Design Engineering',
+    thumbnailClassName: 'bg-[#fdfbf5]',
+    image: '/images/projects/caresignal-clinician-app-impact/thumbnail.webp',
+    imageAlt: 'A smiling care-team member in a headset at their workstation.',
+    optIn: true,
+  },
+  {
+    slug: 'caresignal-member-enrollment',
+    headline: 'Redesigning member enrollment to exceed a health plan’s 20% target',
+    tags: 'Product Strategy · Service Design · Product Design · Design Engineering',
+    thumbnailClassName: 'bg-[#fdfbf5]',
+    image: '/images/projects/caresignal-member-enrollment/thumbnail.webp',
+    imageAlt: 'A woman on the phone in her kitchen.',
+    optIn: true,
   },
   {
     slug: 'sqshbook',
@@ -193,7 +217,7 @@ const PROJECTS: Project[] = [
 // projects in the given order. Used by /for/:company pages to surface
 // the most-relevant work for that audience. Unknown slugs are skipped
 // silently so a stale config can't blow up the landing. When absent,
-// renders the canonical PROJECTS list.
+// renders the canonical PROJECTS list (minus `optIn` entries).
 //
 // `heroSlugs` (optional) — renders those projects first, in order, as
 // full-width two-column hero cards and drops them from the grid so they
@@ -228,7 +252,7 @@ export function FeaturedWork({
       ? slugs
           .map((s) => PROJECTS.find((p) => p.slug === s))
           .filter((p): p is Project => Boolean(p))
-      : PROJECTS
+      : PROJECTS.filter((p) => !p.optIn)
   ).filter((p) => !heroSet.has(p.slug));
 
   const stampSlugs = new Set(featuredProjectSlugs ?? []);
