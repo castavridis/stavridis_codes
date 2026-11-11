@@ -1,0 +1,85 @@
+---
+title: CareSignal Clinician Application
+date: 2026-11-03
+time: 00:00
+summary: Scaling Care Teams
+preview: false
+noindex: true
+headline: I designed a clinician web application that helped nurses in centralized care teams safely manage 15× as many patients, from 100 to 1,500 each.
+introduction: |
+  As CareSignal’s sole Product Designer through acquisition, our clinician web application was my responsibility. I combined my skills in product design, engineering, branding, and service design to take our app from a clinically‑proven proof of concept to a commercial product.
+introBelowHero: true
+tags: ['Product Strategy', 'Product Design', 'Service Design', 'Design Engineering']
+background: '#fdfbf5'
+color: '#201E1F'
+---
+
+import BackToTop from '../../../src/features/projects/components/figures/BackToTop.tsx'
+import { AssumptionsModal } from './AssumptionsModal.tsx'
+
+{/* FIXME: Dangerously setting styles with this component seems like a brittle workaround. Many of these styles should propogate to other case studies.  */}
+import { CaseStudyStyle } from './CaseStudyStyle.tsx'
+import { FrontMatterWashes } from './FrontMatterWashes.tsx'
+import { SectionNav } from './SectionNav.tsx'
+import { SectionMenu } from './SectionMenu.tsx'
+import { HeroFigure } from './HeroFigure.tsx'
+import { Introduction } from './Introduction.tsx'
+import { TheProblem } from './TheProblem.tsx'
+import { ChallengeOne } from './ChallengeOne.tsx'
+import { ChallengeTwo } from './ChallengeTwo.tsx'
+import { ChallengeThree } from './ChallengeThree.tsx'
+import { Outcomes } from './Outcomes.tsx'
+import { KeyLearnings } from './KeyLearnings.tsx'
+import { TeamAndTools } from './TeamAndTools.tsx'
+import { LazyBlocks } from './LazyBlocks.tsx'
+
+{/* Case-study-scoped style overrides (the design's #nurse-case tweaks) */}
+<CaseStudyStyle />
+
+{/* Wash underlines on the frontmatter headline + intro phrases */}
+<FrontMatterWashes />
+
+{/* Nav anchors for the front-matter region (the nav column itself starts
+    below the hero, as in the reference) */}
+<div id="introduction" className="h-0" aria-hidden="true" />
+
+<div id="contribution" className="h-0 scroll-mt-[132px]" aria-hidden="true" />
+
+{/* Introduction — above Figure 1, larger than body copy */}
+<Introduction />
+
+{/* Figure 1 — nurse-orbit simulation, lazy-mounted */}
+<HeroFigure />
+
+<div className="relative">
+	<SectionNav />
+
+	{/* Visit gap, centralized care, and the three challenges */}
+	<TheProblem />
+
+	{/* Challenge 1: flow chart, alert dashboard, design principles */}
+	<ChallengeOne />
+
+	{/* Challenge 2: risk dashboard, closing the loop */}
+	<ChallengeTwo />
+
+	{/* Challenge 3: enrollment, settings cascade, governance, text-message anatomy, data formats */}
+	<ChallengeThree />
+
+	{/* Primary outcome, business outcomes, other care models + the two Care Team Orbit figures */}
+	<Outcomes />
+
+	<KeyLearnings />
+
+	<TeamAndTools />
+</div>
+
+{/* Off-screen prose skips rendering (design lazyBlocks) */}
+<LazyBlocks />
+
+<AssumptionsModal />
+
+{/* Phones/tablets: the sticky title opens a section list */}
+<SectionMenu />
+
+<BackToTop />
