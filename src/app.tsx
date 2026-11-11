@@ -344,7 +344,7 @@ export function App() {
           blurb={company?.blurb}
           onDismiss={company ? handleDismiss : undefined}
           featuredSlugs={company?.featuredSlugs}
-          heroSlug={company?.heroSlug}
+          heroSlugs={company?.heroSlugs}
           featuredProjectSlugs={company?.featuredProjects}
           companySeal={company?.seal}
           companySalutation={company?.salutation}

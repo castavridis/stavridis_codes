@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
-// Featured Work — an optional full-width hero card, then a 2x2 grid of
-// project cards.
+// Featured Work — optional full-width hero cards (image side alternating),
+// then a 2x2 grid of project cards.
 // Inner card visuals from Figma (Engaged Widget, Heat Exchanger UI, SQSHBook
 // form, IBM Watson cursor) are intentionally NOT reconstructed here; each
 // thumbnail is a solid/gradient placeholder so the layout can land first.
@@ -37,8 +37,11 @@ type ProjectOverviewProps = {
   previewOnly?: boolean;
   // 'card' (default): thumbnail over title + tags, one grid cell.
   // 'hero': a full-width two-column card — thumbnail left, title + tags
-  // right (stacked on phones). Driven by CompanyConfig.heroSlug.
+  // right (stacked on phones). Driven by CompanyConfig.heroSlugs.
   layout?: 'card' | 'hero';
+  // Hero only: which column the thumbnail sits in at md+. 'right' swaps the
+  // columns (text left, image right). Phones always stack image-first.
+  imageSide?: 'left' | 'right';
 };
 
 function ProjectOverview({
@@ -53,64 +56,68 @@ function ProjectOverview({
   stampSeal,
   previewOnly,
   layout = 'card',
+  imageSide = 'left',
 }: ProjectOverviewProps): React.ReactElement {
   const hero = layout === 'hero';
+  const imageRight = hero && imageSide === 'right';
   return (
     <div
       className={
         hero
           ? // A white card at the system's card radius (16px) and inset (24px).
-            'relative grid grid-cols-1 gap-[16px] rounded-[16px] bg-white p-[24px] md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:items-center md:gap-x-[40px]'
+            // The image column is always the wider (3fr) one.
+            `relative grid grid-cols-1 gap-[16px] rounded-[16px] bg-white p-[24px] md:items-center md:gap-x-[40px] ${imageRight ? 'md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]' : 'md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]'}`
           : 'relative flex flex-col gap-[16px]'
       }
     >
-      <button
-        type="button"
-        onClick={() => onClick?.(slug)}
-        // Golden-retriever "perk up" on hover — an eager lift + grow + shadow
-        // (motion-safe). Reduced-motion users get a gentle brightness lift
-        // instead. Transition covers both.
-        className={`outline-confetti-black relative flex aspect-[463/304] cursor-pointer w-full items-center justify-center overflow-hidden rounded-[8px] transition-[transform,box-shadow,filter] duration-300 ease-out motion-safe:hover:[transform:translateY(-10px)_scale(1.03)] motion-safe:hover:shadow-[0_20px_44px_rgba(57,31,0,0.18)] motion-reduce:hover:brightness-[1.05] ${hero ? '' : 'md:aspect-auto md:h-[304.03px]'} ${thumbnailClassName ?? ''}`}
-      >
-        {image ? (
-          <img
-            src={image}
-            alt={imageAlt ?? ''}
-            loading="lazy"
-            decoding="async"
-            className="block size-full object-cover"
-          />
-        ) : (
-          <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
-        )}
-        {previewOnly ? (
-          // "Preview Only" tag — Figma node 4140:10216. Paper-tinted pill at
-          // the thumbnail's top-left.
-          <span className="border-washes-paper bg-washes-paper/90 pointer-events-none absolute left-[12px] top-[12px] z-10 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
-            <span className="text-confetti-black/75 font-mono text-[12px] font-medium italic leading-[12px]">
-              Preview
+      {/* Thumbnail + seal share a relative wrapper so the seal tracks the
+          thumbnail whichever column it's in. The seal sits beside the
+          button, NOT inside it — the button's overflow-hidden + hover
+          transform would otherwise clip it. */}
+      <div className={`relative ${imageRight ? 'md:order-2' : ''}`}>
+        <button
+          type="button"
+          onClick={() => onClick?.(slug)}
+          // Golden-retriever "perk up" on hover — an eager lift + grow + shadow
+          // (motion-safe). Reduced-motion users get a gentle brightness lift
+          // instead. Transition covers both.
+          className={`outline-confetti-black relative flex aspect-[463/304] cursor-pointer w-full items-center justify-center overflow-hidden rounded-[8px] transition-[transform,box-shadow,filter] duration-300 ease-out motion-safe:hover:[transform:translateY(-10px)_scale(1.03)] motion-safe:hover:shadow-[0_20px_44px_rgba(57,31,0,0.18)] motion-reduce:hover:brightness-[1.05] ${hero ? '' : 'md:aspect-auto md:h-[304.03px]'} ${thumbnailClassName ?? ''}`}
+        >
+          {image ? (
+            <img
+              src={image}
+              alt={imageAlt ?? ''}
+              loading="lazy"
+              decoding="async"
+              className="block size-full object-cover"
+            />
+          ) : (
+            <span className="font-mono text-[12px] leading-[20px] text-white/30 select-none">{slug}</span>
+          )}
+          {previewOnly ? (
+            // "Preview Only" tag — Figma node 4140:10216. Paper-tinted pill at
+            // the thumbnail's top-left.
+            <span className="border-washes-paper bg-washes-paper/90 pointer-events-none absolute left-[12px] top-[12px] z-10 inline-flex items-center rounded-[6px] border px-[12px] py-[8px]">
+              <span className="text-confetti-black/75 font-mono text-[12px] font-medium italic leading-[12px]">
+                Preview
+              </span>
             </span>
+          ) : null}
+        </button>
+        {stampCompanyName ? (
+          <span
+            className="pointer-events-none absolute left-[-16px] top-[24px] z-10"
+            style={{ isolation: 'isolate' }}
+          >
+            <RotatingSeal
+              companyName={stampCompanyName}
+              size={104}
+              foregroundColor={stampSeal?.foreground_color}
+              backgroundColor={stampSeal?.background_color}
+            />
           </span>
         ) : null}
-      </button>
-      {/* Seal sits on the (relative) card wrapper, NOT inside the
-          overflow-hidden button — otherwise the button's hover transform
-          turns it into the containing block and clips the seal. */}
-      {stampCompanyName ? (
-        <span
-          // Same spot relative to the thumbnail on both layouts: the hero's
-          // 24px card inset shifts it in by that much.
-          className={`pointer-events-none absolute z-10 ${hero ? 'left-[8px] top-[48px]' : 'left-[-16px] top-[24px]'}`}
-          style={{ isolation: 'isolate' }}
-        >
-          <RotatingSeal
-            companyName={stampCompanyName}
-            size={104}
-            foregroundColor={stampSeal?.foreground_color}
-            backgroundColor={stampSeal?.background_color}
-          />
-        </span>
-      ) : null}
+      </div>
       <div className={hero ? 'flex flex-col gap-[12px]' : 'flex flex-col gap-[8px]'}>
         <Text
           variant="copy-large"
@@ -188,9 +195,10 @@ const PROJECTS: Project[] = [
 // silently so a stale config can't blow up the landing. When absent,
 // renders the canonical PROJECTS list.
 //
-// `heroSlug` (optional) — renders that project first as a full-width,
-// two-column hero card and drops it from the grid so it never shows twice.
-// An unknown slug renders no hero. See CompanyConfig.heroSlug.
+// `heroSlugs` (optional) — renders those projects first, in order, as
+// full-width two-column hero cards and drops them from the grid so they
+// never show twice. The image alternates sides: left at even indices, right
+// at odd. Unknown slugs are skipped. See CompanyConfig.heroSlugs.
 //
 // `featuredProjectSlugs` + `stampCompanyName` — when both are set, any
 // project whose slug is in `featuredProjectSlugs` renders a rotating
@@ -199,31 +207,34 @@ const PROJECTS: Project[] = [
 export function FeaturedWork({
   onCardClick,
   slugs,
-  heroSlug,
+  heroSlugs,
   featuredProjectSlugs,
   stampCompanyName,
   stampSeal,
 }: {
   onCardClick?: (slug: string) => void;
   slugs?: string[];
-  heroSlug?: string;
+  heroSlugs?: string[];
   featuredProjectSlugs?: string[];
   stampCompanyName?: string;
   stampSeal?: SealColors;
 }): React.ReactElement {
-  const hero = heroSlug ? PROJECTS.find((p) => p.slug === heroSlug) : undefined;
+  const heroes = (heroSlugs ?? [])
+    .map((s) => PROJECTS.find((p) => p.slug === s))
+    .filter((p): p is Project => Boolean(p));
+  const heroSet = new Set(heroes.map((p) => p.slug));
   const projects = (
     slugs
       ? slugs
           .map((s) => PROJECTS.find((p) => p.slug === s))
           .filter((p): p is Project => Boolean(p))
       : PROJECTS
-  ).filter((p) => p.slug !== hero?.slug);
+  ).filter((p) => !heroSet.has(p.slug));
 
   const stampSlugs = new Set(featuredProjectSlugs ?? []);
   const stampFor = (slug: string) =>
     stampCompanyName && stampSlugs.has(slug) ? stampCompanyName : undefined;
-  const offset = hero ? 1 : 0;
+  const offset = heroes.length;
 
   return (
     <section className="w-full max-w-[944px] px-[16px] md:px-0">
@@ -232,23 +243,26 @@ export function FeaturedWork({
           Featured Work
         </Text>
       </div>
-      {hero ? (
-        <div className="mb-[40px]">
-          <FadeDown delay={0}>
-            <ProjectOverview
-              layout="hero"
-              slug={hero.slug}
-              headline={hero.headline}
-              tags={hero.tags}
-              thumbnailClassName={hero.thumbnailClassName}
-              image={hero.image}
-              imageAlt={hero.imageAlt}
-              stampCompanyName={stampFor(hero.slug)}
-              stampSeal={stampSeal}
-              previewOnly={Boolean(getProject(hero.slug)?.preview)}
-              onClick={onCardClick}
-            />
-          </FadeDown>
+      {heroes.length > 0 ? (
+        <div className="mb-[40px] flex flex-col gap-[40px]">
+          {heroes.map((hero, i) => (
+            <FadeDown key={hero.slug} delay={i * 80}>
+              <ProjectOverview
+                layout="hero"
+                imageSide={i % 2 === 0 ? 'left' : 'right'}
+                slug={hero.slug}
+                headline={hero.headline}
+                tags={hero.tags}
+                thumbnailClassName={hero.thumbnailClassName}
+                image={hero.image}
+                imageAlt={hero.imageAlt}
+                stampCompanyName={stampFor(hero.slug)}
+                stampSeal={stampSeal}
+                previewOnly={Boolean(getProject(hero.slug)?.preview)}
+                onClick={onCardClick}
+              />
+            </FadeDown>
+          ))}
         </div>
       ) : null}
       <div className="grid grid-cols-1 gap-x-[16px] gap-y-[40px] md:grid-cols-2">

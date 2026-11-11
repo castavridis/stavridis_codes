@@ -65,9 +65,9 @@ type LandingPageProps = {
   // visitor — see CompanyConfig.featuredSlugs. Undefined renders the
   // canonical 4.
   featuredSlugs?: string[];
-  // One project to lead Featured Work as a full-width two-column hero card.
-  // See CompanyConfig.heroSlug. Undefined → grid only.
-  heroSlug?: string;
+  // Projects to lead Featured Work as full-width two-column hero cards,
+  // image side alternating. See CompanyConfig.heroSlugs. Undefined → grid only.
+  heroSlugs?: string[];
   // Subset of slugs that get a rotating "Featured Project" seal over
   // their thumbnail. See CompanyConfig.featuredProjects.
   featuredProjectSlugs?: string[];
@@ -100,7 +100,7 @@ export default function LandingPage({
   blurb,
   onDismiss,
   featuredSlugs,
-  heroSlug,
+  heroSlugs,
   featuredProjectSlugs,
   companySeal,
   companySalutation,
@@ -792,7 +792,7 @@ export default function LandingPage({
           <FeaturedWork
             onCardClick={onCardClick}
             slugs={featuredSlugs}
-            heroSlug={heroSlug}
+            heroSlugs={heroSlugs}
             featuredProjectSlugs={featuredProjectSlugs}
             stampCompanyName={company}
             stampSeal={companySeal}

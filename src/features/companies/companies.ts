@@ -5,12 +5,14 @@ import type { Role } from '../role/role-context.js';
 // (`caresignal-platform`, `fracta`, `sqshbook`, `caresignal-ai`). When
 // absent, FeaturedWork renders its canonical 4 in canonical order.
 //
-// `heroSlug` — one project to lead Featured Work as a full-width,
-// two-column hero card (image left, title + tags right) above the grid.
-// Must match a `PROJECTS` slug in featured-work.tsx. The hero is pulled out
-// of the grid so it never shows twice; it doesn't need to be listed in
-// `featuredSlugs`. Its seal follows `featuredProjects` like any card. Unset
-// → no hero, just the grid.
+// `heroSlugs` — ordered projects to lead Featured Work as full-width,
+// two-column hero cards stacked above the grid. The image side alternates
+// by index: left at 0, right at 1, left at 2, … (always image-first when
+// stacked on phones). Each must match a `PROJECTS` slug in
+// featured-work.tsx; unknown slugs are skipped. Heroes are pulled out of the
+// grid so they never show twice; they don't need to be listed in
+// `featuredSlugs`. Their seals follow `featuredProjects` like any card.
+// Unset/empty → no hero, just the grid.
 //
 // `featuredProjects` — slugs that get a rotating "Featured Project"
 // seal stamp over the thumbnail. Supports multiple entries
@@ -72,7 +74,7 @@ export type CompanyConfig = {
   // nothing renders it yet, so for now it only records the file.
   cover_letter?: string;
   featuredSlugs?: string[];
-  heroSlug?: string;
+  heroSlugs?: string[];
   featuredProjects?: string[];
   role?: Role;
   colors?: CompanyColors;
@@ -107,7 +109,7 @@ export const companies: Record<string, CompanyConfig> = {
     role: 'pd',
     cover_letter: 'cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
     resume: '/resumes/C-Stavridis_Mayo-Clinic_Resume.pdf',
-    heroSlug: 'caresignal-clinician-app',
+    heroSlugs: ['caresignal-clinician-app'],
     featuredSlugs: ['caresignal-clinician-app', 'fracta', 'sqshbook'],
     featuredProjects: ['caresignal-clinician-app'],
     salutation_colors: {
