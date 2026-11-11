@@ -60,14 +60,14 @@ const STEPS: Array<[string, string, string, string, string]> = [
 		'Manager, whole team',
 		'Logged',
 		'This team added symptom questions to the weight check-in',
-		'A manager can change any program setting for the entire team, in program settings. Each change is written to the audit log.',
+		'A manager sets the team’s program defaults, including alert thresholds, based on what the Chief Medical Officer signed off. Each change is written to the audit log.',
 		'Logged: J. Okafor · Feb 3, 9:40 AM',
 	],
 	[
 		'Care manager, one patient',
 		'Logged',
 		'Noel set Pat’s baseline at 184 lb at enrollment',
-		'A care manager can change any program setting for a single patient, from their profile. Each change is written to the audit log.',
+		'A nurse care manager adjusts one patient’s settings, such as their baseline and alert thresholds, using clinical judgement of that patient. Each change is documented in the audit log.',
 		'Logged: N. Whitfield, RN · Mar 12, 2:14 PM',
 	],
 	[
