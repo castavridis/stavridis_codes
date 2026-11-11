@@ -1,0 +1,48 @@
+---
+title: Member Enrollment at CareSignal
+date: 2026-11-11
+time: 00:00
+summary: Member Enrollment
+preview: true
+noindex: true
+headline: Member Enrollment at CareSignal
+introduction: |
+  Remote monitoring only helps people who enroll. As CareSignal’s product roadmap owner and “enrollment czar,” I redesigned how members joined, from the tools our call center used to the outreach a health plan’s members received, and exceeded the client’s 20% enrollment target.
+introBelowHero: true
+tags: ['Product Strategy', 'Service Design', 'Product Design', 'Design Engineering']
+background: '#fdfbf5'
+color: '#201E1F'
+---
+
+{/* Ported from tmp/member-enrollment-case-study-v4.html. Styles are scoped
+    under .me-case in member-enrollment.css; MDXLayout supplies the chrome
+    and the h1 (frontmatter `headline`). The introduction above is rendered
+    by <Introduction /> (with the role line, stats, and postcard), not by
+    FrontMatter. */}
+
+import './member-enrollment.css'
+import { Introduction } from './Introduction.tsx'
+import { Problem } from './Problem.tsx'
+import { Capacity } from './Capacity.tsx'
+import { Trust } from './Trust.tsx'
+import { Scale } from './Scale.tsx'
+import { Learned, Team } from './Closing.tsx'
+
+<div className="me-case">
+	<Introduction />
+
+	<Problem />
+
+	{/* Decision 1: agent capacity — dialer figure */}
+	<Capacity />
+
+	{/* Decision 2: the coordinated journey — phases, touchpoints, portal, blueprint */}
+	<Trust />
+
+	{/* Decision 3: scaling — scorecard, redesigns */}
+	<Scale />
+
+	<Learned />
+
+	<Team />
+</div>
