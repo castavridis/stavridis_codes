@@ -26,16 +26,25 @@ const ICON_OUT = (
 );
 
 // A case-study figure: auto-numbered "figure N" chip, title, body, caption,
-// and an Expand button that fills the window (Escape collapses).
+// and an Expand button that fills the window (Escape collapses). Result
+// figures (`expandable={false}`, class `res-fig`) have neither Expand nor
+// caption. `titleWrap` wraps the title in a div of that class (figure 9's
+// title row carries its own info button).
 export function Fig({
 	id,
 	title,
 	caption,
+	className,
+	expandable = true,
+	titleWrap,
 	children,
 }: {
 	id: string;
 	title: ReactNode;
-	caption: ReactNode;
+	caption?: ReactNode;
+	className?: string;
+	expandable?: boolean;
+	titleWrap?: string;
 	children: ReactNode;
 }) {
 	const [expanded, setExpanded] = useState(false);
@@ -62,25 +71,35 @@ export function Fig({
 		};
 	}, [expanded]);
 
+	const titleEl = (
+		<div className="fig-t" id={titleId}>
+			{title}
+		</div>
+	);
+
 	return (
-		<figure id={id} aria-labelledby={titleId} className={expanded ? 'is-expanded' : undefined}>
-			<button
-				ref={btnRef}
-				type="button"
-				className="fs-btn"
-				aria-pressed={expanded}
-				aria-label={expanded ? 'Collapse figure' : 'Expand figure to fill the window'}
-				onClick={() => setExpanded((v) => !v)}
-			>
-				{expanded ? ICON_OUT : ICON_IN}
-				<span className="fs-l">{expanded ? 'Collapse' : 'Expand'}</span>
-			</button>
+		<figure
+			id={id}
+			aria-labelledby={titleId}
+			className={[className, expanded ? 'is-expanded' : ''].filter(Boolean).join(' ') || undefined}
+		>
+			{expandable ? (
+				<button
+					ref={btnRef}
+					type="button"
+					className="fs-btn"
+					aria-pressed={expanded}
+					aria-label={expanded ? 'Collapse figure' : 'Expand figure to fill the window'}
+					onClick={() => setExpanded((v) => !v)}
+				>
+					{expanded ? ICON_OUT : ICON_IN}
+					<span className="fs-l">{expanded ? 'Collapse' : 'Expand'}</span>
+				</button>
+			) : null}
 			<Figure />
-			<div className="fig-t" id={titleId}>
-				{title}
-			</div>
+			{titleWrap ? <div className={titleWrap}>{titleEl}</div> : titleEl}
 			{children}
-			<figcaption>{caption}</figcaption>
+			{caption ? <figcaption>{caption}</figcaption> : null}
 		</figure>
 	);
 }
@@ -222,13 +241,11 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 	);
 }
 
-export function DecisionHeader({ n, meta, title }: { n: number; meta: string; title: string }) {
+// Mono eyebrow label ("Decision 1 · Operators") over the section's h2.
+export function SectionHead({ label, title }: { label: string; title: ReactNode }) {
 	return (
 		<>
-			<div className="chal-n">
-				<b>{n}</b>
-				<span>{meta}</span>
-			</div>
+			<div className="label">{label}</div>
 			<SectionTitle>{title}</SectionTitle>
 		</>
 	);
@@ -243,11 +260,11 @@ export function Beat({ label, children }: { label: string; children: ReactNode }
 	);
 }
 
-export type Stat = { n: string; c: string };
+export type Stat = { n: string; c: ReactNode };
 
-export function Results({ stats }: { stats: Stat[] }) {
+export function Results({ stats, className = 'result' }: { stats: Stat[]; className?: string }) {
 	return (
-		<div className="result">
+		<div className={className}>
 			{stats.map((s) => (
 				<div key={s.n}>
 					<div className="n">{s.n}</div>

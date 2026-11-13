@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 
+import { CohortsFigure } from './CohortsFigure';
 import { Email, EmailRedesign, PostcardBack, PostcardBackRedesign, SmsIntroLink, SmsRedesign } from './fernwood';
-import { Beat, Carousel, Copy, DecisionHeader, Fig, Results } from './shared';
+import { Beat, Carousel, Copy, Fig, Results, SectionHead } from './shared';
 
 const SCORE: { p: 1 | 2; name: string; sent?: string; what: ReactNode; change: string }[] = [
 	{
@@ -13,15 +14,16 @@ const SCORE: { p: 1 | 2; name: string; sent?: string; what: ReactNode; change: s
 	},
 	{
 		p: 1,
-		name: 'Email 1',
-		sent: '1,380 sent',
+		name: 'Emails 1–2',
+		sent: '1,380 and 1,406 sent',
 		what: (
 			<>
-				<strong>45.1% opened</strong>, about twice the roughly 21% industry
-				benchmark for health and insurance email. 1.8% clicked.
+				<strong>45.1% and 44.3% opened</strong>, about twice the roughly 21%
+				industry benchmark for health and insurance email, but only 1.8% and
+				1.7% clicked.
 			</>
 		),
-		change: 'Move the button above the fold and change it to “Check my eligibility.”',
+		change: 'Move the button above the fold and change it to “Check my eligibility,” and remove bounced addresses before every later send.',
 	},
 	{
 		p: 1,
@@ -39,53 +41,11 @@ const SCORE: { p: 1 | 2; name: string; sent?: string; what: ReactNode; change: s
 	},
 	{
 		p: 2,
-		name: 'Email 2',
-		sent: '1,406 sent',
-		what: '44.3% opened and 1.7% clicked, holding steady.',
-		change: 'Remove bounced addresses before every later send.',
-	},
-	{
-		p: 2,
 		name: 'Agent calls',
 		what: 'The caller ID and voicemail used a different program name than the mail and email.',
 		change: 'Fixed in week 1, since it was in our own system: the caller ID and voicemail now matched the program’s name, so a call felt like the letter members already had.',
 	},
 ];
-
-function Scorecard() {
-	return (
-		<Fig
-			id="fig-score"
-			title="What each touchpoint did, and what I would change"
-			caption="Cohort 1, March 4–18, 2022. The campaign hit its goal, so the plan kept its approved materials; I documented these recommendations instead."
-		>
-			<div className="tbl-scroll">
-				<table className="score">
-					<thead>
-						<tr>
-							<th scope="col">Touchpoint</th>
-							<th scope="col">What happened</th>
-							<th scope="col">What I would change</th>
-						</tr>
-					</thead>
-					<tbody>
-						{SCORE.map((r) => (
-							<tr key={r.name}>
-								<th scope="row">
-									<span className="sw" style={{ ['--pc' as string]: `var(--p${r.p})` }} />
-									{r.name}
-									{r.sent ? <small>{r.sent}</small> : null}
-								</th>
-								<td>{r.what}</td>
-								<td>{r.change}</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-		</Fig>
-	);
-}
 
 type Redesign = { title: string; why: string; before: ReactNode; after: ReactNode; notes: string[] };
 
@@ -124,13 +84,39 @@ const REDESIGNS: Redesign[] = [
 	},
 ];
 
-function RedesignFigure() {
+// Figure 10 — the touchpoint scorecard, then the three redesigns it led to.
+function Scorecard() {
 	return (
 		<Fig
-			id="fig-redesign"
-			title="What I would change, redesigned"
-			caption="Recreated with a fictional brand. Left: as shipped in 2022. Right: a 2026 redesign applying the recommendations I documented after cohort 1, which the plan chose not to change mid-campaign."
+			id="fig-score"
+			title="What each touchpoint did, and what I would change"
+			caption="Cohort 1. The campaign hit its goal, so the plan kept its approved materials; I documented these recommendations instead. The redesigns apply them to the postcard, email, and text, recreated with a fictional brand: as shipped on the left, redesigned on the right."
 		>
+			<div className="tbl-scroll">
+				<table className="score">
+					<thead>
+						<tr>
+							<th scope="col">Touchpoint</th>
+							<th scope="col">What happened</th>
+							<th scope="col">What I would change</th>
+						</tr>
+					</thead>
+					<tbody>
+						{SCORE.map((r) => (
+							<tr key={r.name}>
+								<th scope="row">
+									<span className="sw" style={{ ['--pc' as string]: `var(--p${r.p})` }} />
+									{r.name}
+									{r.sent ? <small>{r.sent}</small> : null}
+								</th>
+								<td>{r.what}</td>
+								<td>{r.change}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
+			<div className="sub-h">Redesigned</div>
 			<Carousel
 				label="Three redesigned touchpoints"
 				titles={REDESIGNS.map((r) => r.title)}
@@ -142,11 +128,11 @@ function RedesignFigure() {
 						<p>{r.why}</p>
 						<div className="ba-pair">
 							<div>
-								<span>As shipped, 2022</span>
+								<span>As shipped</span>
 								{r.before}
 							</div>
 							<div>
-								<span className="new">Redesign, 2026</span>
+								<span className="new">Redesign</span>
 								{r.after}
 							</div>
 						</div>
@@ -164,11 +150,10 @@ function RedesignFigure() {
 
 export function Scale() {
 	return (
-		<section className="chal" id="c3">
-			<DecisionHeader
-				n={3}
-				meta="Decision 3 · Teams and systems · 2022"
-				title="Scale the service: make it work beyond one client"
+		<section className="dec" id="c3">
+			<SectionHead
+				label="Decision 3 · Teams and systems"
+				title="Scale the service: make what worked the standard"
 			/>
 			<Beat label="The challenge">
 				<Copy>
@@ -189,9 +174,10 @@ export function Scale() {
 						and procured.
 					</li>
 					<li>
-						<strong>List reconciliation:</strong> our clients’ lists, the portal,
-						and the call-center app were matched by hand every week. I pitched a
-						tool to our CTO, so enrolled members weren’t called again.
+						<strong>Automated list scrubbing:</strong> an engineer scrubbed our
+						clients’ lists against the portal and the call-center app by hand,
+						about an hour a day, a step on our service blueprints for years. I
+						automated it, so enrolled members weren’t called again.
 					</li>
 					<li>
 						<strong>Work taken off the plan’s plate:</strong> we owned copy,
@@ -205,14 +191,22 @@ export function Scale() {
 					</li>
 				</ul>
 			</Beat>
+			<CohortsFigure />
 			<Scorecard />
-			<RedesignFigure />
-			<Results
-				stats={[
-					{ n: '3', c: 'More populations ran the playbook: Medicare Advantage members, another plan, a public health system' },
-					{ n: '141', c: 'Self-enrollments in one week at the public health system' },
-				]}
-			/>
+			<Fig id="fig-scale" className="res-fig" expandable={false} title="Scale outcomes">
+				<Results
+					stats={[
+						{
+							n: 'Standard',
+							c: 'Several of the campaign’s new touchpoints became the default for future implementations',
+						},
+						{
+							n: 'Up to ~6 wks',
+							c: 'Engineering time saved a year: a daily hour of matching patient lists by hand, usually by our analytics engineer and sometimes escalated to our lead engineer or CTO, became one repeatable query',
+						},
+					]}
+				/>
+			</Fig>
 			<Copy style={{ marginTop: 28 }}>
 				Today I build the same way, with less wait: I hand-code full-stack apps
 				and prototype most experiments with Claude Code, so a bet like the portal

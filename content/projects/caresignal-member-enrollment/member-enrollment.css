@@ -1,5 +1,5 @@
-/* Member Enrollment case study — ported from the design file
-   tmp/member-enrollment-case-study-v4.html. Everything is nested under the
+/* Member Enrollment case study — ported from the Claude Design export
+   tmp/enrollment-case-study/case-study (v5). Everything is nested under the
    case study's own wrapper (`.me-case`, inside MDXLayout's
    [data-case="caresignal-member-enrollment"]) so none of these short class
    names (.chip, .row, .result…) leak into other pages. The design's page
@@ -18,7 +18,7 @@
 	--ink-5: rgba(57, 31, 0, 0.05);
 	--muted: #706c69;
 	--cerulean: var(--color-washes-cerulean-blue);
-	--figure: var(--color-washes-paper);
+	--figure: #fdfbf5;
 	--on-ink: #fffbf0;
 	--p1: #f9ac31;
 	--p2: #f06a41;
@@ -76,13 +76,18 @@
 	}
 
 	/* ── Intro ─────────────────────────────────────────────── */
-	.role {
-		font: 500 13px/20px var(--mono);
-		color: var(--muted);
+	.lead {
+		font: 300 20px/30px var(--body);
+		max-width: 880px;
 	}
-	.summary {
-		font: 300 22px/32px var(--body);
-		max-width: 780px;
+	@media (min-width: 768px) {
+		.lead {
+			font-size: 24px;
+			line-height: 34px;
+		}
+	}
+	.lead strong {
+		font-weight: 600;
 	}
 	.stats {
 		display: grid;
@@ -105,22 +110,52 @@
 		font: 400 14px/20px var(--body);
 		margin-top: 6px;
 	}
-	.hero-img {
-		margin: 40px 0 0;
-		border-radius: 1rem;
-		overflow: hidden;
-		background: #211e1f;
-		padding: 20px;
-	}
-
 	/* ── Sections ──────────────────────────────────────────── */
 	& section {
-		margin: 96px 0 0;
+		margin: 0 0 120px;
+		scroll-margin-top: 96px;
+	}
+	& section:last-child {
+		margin-bottom: 0;
+	}
+	/* Sections beside the sticky section nav (SectionNav, from 1100px): the
+	   prose sits in a 704px right-hand column, figures span the full width,
+	   as in the design's 200px + 1fr layout grid. */
+	.me-layout {
+		margin-top: 96px;
+	}
+	@media (min-width: 1100px) {
+		.me-layout > section > :not(figure, details) {
+			margin-left: auto;
+			max-width: 704px;
+		}
+		.me-layout details.more > summary {
+			margin-left: calc(100% - 704px);
+		}
+	}
+	/* a clear break before each new decision, and before Key Learnings */
+	.dec {
+		margin: 0;
+	}
+	.dec + .dec,
+	#learnings {
+		padding-top: 64px;
+	}
+	.label {
+		font: 500 13px/20px var(--mono);
+		color: var(--muted);
+		margin-bottom: 14px;
 	}
 	& h2 {
-		font: 500 32px/40px var(--kyoto);
+		font: 500 28px/36px var(--kyoto);
 		margin: 0 0 20px;
 		text-wrap: balance;
+	}
+	@media (min-width: 768px) {
+		& h2 {
+			font-size: 34px;
+			line-height: 42px;
+		}
 	}
 	.copy {
 		font: 300 20px/30px var(--body);
@@ -162,13 +197,23 @@
 	}
 	.overview li {
 		display: grid;
-		grid-template-columns: 40px 1fr;
-		align-items: baseline;
+		grid-template-columns: 44px 1fr;
+		align-items: start;
 		font: 300 20px/30px var(--body);
 	}
+	/* white on this green: APCA Lc 70.7 */
 	.overview li b {
-		font: italic 500 28px/30px var(--kyoto);
-		color: var(--cerulean);
+		width: 28px;
+		height: 28px;
+		margin-top: 1px;
+		border-radius: 50%;
+		background: #5f9112;
+		color: #fff;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: 700 15px/1 var(--body);
+		font-variant-numeric: tabular-nums;
 	}
 	.overview a {
 		text-decoration: none;
@@ -177,31 +222,9 @@
 		text-decoration: underline;
 	}
 	.overview strong {
-		font-weight: 600;
+		font-weight: 700;
 	}
 
-	/* Decisions */
-	.chal {
-		margin: 110px 0 0;
-		scroll-margin-top: 96px;
-	}
-	.chal-n {
-		display: flex;
-		align-items: baseline;
-		gap: 14px;
-		margin-bottom: 6px;
-	}
-	.chal-n b {
-		font: italic 500 64px/64px var(--kyoto);
-		color: var(--cerulean);
-	}
-	.chal-n span {
-		font: 500 13px/18px var(--mono);
-		color: var(--muted);
-	}
-	.chal h2 {
-		margin-top: 4px;
-	}
 	.beat {
 		display: grid;
 		grid-template-columns: 1fr;
@@ -248,39 +271,11 @@
 		margin-top: 4px;
 	}
 
-	/* What I learned */
-	.principles {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 16px;
-		margin-top: 24px;
-	}
-	@media (min-width: 768px) {
-		.principles {
-			grid-template-columns: 1fr 1fr;
-		}
-	}
-	.principles > div {
-		background: var(--figure);
-		border-radius: 0.5rem;
-		padding: 22px;
-	}
-	.principles h4 {
-		font: 500 20px/26px var(--kyoto);
-		margin: 0 0 8px;
-	}
-	.principles p {
-		font: 400 16px/24px var(--body);
-	}
-
 	.team {
 		font: 400 13px/22px var(--mono);
 	}
 	.team b {
 		font-weight: 500;
-	}
-	.back {
-		margin-top: 56px;
 	}
 
 	& details.more {
@@ -478,211 +473,6 @@
 	.db-n {
 		font: italic 500 22px/24px var(--kyoto);
 		text-align: right;
-	}
-
-	/* Figure: reasons and phases */
-	.reasons {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 10px;
-		margin-bottom: 24px;
-	}
-	@media (min-width: 768px) {
-		.reasons {
-			grid-template-columns: repeat(4, 1fr);
-		}
-	}
-	.reason {
-		all: unset;
-		box-sizing: border-box;
-		cursor: pointer;
-		border: 1px solid var(--ink-15);
-		border-radius: 0.5rem;
-		padding: 14px 14px 16px;
-		background: var(--card);
-		display: flex;
-		flex-direction: column;
-		gap: 6px;
-		transition:
-			border-color 0.2s,
-			box-shadow 0.2s,
-			opacity 0.2s;
-	}
-	.reason:hover {
-		border-color: var(--ink-50);
-	}
-	.reason:focus-visible {
-		outline: 2px solid var(--ink);
-		outline-offset: 3px;
-	}
-	.reason[aria-pressed='true'] {
-		border-color: var(--ink);
-		box-shadow: inset 0 -4px 0 var(--pc);
-	}
-	.reason .r-top {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font: 500 12px/16px var(--mono);
-		color: var(--muted);
-	}
-	.reason .sw {
-		width: 12px;
-		height: 12px;
-		border-radius: 3px;
-		background: var(--pc);
-		flex: none;
-	}
-	.reason .big {
-		font: italic 500 40px/44px var(--kyoto);
-	}
-	.reason .why {
-		font: 400 15px/21px var(--body);
-	}
-	.dim .reason[aria-pressed='false'] {
-		opacity: 0.55;
-	}
-
-	.tl-scroll {
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		padding-bottom: 4px;
-	}
-	.timeline {
-		min-width: 640px;
-		position: relative;
-	}
-	.tl-head {
-		display: grid;
-		grid-template-columns: 72px repeat(6, 1fr);
-		font: 500 12px/16px var(--mono);
-		color: var(--muted);
-		margin-bottom: 6px;
-	}
-	.tl-head span {
-		padding-left: 6px;
-	}
-	.phases {
-		display: grid;
-		grid-template-columns: 72px 2fr 2fr 1fr 1fr;
-		gap: 0;
-		margin-bottom: 8px;
-	}
-	.phase {
-		all: unset;
-		box-sizing: border-box;
-		cursor: pointer;
-		padding: 10px 10px 12px;
-		border-top: 6px solid var(--pc);
-		background: var(--card);
-		border-right: 1px solid var(--figure);
-		transition:
-			opacity 0.2s,
-			background 0.2s;
-	}
-	.phase:focus-visible {
-		outline: 2px solid var(--ink);
-		outline-offset: -2px;
-	}
-	.phase b {
-		display: block;
-		font: 500 12px/16px var(--mono);
-	}
-	.phase em {
-		display: block;
-		font: italic 500 16px/20px var(--kyoto);
-		margin-top: 4px;
-	}
-	.rows {
-		position: relative;
-	}
-	.row {
-		display: grid;
-		grid-template-columns: 72px 1fr;
-		align-items: center;
-		height: 44px;
-		border-top: 1px dashed var(--ink-15);
-	}
-	.row:last-child {
-		border-bottom: 1px dashed var(--ink-15);
-	}
-	.row .rl {
-		font: 500 12px/16px var(--mono);
-		color: var(--muted);
-	}
-	.lane {
-		position: relative;
-		height: 100%;
-	}
-	.chip {
-		position: absolute;
-		top: 8px;
-		transform: translateX(-50%);
-		white-space: nowrap;
-		font: 500 11px/14px var(--mono);
-		padding: 6px 8px;
-		border-radius: 0.25rem;
-		background: var(--chip);
-		color: var(--chip-ink);
-		border: 1px solid var(--ink-15);
-		box-shadow: inset 0 3px 0 var(--pc);
-		transition:
-			opacity 0.25s,
-			transform 0.25s;
-	}
-	.timeline.focus .chip:not(.on),
-	.timeline.focus .phase:not(.on) {
-		opacity: 0.28;
-	}
-	.timeline.playing .chip {
-		opacity: 0.18;
-	}
-	.timeline.playing .chip.shown {
-		opacity: 1;
-	}
-	.playhead {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		width: 2px;
-		background: var(--ink);
-		left: 72px;
-		opacity: 0;
-		pointer-events: none;
-	}
-	.timeline.playing .playhead {
-		opacity: 1;
-	}
-	.always {
-		margin-top: 12px;
-		font: 400 13px/20px var(--mono);
-		color: var(--muted);
-	}
-	.always b {
-		color: var(--ink);
-		font-weight: 500;
-	}
-	.f1-controls {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		align-items: center;
-		justify-content: space-between;
-		margin-top: 20px;
-	}
-	.detail {
-		margin-top: 20px;
-		border-top: 1px solid var(--ink-15);
-		padding-top: 16px;
-		min-height: 96px;
-	}
-	.detail h4 {
-		font: 500 20px/28px var(--kyoto);
-		margin: 0 0 6px;
-	}
-	.detail p {
-		font: 400 16px/24px var(--body);
-		max-width: 720px;
 	}
 
 	/* Figure: touchpoint strip */
@@ -1086,6 +876,321 @@
 		padding-left: 18px;
 		font: 400 14px/21px var(--body);
 		list-style: disc;
+	}
+
+	/* Result figures: decision outcomes and figure 2, no rules, no Expand */
+	.res-fig .result {
+		margin-top: 14px;
+	}
+	.res-fig .result > div {
+		border-top: 0;
+		padding-top: 0;
+	}
+	/* two outcomes, spread across the full width */
+	#fig-trust .result,
+	#fig-scale .result {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	#fig-outcomes .stats {
+		margin-top: 14px;
+		border-top: 0;
+		border-bottom: 0;
+		padding: 8px 0 4px;
+	}
+
+	/* Figure: invitation postcard above the touchpoint strip */
+	.strip-pc {
+		margin-bottom: 18px;
+	}
+	.strip-pc > span {
+		display: block;
+		font: 400 12px/18px var(--mono);
+		color: var(--muted);
+		margin-top: 6px;
+	}
+
+	/* Figure: scorecard + redesigns */
+	#fig-score .sub-h {
+		margin: 28px 0 10px;
+		font: italic 500 18px/24px var(--kyoto);
+	}
+
+	/* Figure: staggered cohorts */
+	#fig-weeks .coh-head {
+		padding-right: 110px;
+	}
+	@media (max-width: 640px) {
+		#fig-weeks .coh-head {
+			padding-right: 0;
+		}
+	}
+	#fig-weeks .coh-info {
+		all: unset;
+		cursor: pointer;
+		vertical-align: 4px;
+		margin-left: 8px;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		border: 1.25px solid var(--ink);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: italic 500 13px/1 var(--kyoto);
+		color: var(--ink);
+	}
+	#fig-weeks .coh-info:hover,
+	#fig-weeks .coh-info[aria-expanded='true'] {
+		background: var(--ink);
+		color: var(--card);
+	}
+	#fig-weeks .coh-info:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+	#fig-weeks .coh-pop {
+		position: absolute;
+		z-index: 9;
+		left: 32px;
+		right: 32px;
+		margin-top: 10px;
+		max-width: 440px;
+		background: var(--card);
+		color: var(--ink);
+		border: 1px solid var(--ink-15);
+		border-radius: 8px;
+		padding: 14px 16px;
+		font: 400 13px/19px var(--body);
+		box-shadow: 0 8px 24px rgba(57, 31, 0, 0.14);
+	}
+	#fig-weeks .coh-pop[hidden] {
+		display: none;
+	}
+	#fig-weeks .coh-pop b {
+		display: block;
+		font: italic 500 16px/20px var(--kyoto);
+		margin-bottom: 6px;
+	}
+	#fig-weeks .coh-pop p {
+		margin: 0 0 8px;
+	}
+	#fig-weeks .coh-pop p:last-child {
+		margin: 0;
+	}
+	#fig-weeks .coh-ctl {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 16px;
+		margin: 14px 0 12px;
+	}
+	#fig-weeks .coh-wk {
+		font: 500 12px/16px var(--mono);
+		color: var(--ink-75);
+		min-width: 84px;
+	}
+	#fig-weeks .coh-wk b {
+		color: var(--ink);
+		font-weight: 600;
+	}
+	/* the week slider: a thin rule and an outlined circle */
+	#fig-weeks input[type='range'] {
+		flex: 1 1 220px;
+		max-width: 360px;
+		-webkit-appearance: none;
+		appearance: none;
+		background: transparent;
+		height: 22px;
+		margin: 0;
+		cursor: pointer;
+	}
+	#fig-weeks input[type='range']::-webkit-slider-runnable-track {
+		height: 1px;
+		background: var(--ink);
+	}
+	#fig-weeks input[type='range']::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 16px;
+		height: 16px;
+		margin-top: -7.5px;
+		border-radius: 50%;
+		border: 1.5px solid var(--ink);
+		background: var(--card);
+		transition: background 0.15s;
+	}
+	#fig-weeks input[type='range']::-moz-range-track {
+		height: 1px;
+		background: var(--ink);
+		border: 0;
+	}
+	#fig-weeks input[type='range']::-moz-range-thumb {
+		width: 13px;
+		height: 13px;
+		border-radius: 50%;
+		border: 1.5px solid var(--ink);
+		background: var(--card);
+	}
+	#fig-weeks input[type='range']:hover::-webkit-slider-thumb,
+	#fig-weeks input[type='range']:active::-webkit-slider-thumb {
+		background: var(--ink);
+	}
+	#fig-weeks input[type='range']:hover::-moz-range-thumb,
+	#fig-weeks input[type='range']:active::-moz-range-thumb {
+		background: var(--ink);
+	}
+	#fig-weeks input[type='range']:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 4px;
+		border-radius: 4px;
+	}
+	#fig-weeks .coh-loop {
+		all: unset;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 6px 14px;
+		border-radius: 999px;
+		border: 1.25px solid var(--ink);
+		background: var(--card);
+		color: var(--ink);
+		font: 500 12px/16px var(--mono);
+		letter-spacing: 0.02em;
+		transition:
+			background 0.2s,
+			color 0.2s;
+	}
+	#fig-weeks .coh-loop:hover {
+		background: color-mix(in srgb, var(--card) 90%, var(--ink));
+	}
+	#fig-weeks .coh-loop[aria-pressed='true'] {
+		background: var(--ink);
+		color: var(--card);
+	}
+	#fig-weeks .coh-loop:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+	#fig-weeks .coh-scroll {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 4px;
+	}
+	.cohorts {
+		position: relative;
+		min-width: 720px;
+		display: grid;
+		grid-template-columns: 84px repeat(14, 1fr);
+		gap: 3px;
+		font: 500 12px/16px var(--mono);
+	}
+	.cohorts .h {
+		color: var(--muted);
+		text-align: center;
+		padding: 4px 0;
+	}
+	.cohorts .h.now {
+		color: var(--ink);
+		font-weight: 600;
+	}
+	.cohorts .rl {
+		color: var(--muted);
+		display: flex;
+		align-items: center;
+	}
+	.cell {
+		height: 34px;
+		border-radius: 3px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--chip-ink);
+		transition:
+			opacity 0.2s,
+			outline-color 0.2s;
+		outline: 2px solid transparent;
+		outline-offset: -2px;
+	}
+	.cell.p1 {
+		background: color-mix(in srgb, var(--p1) 45%, var(--card));
+	}
+	.cell.p2 {
+		background: color-mix(in srgb, var(--p2) 40%, var(--card));
+	}
+	.cell.p3 {
+		background: color-mix(in srgb, var(--p3) 40%, var(--card));
+	}
+	.cell.p4 {
+		background: color-mix(in srgb, var(--p4) 40%, var(--card));
+	}
+	.cell.now {
+		outline-color: var(--ink);
+	}
+	.cell.pz {
+		background: repeating-linear-gradient(135deg, transparent 0 5px, var(--ink-15) 5px 6px);
+		opacity: 0.9;
+	}
+	.cohorts.loop2 .lp-dim {
+		opacity: 0.45;
+	}
+	.cohorts.loop2 .cell.now {
+		outline-color: transparent;
+	}
+	.cohorts.loop2 .rl.lp-cur {
+		color: var(--ink);
+		font-weight: 600;
+	}
+	.loop-box {
+		position: absolute;
+		border: 2px solid #5f9112;
+		border-radius: 6px;
+		pointer-events: none;
+	}
+	.loop-arrow {
+		position: absolute;
+		left: 0;
+		top: 0;
+		overflow: visible;
+		pointer-events: none;
+		color: #5f9112;
+	}
+	.loop-arrow > path {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linejoin: round;
+	}
+	#fig-weeks .coh-note {
+		margin: 10px 0 0;
+		font: 400 14px/20px var(--body);
+		color: var(--ink-75);
+		min-height: 20px;
+	}
+	#fig-weeks .coh-key {
+		list-style: none;
+		margin: 10px 0 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 16px;
+		font: 500 11px/14px var(--mono);
+		color: var(--ink-75);
+	}
+	#fig-weeks .coh-key li {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	#fig-weeks .coh-key li::before {
+		content: '';
+		width: 12px;
+		height: 12px;
+		border-radius: 3px;
+		background: color-mix(in srgb, var(--pc) 45%, var(--card));
+	}
+	#fig-weeks .coh-key li.coh-key-pz::before {
+		background: repeating-linear-gradient(135deg, transparent 0 3px, var(--ink-50) 3px 4px);
 	}
 
 	/* ── Fernwood recreations (fictional brand) ────────────── */

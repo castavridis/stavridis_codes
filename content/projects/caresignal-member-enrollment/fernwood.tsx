@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-// Recreations of the 2022 enrollment materials under a fictional brand,
+// Recreations of the enrollment materials under a fictional brand,
 // Fernwood Health. Static, presentational markup; styles live under `.mk`
 // in member-enrollment.css. Several pieces appear more than once (the
 // postcard back and email in both the hero and the redesign figure), so
@@ -148,7 +148,7 @@ function EmailFrame({
 					<Logo dark />
 				</div>
 				{children}
-				<div className="em-foot">Unsubscribe · Fernwood Health · © 2022</div>
+				<div className="em-foot">Unsubscribe · Fernwood Health</div>
 			</div>
 		</div>
 	);

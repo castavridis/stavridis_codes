@@ -9,12 +9,12 @@ type Row = Lane | { line: string };
 
 // Column: phase label, title, dates, accent.
 const COLS: [string, string, string, string][] = [
-	['Before launch', 'Prep', 'Dec–Feb', 'var(--ink-50)'],
-	['Phase 1', 'Introducing enhanced benefits', 'Mar 7–20', 'var(--p1)'],
-	['Phase 2', 'Need more information?', 'Mar 21–Apr 3', 'var(--p2)'],
-	['Phase 3', 'Last chance', 'Apr 4–11', 'var(--p3)'],
+	['Before launch', 'Prep', 'Ahead of week 1', 'var(--ink-50)'],
+	['Phase 1', 'Introducing enhanced benefits', 'weeks 1–2', 'var(--p1)'],
+	['Phase 2', 'Need more information?', 'weeks 3–4', 'var(--p2)'],
+	['Phase 3', 'Last chance', 'week 5', 'var(--p3)'],
 	['Pause', 'Capacity pause', '1–4 weeks', 'var(--ink-15)'],
-	['Phase 4', 'We saved you a spot', 'Apr 18–30', 'var(--p4)'],
+	['Phase 4', 'We saved you a spot', 'after the pause', 'var(--p4)'],
 	['Enrolled', 'Welcome', 'First check-in', 'var(--cerulean)'],
 ];
 
@@ -121,8 +121,8 @@ const ROWS: Row[] = [
 				{
 					text: 'Client list, portal, and call center reconciled',
 					flags: [
-						['pain', 'Matched by hand each week'],
-						['fix', 'Tool I pitched to our CTO'],
+						['pain', 'Scrubbed by hand, about an hour a day'],
+						['fix', 'Automated in this project'],
 					],
 				},
 			],
@@ -142,7 +142,7 @@ export function ServiceBlueprint() {
 		<Fig
 			id="fig-bp"
 			title="Service blueprint of the enrollment campaign, from launch prep to a member’s first check-in"
-			caption="Reconstructed in 2026 from the 2021–22 campaign plan, communication schedule, scripts, touchpoint tracking, and meeting notes. Member feelings are inferred from research and decline reasons, not measured."
+			caption="Reconstructed from the campaign plan, communication schedule, scripts, touchpoint tracking, and meeting notes. Member feelings are inferred from research and decline reasons, not measured."
 		>
 			<div className="bp-controls">
 				<button className="btn ghost" type="button" aria-pressed={flags} onClick={() => setFlags((v) => !v)}>

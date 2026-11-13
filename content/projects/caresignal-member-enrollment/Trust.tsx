@@ -1,17 +1,35 @@
 import type { ReactNode } from 'react';
 
-import { Email, Letter, PortalForm, PortalHelp, PortalSettings, SmsIntro } from './fernwood';
-import { JourneyFigure } from './JourneyFigure';
+import Citation from '../../../src/features/projects/components/figures/Citation';
+
+import { CITATIONS } from './citations';
+import {
+	Email,
+	Letter,
+	PortalForm,
+	PortalHelp,
+	PortalSettings,
+	PostcardBack,
+	PostcardFront,
+	SmsIntro,
+} from './fernwood';
 import { ServiceBlueprint } from './ServiceBlueprint';
-import { Beat, Carousel, Copy, DecisionHeader, Fig, Results } from './shared';
+import { Beat, Carousel, Copy, Fig, Results, SectionHead } from './shared';
 
 function TouchpointStrip() {
 	return (
 		<Fig
 			id="fig-strip"
-			title="The first touchpoints a member received, after the postcard"
-			caption="Recreated with a fictional brand, Fernwood Health, from the materials as approved in 2022. The invitation postcard is at the top of this page."
+			title="The first touchpoints a member received"
+			caption="Recreated with a fictional brand, Fernwood Health, from the materials as approved."
 		>
+			<div className="strip-pc">
+				<div className="mk mk-pc" role="img" aria-label="Invitation postcard, front and back.">
+					<PostcardFront />
+					<PostcardBack />
+				</div>
+				<span>Invitation postcard with three ways to enroll</span>
+			</div>
 			<div className="strip">
 				<div>
 					<Email />
@@ -76,7 +94,7 @@ function PortalFigure() {
 		<Fig
 			id="fig-portal"
 			title="The self-enrollment portal: each screen removes one reason to give up"
-			caption="Recreated with a fictional brand from the self-enrollment portal I designed in late 2020, which each health plan client co-branded. Sample member data."
+			caption="Recreated with a fictional brand from the self-enrollment portal I designed, which each health plan client co-branded. Sample member data."
 		>
 			<Carousel
 				label="Self-enrollment portal, five screens"
@@ -106,10 +124,9 @@ function PortalFigure() {
 
 export function Trust() {
 	return (
-		<section className="chal" id="c2">
-			<DecisionHeader
-				n={2}
-				meta="Decision 2 · Members and families · 2021–22"
+		<section className="dec" id="c2">
+			<SectionHead
+				label="Decision 2 · Members and families"
 				title="Build trust: earn a stranger’s yes, fast"
 			/>
 			<Beat label="The challenge">
@@ -124,8 +141,9 @@ export function Trust() {
 			<Beat label="What I did">
 				<Copy>
 					I had designed and engineered nearly all of our enrollment touchpoints,
-					but they had always been deployed one at a time. I connected them into
-					one journey, with each phase answering one reason to say no.
+					but they were deployed one at a time, or in combinations chosen by gut
+					rather than by a strategy anyone could explain. I connected them into
+					one journey, with each phase answering one obstacle to enrollment.
 				</Copy>
 				<ul className="clean">
 					<li>
@@ -149,7 +167,6 @@ export function Trust() {
 					</li>
 				</ul>
 			</Beat>
-			<JourneyFigure />
 			<Beat label="The tradeoff">
 				<Copy>
 					Persistence versus annoyance. Some members took eight or more calls, but
@@ -159,14 +176,32 @@ export function Trust() {
 			</Beat>
 			<TouchpointStrip />
 			<PortalFigure />
-			<Results
-				stats={[
-					{ n: '21%', c: 'Conversion, exceeding the client’s 20% target' },
-					{ n: '5→21%', c: 'Versus a comparable campaign: a similar population in the same region, for another payer' },
-					{ n: '$79→$19', c: 'Cost per enrollment once agent calls layered onto mail, email, and text' },
-					{ n: '24 of 33', c: 'First enrollments came through the portal, before any agent called' },
-				]}
-			/>
+			<Fig id="fig-trust" className="res-fig" expandable={false} title="Trust outcomes">
+				<Results
+					stats={[
+						{
+							n: '$79→$19',
+							c: (
+								<>
+									Cost per enrollment once agent calls reached members who had
+									already heard from us by mail, email, and text
+									<Citation {...CITATIONS.cost} />
+								</>
+							),
+						},
+						{
+							n: '45%',
+							c: (
+								<>
+									Email open rate, about twice the average for health and insurance
+									email
+									<Citation {...CITATIONS.email} />
+								</>
+							),
+						},
+					]}
+				/>
+			</Fig>
 			<Copy style={{ marginTop: 28 }}>
 				<strong>What contributed most.</strong> Our touchpoint tracking points to
 				three decisions: the one-step portal (24 of the first 33 enrollments came
