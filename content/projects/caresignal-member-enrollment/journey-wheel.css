@@ -1,0 +1,633 @@
+/* Figure 1 — the six-week journey wheel and cohort 1's enrollment chart.
+   Ported from tmp/enrollment-case-study/figure-1/index.html (the design's
+   standalone figure 1, as embedded in the case study: light only, opens
+   finished). Scoped under .wh; the design's dark-mode rules, the hidden
+   Replay pill and unused HUD/legend rules are dropped. */
+
+[data-case='caresignal-member-enrollment'] .me-case .wh {
+	--paper: #fdfbf5;
+	--wash-paper: #fdfbf5;
+	--ink: var(--color-confetti-black);
+	--ink75: rgba(57, 31, 0, 0.75);
+	--ink55: rgba(57, 31, 0, 0.55);
+	--line: rgba(57, 31, 0, 0.15);
+	--line2: rgba(57, 31, 0, 0.28);
+	--card: #fff;
+	--p1: #f9ac31;
+	--p2: #f06a41;
+	--p3: #79b315;
+	--p4: #457cbb;
+
+	margin: 32px 0 0;
+
+	.fig {
+		position: relative;
+		margin: 0;
+		border-radius: 16px;
+		background: var(--paper);
+		padding: 18px 24px 14px;
+		overflow: hidden;
+	}
+	.fig-top {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-bottom: 10px;
+	}
+	@media (min-width: 880px) {
+		.fig-top {
+			position: absolute;
+			top: 18px;
+			left: 24px;
+			right: 24px;
+			margin: 0;
+			z-index: 6;
+			pointer-events: none;
+		}
+		.fig-top > * {
+			pointer-events: auto;
+		}
+		.chalwrap {
+			padding-top: 34px;
+		}
+	}
+	.info {
+		all: unset;
+		cursor: pointer;
+		margin-left: auto;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		border: 1.25px solid var(--ink);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: italic 400 13px/1 var(--font-kyoto);
+	}
+	.info:hover,
+	.info[aria-expanded='true'] {
+		background: var(--ink);
+		color: var(--paper);
+	}
+	.info:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+	& h2.fig-h {
+		font: 400 26px/34px var(--font-kyoto);
+		margin: 0 0 16px;
+		max-width: 760px;
+	}
+	@media (min-width: 768px) {
+		& h2.fig-h {
+			font-size: 30px;
+			line-height: 38px;
+		}
+	}
+	.hl-label {
+		font-family: inherit;
+		font-style: italic;
+		font-synthesis: style;
+	}
+
+	/* stage */
+	.stage {
+		position: relative;
+		width: 100%;
+		max-width: 640px;
+		aspect-ratio: 1/1;
+		margin: 0 auto;
+	}
+	.stage > .wash,
+	.stage > svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.wash {
+		pointer-events: none;
+	}
+	.wash canvas {
+		width: 100% !important;
+		height: 100% !important;
+		display: block;
+	}
+	.ring-mask {
+		-webkit-mask-image: radial-gradient(
+			circle closest-side at 50% 50%,
+			transparent 0,
+			transparent calc(var(--rin) - 0.5%),
+			#000 var(--rin),
+			#000 var(--rout),
+			transparent calc(var(--rout) + 0.5%)
+		);
+		mask-image: radial-gradient(
+			circle closest-side at 50% 50%,
+			transparent 0,
+			transparent calc(var(--rin) - 0.5%),
+			#000 var(--rin),
+			#000 var(--rout),
+			transparent calc(var(--rout) + 0.5%)
+		);
+		-webkit-mask-repeat: no-repeat;
+		mask-repeat: no-repeat;
+	}
+
+	/* svg */
+	& svg text {
+		fill: var(--ink);
+	}
+	.track {
+		fill: none;
+		stroke: var(--line2);
+		stroke-width: 1;
+		stroke-dasharray: 2 5;
+	}
+	.chan {
+		fill: none;
+		stroke: var(--line);
+		stroke-width: 1;
+	}
+	.chan-label {
+		font: 500 11px var(--font-mono);
+		fill: var(--ink75);
+		letter-spacing: 0.04em;
+	}
+	.wk {
+		font: 500 10px var(--font-mono);
+		fill: var(--ink75);
+		letter-spacing: 0.04em;
+	}
+	.tick {
+		stroke: var(--line2);
+		stroke-width: 1;
+	}
+	.spoke {
+		stroke-width: 1.1;
+		stroke-linecap: round;
+		opacity: 0.75;
+	}
+	.tp {
+		outline: none;
+	}
+	.tp .hit {
+		fill: transparent;
+	}
+	.tp:focus .ring {
+		stroke: var(--ink);
+		stroke-width: 1.5;
+		fill: none;
+	}
+	.tp .ring {
+		fill: none;
+		stroke: none;
+	}
+	.phase-title2 {
+		font: 400 18px var(--font-kyoto);
+	}
+	.phase-k {
+		font: 500 10px var(--font-mono);
+		fill: var(--ink75);
+		letter-spacing: 0.06em;
+	}
+	.photo-ring {
+		fill: none;
+		stroke: var(--paper);
+		stroke-width: 6;
+	}
+
+	/* week-over-week chart under the wheel */
+	.wkc .wh-title {
+		margin: 0 0 2px;
+		font: 400 26px/34px var(--font-kyoto);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+	@media (min-width: 768px) {
+		.wkc .wh-title {
+			font-size: 30px;
+			line-height: 38px;
+		}
+	}
+	.journeycol {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 0;
+	}
+	.journeycol .stage {
+		width: 100%;
+	}
+	.wkc {
+		margin-top: 8px;
+		width: 100%;
+		padding-top: 12px;
+		border-top: 1px solid var(--line);
+	}
+	.wkc-stage {
+		position: relative;
+		width: 100%;
+		height: 184px;
+	}
+	.wkc-stage > .wash,
+	.wkc-stage > svg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.csvgB text,
+	.csvg text {
+		font: 500 11px var(--font-mono);
+		letter-spacing: 0.04em;
+		fill: var(--ink75);
+	}
+	.csvg .cv {
+		font: 400 14px var(--font-kyoto);
+		fill: var(--ink);
+		opacity: 0;
+		transition: opacity 0.4s;
+	}
+	.csvg .cv.on {
+		opacity: 1;
+	}
+	.csvg .cv.last {
+		font-size: 17px;
+	}
+	.csvg .cflag {
+		font: 600 11px var(--font-body);
+		letter-spacing: 0;
+		fill: var(--ink);
+	}
+	.csvg .axis {
+		stroke: var(--line2);
+		stroke-width: 1;
+	}
+
+	/* challenges beside the journey */
+	.split {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 20px;
+		margin-top: 6px;
+	}
+	@media (min-width: 880px) {
+		.split {
+			grid-template-columns: minmax(260px, 330px) minmax(0, 1fr);
+			gap: 28px;
+			align-items: center;
+		}
+		.split .stage {
+			max-width: 600px;
+			width: 100%;
+		}
+	}
+	.chal {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.chal li {
+		display: grid;
+		grid-template-columns: 30px 1fr;
+		gap: 10px;
+		align-items: start;
+		padding: 12px 12px 12px 10px;
+		border-radius: 10px;
+		cursor: default;
+		outline: none;
+		transition:
+			background 0.45s ease,
+			opacity 0.45s ease,
+			transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1);
+	}
+	/* white numbers meet APCA Lc 60 at 16px bold: phases 1 and 3 are
+	   deepened slightly toward the ink colour */
+	.chal .cbadge {
+		width: 30px;
+		height: 30px;
+		margin-top: -4px;
+		border-radius: 50%;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: 700 16px/1 var(--font-body);
+		color: #fff;
+		font-variant-numeric: tabular-nums;
+		background: var(--cb);
+	}
+	.chal li:nth-child(1) {
+		--cb: #cb8a25;
+	}
+	.chal li:nth-child(2) {
+		--cb: #f06a41;
+	}
+	.chal li:nth-child(3) {
+		--cb: #73a613;
+	}
+	.chal li:nth-child(4) {
+		--cb: #457cbb;
+	}
+	.chal .ct {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+	}
+	.chal b {
+		font: 600 15px/21px var(--font-body);
+	}
+	.chal .cs {
+		font: 400 13px/18px var(--font-body);
+		color: var(--ink75);
+	}
+	.chal li[data-state='upcoming'] {
+		opacity: 0.5;
+	}
+	.chal li[data-focus='on'] {
+		background: color-mix(in srgb, var(--c) 18%, transparent);
+	}
+	.chal li[data-focus='off'] {
+		opacity: 0.35;
+	}
+	.chal li:focus-visible {
+		box-shadow: 0 0 0 2px var(--ink);
+	}
+	.chal li[data-state='active'] {
+		background: color-mix(in srgb, var(--c) 18%, transparent);
+	}
+
+	/* a ~500ms entrance the first time the figure comes into view */
+	.chalwrap .eb,
+	.journeycol .stage,
+	.wkc {
+		transition:
+			opacity 0.38s ease,
+			transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1);
+	}
+	.fig.pre .chal li,
+	.fig.pre .wkc {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	.fig.pre .journeycol .stage {
+		opacity: 0;
+		transform: scale(0.97);
+	}
+	.fig.intro .chal li:nth-child(1) {
+		transition-delay: 30ms;
+	}
+	.fig.intro .chal li:nth-child(2) {
+		transition-delay: 60ms;
+	}
+	.fig.intro .chal li:nth-child(3) {
+		transition-delay: 90ms;
+	}
+	.fig.intro .chal li:nth-child(4) {
+		transition-delay: 120ms;
+	}
+	.fig.intro .journeycol .stage {
+		transition-delay: 40ms;
+	}
+	.fig.intro .wkc {
+		transition-delay: 110ms;
+	}
+
+	.printonly {
+		display: none;
+	}
+	.tip {
+		position: absolute;
+		pointer-events: none;
+		background: var(--ink);
+		color: var(--paper);
+		font: 400 12px/16px var(--font-body);
+		padding: 6px 9px;
+		border-radius: 0.25rem;
+		transform: translate(-50%, -135%);
+		white-space: nowrap;
+		opacity: 0;
+		transition: opacity 0.15s;
+		z-index: 6;
+	}
+	.tip.on {
+		opacity: 1;
+	}
+
+	/* Linda's own info button, below her face on the portrait */
+	.persona {
+		all: unset;
+		cursor: pointer;
+		position: absolute;
+		left: 50%;
+		top: 61.4%;
+		transform: translate(-50%, -50%);
+		z-index: 4;
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		padding: 3px 5px 3px 12px;
+		border-radius: 999px;
+		background: rgba(57, 31, 0, 0.76);
+		color: #fbf6ea;
+		font: italic 500 15px/22px var(--font-kyoto);
+		white-space: nowrap;
+	}
+	.persona .pi {
+		width: 17px;
+		height: 17px;
+		border-radius: 50%;
+		border: 1.25px solid #fbf6ea;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: italic 500 11px/1 var(--font-kyoto);
+	}
+	.persona:hover .pi,
+	.persona[aria-expanded='true'] .pi {
+		background: #fbf6ea;
+		color: #391f00;
+	}
+	.persona:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+	.vh {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	/* phase rationale buttons */
+	.phinfo {
+		all: unset;
+		cursor: pointer;
+		position: absolute;
+		transform: translate(-50%, -50%);
+		z-index: 5;
+		width: 15px;
+		height: 15px;
+		border-radius: 50%;
+		border: 1.1px solid var(--ink);
+		background: var(--paper);
+		color: var(--ink);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font: italic 500 9.5px/1 var(--font-kyoto);
+	}
+	.phinfo:hover,
+	.phinfo[aria-expanded='true'] {
+		background: var(--ink);
+		color: var(--paper);
+	}
+	.phinfo:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+
+	/* popovers */
+	.pop {
+		position: absolute;
+		right: 24px;
+		top: 56px;
+		z-index: 9;
+		max-width: 380px;
+		background: var(--card);
+		color: var(--ink);
+		border: 1px solid var(--line2);
+		border-radius: 8px;
+		padding: 14px 16px;
+		font: 400 13px/19px var(--font-body);
+		box-shadow: 0 8px 24px rgba(57, 31, 0, 0.14);
+	}
+	.pop[hidden] {
+		display: none;
+	}
+	.pop b {
+		display: block;
+		font: 400 15px/20px var(--font-kyoto);
+		margin: 2px 0 6px;
+	}
+	.pop p {
+		margin: 0 0 9px;
+	}
+	.pop .pstat,
+	.pop .pnote {
+		color: var(--ink75);
+		font-size: 12px;
+		line-height: 17px;
+	}
+	.pop .pnote {
+		margin-bottom: 12px;
+	}
+	.pop .pnote.last {
+		margin-bottom: 0;
+	}
+	.pop .ptech {
+		margin: 0;
+		font: 500 11px/16px var(--font-mono);
+		letter-spacing: 0.03em;
+		color: var(--ink75);
+	}
+	.pop.ppop {
+		left: 50%;
+		right: auto;
+		top: calc(61.4% + 20px);
+		transform: translateX(-50%);
+		width: min(320px, 92%);
+		max-width: none;
+	}
+	.pop.phpop {
+		left: 50%;
+		right: auto;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: min(360px, 92%);
+		max-width: none;
+		z-index: 8;
+	}
+	.pop.phpop ul {
+		margin: 4px 0 10px;
+		padding-left: 18px;
+		list-style: disc;
+	}
+	.pop.phpop li {
+		margin: 0 0 6px;
+	}
+
+	/* phones: the wheel bleeds to the figure's edges and its labels grow in
+	   the wheel's own units */
+	@media (max-width: 600px) {
+		.fig {
+			padding: 16px 16px 12px;
+		}
+		.journeycol .stage {
+			width: calc(100% + 32px);
+			max-width: none;
+			margin: 0 -16px;
+		}
+		.phase-title2 {
+			font-size: 25px;
+		}
+		.phase-k {
+			display: none;
+		}
+		.wk {
+			font-size: 17px;
+		}
+		.chan-label {
+			font-size: 17px;
+		}
+		.phinfo {
+			width: 20px;
+			height: 20px;
+			font-size: 11px;
+		}
+		.persona {
+			font-size: 12px;
+			line-height: 18px;
+			padding: 2px 4px 2px 9px;
+			gap: 5px;
+		}
+		.persona .pi {
+			width: 14px;
+			height: 14px;
+			font-size: 10px;
+		}
+		.csvg .cv {
+			font-size: 12px;
+		}
+		.csvg .cv.last {
+			font-size: 14px;
+		}
+	}
+}
+
+@media print {
+	[data-case='caresignal-member-enrollment'] .me-case .wh {
+		.printonly {
+			display: inline;
+		}
+		.wash {
+			display: none !important;
+		}
+		.info,
+		.phinfo,
+		.persona .pi {
+			display: none !important;
+		}
+		.fig.pre .chal li,
+		.fig.pre .wkc,
+		.fig.pre .journeycol .stage {
+			opacity: 1 !important;
+			transform: none !important;
+		}
+	}
+}
