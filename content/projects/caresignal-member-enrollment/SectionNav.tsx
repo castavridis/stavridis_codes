@@ -7,11 +7,14 @@ import { findScrollport } from '../../../src/features/projects/components/figure
 // Desktop-only sticky section nav, copied from the clinician case studies'
 // SectionNav (it isn't a shared component yet) with this page's sections. A
 // white card pinned at 96px in the left column; mono labels with a 6px dot
-// (red on the active one). The list stays open the whole way down (six
-// sections fit), and the card's border + shadow "peel" in like chewed gum
-// once it sticks, as on the clinician case study.
+// (red on the active one). As on the clinician case study, the first item
+// ("Role") is the top of the page; the full list shows until section 1
+// (Capacity), then collapses to the current item plus a caret that expands
+// the rest. The card's border + shadow "peel" in like chewed gum once it
+// sticks.
 // BackToTop keys off nav[aria-label="Sections"].
 export const ITEMS = [
+	{ key: 'role', label: 'Role' },
 	{ key: 'problem', label: 'The problem' },
 	{ key: 'c1', label: '1 · Capacity' },
 	{ key: 'c2', label: '2 · Trust' },
@@ -20,8 +23,9 @@ export const ITEMS = [
 	{ key: 'team', label: 'Team' },
 ];
 
-// Never collapses: the index is past the last section.
-const COLLAPSE_FROM = ITEMS.length;
+// The list collapses to the current item once the active section reaches
+// section 1 (Capacity); before that the whole list is shown.
+const COLLAPSE_FROM = ITEMS.findIndex((it) => it.key === 'c1');
 const INK = 'var(--color-confetti-black)';
 
 // The current section: the last one whose top has passed 40% down the
@@ -39,19 +43,41 @@ export function activeSection(port: HTMLElement | null | undefined): string {
 	return current;
 }
 
-// Scroll to a section and mirror it in the URL hash.
-export function goToSection(id: string) {
+// Scroll to a section and mirror it in the URL hash. "Role" (the first item)
+// is the top of the page: it scrolls the sheet's scrollport home and clears
+// the hash. `from` is any element inside that scrollport.
+export function goToSection(id: string, from?: Element | null) {
 	const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+	if (id === ITEMS[0].key) {
+		const port = findScrollport(from ?? document.querySelector('nav[aria-label="Sections"]'));
+		(port ?? window).scrollTo({ top: 0, behavior });
+		history.replaceState(null, '', location.pathname + location.search);
+		return;
+	}
 	const el = document.getElementById(id);
 	if (el) el.scrollIntoView({ behavior });
 	history.replaceState(null, '', `#${id}`);
 }
 
-// The card's left padding + border. The card hangs this far left of the nav
-// column so its text (the "section" eyebrow, the dots) sits on the content
-// column's left edge, while the card's border — visible once it peels —
-// lines up with BackToTop's pill, which tracks the card's left edge.
+// The card's left padding + border: its resting offset before the first
+// alignment pass (see alignToChrome).
 const CARD_INSET = 18 + 1.25;
+
+// Keep the card's left edge on the sticky chrome row's left edge (where its
+// "Title: Subtitle" and tags start). The chrome's inline padding springs
+// from 72 to 36px once scrolled, so this is measured rather than fixed.
+// BackToTop's pill tracks the card's left edge (alignSelector), so it lines
+// up with the top nav too.
+function alignToChrome(card: HTMLElement) {
+	const row = card.closest('[data-case]')?.querySelector<HTMLElement>('[data-chrome-row]');
+	if (!row || getComputedStyle(card.parentElement ?? card).display === 'none') return;
+	const target = row.getBoundingClientRect().left;
+	const current = card.getBoundingClientRect().left;
+	const d = target - current;
+	if (Math.abs(d) < 0.5) return;
+	const ml = parseFloat(card.style.marginLeft);
+	card.style.marginLeft = `${((Number.isFinite(ml) ? ml : -CARD_INSET) + d).toFixed(1)}px`;
+}
 
 export function SectionNav() {
 	const cardRef = useRef<HTMLDivElement>(null);
@@ -78,9 +104,14 @@ export function SectionNav() {
 				const r = card.getBoundingClientRect();
 				const pr = card.parentElement?.getBoundingClientRect();
 				setStuck(!!pr && r.top - pr.top > 2);
+				alignToChrome(card);
 			}
+			// Keep re-aligning while the chrome's padding spring settles.
+			if (performance.now() < settleUntil && !raf) raf = requestAnimationFrame(tick);
 		};
+		let settleUntil = 0;
 		const onScroll = () => {
+			settleUntil = performance.now() + 1500;
 			if (!raf) raf = requestAnimationFrame(tick);
 		};
 		// capture: the case study scrolls inside the sheet overlay, and scroll
@@ -201,7 +232,7 @@ export function SectionNav() {
 			return;
 		}
 		if (navOpen) setNavOpen(false);
-		goToSection(id);
+		goToSection(id, cardRef.current);
 	};
 
 	return (
@@ -243,7 +274,7 @@ export function SectionNav() {
 					return (
 						<a
 							key={it.key}
-							href={`#${it.key}`}
+							href={i === 0 ? '#' : `#${it.key}`}
 							aria-current={isActive ? 'true' : undefined}
 							aria-hidden={hide || undefined}
 							tabIndex={hide ? -1 : 0}
