@@ -91,8 +91,8 @@ export const companies: Record<string, CompanyConfig> = {
   honor: {
     name: 'Honor',
     role: 'pd',
-    cover_letter: '',
-    resume: '',
+    cover_letter: '/cover-letters/C-Stavridis_Honor_Cover-Letter.pdf',
+    resume: '/resumes/C-Stavridis_Honor_Resume.pdf',
     featuredSlugs: ['caresignal-member-enrollment','caresignal-clinician-app', 'sqshbook', 'fracta'],
     featuredProjects: ['caresignal-member-enrollment'],
     heroSlugs: ['caresignal-member-enrollment', 'caresignal-clinician-app'],
@@ -108,7 +108,7 @@ export const companies: Record<string, CompanyConfig> = {
   mayo_clinic: {
     name: 'Mayo Clinic',
     role: 'pd',
-    cover_letter: 'cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
+    cover_letter: '/cover-letters/C-Stavridis_Mayo-Clinic_Cover-Letter.pdf',
     resume: '/resumes/C-Stavridis_Mayo-Clinic_Resume.pdf',
     heroSlugs: ['caresignal-clinician-app'],
     featuredSlugs: ['caresignal-clinician-app', 'fracta', 'sqshbook'],
