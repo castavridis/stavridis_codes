@@ -739,7 +739,7 @@ export default function LandingPage({
                     </HoverPopover>
                     . I co-founded
                     CareSignal, a Best in KLAS remote patient monitoring company (acquired by Lightbeam), where I
-                    designed the tools that transformed care delivery and patient outcomes.
+                    designed the tools that transformed care delivery and outcomes.
                   </Text>
                   <Text variant="copy" className="mb-0">&nbsp;</Text>
                   <Text variant="copy">
