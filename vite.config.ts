@@ -33,6 +33,16 @@ export default defineConfig({
   server: {
     allowedHosts: ["celeste.local"],
   },
+  // three and @react-three/fiber are only imported by the CareSignal
+  // clinician figures (orbit/*.js), which load through .mdx — and Vite's
+  // startup dependency scan can't read .mdx. Without this, the dev server
+  // discovers them on the first visit to that case study, re-bundles every
+  // dependency with new chunk export names, and forces a reload; Safari can
+  // run old and new chunks together first and throw "Importing binding name
+  // 't' is not found". Pre-bundling them at startup avoids the re-optimize.
+  optimizeDeps: {
+    include: ['three', '@react-three/fiber'],
+  },
   define: {
     __LAST_UPDATED__: JSON.stringify(GIT.date),
     __LAST_COMMIT_SHA__: JSON.stringify(GIT.sha),
