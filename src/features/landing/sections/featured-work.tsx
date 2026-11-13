@@ -132,7 +132,11 @@ function ProjectOverview({
           variant={hero ? 'default' : 'outline'}
           onClick={() => onClick?.(slug)}
           aria-label={`View case study: ${typeof headline === 'string' ? headline : slug}`}
-          className={`self-start ${hero ? 'mt-[12px]' : 'mt-[8px]'}`}
+          // Hero (horizontal) cards: the filled button's own hover (ink at
+          // 85%) barely reads, so it inverts to paper with an ink border
+          // instead — the mirror of the outline buttons filling in. The
+          // border is there at rest too so the size doesn't jump.
+          className={`self-start ${hero ? 'mt-[12px] border border-confetti-black hover:!bg-washes-paper hover:!text-confetti-black focus-visible:!bg-washes-paper focus-visible:!text-confetti-black' : 'mt-[8px]'}`}
         >
           View case study
         </Button>
