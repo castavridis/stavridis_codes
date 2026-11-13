@@ -23,8 +23,9 @@ import {
 import { usePaintStore } from './lib/paint-store.js';
 
 // Height of the landing's wash-shell section (logo + nav + Contact Me +
-// washes canvas). Matches the inline `height: 660px` in landing-page.tsx
-// (the `<section>` that wraps the wash + glass card). The project
+// washes canvas). Matches the `md:min-h-[660px]` in landing-page.tsx
+// (the `<section>` that wraps the wash + glass card; it grows past 660
+// when the intro copy wraps taller). Currently unused. The project
 // SheetOverlay starts BELOW this band so the wash shell remains visible
 // at the top of the viewport while a case study is open — see Path A
 // in the project-overlay arch (single source of truth for the wash

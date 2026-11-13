@@ -478,10 +478,10 @@ export default function LandingPage({
           corners; everything inside is absolutely positioned.
           ------------------------------------------------------------------- */}
       {/* wash-shell:start marker injected below — section opens here */}
-      {/* Height: fixed 660px overlay on desktop; on mobile the section grows
-          to fit the in-flow glass card (see below) so the intro copy is
-          never clipped. */}
-      <section data-marker="wash-shell" className="relative w-full max-w-[1136px] h-auto md:h-[660px]">
+      {/* Height: at least 660px on desktop, growing to fit the in-flow
+          glass card (see below) whenever the intro copy wraps taller, so the
+          "then"/"now" copy is never clipped. Mobile already grows. */}
+      <section data-marker="wash-shell" className="relative w-full max-w-[1136px] h-auto md:min-h-[660px]">
         {/* Washes Canvas region — Figma node 4002:21177. Takes the top
             66.93% of the shell (inset bottom = 33.07%). Owns the wash
             WebGL host, the Connecting Gradients overlays, the Header
@@ -569,11 +569,13 @@ export default function LandingPage({
             establishes the canonical resting structure. */}
         <animated.div
           ref={glassCardRef}
-          // On mobile the card is in-flow (relative, no clip) so the section
-          // grows to fit it and the "now" copy isn't cut off. At md+ it
-          // returns to the fixed overlay: absolute with percentage insets +
-          // overflow-clip. Mobile pt clears the absolute in-shell Header.
-          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] pt-[64px] pb-[24px] md:absolute top-[56px] md:top-[9.42%] md:bottom-[0.2%] md:left-[1.41%]  md:right-[1.41%] md:overflow-clip md:px-[160px] md:pt-[96px] md:pb-0"
+          // In-flow at every width (relative, no clip) so the shell grows to
+          // fit it and the "then"/"now" copy is never cut off. Mobile pt
+          // clears the absolute in-shell Header. At md+ the margins
+          // reproduce the old overlay insets (top 9.42% of the 660px shell
+          // = 62px, 1.41% sides, ~1px bottom) and the min-height fills the
+          // 660px shell, so it looks the same wherever the copy fits.
+          className="relative z-10 flex flex-col items-center md:items-start rounded-tl-[12px] rounded-tr-[12px] rounded-bl-[12px] rounded-br-[12px] border-solid border-[#fbf6ea] px-[56px] pt-[64px] pb-[24px] top-[56px] md:top-0 md:mt-[62px] md:mb-[1px] md:mx-[1.41%] md:min-h-[597px] md:px-[160px] md:pt-[96px] md:pb-[16px]"
           style={{
             backdropFilter: "blur(1px)",
             WebkitBackdropFilter: "blur(1px)",

@@ -7,9 +7,9 @@ import { findScrollport } from '../../../src/features/projects/components/figure
 // Desktop-only sticky section nav, copied from the clinician case studies'
 // SectionNav (it isn't a shared component yet) with this page's sections. A
 // white card pinned at 96px in the left column; mono labels with a 6px dot
-// (red on the active one). As in this case study's design, the list is
-// always collapsed to the current section plus a caret that expands the
-// rest. The card's border + shadow "peel" in like chewed gum once it sticks.
+// (red on the active one). The list stays open the whole way down (six
+// sections fit), and the card's border + shadow "peel" in like chewed gum
+// once it sticks, as on the clinician case study.
 // BackToTop keys off nav[aria-label="Sections"].
 export const ITEMS = [
 	{ key: 'problem', label: 'The problem' },
@@ -20,7 +20,8 @@ export const ITEMS = [
 	{ key: 'team', label: 'Team' },
 ];
 
-const COLLAPSE_FROM = 0;
+// Never collapses: the index is past the last section.
+const COLLAPSE_FROM = ITEMS.length;
 const INK = 'var(--color-confetti-black)';
 
 // The current section: the last one whose top has passed 40% down the

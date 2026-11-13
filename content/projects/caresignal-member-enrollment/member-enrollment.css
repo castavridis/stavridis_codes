@@ -6,6 +6,38 @@
    chrome (header bar, washes, card, footer), dark mode, and print rules are
    dropped: MDXLayout supplies the chrome and the site is light-only. */
 
+/* Sticky chrome row, as on the clinician case study: a "Title: Subtitle"
+   line (from frontmatter, via ChromeTitle's --chrome-title) above the tags,
+   both at full strength. !important beats MDXLayout's inline scroll-linked
+   tag fade; the row as a whole still dims once scrolled (MDXLayout's
+   chromeSpring). The truncated-headline swap is hidden. */
+[data-case='caresignal-member-enrollment'] p.type-tag {
+	opacity: 1 !important;
+	color: var(--color-confetti-black);
+}
+[data-case='caresignal-member-enrollment'] p.type-tag::before {
+	content: var(--chrome-title, none);
+	display: block;
+	font-family: var(--font-kyoto);
+	font-weight: 500;
+	font-size: 16px;
+	line-height: 22px;
+	margin-bottom: 2px;
+	color: var(--color-confetti-black);
+}
+[data-case='caresignal-member-enrollment'] p.type-headline-meta.absolute {
+	display: none;
+}
+/* Phones: the chrome row is 12px top and bottom, and Close is 44px tall. */
+@media (max-width: 599.98px) {
+	[data-case='caresignal-member-enrollment'] [data-chrome-row] {
+		padding-block: 12px;
+	}
+	[data-case='caresignal-member-enrollment'] [data-chrome-row] > :last-child button {
+		min-height: 44px;
+	}
+}
+
 [data-case='caresignal-member-enrollment'] .me-case {
 	/* Design tokens, mapped onto the site's where they exist. */
 	--paper: var(--color-washes-paper);
@@ -34,11 +66,9 @@
 	color: var(--ink);
 	font-family: var(--body);
 
-	& *,
-	& *::before,
-	& *::after {
-		box-sizing: border-box;
-	}
+	/* No blanket box-sizing reset here: Tailwind's preflight already sets
+	   border-box, and an unlayered one would override utilities like the
+	   section nav links' box-content (squashing their padding). */
 	& img {
 		max-width: 100%;
 	}

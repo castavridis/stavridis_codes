@@ -2,7 +2,7 @@
 title: Member Enrollment at CareSignal
 date: 2026-11-11
 time: 00:00
-summary: Member Enrollment
+summary: Enrolling More Members Without More Staff
 noindex: true
 headline: I redesigned enrollment, from tools to strategy, and quadrupled our 5% benchmark to 21%.
 introduction: |
@@ -24,6 +24,7 @@ color: '#201E1F'
 import BackToTop from '../../../src/features/projects/components/figures/BackToTop.tsx'
 import './member-enrollment.css'
 import { AdditionalOutcomes, Introduction } from './Introduction.tsx'
+import { ChromeTitle } from './ChromeTitle.tsx'
 import { JourneyWheel } from './JourneyWheel.tsx'
 import { SectionNav } from './SectionNav.tsx'
 import { Problem } from './Problem.tsx'
@@ -31,6 +32,9 @@ import { Capacity } from './Capacity.tsx'
 import { Trust } from './Trust.tsx'
 import { Scale } from './Scale.tsx'
 import { Learned, Team } from './Closing.tsx'
+
+{/* "Title: Subtitle" above the tags in the sticky chrome, as on the clinician case study */}
+<ChromeTitle title={frontmatter.title} subtitle={frontmatter.summary} />
 
 <div className="me-case">
 	{/* The lead below the headline, with its wash underline */}
