@@ -158,7 +158,16 @@ type Project = {
   optIn?: boolean;
 };
 
+// Order here is the default (no-company) landing's order.
 const PROJECTS: Project[] = [
+  {
+    slug: 'caresignal-member-enrollment',
+    headline: 'Redesigning member enrollment to exceed a health plan’s 20% target',
+    tags: 'Product Strategy · Service Design · Product Design · Design Engineering',
+    thumbnailClassName: 'bg-[#fdfbf5]',
+    image: '/images/projects/caresignal-member-enrollment/thumbnail.webp',
+    imageAlt: 'A woman on the phone in her kitchen.',
+  },
   {
     // Matches content/projects/caresignal-clinician-app/index.mdx (nested
     // {slug}/index.mdx layout).
@@ -179,15 +188,6 @@ const PROJECTS: Project[] = [
     thumbnailClassName: 'bg-[#fdfbf5]',
     image: '/images/projects/caresignal-clinician-app-impact/thumbnail.webp',
     imageAlt: 'A smiling care-team member in a headset at their workstation.',
-    optIn: true,
-  },
-  {
-    slug: 'caresignal-member-enrollment',
-    headline: 'Redesigning member enrollment to exceed a health plan’s 20% target',
-    tags: 'Product Strategy · Service Design · Product Design · Design Engineering',
-    thumbnailClassName: 'bg-[#fdfbf5]',
-    image: '/images/projects/caresignal-member-enrollment/thumbnail.webp',
-    imageAlt: 'A woman on the phone in her kitchen.',
     optIn: true,
   },
   {
@@ -214,6 +214,8 @@ const PROJECTS: Project[] = [
     thumbnailClassName: 'bg-washes-cerulean-blue',
     image: '/images/projects/CareSignal%20AI%20Thumbnail.png',
     imageAlt: 'CareSignal AI thumbnail.',
+    // Off the default landing; company pages that name it still show it.
+    optIn: true,
   },
 ];
 
