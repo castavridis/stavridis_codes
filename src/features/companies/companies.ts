@@ -93,8 +93,9 @@ export const companies: Record<string, CompanyConfig> = {
     role: 'pd',
     cover_letter: '',
     resume: '',
-    featuredSlugs: ['caresignal-clinician-app', 'sqshbook', 'fracta'],
-    featuredProjects: ['caresignal-clinician-app'],
+    featuredSlugs: ['caresignal-member-enrollment','caresignal-clinician-app', 'sqshbook', 'fracta'],
+    featuredProjects: ['caresignal-member-enrollment'],
+    heroSlugs: ['caresignal-member-enrollment', 'caresignal-clinician-app'],
     seal: {
       foreground_color: 'rgb(253,253,252)',
       background_color: 'rgb(79,193,171)',
